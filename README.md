@@ -1,4 +1,4 @@
-TD_RF_Module_SDK
+TD RF Module SDK
 ================
 
 Telecom Design RF Module Software Development Kit
