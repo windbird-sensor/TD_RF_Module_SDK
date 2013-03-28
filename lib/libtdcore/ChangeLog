@@ -1,0 +1,31 @@
+= Version 1.0.0 =
+  * Initial revision
+
+= Version 1.0.1 =
+  * Disable system startup banner by default in AT parser
+  * Corrected behavior of "A/" (replay last command)
+  * Read updated serial number just before displaying it
+  * Added TD_RTC_SetOffsetTime(), TD_RTC_GetOverflowCounter() and __time32() for system time managment
+  * Set UART RX port to totem-pole instead of GND with pull-up reistor
+  * Added TD_UART_AvailableChars() tocount thenumber of available UART characters
+  * Added Keep-Alive handling in main idle loop
+  * Bumped hardware module revision to F
+
+ = Version 2.0.0 =
+  * Renamed libtd1202 to libtdcore
+  * Added build configuration for GCC/IAR, Debug/Release, Tiny Gecko/Gecko
+  * Implemented New module pin naming (ADC0=>USR2, ADC1=>USR3, IO1=>USR4, TIM1=>ADC0)
+  * Increased AT command argument count to 9
+  * Added AT£FS command to print free stack
+  * Added Extended Flash FACTORY area to store 64-bit SIGFOX key
+  * Changed persistence in Flash API to use FLASH_Variables
+  * TD_FLASH_Init(), TD_FLASH_DeInit(), TD_FLASH_WriteWord(), TD_FLASH_ErasePage() are now part of public API
+  * Added Extended TD_MEASURE functions to get voltages in millivolts and temperatures in tenths of degrees Celsius
+  * Added TD_MEASURE_EnableBatteryLevelMonitoring()
+  * Added PRINTF macro
+  * Corrected a buffer overflow in tfp_dump()
+  * Added TD_RTC_UserAlarmAfter() function to program a relative alarm
+  * Added TD_UART_Flush()
+  * Added TS_SCHEDULER module
+  * Added TD_RTC_Process() function to handle keep-alive
+  * Added TD_RTC_SetOverflowHandler()

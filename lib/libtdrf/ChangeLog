@@ -1,0 +1,25 @@
+= Version 1.0.0 =
+  * Initial revision
+
+= Version 1.0.1 =
+  * N/A
+
+= Version 1.0.2 =
+  * Fixed bug in RF going back to sleep with RF chip version 1B
+  * Changed TD_LAN frame length to 21 bytes in order to contain a SIGFOX frame
+  * Changed RF chip SPI write access method
+  * Changed result of SIGFOX "SFV;" to "02OK;" (SIGFOX version 2)
+  * Changed SIGFOX RF IRQ to match TD_LAN
+  * Added control on keep-alive max value + missing keep-alive message when setting null period
+  * Added control on keep-alive retries mac value
+  * Added random to frequency hoping seed value
+  * Added TD_LAN_Release() to release the RF for SIGFOX transmission
+  * Added TD_SIGFOX_FrequencyConf() and TD_SIGFOX_FrequencySet() to set SIGFOX operating frequency
+  * Added TD_SIGFOX_MainRfPower() to setup SIGFOX max power
+  * Added TS_SIGFOX_VersionLib() to get the libtdrf library version
+  * Provision for 169 MHz support (not yet available)
+
+= Version 2.0.0 =
+  * Added TD_LAN_Restart(), TD_LAN_Process(), TD_LAN_SetFrequencyLevel() and TD_LAN_ReadLatchedRSSI() to public API
+  * Added TD_SIGFOX_RelayId()
+  * Added AT_LAN AT parser extension
