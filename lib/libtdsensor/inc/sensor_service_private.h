@@ -2,7 +2,7 @@
  * @file sensor_service_private.h
  * @brief Service Frame Private
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -41,7 +41,7 @@
 /***************************************************************************//**
  * @addtogroup SENSOR_SERVICE Sensor Service
  *
- *  * @{
+ * @{
  ******************************************************************************/
 
 /***************************************************************************//**
@@ -50,7 +50,8 @@
 
 /** Sensor Service Type  */
 typedef enum {
-	SERVICE_SMS, SERVICE_TWEET
+	SERVICE_SMS,
+	SERVICE_TWEET
 
 } SensorServiceType;
 

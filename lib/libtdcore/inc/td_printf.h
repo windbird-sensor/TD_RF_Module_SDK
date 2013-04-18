@@ -2,8 +2,7 @@
  * @file
  * @brief printf utility  for the TDxxxx RF modules.
  * @author Kustaa Nyholm
- * @version 2.0.0
- *
+ * @version 2.0.1
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2004  Kustaa Nyholm</b>
@@ -149,7 +148,7 @@ extern "C" {
   *************************   PROTOTYPES   **************************************
   ******************************************************************************/
 
- /** @addtogroup PRINTF_PUBLIC_FUNCTIONS Public Functions
+ /** @addtogroup PRINTF_USER_FUNCTIONS User Functions
   * @{ */
  /** @addtogroup PRINTF_PROTOTYPES Prototypes
   * @{ */

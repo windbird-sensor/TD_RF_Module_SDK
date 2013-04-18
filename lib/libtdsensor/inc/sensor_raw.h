@@ -2,7 +2,7 @@
  * @file sensor_raw.h
  * @brief API for sending Raw frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -41,9 +41,14 @@
 extern "C" {
 #endif
 
+
+/** @defgroup SENSOR_RAW_USER_FUNCTIONS User Functions
+ *  @ingroup SENSOR_RAW
+ *  @nosubgrouping
+ */
+
 /***************************************************************************//**
  * @addtogroup SENSOR_RAW Sensor Raw
- *
  * @{
  ******************************************************************************/
 
@@ -55,10 +60,13 @@ extern "C" {
  * @{ */
 /** @addtogroup SENSOR_RAW_PROTOTYPES Prototypes
  * @{ */
-
+/** @ingroup SENSOR_RAW_USER_FUNCTIONS
+ * @{ */
 bool TD_SENSOR_SendRaw(uint8_t * msg, uint8_t count);
 
 void TD_SENSOR_SetRawTransmissionProfile(uint8_t count, uint32_t interval);
+
+/** @} */
 
 /** @} */
 

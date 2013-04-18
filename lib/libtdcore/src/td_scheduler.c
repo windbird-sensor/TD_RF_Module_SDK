@@ -2,7 +2,7 @@
  * @file
  * @brief Scheduler API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -41,7 +41,7 @@
 
 /***************************************************************************//**
  * @addtogroup SCHEDULER
- * @brief Scheduler for the TD1202 module
+ * @brief Scheduler
  * @{
  ******************************************************************************/
 
@@ -52,15 +52,21 @@
 /** @addtogroup SCHEDULER_DEFINES Defines
  * @{ */
 
-/** Maximum allowed timers */
 #ifdef EFM32TG210F32
-#define TD_SCHEDULER_MAX_TIMER 20
-#elif EFM32G210F128
-#define TD_SCHEDULER_MAX_TIMER 100
-#endif
 
-/** Maximum allowed callback in queue */
+/** Maximum number of timers */
+#define TD_SCHEDULER_MAX_TIMER 20
+
+/** Maximum number of callback in queue */
 #define TD_SCHEDULER_MAX_IRQ_QUEUE 5
+#else
+
+/** Maximum number of timers */
+#define TD_SCHEDULER_MAX_TIMER 100
+
+/** Maximum number of callback in queue */
+#define TD_SCHEDULER_MAX_IRQ_QUEUE 10
+#endif
 
 /** @} */
 
@@ -80,7 +86,7 @@ typedef struct {
 	uint8_t repetition;						///< Timer repetition, 0xFF for infinite
 } TD_SCHEDULER_timer_t;
 
-/** Callback structure */
+/** Scheduler callback structure */
 typedef struct {
 	uint8_t index;
 	void (*callback)(uint32_t, uint8_t);	///< Function to be called
@@ -106,10 +112,10 @@ static uint8_t TD_SCHEDULER_TimerCount = 0;
 /** Active timer index */
 static uint8_t TD_SCHEDULER_ActiveTimer = 0xFF;
 
-/** Flag to reject undesired irq as comp1 always have a value */
+/** Flag to reject undesired IRQ as comp1 always have a value */
 static bool TD_SCHEDULER_WaitIrq = false;
 
-/** Queue for timer irqs */
+/** Queue for timer IRQs */
 static TD_SCHEDULER_callback_t CallbackQueue[TD_SCHEDULER_MAX_IRQ_QUEUE];
 
 /** Callback count in queue */
@@ -117,6 +123,9 @@ static uint8_t CallbackQueueCount = 0;
 
 /** Current callback index in queue */
 static uint8_t CallbackQueueIndex = 0;
+
+/** Reference for elapsed time */
+static uint64_t last_time = 0;
 
 /** @} */
 
@@ -129,9 +138,10 @@ static uint8_t CallbackQueueIndex = 0;
 
 /***************************************************************************//**
  * @brief
- *   Return current time in 1/32768 ticks
+ *   Return the current time in 1/32768 s ticks
  ******************************************************************************/
-static uint64_t TD_SCHEDULER_GetTime(void) {
+static uint64_t TD_SCHEDULER_GetTime(void)
+{
 	uint64_t time_now;
 	uint32_t time_tick, overflow_counter;
 
@@ -147,9 +157,10 @@ static uint64_t TD_SCHEDULER_GetTime(void) {
 
 /***************************************************************************//**
  * @brief
- *   Arm the next timer IRQ according to all required timer.
+ *   Arm the next timer IRQ according to all required timers.
  ******************************************************************************/
-static void TD_SCHEDULER_Manager(void) {
+static void TD_SCHEDULER_Manager(void)
+{
 	int i, j;
 	uint64_t delta = 0xFFFFFFFFFFFFFFFF, temp_delta = 0, diff, time_now;
 	bool set_alarm = false;
@@ -218,27 +229,24 @@ static void TD_SCHEDULER_Manager(void) {
 
 /***************************************************************************//**
  * @brief
- *   Timer IRQ handler. Add the corresponding callback and argument in the queue so that it
- *   can be safely processed.
+ *   Timer IRQ handler. Add the corresponding callback and argument in the queue
+ *   so that it can be safely processed.
  ******************************************************************************/
-static void TD_SCHEDULER_TimerIRQHandler(void) {
+static void TD_SCHEDULER_TimerIRQHandler(void)
+{
 	uint8_t index;
 
 	if (TD_SCHEDULER_WaitIrq) {
 		if (TD_SCHEDULER_ActiveTimer != 0xFF) {
 			TD_SCHEDULER_WaitIrq = false;
-			TD_SCHEDULER_Timer[TD_SCHEDULER_ActiveTimer].last_time =
-					TD_SCHEDULER_GetTime();
+			TD_SCHEDULER_Timer[TD_SCHEDULER_ActiveTimer].last_time = TD_SCHEDULER_GetTime();
 			index = CallbackQueueIndex + CallbackQueueCount;
 			if (index >= TD_SCHEDULER_MAX_IRQ_QUEUE) {
 				index -= TD_SCHEDULER_MAX_IRQ_QUEUE;
 			}
-			CallbackQueue[index].arg =
-					TD_SCHEDULER_Timer[TD_SCHEDULER_ActiveTimer].arg;
-			CallbackQueue[index].callback =
-					TD_SCHEDULER_Timer[TD_SCHEDULER_ActiveTimer].callback;
-			CallbackQueue[index].repetition =
-					TD_SCHEDULER_Timer[TD_SCHEDULER_ActiveTimer].repetition;
+			CallbackQueue[index].arg = TD_SCHEDULER_Timer[TD_SCHEDULER_ActiveTimer].arg;
+			CallbackQueue[index].callback = TD_SCHEDULER_Timer[TD_SCHEDULER_ActiveTimer].callback;
+			CallbackQueue[index].repetition = TD_SCHEDULER_Timer[TD_SCHEDULER_ActiveTimer].repetition;
 			CallbackQueue[index].index = TD_SCHEDULER_ActiveTimer;
 			CallbackQueueCount++;
 		}
@@ -252,14 +260,15 @@ static void TD_SCHEDULER_TimerIRQHandler(void) {
  *************************   PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
-/** @addtogroup SCHEDULER_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup SCHEDULER_USER_FUNCTIONS User Functions
  * @{ */
 
 /***************************************************************************//**
  * @brief
- *   Safely process all callback in queue.
+ *   Safely process all callbacks in queue.
  ******************************************************************************/
-void TD_SCHEDULER_Process(void) {
+void TD_SCHEDULER_Process(void)
+{
 	void (*callback)(uint32_t, uint8_t);
 	uint32_t arg;
 	uint8_t repetition, index;
@@ -297,7 +306,8 @@ void TD_SCHEDULER_Process(void) {
  * @brief
  *   Initialize the scheduler.
  ******************************************************************************/
-void TD_SCHEDULER_Init(void) {
+void TD_SCHEDULER_Init(void)
+{
 	int i;
 
 	for (i = 0; i < TD_SCHEDULER_MAX_TIMER; i++) {
@@ -307,7 +317,7 @@ void TD_SCHEDULER_Init(void) {
 
 /***************************************************************************//**
  * @brief
- *   Append a timer on schedule.
+ *   Append a timer to schedule.
  *
  * @param[in] interval
  *  Interval integer part in seconds at which the callback is called.
@@ -331,8 +341,8 @@ void TD_SCHEDULER_Init(void) {
  * 	Returns a timer id if successful or 0xFF if no more timer can be added in
  * 	the list.
  ******************************************************************************/
-uint8_t TD_SCHEDULER_Append(uint32_t interval, uint16_t tick, uint32_t delay,
-		uint8_t repetition, void (*callback)(uint32_t, uint8_t), uint32_t arg) {
+uint8_t TD_SCHEDULER_Append(uint32_t interval, uint16_t tick, uint32_t delay, uint8_t repetition, void (*callback)(uint32_t, uint8_t), uint32_t arg)
+{
 	uint8_t index;
 
 	// Look for an available slot
@@ -347,13 +357,11 @@ uint8_t TD_SCHEDULER_Append(uint32_t interval, uint16_t tick, uint32_t delay,
 					TD_RTC_EnableUserInterrupts(true);
 				}
 				TD_SCHEDULER_Timer[index].interval = interval;
-				TD_SCHEDULER_Timer[index].interval =
-						TD_SCHEDULER_Timer[index].interval << 15;
+				TD_SCHEDULER_Timer[index].interval = TD_SCHEDULER_Timer[index].interval << 15;
 				TD_SCHEDULER_Timer[index].interval |= tick;
 				TD_SCHEDULER_Timer[index].callback = callback;
 				TD_SCHEDULER_Timer[index].repetition = repetition;
-				TD_SCHEDULER_Timer[index].last_time = TD_SCHEDULER_GetTime()
-						+ (delay << 15);
+				TD_SCHEDULER_Timer[index].last_time = TD_SCHEDULER_GetTime() + (delay << 15);
 				TD_SCHEDULER_Timer[index].arg = arg;
 				TD_SCHEDULER_TimerCount++;
 				TD_SCHEDULER_Manager();
@@ -380,7 +388,8 @@ uint8_t TD_SCHEDULER_Append(uint32_t interval, uint16_t tick, uint32_t delay,
  * @param[in] delay
  *  Time to wait in seconds before actually scheduling the timer.
  ******************************************************************************/
-void TD_SCHEDULER_SetInterval(uint8_t id, uint32_t interval, uint16_t tick, uint32_t delay) {
+void TD_SCHEDULER_SetInterval(uint8_t id, uint32_t interval, uint16_t tick, uint32_t delay)
+{
 	TD_SCHEDULER_Timer[id].interval = interval;
 	TD_SCHEDULER_Timer[id].interval = TD_SCHEDULER_Timer[id].interval << 15;
 	TD_SCHEDULER_Timer[id].interval |= tick;
@@ -398,13 +407,14 @@ void TD_SCHEDULER_SetInterval(uint8_t id, uint32_t interval, uint16_t tick, uint
  * @param[in] arg
  *  New timer argument to be passed to the callback.
  ******************************************************************************/
-void TD_SCHEDULER_SetArg(uint8_t id, uint32_t arg) {
+void TD_SCHEDULER_SetArg(uint8_t id, uint32_t arg)
+{
 	TD_SCHEDULER_Timer[id].arg = arg;
 }
 
 /***************************************************************************//**
  * @brief
- *   Change a timer argument on the fly.
+ *   Change a timer repetition on the fly.
  *
  * @param[in] id
  *  Timer id.
@@ -412,7 +422,8 @@ void TD_SCHEDULER_SetArg(uint8_t id, uint32_t arg) {
  * @return
  * 	Remaining repetitions for the given Timer id.
  ******************************************************************************/
-uint8_t TD_SCHEDULER_GetRepetition(uint8_t id) {
+uint8_t TD_SCHEDULER_GetRepetition(uint8_t id)
+{
 	return TD_SCHEDULER_Timer[id].repetition;
 }
 
@@ -423,7 +434,8 @@ uint8_t TD_SCHEDULER_GetRepetition(uint8_t id) {
  * @param[in] id
  *  Timer id.
  ******************************************************************************/
-void TD_SCHEDULER_Remove(uint8_t id) {
+void TD_SCHEDULER_Remove(uint8_t id)
+{
 	if (id == TD_SCHEDULER_ActiveTimer) {
 		TD_SCHEDULER_ActiveTimer = 0xFF;
 	}
@@ -439,6 +451,20 @@ void TD_SCHEDULER_Remove(uint8_t id) {
 		}
 	}
 }
+
+/***************************************************************************//**
+ * @brief
+ *   Return elapsed time since last call in 1/32768 s ticks.
+ ******************************************************************************/
+uint32_t TD_ElapsedTime(void)
+{
+	uint64_t time_now,last;
+	time_now = TD_SCHEDULER_GetTime();
+	last = time_now - last_time;
+	last_time = time_now;
+	return last;
+}
+
 
 /** @} */
 

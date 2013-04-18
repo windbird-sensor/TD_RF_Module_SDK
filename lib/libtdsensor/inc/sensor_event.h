@@ -2,7 +2,7 @@
  * @file sensor_event.h
  * @brief API for sending Event frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -41,9 +41,13 @@
 extern "C" {
 #endif
 
+/** @defgroup SENSOR_EVENT_USER_FUNCTIONS User Functions
+ *  @ingroup SENSOR_EVENT
+ *  @nosubgrouping
+ */
+
 /***************************************************************************//**
  * @addtogroup SENSOR_EVENT Sensor Event
- *
  * @{
  ******************************************************************************/
 
@@ -63,7 +67,10 @@ bool TD_SENSOR_SendEventTemperature(uint8_t state);
 bool TD_SENSOR_SendEventBoot();
 bool TD_SENSOR_SendEventSwitch(uint8_t port, uint8_t bit, bool state);
 
+/** @ingroup SENSOR_EVENT_USER_FUNCTIONS
+ * @{ */
 void TD_SENSOR_SetEventTransmissionProfile(uint8_t repetition,uint32_t interval);
+/** @} */
 
 /** @} */
 

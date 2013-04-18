@@ -2,7 +2,7 @@
  * @file td_sensor.h
  * @brief Sensor Monitoring
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -40,6 +40,11 @@
 #include "sensor_private.h"
 #include "sensor_config.h"
 
+/** @defgroup TD_SENSOR_USER_FUNCTIONS User Functions
+ *  @ingroup TD_SENSOR
+ *  @nosubgrouping
+ */
+
 /***************************************************************************//**
  * @addtogroup TD_SENSOR Sensor Monitoring
  * @{ */
@@ -53,15 +58,24 @@
 
 /***************************************************************************//**
  * @brief
- *   Temperature Monitoring state
+ *   Module Type
  ******************************************************************************/
 typedef enum {
-	SENSOR_DEVICE, SENSOR_GATEWAY, SENSOR_TRANSMITTER
+	SENSOR_DEVICE,
+	SENSOR_GATEWAY,
+	SENSOR_TRANSMITTER
 
 } ModuleType;
 
+
+/***************************************************************************//**
+ * @brief
+ *   Temperature Monitoring state
+ ******************************************************************************/
 typedef enum {
-	TEMPERATURE_LOW, TEMPERATURE_OK, TEMPERATURE_HIGH,
+	TEMPERATURE_LOW,
+	TEMPERATURE_OK,
+	TEMPERATURE_HIGH,
 
 } TemperatureState;
 
@@ -112,7 +126,7 @@ typedef struct {
 
 typedef struct {
 	bool monitor :1;
-	uint32_t interval :32;
+	uint8_t interval :8;
 	uint8_t timer :8;
 
 }__PACKED SensorKeepaliveConfiguration;
@@ -131,6 +145,8 @@ typedef struct {
 }__PACKED BootConfiguration;
 
 typedef uint16_t DeviceClass;
+
+
 
 /***************************************************************************//**
  * @brief
@@ -156,7 +172,17 @@ typedef struct {
 
 /** @} */
 
+
+/*******************************************************************************
+ **************************  PUBLIC VARIABLES   ****************************************
+ ******************************************************************************/
+
+/** @addtogroup TD_SENSOR_TYPEDEFS Typedefs
+ * @{ */
+
 extern uint32_t SigfoxID;
+
+/** @} */
 
 /*******************************************************************************
  *************************   PROTOTYPES   **************************************
@@ -164,9 +190,12 @@ extern uint32_t SigfoxID;
 
 /** @addtogroup TD_SENSOR_PUBLIC_FUNCTIONS Public Functions
  * @{ */
+
 /** @addtogroup TD_SENSOR_PROTOTYPES Prototypes
  * @{ */
 
+/** @ingroup TD_SENSOR_USER_FUNCTIONS
+ * @{ */
 bool TD_SENSOR_Init(ModuleType type, uint32_t lan_frequency, int16_t lan_power_level);
 void TD_SENSOR_SetDeviceClass(uint16_t class);
 void TD_SENSOR_Reset();
@@ -174,15 +203,18 @@ void TD_SENSOR_Reset();
 void TD_SENSOR_MonitorBattery(bool enable, uint16_t level_low, uint16_t level_ok, bool (*callback)(bool state, uint16_t level));
 void TD_SENSOR_MonitorBoot(bool enable, bool (*callback)(void));
 bool TD_SENSOR_MonitorConnection(bool enable, uint32_t interval);
-bool TD_SENSOR_MonitorKeepAlive(bool enable, uint32_t interval);
+bool TD_SENSOR_MonitorKeepAlive(bool enable, uint8_t interval);
 bool TD_SENSOR_MonitorRSSI(bool enable, int8_t level_low, int8_t level_ok);
 bool TD_SENSOR_MonitorSwitch(bool enable, GPIO_Port_TypeDef port, unsigned int bit, bool falling, bool rising, bool pull, bool state, bool (*switch_callback)(GPIO_Port_TypeDef port, unsigned int bit,	bool state));
 void TD_SENSOR_MonitorTemperature(bool enable, uint32_t interval, int16_t level_low, int16_t level_high, bool (*callback)(TemperatureState state, int16_t level));
 
 ModuleType TD_SENSOR_GetModuleType();
 ModuleConfiguration * TD_SENSOR_GetModuleConfiguration();
+uint32_t  TD_SENSOR_GetSigfoxID();
+/** @} */
 
 void TD_SENSOR_Process();
+
 
 
 /** @} */

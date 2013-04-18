@@ -2,7 +2,7 @@
  * @file td_sensor_transmitter.c
  * @brief Sensor Transmitter
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -33,27 +33,25 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <td_lan.h>
-#include <td_flash.h>
-#include <td_rtc.h>
+
 #include <td_scheduler.h>
 #include <td_sigfox.h>
+
 #include "sensor_private.h"
+#include "sensor_config.h"
+#include "sensor_send.h"
+#include "sensor_send_private.h"
 #include "td_sensor.h"
 #include "td_sensor_lan.h"
-#include "td_sensor_device.h"
-#include "sensor_event.h"
-#include "sensor_config.h"
-#include "sensor_send_private.h"
+
 #include "td_sensor_transmitter.h"
 
 /***************************************************************************//**
  * @addtogroup TD_SENSOR_TRANSMITTER Sensor Transmitter
- * @brief Interface the Sigfox API by handling Sensor headers and retransmissions
+ * @brief
+ *  Interface the Sigfox API by handling Sensor headers and retransmissions
  * @{
  ******************************************************************************/
-
-/** @cond TD_PRIVATE */
 
 /*******************************************************************************
  **************************  DEFINES   ****************************************
@@ -62,7 +60,7 @@
 /** @addtogroup TD_SENSOR_TRANSMITTER_DEFINES Defines
  * @{ */
 
-/* Minimum interval in seconds between two Sigfox Transmissions. Should only apply to Gateways */
+/** Minimum interval in seconds between two Sigfox Transmissions. Should only apply to Gateways */
 #define TRANSMISSION_INTERVAL 0
 
 /** @} */
@@ -136,6 +134,7 @@ static bool CanEmit = true;
 /** Transmission regulation timer */
 static uint8_t QueueTimer = 0xFF;
 
+
 /** @} */
 
 /*******************************************************************************
@@ -181,11 +180,13 @@ static void TD_SENSOR_TRANSMITTER_AppendInQueue(uint8_t * data, uint8_t count)
 	int i;
 	int index = 0;
 
+	//if circular buffer is full, send anyway
 	if (QueueCount >= MAX_TRANSMISSION_QUEUE) {
 		//can't afford to lose any frame
 		TD_SENSOR_TRANSMITTER_EmitFirstInQueue();
 	}
-	//circular buffer
+
+	//append to circular buffer
 	index = QueueCurrentIndex + QueueCount;
 	if (index >= MAX_TRANSMISSION_QUEUE) {
 		index -= MAX_TRANSMISSION_QUEUE;
@@ -196,7 +197,6 @@ static void TD_SENSOR_TRANSMITTER_AppendInQueue(uint8_t * data, uint8_t count)
 	}
 	TransmissionQueue[index].count = count;
 	QueueCount++;
-
 }
 
 /***************************************************************************//**
@@ -209,7 +209,6 @@ static void TD_SENSOR_TRANSMITTER_AppendInQueue(uint8_t * data, uint8_t count)
  * @param[in] repetitions
  *	Timer parameter. Not used.
  ******************************************************************************/
-
 static void TD_SENSOR_TRANSMITTER_QueueManagerCallback(uint32_t arg, uint8_t repetitions)
 {
 	CanEmit = true;
@@ -255,10 +254,8 @@ static void TD_SENSOR_TRANSMITTER_QueueManager()
  * 	Always true
  *
  ******************************************************************************/
-
 static bool TD_SENSOR_TRANSMITTER_SendSigfoxPrivate(SensorFrame * frame, uint8_t count, bool retry)
 {
-
 	frame->header.retry = retry;
 	frame->header.cpt = GatewayCpt;
 	GatewayCpt = (GatewayCpt + 1) & 0xF;
@@ -281,13 +278,13 @@ static bool TD_SENSOR_TRANSMITTER_SendSigfoxPrivate(SensorFrame * frame, uint8_t
  *	Timer repetitions left.
  *
  ******************************************************************************/
-
 static void TD_SENSOR_TRANSMITTER_RetransmissionHandler(uint32_t arg, uint8_t repetitions)
 {
 	int i;
 	SensorFrame frame;
 	RetransmissionParam param;
 
+	//compiler refuses cast
 	param.index = (arg >> 20) & 0xFF;
 	param.frame_type = (SensorFrameType) ((arg >> 16) & 0xF);
 	param.entry_id = (arg >> 12) & 0xF;
@@ -356,8 +353,7 @@ static bool TD_SENSOR_TRANSMITTER_AddRetransmission(SensorFrame * frame, uint8_t
 					| ((param.payload_count & 0xF) << 4);
 
 			//setup timer on interval with given repetitions
-			RetransmissionList[index].timer = TD_SCHEDULER_Append(interval, 0, 0, repetitions, TD_SENSOR_TRANSMITTER_RetransmissionHandler,
-					uint_param);
+			RetransmissionList[index].timer = TD_SCHEDULER_Append(interval, 0, 0, repetitions, TD_SENSOR_TRANSMITTER_RetransmissionHandler, uint_param);
 
 			return true;
 		}
@@ -429,6 +425,7 @@ void TD_SENSOR_TRANSMITTER_Init()
 		RetransmissionList[i].timer = 0xFF;
 	}
 
+	//reset all values
 	GatewayCpt = 0;
 	QueueCount = 0;
 	QueueCurrentIndex = 0;
@@ -437,7 +434,5 @@ void TD_SENSOR_TRANSMITTER_Init()
 }
 
 /** @} */
-
-/** @endcond */
 
 /** @} */

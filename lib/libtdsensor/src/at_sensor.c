@@ -2,7 +2,7 @@
  * @file at_sensor.c
  * @brief AT Sensor
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -30,19 +30,21 @@
  * arising from your use of this Software.
  *
  ******************************************************************************/
+#include <stdint.h>
+#include <stdbool.h>
 
-#define USE_PRINTF
 #include <at_parse.h>
-#include <td_printf.h>
 #include <td_flash.h>
+
+#include "sensor_config.h"
+
 #include "td_sensor.h"
-#include "sensor_raw.h"
 #include "td_sensor_device.h"
 #include "td_measure.h"
-#include "sensor_config.h"
+
 #include "at_sensor.h"
 
-static ModuleType type;
+static ModuleType type = SENSOR_TRANSMITTER;
 
 // ****************************************************************************
 // TYPES:
@@ -141,6 +143,9 @@ static AT_command_t const sensor_commands[] = {
 
 	{ "AT$DF", AT_SENSOR_DELETE_FLASH_VARIABLES },
 
+
+
+
 	{ 0, 0 }
 
 };
@@ -157,6 +162,7 @@ static AT_command_t const sensor_commands[] = {
  * @brief Manufacturing test AT command parser init.
  */
 static void sensor_init(void) {
+
 	type = SENSOR_TRANSMITTER;
 }
 
@@ -164,8 +170,17 @@ static void sensor_init(void) {
  * @brief Manufacturing test AT help
  */
 static void sensor_help(void) {
-	tfp_printf("--SENSOR Commands--\r\n"
-
+	AT_printf(
+		"ATS500 => Module type\r\n"
+		"ATS501 => Device class\r\n"
+		"ATS502 => Battery monitoring\r\n"
+		"ATS503= => Temperature monitoring\r\n"
+		"ATS504= => RSSI monitoring\r\n"
+		"ATS505= => Connection monitoring\r\n"
+		"ATS506= => Switch monitoring\r\n"
+		"ATS507 => Boot monitoring\r\n"
+		"ATS508= => Keep-alive monitoring\r\n"
+		"AT$SZ= => Sensor reset\r\n"
 	);
 }
 ;
@@ -187,7 +202,7 @@ static void sensor_help(void) {
  * @return
  *   The number of bytes read from/written to the persistent data buffer.
  ******************************************************************************/
-static uint8_t sensor_persist(bool write, uint8_t *buffer, uint8_t count) {
+static uint8_t sensor_persist(bool write, uint8_t * buffer, uint8_t count) {
 
 	if (buffer != 0 && count != 0) {
 		if (write == true) {
@@ -228,7 +243,7 @@ static int8_t sensor_parse(uint8_t token) {
 		if (AT_argc != 0) {
 			result = AT_ERROR;
 		} else {
-			AT_printf("%02X\r\n", config->type);
+			AT_printf("%02X\r\n", type);
 		}
 		break;
 
@@ -487,7 +502,7 @@ static int8_t sensor_parse(uint8_t token) {
 		if (AT_argc != 0) {
 			result = AT_ERROR;
 		} else {
-			AT_printf("0..1, 3600..4294967295\r\n");
+			AT_printf("0..1, 1..255\r\n");
 		}
 		break;
 
@@ -504,8 +519,8 @@ static int8_t sensor_parse(uint8_t token) {
 	case AT_SENSOR_SET_KEEPALIVE_MONITORING:
 		if (AT_argc == 2) {
 
-			if (AT_atoll(AT_argv[0]) == 1 && AT_atoll(AT_argv[1]) >= 3600
-					&& AT_atoll(AT_argv[1]) <= 4294967295UL) {
+			if (AT_atoll(AT_argv[0]) == 1 && AT_atoll(AT_argv[1]) >= 1
+					&& AT_atoll(AT_argv[1]) <= 255) {
 				if (!TD_SENSOR_MonitorKeepAlive(true, AT_atoll(AT_argv[1]))) {
 					result = AT_ERROR;
 				}
@@ -607,11 +622,10 @@ static int8_t sensor_parse(uint8_t token) {
 		}
 		break;
 
-	default:
-		result = AT_NOTHING;
-		break;
+		default:
+				result = AT_NOTHING;
+				break;
 	}
-
 	return result;
 }
 

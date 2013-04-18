@@ -1,8 +1,9 @@
 /***************************************************************************//**
  * @file sensor_event.c
+
  * @brief API for sending Event frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -30,8 +31,10 @@
  * arising from your use of this Software.
  *
  ******************************************************************************/
+
 #include <stdbool.h>
 #include <stdint.h>
+
 #include "sensor_send.h"
 #include "sensor_event.h"
 #include "sensor_event_private.h"
@@ -101,13 +104,11 @@
 /** @addtogroup SENSOR_EVENT_PRIVATE_VARIABLES Private Variables
  * @{ */
 
-static TransmitProfile event_profile = { EVENT_DEFAULT_REPETITON,
-		EVENT_DEFAULT_INTERVAL };
+static TransmitProfile event_profile = {EVENT_DEFAULT_REPETITON, EVENT_DEFAULT_INTERVAL};
 static uint8_t event_stamp = -1;
 
 /** @} */
 
-/** @cond TD_PRIVATE */
 
 /*******************************************************************************
  **************************  PRIVATE FUNCTIONS   *******************************
@@ -129,7 +130,6 @@ static uint8_t event_stamp = -1;
  * @return
  *   True if the data has been sent over the Sigfox Network
  ******************************************************************************/
-
 static bool TD_SENSOR_SendEvent(SensorEventType event, uint8_t data) {
 	SRV_FRAME_EVENT frame;
 	frame.type = event;
@@ -173,7 +173,6 @@ static bool TD_SENSOR_SendEvent(SensorEventType event, uint8_t data) {
  *   True if the data has been sent (ie. the gateway has acknowledged the request)
  *   False if the ack from the gateway was never received.
  ******************************************************************************/
-
 bool TD_SENSOR_SendEventBattery(bool state, uint8_t battery_level) {
 	if (state) {
 		return TD_SENSOR_SendEvent(EVENT_BATTERY_OK, battery_level);
@@ -308,7 +307,6 @@ bool TD_SENSOR_SendEventSwitch(	uint8_t port, uint8_t bit, bool state)
  *	Interval between two repetitions in seconds.
  *
  ******************************************************************************/
-
 void TD_SENSOR_SetEventTransmissionProfile(uint8_t repetition,uint32_t interval)
 {
 	event_profile.repetition = repetition;
@@ -316,7 +314,5 @@ void TD_SENSOR_SetEventTransmissionProfile(uint8_t repetition,uint32_t interval)
 }
 
 /** @} */
-
-/** @endcond */
 
 /** @} */

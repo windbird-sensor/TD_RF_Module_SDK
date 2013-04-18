@@ -2,7 +2,7 @@
  * @file sensor_keepalive.c
  * @brief API for sending KeepAlive frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -33,14 +33,19 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+
+#include <td_measure.h>
+
+#include "td_sensor.h"
 #include "sensor_send.h"
 #include "sensor_keepalive.h"
+#include "sensor_keepalive_private.h"
 
 /***************************************************************************//**
  * @addtogroup SENSOR_KEEPALIVE Sensor Keep-Alive
- * @brief Sensor API for sending a Keep-Alive Frame
- *
- *
+ * @brief
+ *  Sensor API for sending a Keep-Alive Frame. Temperature, battery level information
+ *  and next expected keep-alive time are sent alongside with this frame.
  * @{
  ******************************************************************************/
 
@@ -49,6 +54,7 @@
 
 #define KEEPALIVE_DEFAULT_REPETITON 0
 #define KEEPALIVE_DEFAULT_INTERVAL 0
+
 /** @} */
 
 /*******************************************************************************
@@ -70,8 +76,6 @@ static uint8_t keepalive_stamp = -1;
 /** @addtogroup SENSOR_KEEPALIVE_PUBLIC_FUNCTIONS Public Functions
  * @{ */
 
-/** @cond TD_PRIVATE */
-
 /***************************************************************************//**
  * @brief
  *   Send a KEEPALIVE frame to Sensor
@@ -79,17 +83,27 @@ static uint8_t keepalive_stamp = -1;
  * @return
  *   True if the data has been sent over the Sigfox Network
  ******************************************************************************/
-
 bool TD_SENSOR_SendKeepAlive()
 {
+	SRV_FRAME_KEEPALIVE frame;
+	ModuleConfiguration * config = TD_SENSOR_GetModuleConfiguration();
+
+	frame.voltage = TD_MEASURE_Voltage();
+	frame.temperature = TD_MEASURE_TemperatureExtended()/10;
+
+	if(config->keepalive.monitor)
+	{
+		frame.interval = config->keepalive.interval;
+	}
+	else
+	{
+		frame.interval = 0;
+	}
+
 	keepalive_stamp = (keepalive_stamp & 0x07) + 1;
 
-	return TD_SENSOR_Send(&keepalive_profile, SRV_FRM_KEEPALIVE, keepalive_stamp, 0, 0);
-
+	return TD_SENSOR_Send(&keepalive_profile, SRV_FRM_KEEPALIVE, keepalive_stamp, (uint8_t *)&frame, 3);
 }
-
-/** @endcond */
-
 /***************************************************************************//**
  * @brief
  *   Set a transmission profile to a given frame type

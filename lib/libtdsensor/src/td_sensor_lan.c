@@ -2,7 +2,7 @@
  * @file td_sensor_lan.c
  * @brief Sensor LAN
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -33,24 +33,25 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+
 #include <td_lan.h>
-#define USE_PRINTF
-#include <td_printf.h>
 #include <td_flash.h>
-#include <td_rtc.h>
+
 #include "sensor_config.h"
 #include "sensor_private.h"
+
 #include "td_sensor_gateway.h"
 #include "td_sensor_device.h"
 #include "td_sensor_lan.h"
+
 
 /***************************************************************************//**
  * @addtogroup TD_SENSOR_LAN Sensor LAN
  * @brief LAN protocol management
  *
- *
  * @{
  ******************************************************************************/
+
 
 /*******************************************************************************
  **************************  PRIVATE VARIABLES   *******************************
@@ -87,11 +88,11 @@ static LanAddress LanConfig;
  * @return
  *  Ack error code
  ******************************************************************************/
-
 static AckCode TD_SENSOR_LAN_SendFramePrivate(uint8_t * data, uint8_t count, uint8_t * data_rx)
 {
 	TD_LAN_frame_t TX, RX;
 	int i;
+
 	TX.header = 0;
 	SET_ADDRESS(TX.header, LanConfig.address);
 
@@ -109,13 +110,12 @@ static AckCode TD_SENSOR_LAN_SendFramePrivate(uint8_t * data, uint8_t count, uin
 	} else {
 
 		if (data_rx != 0) {
-			//don't copy ack code...
+			//don't copy ack code
 			for (i = 0; i < TD_SENSOR_LAN_PAYLOAD_SIZE; i++) {
 				data_rx[i] = RX.payload[i + 1];
 			}
 		}
 
-		//tfp_printf("retok\r\n");
 		return (AckCode) RX.payload[0];
 	}
 }
@@ -150,7 +150,6 @@ static void TD_SENSOR_LAN_DefineAsDevice()
 /** @addtogroup TD_SENSOR_LAN_PUBLIC_FUNCTIONS Public Functions
  * @{ */
 
-/** @cond TD_PRIVATE */
 
 /***************************************************************************//**
  * @brief
@@ -213,7 +212,6 @@ LanAddress * TD_SENSOR_LAN_GetAddress()
  *   AckCode.
  *
  ******************************************************************************/
-
 AckCode TD_SENSOR_LAN_SendFrame(LocalFrameType type, uint8_t * payload, uint8_t count, uint8_t * data_rx)
 {
 	LocalSensorFrame frame;
@@ -226,7 +224,6 @@ AckCode TD_SENSOR_LAN_SendFrame(LocalFrameType type, uint8_t * payload, uint8_t 
 		return ACK_ERROR;
 	}
 
-	//copy payload
 	for (i = 0; i < count; i++) {
 		frame.data[i] = payload[i];
 	}
@@ -272,7 +269,5 @@ bool TD_SENSOR_LAN_Init(bool gateway, uint32_t lan_frequency, int16_t lan_power_
 }
 
 /** @} */
-
-/** @endcond */
 
 /** @} */

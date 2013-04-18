@@ -116,6 +116,25 @@
 							<tool commandLinePattern="${COMMAND} --create ${INPUTS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${FLAGS}" id="iar.arm.toolchain.archive.v5.4.0.964136368" name="IAR Library Builder for ARM" superClass="iar.arm.toolchain.archive.v5.4.0"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="iar.arm.toolchain.project.library.configuration.debug.v5.4.0.133491925.1825457248" name="sensor.c" rcbsApplicability="disable" resourcePath="src/sensor.c" toolsToInvoke="iar.arm.toolchain.compiler.v5.4.1.1503958216.927071318">
+						<tool id="iar.arm.toolchain.compiler.v5.4.1.1503958216.927071318" name="IAR C/C++ Compiler for ARM" superClass="iar.arm.toolchain.compiler.v5.4.1.1503958216">
+							<option id="iar.arm.toolchain.compiler.option.preprocessorOut.v6.2.0.1172604259" name="Preprocessor output to file" superClass="iar.arm.toolchain.compiler.option.preprocessorOut.v6.2.0" value="true" valueType="boolean"/>
+							<option id="iar.arm.toolchain.compiler.option.optCSE.v5.4.0.298197086" name="Disable common subexpression elimination" superClass="iar.arm.toolchain.compiler.option.optCSE.v5.4.0" value="true" valueType="boolean"/>
+							<option id="iar.arm.toolchain.compiler.option.optUnroll.v5.4.0.212943813" name="Disable loop unrolling" superClass="iar.arm.toolchain.compiler.option.optUnroll.v5.4.0" value="true" valueType="boolean"/>
+							<option id="iar.arm.toolchain.compiler.option.optInline.v5.4.0.1250438325" name="Disable function inlining" superClass="iar.arm.toolchain.compiler.option.optInline.v5.4.0" value="true" valueType="boolean"/>
+							<option id="iar.arm.toolchain.compiler.option.optCodeMotion.v5.4.0.716712711" name="Disable code motion" superClass="iar.arm.toolchain.compiler.option.optCodeMotion.v5.4.0" value="true" valueType="boolean"/>
+							<option id="iar.arm.toolchain.compiler.option.optAliasAnalysis.v5.4.0.1051105232" name="Disable type-based alias analysis" superClass="iar.arm.toolchain.compiler.option.optAliasAnalysis.v5.4.0" value="true" valueType="boolean"/>
+							<option id="iar.arm.toolchain.compiler.option.optStaticClustering.v5.4.0.1794046838" name="Disable static clustering" superClass="iar.arm.toolchain.compiler.option.optStaticClustering.v5.4.0" value="true" valueType="boolean"/>
+							<option id="iar.arm.toolchain.compiler.option.optScheduling.v5.4.0.1143391090" name="Disable instruction scheduling" superClass="iar.arm.toolchain.compiler.option.optScheduling.v5.4.0" value="true" valueType="boolean"/>
+							<inputType id="iar.arm.toolchain.compiler.inputType.v5.4.1.987368220" name="IAR C/C++ Compiler Input Type" superClass="iar.arm.toolchain.compiler.inputType.v5.4.1"/>
+						</tool>
+						<tool customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.534425560" name="Resource Custom Build Step">
+							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.1570254553" name="Resource Custom Build Step Input Type">
+								<additionalInput kind="additionalinputdependency" paths=""/>
+							</inputType>
+							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.1419512041" name="Resource Custom Build Step Output Type"/>
+						</tool>
+					</fileInfo>
 					<sourceEntries>
 						<entry excluding="src/sensor_geoloc.c|src/td_geoloc.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
@@ -692,15 +711,6 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="libtdsensor-IAR.iar.arm.toolchain.project.library.v5.4.0.834419571" name="Static Library" projectType="iar.arm.toolchain.project.library.v5.4.0"/>
 	</storageModule>
-	<storageModule moduleId="scannerConfiguration">
-		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.release.v5.4.0.1266702257;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1266702257.;iar.arm.toolchain.compiler.v5.4.1.678258599;iar.arm.toolchain.compiler.inputType.v5.4.1.387727989">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.debug.v5.4.0.133491925;iar.arm.toolchain.project.library.configuration.debug.v5.4.0.133491925.;iar.arm.toolchain.compiler.v5.4.1.1503958216;iar.arm.toolchain.compiler.inputType.v5.4.1.199284014">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
-		</scannerConfigBuildInfo>
-	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
 		<configuration configurationName="GCC Release">
@@ -738,4 +748,19 @@
 		</project-mappings>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.c.compiler.release.260646574;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.61909250">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.assembler.release.1713368237;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.600849016">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.debug.v5.4.0.133491925;iar.arm.toolchain.project.library.configuration.debug.v5.4.0.133491925.;iar.arm.toolchain.compiler.v5.4.1.1503958216;iar.arm.toolchain.compiler.inputType.v5.4.1.199284014">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.release.v5.4.0.1266702257;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1266702257.;iar.arm.toolchain.compiler.v5.4.1.678258599;iar.arm.toolchain.compiler.inputType.v5.4.1.387727989">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
+		</scannerConfigBuildInfo>
+	</storageModule>
 </cproject>

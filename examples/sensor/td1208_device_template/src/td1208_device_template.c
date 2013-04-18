@@ -1,6 +1,6 @@
 /******************************************************************************
  * @file
- * @brief template file for TDxxxx RF modules.
+ * @brief Sensor Device Application Example
  * @author Telecom Design S.A.
  * @version 2.0.0
  ******************************************************************************
@@ -45,17 +45,32 @@
 #include <td_sensor_device.h>
 #include <sensor_event.h>
 #include <sensor_register.h>
+#include <sensor_data.h>
 
 
-#define DEVICE_CLASS 0x0001 //define your own device class
+/*******************************************************************************
+ **************************   DEFINES   ****************************************
+ ******************************************************************************/
 
-static bool FirstBoot=0; //is the device already registered on sensor?
+
+/** Define your current variable version */
+#define VARIABLES_VERSION 0x1
+
+/** Define your own device class */
+#define DEVICE_CLASS 0x0001
+
+
+/*******************************************************************************
+ **************************   PRIVATE VARIABLES   ******************************
+ ******************************************************************************/
+
+/** Boot flash variable */
+static bool FirstBoot=false;
+
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
  ******************************************************************************/
-
-
 
 /***************************************************************************//**
  * @brief
@@ -63,10 +78,11 @@ static bool FirstBoot=0; //is the device already registered on sensor?
  ******************************************************************************/
 void TD_USER_Setup(void)
 {
+	//Set variable version
+	TD_FLASH_SetVariablesVersion(VARIABLES_VERSION);
 
 	//Initialize the device as a transmitter with no local RF configuration.
 	TD_SENSOR_Init(SENSOR_DEVICE,869312500,14);
-
 
 	//Register only once on Sensor using persistent flash variable
 	if(!TD_FLASH_DeclareVariable((uint8_t *)&FirstBoot, 1, 0))
@@ -80,7 +96,7 @@ void TD_USER_Setup(void)
 			TD_RTC_Delay(T10S);
 		}
 
-		//The gateway is most likely still in registration mode
+		//the gateway is most likely still in registration mode
 		TD_RTC_Delay(T20S);
 
 		//Register on Sensor.
@@ -89,15 +105,13 @@ void TD_USER_Setup(void)
 			TD_RTC_Delay(T10S);
 		}
 
-
-		//Enable monitoring here
-
-
 		//Save on flash
 		FirstBoot=true;
 		TD_FLASH_WriteVariables();
-	}
 
+		//Process events if any
+		TD_SENSOR_Process();
+	}
 }
 
 /***************************************************************************//**

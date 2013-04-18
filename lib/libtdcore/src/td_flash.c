@@ -2,7 +2,7 @@
  * @file
  * @brief Flash controller (MSC) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -76,21 +76,32 @@ extern const char __userrom_start;
 /** DWORD size */
 #define DWORDSZ         sizeof (uint32_t)
 
-/** MAX allowed data pointers */
-#define MAX_FLASH_DATA_POINTER 10
+/** Maximum number of data pointers */
+#define MAX_FLASH_DATA_POINTER 30
 
 /** @} */
 
-/** Flash variable structure
+/*******************************************************************************
+ *******************************  TYPEDEFS   ***********************************
+ ******************************************************************************/
+
+
+/** @addtogroup FLASH_TYPEDEFS Typedefs
+ * @{ */
+
+/**
+ * Flash variable structure
  *
  * @note
  *  Each variable is assigned a unique virtual address automatically when first
  *  written to, or when using the declare function.
  */
 typedef struct {
-	uint8_t *data_pointer;
-	uint16_t data_size;
+	uint8_t *data_pointer;	/**< Variable data pointer. */
+	uint16_t data_size;		/**< Variable data size. */
 } TD_FLASH_variable_t;
+
+/** @} */
 
 /*******************************************************************************
  *******************************   PRIVATE VARIABLES   *************************
@@ -100,13 +111,16 @@ typedef struct {
  * @{ */
 
 /** List of pointer to data which should be stored in Flash memory */
-static TD_FLASH_variable_t FlashDataList[MAX_FLASH_DATA_POINTER];
+static TD_FLASH_variable_t FlashVariablesList[MAX_FLASH_DATA_POINTER];
 
 /** Data list count */
-static uint8_t data_count = 0;
+static uint8_t VariablesCount = 0;
 
 /** Total size of flash memory reserved */
-static uint16_t total_size = 0;
+static uint16_t VariablesTotalSize = 0;
+
+/** Variables version */
+static uint32_t VariablesVersion = 0;
 
 /** @} */
 
@@ -305,7 +319,7 @@ __RAMFUNCTION void TD_FLASH_ErasePage(uint32_t *blockStart)
 
  /***************************************************************************//**
  * @brief
- *   Writes a buffer to a given Flash region.
+ *   Writes a buffer and an optional extension buffer to a given Flash region.
  *
  * @param[in] start
  *   Pointer to the flash region to write to.
@@ -317,10 +331,10 @@ __RAMFUNCTION void TD_FLASH_ErasePage(uint32_t *blockStart)
  *   Buffer size in bytes.
  *
  * @param[in] extended_buffer
- *   Pointer to the extended source buffer.
+ *   Optional pointer to the extended source buffer.
  *
  * @param[in] extended_count
- *   Extended buffer size in bytes.
+ *   Optional extended buffer size in bytes.
  ******************************************************************************/
 static void TD_FLASH_WriteRegion(uint32_t start, void *buffer, uint32_t count, void *extended_buffer, uint32_t extended_count)
 {
@@ -391,7 +405,7 @@ static void TD_FLASH_WriteRegion(uint32_t start, void *buffer, uint32_t count, v
 
 /***************************************************************************//**
 * @brief
-*   Reads a buffer from a given Flash region.
+*   Reads a buffer and an optional extension buffer from a given Flash region.
 *
 * @param[in] start
 *   Pointer to the flash region to read from.
@@ -403,10 +417,10 @@ static void TD_FLASH_WriteRegion(uint32_t start, void *buffer, uint32_t count, v
 *   Buffer size in bytes.
 *
 * @param[in] extended_buffer
-*   Pointer to the destination extended buffer.
+*   Optional pointer to the destination extended buffer.
 *
 * @param[in] extended_count
-*   Extended buffer size in bytes.
+*   Optional extended buffer size in bytes.
 *
 * @return
 *   Returns true upon success, false if a checksum error has been detected
@@ -462,14 +476,13 @@ static bool TD_FLASH_ReadRegion(uint32_t *start, void *buffer, uint32_t count, v
  **************************   PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
-/** @addtogroup FLASH_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup FLASH_USER_FUNCTIONS User Functions
  * @{ */
+
 
 /***************************************************************************//**
 * @brief
 * Delete all variables from flash.
-*
-*
 ******************************************************************************/
 void TD_FLASH_DeleteVariables(void)
 {
@@ -488,8 +501,7 @@ void TD_FLASH_DeleteVariables(void)
 
 /***************************************************************************//**
 * @brief
-*   Update all the declared variables.
-*
+*   Update all declared variables.
 ******************************************************************************/
 void TD_FLASH_WriteVariables(void)
 {
@@ -501,7 +513,7 @@ void TD_FLASH_WriteVariables(void)
 	int j, k;
 
 	// Optimization - check if block is already erased. This will typically happen when the chip is new
-	for (i = (uint32_t) E2P_USER; i < ((uint32_t) E2P_USER + total_size + 1); i++) {
+	for (i = (uint32_t) E2P_USER; i < ((uint32_t) E2P_USER + VariablesTotalSize + 1); i++) {
 		acc &= *((int32_t *) i);
 	}
 
@@ -514,23 +526,23 @@ void TD_FLASH_WriteVariables(void)
 	}
 
 	// For each variable
-	for (i = 0; i < data_count; i++) {
+	for (i = 0; i < VariablesCount; i++) {
 
 		// How many blocks of 4 bytes do we need?
-		count = FlashDataList[i].data_size;
+		count = FlashVariablesList[i].data_size;
 		if (count % DWORDSZ) {
 			count += DWORDSZ;
 		}
 		count /= DWORDSZ;
 
 		// Copy data pointer
-		pdata = FlashDataList[i].data_pointer;
+		pdata = FlashVariablesList[i].data_pointer;
 
 		// Compute crc
-		crc = TD_FLASH_CRC8(FlashDataList[i].data_pointer, FlashDataList[i].data_size);
+		crc = TD_FLASH_CRC8(FlashVariablesList[i].data_pointer, FlashVariablesList[i].data_size);
 
 		// Append index and size info
-		temp = (crc << 24) | (FlashDataList[i].data_size&0xFFFF) << 8 | (i);
+		temp = (crc << 24) | (FlashVariablesList[i].data_size&0xFFFF) << 8 | (i);
 
 		// Write first byte
 		TD_FLASH_WriteWord((uint32_t *) (E2P_USER + total_word), temp);
@@ -540,7 +552,7 @@ void TD_FLASH_WriteVariables(void)
 		for (j = 0; j < count; j++) {
 			temp = 0;
 			for (k = 0; k < 4; k++) {
-				if ((j << 2) + k < FlashDataList[i].data_size) {
+				if ((j << 2) + k < FlashVariablesList[i].data_size) {
 					temp |= (*pdata++) << (k << 3);
 				} else {
 					break;
@@ -561,29 +573,28 @@ void TD_FLASH_WriteVariables(void)
 
 /***************************************************************************//**
 * @brief
-*   Declare a variable to Flash and try to read its previous value.
+*   Declare a data variable to Flash and try to read its previous value.
 *
 * @param[in] variable
-*   Pointer to the variable. This one must be global as data is NOT copied.
+*   Pointer to the data variable. This one must be global as data is NOT copied.
 *
 * @param[in] size
-*   Variable size in bytes.
+*   Data variable size in bytes.
 *
 * @param[out] index
-*   Index of variable for further read. Will be 0xFF if the flash is full or
-*    if too many variable have already been added.
+*   Index of data variable for further read. Will be 0xFF if the flash is full or
+*    if too many data variables have already been added.
 *
 * @return
-* 	Returns true if the variable has been found in flash and its value has been
-* 	updated, false otherwise.
-*
+* 	Returns true if the data variable has been found in flash and its value has
+* 	been updated, false otherwise.
 ******************************************************************************/
-bool TD_FLASH_DeclareVariable(uint8_t *variable, uint16_t size, uint8_t *index)
+bool TD_FLASH_DeclareVariable(uint8_t * variable, uint16_t size, uint8_t * index)
 {
 	uint16_t temp_size;
 
 	// Make sure that there are not too many variables declared
-	if (data_count > MAX_FLASH_DATA_POINTER) {
+	if (VariablesCount > MAX_FLASH_DATA_POINTER) {
 		if (index != 0) {
 			*index = 0xFF;
 		}
@@ -598,7 +609,7 @@ bool TD_FLASH_DeclareVariable(uint8_t *variable, uint16_t size, uint8_t *index)
 		temp_size /= DWORDSZ;
 
 		// Make sure there is enough room for this variable
-		if (total_size + size + 4 > FLASH_PAGE_SIZE) {
+		if (VariablesTotalSize + size + 4 > FLASH_PAGE_SIZE) {
 			if (index != 0) {
 				*index = 0xFF;
 			}
@@ -606,18 +617,18 @@ bool TD_FLASH_DeclareVariable(uint8_t *variable, uint16_t size, uint8_t *index)
 		} else {
 
 			// Append variable to the list
-			FlashDataList[data_count].data_pointer = variable;
-			FlashDataList[data_count].data_size = size;
+			FlashVariablesList[VariablesCount].data_pointer = variable;
+			FlashVariablesList[VariablesCount].data_size = size;
 			if (index != 0) {
-				*index = data_count;
+				*index = VariablesCount;
 			}
 
 			// Save size and data count
-			total_size += size + 4;
-			data_count++;
+			VariablesTotalSize += size + 4;
+			VariablesCount++;
 
 			// Try to read previous value
-			if (TD_FLASH_ReadVariable(data_count - 1, variable) == 0) {
+			if (TD_FLASH_ReadVariable(VariablesCount - 1, variable) == 0) {
 				return false;
 			}
 			return true;
@@ -627,20 +638,19 @@ bool TD_FLASH_DeclareVariable(uint8_t *variable, uint16_t size, uint8_t *index)
 
 /***************************************************************************//**
 * @brief
-*   Read a buffer from Flash memory.
+*   Read a data variable from Flash memory.
 *
 * @param[in] index
-*   Index of data into the List. You will get this parameter when using
-*   TD_FLASH_DeclareFlashVariable to declare a new variable.
+*   Index of data variable into the List. You will get this parameter when using
+*   TD_FLASH_DeclareFlashVariable to declare a new data variable.
 *
 * @param[out] buffer
 *   Pointer to the buffer where data value should be copied.
 *
 * @return
 * 	Returns read data count if successful, 0 otherwise.
-*
 ******************************************************************************/
-uint16_t TD_FLASH_ReadVariable(uint8_t index, uint8_t *buffer)
+uint16_t TD_FLASH_ReadVariable(uint8_t index, uint8_t * buffer)
 {
 	 uint32_t i, j, crc, count, temp;
 	 uint32_t *pr;
@@ -649,13 +659,13 @@ uint16_t TD_FLASH_ReadVariable(uint8_t index, uint8_t *buffer)
 	 pr = (uint32_t *) E2P_USER;
 
 	 // Make sure index is within valid range
-	 if (index > data_count) {
+	 if (index > VariablesCount) {
 		 return 0;
 	 }
 
 	 // Find out our data address
 	 for (i = 0; i < index; i++) {
-		count = FlashDataList[i].data_size;
+		count = FlashVariablesList[i].data_size;
 		if (count % DWORDSZ) {
 			count += DWORDSZ;
 		}
@@ -664,7 +674,7 @@ uint16_t TD_FLASH_ReadVariable(uint8_t index, uint8_t *buffer)
 	 }
 
 	// Get data size is blocks of 4 bytes.
-	count = FlashDataList[index].data_size;
+	count = FlashVariablesList[index].data_size;
 	if (count % DWORDSZ) {
 
 	   // Round count to DWORD
@@ -675,7 +685,7 @@ uint16_t TD_FLASH_ReadVariable(uint8_t index, uint8_t *buffer)
 	crc = (temp >> 24) & 0xFF;
 
 	 // Check index and size
-	if (((temp & 0xFF) != index) || (((temp >> 8) & 0xFFFF) != FlashDataList[index].data_size)) {
+	if (((temp & 0xFF) != index) || (((temp >> 8) & 0xFFFF) != FlashVariablesList[index].data_size)) {
 		return 0;
 	}
 
@@ -683,7 +693,7 @@ uint16_t TD_FLASH_ReadVariable(uint8_t index, uint8_t *buffer)
 	for (i = 0; i < count; i++) {
 	    temp = *pr++;
 	    for (j = 0; j < 4; j++) {
-	    	if ((i << 2) + j < FlashDataList[index].data_size) {
+	    	if ((i << 2) + j < FlashVariablesList[index].data_size) {
 	    		*pdata++ = (temp >> (j << 3)) & 0xFF;
 	    	} else {
 	    		break;
@@ -692,12 +702,33 @@ uint16_t TD_FLASH_ReadVariable(uint8_t index, uint8_t *buffer)
 	 }
 
 	// Make sure the CRC is fine
-	if (crc != TD_FLASH_CRC8(buffer, FlashDataList[index].data_size)) {
+	if (crc != TD_FLASH_CRC8(buffer, FlashVariablesList[index].data_size)) {
 	   return 0;
 	}
 
 	// Return read data size
-	return FlashDataList[index].data_size;
+	return FlashVariablesList[index].data_size;
+}
+
+
+/***************************************************************************//**
+* @brief
+* Set a version and delete all flash content if current version in Flash is not
+* the same.
+* @param[in] version
+*   Version number
+******************************************************************************/
+void TD_FLASH_SetVariablesVersion(uint32_t version)
+{
+	if(TD_FLASH_DeclareVariable((uint8_t *)&VariablesVersion,4,0)) {
+		if(VariablesVersion != version) {
+			//set new version
+			VariablesVersion = version;
+
+			//write new version
+			TD_FLASH_WriteVariables();
+		}
+	}
 }
 
 /***************************************************************************//**
@@ -717,7 +748,7 @@ void TD_FLASH_Write(void *buffer, uint32_t count)
 
 /***************************************************************************//**
 * @brief
-*   Reads a buffer from Flash memory.
+*   Reads a buffer from User Flash memory.
 *
 * @param[in] buffer
 *   Pointer to the destination buffer.
@@ -736,7 +767,7 @@ bool TD_FLASH_Read(void *buffer, uint32_t count)
 /** @cond RESTRICTED */
 /***************************************************************************//**
 * @brief
-*   Writes a buffer to factory Flash memory.
+*   Writes a buffer to Factory Flash memory.
 *
 * @param[in] device
 *   Pointer to the source TD_DEVICE buffer.
@@ -752,13 +783,13 @@ void TD_FLASH_DeviceWrite(TD_DEVICE *device)
 
 /***************************************************************************//**
 * @brief
-*   Writes buffers to factory Flash memory.
+*   Writes buffers to Factory Flash memory.
 *
 * @param[in] device
-*   Pointer to the source TD_DEVICE buffer.
+*   Pointer to the source #TD_DEVICE buffer.
 *
 * @param[in] device_ext
-*   Pointer to the source TD_DEVICE_EXT buffer.
+*   Pointer to the optional source #TD_DEVICE_EXT buffer.
 *
 * @warning
 *   Using this function destroys the unique module ID!
@@ -772,7 +803,7 @@ void TD_FLASH_DeviceWriteExtended(TD_DEVICE *device, TD_DEVICE_EXT *device_ext)
 
 /***************************************************************************//**
 * @brief
-*   Reads a buffer from factory Flash memory.
+*   Reads a buffer from Factory Flash memory.
 *
 * @param[in] device
 *   Pointer to the destination TD_DEVICE buffer.
@@ -787,13 +818,13 @@ bool TD_FLASH_DeviceRead(TD_DEVICE *device)
 
 /***************************************************************************//**
 * @brief
-*   Reads a buffer from factory Flash memory.
+*   Reads a buffer from Factory Flash memory.
 *
 * @param[in] device
-*   Pointer to the destination TD_DEVICE buffer.
+*   Pointer to the destination #TD_DEVICE buffer.
 *
 * @param[in] device_ext
-*   Pointer to the destination TD_DEVICE_EXT buffer.
+*   Pointer to the optional destination #TD_DEVICE_EXT buffer.
 *
 * @return
 *   Returns true upon success, false if a checksum error has been detected

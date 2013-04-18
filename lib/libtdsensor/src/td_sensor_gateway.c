@@ -2,7 +2,7 @@
  * @file td_sensor_gateway.c
  * @brief Sensor Gateway
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -33,18 +33,20 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+
 #include <td_lan.h>
 #include <td_flash.h>
 #include <td_rtc.h>
-#include <td_sigfox.h>
+#include <td_scheduler.h>
+
 #include "sensor_private.h"
+#include "sensor_config.h"
+#include "sensor_send_private.h"
+#include "sensor_event.h"
+
 #include "td_sensor.h"
 #include "td_sensor_lan.h"
 #include "td_sensor_device.h"
-#include "sensor_event.h"
-#include "td_scheduler.h"
-#include "sensor_config.h"
-#include "sensor_send_private.h"
 #include "td_sensor_transmitter.h"
 #include "td_sensor_gateway.h"
 
@@ -60,6 +62,7 @@
 /** @addtogroup TD_SENSOR_GATEWAY_DEFINES Defines
  * @{ */
 
+/** Maximum simultaneous gateway event*/
 #define MAX_GATEWAY_EVENT 5
 
 /** @} */
@@ -68,7 +71,7 @@
  **************************  TYPEDEFS   ****************************************
  ******************************************************************************/
 
-/** @addtogroup TD_SENSOR_TYPEDEFS Typedefs
+/** @addtogroup TD_SENSOR_GATEWAY_TYPEDEFS Typedefs
  * @{ */
 
 /***************************************************************************//**
@@ -82,7 +85,7 @@ typedef enum {
 
 /***************************************************************************//**
  * @brief
- *   Gateway Events
+ *   Gateway Events. These can only happen on gateway's side.
  ******************************************************************************/
 typedef enum {
 	CONNECTION_LOST, CONNECTION_OK, RSSI_LOW, RSSI_OK,
@@ -145,11 +148,6 @@ typedef struct {
 
 /** @} */
 
-/*******************************************************************************
- **************************  PUBLIC VARIABLES   *******************************
- ******************************************************************************/
-
-extern uint32_t SigfoxID;
 
 /*******************************************************************************
  **************************  PRIVATE VARIABLES   *******************************
@@ -176,8 +174,8 @@ static bool PairingEnabled = false;
 static uint8_t (*DataCallback)(uint8_t * data, uint8_t len, uint8_t * reply) = 0;
 
 /** On Registration callback*/
-static void (*RegistrationCallback)(uint32_t lan_address, uint32_t sigfox_id) =
-0;
+static void (*RegistrationCallback)(uint32_t lan_address, uint32_t sigfox_id) = 0;
+
 
 /** @} */
 
@@ -275,12 +273,13 @@ static void TD_SENSOR_GATEWAY_KeepAliveHandler(uint32_t arg, uint8_t repetitions
  *   EntryId if the device has been added
  *   0XFF otherwise
  ******************************************************************************/
-
 static uint8_t TD_SENSOR_GATEWAY_AppendDevice(Device * device)
 {
 	uint8_t address;
+	bool ok;
 	int i = 0;
-	//no more than 16 devices around
+
+	//no more than 16 devices gateway included
 	if (DeviceCount > MAX_DEVICE) {
 		return 0xFF;
 	}
@@ -294,8 +293,6 @@ static uint8_t TD_SENSOR_GATEWAY_AppendDevice(Device * device)
 
 	//otherwise compute a new address
 	address = TD_SENSOR_LAN_ComputeAddressTo8bits(device->sigfox_id);
-
-	bool ok;
 
 	//check if address not already in use
 	do {
@@ -335,13 +332,10 @@ static uint8_t TD_SENSOR_GATEWAY_AppendDevice(Device * device)
  *   Pointer to the Access Point.
  *   0 if the SigfoxId was not found in the registration list
  ******************************************************************************/
-
 static uint8_t TD_SENSOR_GATEWAY_GetDevice(uint8_t lan_address)
 {
 	int i = 1;
-	//tfp_printf("look for address : %02x \r\n",lan_address);
 	while (i < DeviceCount) {
-		//tfp_printf("address number %d : %02x \r\n",i,DeviceList[i].lan_address);
 		if (DeviceList[i].lan_address == lan_address)
 			return i;
 		i++;
@@ -401,7 +395,6 @@ static void TD_SENSOR_GATEWAY_Ack(TD_LAN_frame_t *rx_frame, AckCode code, uint8_
 
 	//Send Ack frame
 	TD_LAN_SendFrame(1, &tx_frame, rx_frame);
-
 }
 
 /***************************************************************************//**
@@ -414,7 +407,6 @@ static void TD_SENSOR_GATEWAY_Ack(TD_LAN_frame_t *rx_frame, AckCode code, uint8_
  ******************************************************************************/
 static void TD_SENSOR_GATEWAY_CheckRSSI(uint8_t entry_id)
 {
-	//RSSI checking
 	if (DeviceList[entry_id].config.rssi.monitor) {
 		int8_t rssi;
 		uint8_t old_status;
@@ -435,7 +427,6 @@ static void TD_SENSOR_GATEWAY_CheckRSSI(uint8_t entry_id)
 				TD_SENSOR_SendEventRSSI(0, entry_id);
 			}
 		}
-
 	}
 }
 
@@ -455,7 +446,6 @@ static void TD_SENSOR_GATEWAY_ConfigureDeviceMonitoring(uint8_t entry, LocalKeep
 {
 
 	if (frame->keepalive == false && DeviceList[entry].config.keepalive.monitor == true) {
-		//disable keep alive
 		DeviceList[entry].config.keepalive.monitor = false;
 		TD_SCHEDULER_Remove(DeviceList[entry].config.keepalive.timer);
 	} else if (frame->keepalive == true) {
@@ -534,13 +524,12 @@ static int TD_SENSOR_GATEWAY_FrameReceived(TD_LAN_frame_t *tx_frame, TD_LAN_fram
 
 	}
 
-	if (entry != 0xFF) //if device is found or frame is broadcast
-			{
-		if (entry != 0) //if device is registered
-				{
-
+	if (entry != 0xFF) {//if device is found or frame is broadcast
+		if (entry != 0) { //if device is registered
 			if (entry < DeviceCount) {
+
 				switch (frame->type) {
+
 				case LOCAL_FORWARD: {
 					LocalForwardFrame * forward_frame;
 					TD_SENSOR_GATEWAY_Ack(&gateway_RX, ACK_OK, 0, 0);
@@ -583,7 +572,6 @@ static int TD_SENSOR_GATEWAY_FrameReceived(TD_LAN_frame_t *tx_frame, TD_LAN_fram
 					break;
 
 				case LOCAL_DATA:
-
 					if (DataCallback != 0) {
 						uint8_t reply[15];
 						uint8_t reply_count;
@@ -594,16 +582,12 @@ static int TD_SENSOR_GATEWAY_FrameReceived(TD_LAN_frame_t *tx_frame, TD_LAN_fram
 						//echo
 						TD_SENSOR_GATEWAY_Ack(&gateway_RX, ACK_OK, frame->data, frame_count);
 					}
-
 					break;
 
 				}
-
 				TD_SENSOR_GATEWAY_CheckRSSI(entry);
-
 			}
-		} else if (frame->count > 0) //if broadcast and frame count >0
-				{
+		} else if (frame->count > 0) {
 			//only the register local frame is allowed if a device is not already paired
 			if (frame->type == LOCAL_REGISTER) {
 				/********DON'T ADD TOO MANY THINGS HERE BEFORE ACKING*****************/
@@ -628,9 +612,8 @@ static int TD_SENSOR_GATEWAY_FrameReceived(TD_LAN_frame_t *tx_frame, TD_LAN_fram
 
 						if (new_lan_address == 0xFF) {
 							TD_SENSOR_GATEWAY_Ack(&gateway_RX, ACK_ERROR, 0, 0);
-						} else //if an address could be given to the device
-						{
-
+						} else {
+							//if an address could be given to the device
 							LanAddress newAdress;
 							newAdress.address = new_lan_address | GatewayAddress;
 							newAdress.mask = NETWORK_MASK;
@@ -679,7 +662,6 @@ void TD_SENSOR_GATEWAY_DeleteAllDevices()
 	int i;
 
 	for (i = 1; i < MAX_DEVICE; i++) {
-		//stop device timer
 		if (DeviceList[i].config.keepalive.monitor) {
 			TD_SCHEDULER_Remove(DeviceList[i].config.keepalive.timer);
 		}
@@ -835,7 +817,6 @@ void TD_SENSOR_GATEWAY_Init()
 
 		DeviceList[i].config.rssi.status = false;
 		DeviceList[i].config.rssi.monitor = false;
-
 	}
 
 	TD_LAN_SetUserCallback(TD_SENSOR_GATEWAY_FrameReceived);

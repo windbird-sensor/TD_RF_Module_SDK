@@ -2,7 +2,7 @@
  * @file sensor_raw.c
  * @brief API for sending Raw frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -39,9 +39,7 @@
  * @brief Sensor API for sending a Raw Frame.
  *
  * @details
- *	The raw frames allows to send up to 10 bytes to Sensor. Processing of these frames is NOT enabled by default
- *	and they will be delivered such as.
- *
+ *	The raw frames allows to send up to 10 bytes to Sensor.
  * @{
  ******************************************************************************/
 
@@ -50,6 +48,7 @@
 
 #define RAW_DEFAULT_REPETITON 3 	///<Default retransmission repetition
 #define RAW_DEFAULT_INTERVAL 120		///<Default retransmission interval in seconds
+
 /** @} */
 
 /*******************************************************************************
@@ -85,7 +84,6 @@ static uint8_t raw_stamp = -1;
  * @return
  *   True if the data has been sent over the Sigfox Network
  ******************************************************************************/
-
 bool TD_SENSOR_SendRaw(uint8_t * msg, uint8_t count)
 {
 	if (count > 10)
@@ -107,7 +105,6 @@ bool TD_SENSOR_SendRaw(uint8_t * msg, uint8_t count)
  *	Interval between two repetitions in seconds
  *
  ******************************************************************************/
-
 void TD_SENSOR_SetRawTransmissionProfile(uint8_t repetition, uint32_t interval)
 {
 	raw_profile.repetition = repetition;

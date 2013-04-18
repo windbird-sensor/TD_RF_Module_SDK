@@ -2,7 +2,7 @@
  * @file
  * @brief AT parser API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -63,7 +63,7 @@ extern "C" {
 /** AT command buffer size */
 #define AT_BUFFER_SIZE	75
 
-/** AT command maximum number of arguments */
+/** Maximum number of AT command arguments */
 #define AT_MAX_ARGS		9
 
 /** AT persist buffer size */
@@ -135,7 +135,9 @@ typedef enum AT_results {
  * @{ */
 
 /** AT command structure
+ *
  * Basically, a string LUT with corresponding token.
+ *
  * Both members are set to NULL to flag the last command.
  */
 typedef struct {
@@ -144,7 +146,28 @@ typedef struct {
 } AT_command_t;
 
 /**
- * AT parser extension structure
+ * @brief AT parser extension structure
+ *
+ * @details
+ *   #Introduction
+ *
+ *   The AT parser extension provides a plugin mechanism that allows to extend
+ *   the set of available AT commands.
+ *
+ *   #Implementation
+ *
+ *   The At parser extension consists in a structure that contains:
+ *    - a table with the additional AT commands supported by the exntension in
+ *    ASCII with the corresponding token
+ *    - some functions that will be called back for some specific purpose: during
+ *    initialization, while display help or status, when parsing a new character,
+ *    when a command has been recognized or when the system needs to perform
+ *    a persistent write of its configuration or when it has to read it back
+ *
+ *    #Calling Sequence
+ *
+ *    The only required operation dealing with an AT extension is to register it
+ *    using AT_AddExtension().
  */
 typedef struct {
 	AT_command_t const *commands;	///< Pointer to the list of extension commands
@@ -186,7 +209,7 @@ extern char const *AT_serial;
  *************************   PROTOTYPES   **************************************
  ******************************************************************************/
 
-/** @addtogroup AT_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup AT_USER_FUNCTIONS User Functions
  * @{ */
 /** @addtogroup AT_PROTOTYPES Prototypes
  * @{ */
@@ -206,7 +229,7 @@ long long AT_atoll(const char *s);
  **************************   PUBLIC VARIABLES   *******************************
  ******************************************************************************/
 
-/** @addtogroup AT_PUBLIC_VARIABLES Public Variables
+/** @addtogroup AT_USER_VARIABLES User Variables
  * @{ */
 /** @addtogroup AT_EXTERN Extern Declarations
  * @{ */

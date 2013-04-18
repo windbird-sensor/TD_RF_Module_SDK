@@ -2,7 +2,7 @@
  * @file
  * @brief Public header for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -51,13 +51,13 @@ extern "C" {
  ******************************************************************************/
 
 /** libtdcore v2.0.0 version number */
-#define LIBTDCORE_V2_0_2			((2 * 0x10000) + (0 * 0x100) + 0)
+#define LIBTDCORE_V2_0_1			((2 * 0x10000) + (0 * 0x100) + 1)
 
 /** libtdcore current version number */
-#define LIBTDCORE_VERSION			LIBTD1202_V2_0_0
+#define LIBTDCORE_VERSION			LIBTD1202_V2_0_1
 
 /** libtdcore current version number string */
-#define LIBTDCORE_VERSION_STRING	"v2.0.0"
+#define LIBTDCORE_VERSION_STRING	"v2.0.1"
 
 /** Flag to include printf() support */
 #define USE_PRINTF

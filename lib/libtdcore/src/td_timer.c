@@ -52,7 +52,7 @@
  **************************   PUBLIC VARIABLES   *******************************
  ******************************************************************************/
 
-/** @addtogroup TIMER_PUBLIC_VARIABLES Public Variables
+/** @addtogroup TIMER_USER_VARIABLES User Variables
  * @{ */
 
 /** Flag for timer enabled */
@@ -108,7 +108,7 @@ static TIMER_Init_TypeDef timerInit =
  **************************   PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
-/** @addtogroup TIMER_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup TIMER_USER_FUNCTIONS User Functions
  * @{ */
 
 /***************************************************************************//**

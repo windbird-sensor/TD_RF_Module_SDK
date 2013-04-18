@@ -21,8 +21,17 @@
 /** Manufacturer */
 #define MANUFACTURER		"Telecom Design"
 
+#ifdef EFM32TG210F32
 /** Product */
 #define PRODUCT				"TD1202"
+
+#endif
+
+#ifdef EFM32G210F128
+/** Product */
+#define PRODUCT				"TD1208"
+
+#endif
 
 /** Hardware revision */
 #if MODULE_REVISION == REVISION_D
@@ -34,11 +43,22 @@ qsd;;
 #define HARDWARE_VERSION	"0F"
 #endif
 
+#ifdef EFM32TG210F32
 /** Software version */
 #define SOFTWARE_VERSION	"SOFT1154"
+#endif
+
+#ifdef EFM32G210F128
+/** Software version */
+#define SOFTWARE_VERSION	"SOFT1158"
+
+#endif
+
+/** Variables version in flash */
+#define VARIABLES_VERSION 	1158
 
 /** Release data */
-#define RELEASE_DATE		"M01+2013"
+#define RELEASE_DATE		"M04+2013"
 
 /** Telecom Design 12-digit serial number */
 #define SERIAL_NUMBER		"123456789012"
@@ -53,10 +73,10 @@ qsd;;
 #define AT_MFG_TEST			0
 
 /** RF chip info AT parser extension */
-#define AT_RADIO_INFO		0
+#define AT_RADIO_INFO		1
 
 /** SigFox AT parser extension */
-#define AT_SIGFOX			0
+#define AT_SIGFOX			1
 
 /** TD Sensor AT parser extension */
 #define AT_SENSOR			1

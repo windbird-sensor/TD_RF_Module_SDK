@@ -2,7 +2,7 @@
  * @file td_sensor_transmitter.h
  * @brief Sensor Transmitter
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -34,10 +34,11 @@
 #ifndef TD_SENSOR_TRANSMITTER_H_
 #define TD_SENSOR_TRANSMITTER_H_
 
+#include "sensor_send_private.h"
+
 /***************************************************************************//**
  * @addtogroup TD_SENSOR_TRANSMITTER Sensor Transmitter
- *
- *  * @{
+ * @{
  ******************************************************************************/
 
 /*******************************************************************************

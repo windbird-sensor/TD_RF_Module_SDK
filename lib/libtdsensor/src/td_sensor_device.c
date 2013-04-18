@@ -2,7 +2,7 @@
  * @file td_sensor_device.c
  * @brief Sensor Device
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -33,18 +33,14 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdarg.h>
-#define USE_PRINTF
-#include <td_printf.h>
-#include <td_rtc.h>
-#include <td_lan.h>
+
 #include <td_flash.h>
-#include <sensor_send.h>
+
+#include "sensor_send.h"
+
 #include "td_sensor.h"
 #include "td_sensor_lan.h"
 #include "td_sensor_device.h"
-
-extern uint32_t SigfoxID;
 
 /***************************************************************************//**
  * @addtogroup TD_SENSOR_DEVICE Sensor LAN Device
@@ -57,8 +53,6 @@ extern uint32_t SigfoxID;
 
 /** @addtogroup TD_SENSOR_DEVICE_PUBLIC_FUNCTIONS Public Functions
  * @{ */
-
-/** @cond TD_PRIVATE */
 
 /***************************************************************************//**
  * @brief
@@ -80,7 +74,6 @@ extern uint32_t SigfoxID;
  *  AckCode
  *
  ******************************************************************************/
-
 AckCode TD_SENSOR_DEVICE_Forward(uint8_t * payload, uint8_t count, uint8_t repetition, uint32_t interval)
 {
 	LocalForwardFrame frame;
@@ -128,7 +121,6 @@ AckCode TD_SENSOR_DEVICE_Forward(uint8_t * payload, uint8_t count, uint8_t repet
  *  Return AckCode
  *
  ******************************************************************************/
-
 AckCode TD_SENSOR_DEVICE_KeepAlive(bool keepalive, uint32_t interval, bool rssi, int8_t level_low, int8_t level_ok)
 {
 	LocalKeepAliveFrame frame;
@@ -143,8 +135,6 @@ AckCode TD_SENSOR_DEVICE_KeepAlive(bool keepalive, uint32_t interval, bool rssi,
 
 	return code;
 }
-
-/** @endcond */
 
 /***************************************************************************//**
  * @brief
@@ -163,12 +153,13 @@ AckCode TD_SENSOR_DEVICE_KeepAlive(bool keepalive, uint32_t interval, bool rssi,
  *  Return AckCode
  *
  ******************************************************************************/
-
 AckCode TD_SENSOR_DEVICE_Data(uint8_t * data, uint8_t count, uint8_t data_rx[TD_SENSOR_LAN_PAYLOAD_SIZE])
 {
 
 	if (count > 16)
+	{
 		return ACK_ERROR;
+	}
 
 	AckCode code = TD_SENSOR_LAN_SendFrame(LOCAL_DATA, (uint8_t *) data, count, data_rx);
 
@@ -184,7 +175,6 @@ AckCode TD_SENSOR_DEVICE_Data(uint8_t * data, uint8_t count, uint8_t data_rx[TD_
  *  Return AckCode
  *
  ******************************************************************************/
-
 AckCode TD_SENSOR_DEVICE_Register()
 {
 	LocalRegisterFrame frame;
@@ -193,7 +183,7 @@ AckCode TD_SENSOR_DEVICE_Register()
 	uint8_t rx[TD_SENSOR_LAN_PAYLOAD_SIZE];
 
 	frame.checker = LOCAL_REGISTER_CHECK;
-	frame.SigfoxID = SigfoxID;
+	frame.SigfoxID = TD_SENSOR_GetSigfoxID();
 
 	code = TD_SENSOR_LAN_SendFrame(LOCAL_REGISTER, (uint8_t *) &frame, sizeof(LocalRegisterFrame), (uint8_t *) rx);
 	switch (code) {
@@ -217,7 +207,6 @@ AckCode TD_SENSOR_DEVICE_Register()
  *  Reset Device Address
  *
  ******************************************************************************/
-
 void TD_SENSOR_DEVICE_Reset()
 {
 	TD_SENSOR_LAN_setLanAddress(BROADCAST_ADDRESS, BROADCAST_MASK);

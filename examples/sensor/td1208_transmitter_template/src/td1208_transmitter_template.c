@@ -39,9 +39,23 @@
 #include <sensor_register.h>
 
 
-#define DEVICE_CLASS 0x0001 //define your own device class
+/*******************************************************************************
+ **************************   DEFINES   ****************************************
+ ******************************************************************************/
 
-static bool FirstBoot=0; //is the device already registered on sensor?
+/** Define your current variable version */
+#define VARIABLES_VERSION 0x1
+
+/** Define your own device class */
+#define DEVICE_CLASS 0x0001
+
+
+/*******************************************************************************
+ **************************   PRIVATE VARIABLES   ******************************
+ ******************************************************************************/
+
+/** Boot flash variable */
+static bool FirstBoot=false;
 
 
 /*******************************************************************************
@@ -54,6 +68,8 @@ static bool FirstBoot=0; //is the device already registered on sensor?
  ******************************************************************************/
 void TD_USER_Setup(void)
 {
+	//Set variable version
+	TD_FLASH_SetVariablesVersion(VARIABLES_VERSION);
 
 	//Initialize the device as a transmitter with no local RF configuration.
 	TD_SENSOR_Init(SENSOR_TRANSMITTER,0,0);
@@ -71,14 +87,13 @@ void TD_USER_Setup(void)
 		//Append monitoring here
 
 
-
 		//Save on flash
 		FirstBoot=true;
 		TD_FLASH_WriteVariables();
+
+		//Process events if any
+		TD_SENSOR_Process();
 	}
-
-
-
 }
 
 /***************************************************************************//**

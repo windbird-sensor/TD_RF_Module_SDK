@@ -2,7 +2,7 @@
  * @file sensor_register.c
  * @brief API for sending Register frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -38,9 +38,14 @@
 extern "C" {
 #endif
 
+
+/** @defgroup SENSOR_REGISTER_USER_FUNCTIONS User Functions
+ *  @ingroup SENSOR_REGISTER
+ *  @nosubgrouping
+ */
+
 /***************************************************************************//**
  * @addtogroup SENSOR_REGISTER Sensor Register
- *
  * @{
  ******************************************************************************/
 
@@ -52,9 +57,15 @@ extern "C" {
  * @{ */
 /** @addtogroup SENSOR_REGISTER_PROTOTYPES Prototypes
  * @{ */
+
+/** @ingroup SENSOR_REGISTER_USER_FUNCTIONS
+ * @{ */
+
 bool TD_SENSOR_SendRegister();
 
 void TD_SENSOR_SetRegisterTransmissionProfile(uint8_t repetition, uint32_t interval);
+
+/** @} */
 
 /** @} */
 

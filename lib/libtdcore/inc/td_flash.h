@@ -2,7 +2,7 @@
  * @file
  * @brief Flash controller (MSC) peripheral API for the TDxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -94,7 +94,7 @@ typedef struct _TD_DEVICE_EXT {
  *************************   PROTOTYPES   **************************************
  ******************************************************************************/
 
-/** @addtogroup FLASH_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup FLASH_USER_FUNCTIONS User Functions
  * @{ */
 /** @addtogroup FLASH_PROTOTYPES Prototypes
  * @{ */
@@ -108,6 +108,7 @@ uint16_t TD_FLASH_ReadVariable(uint8_t index, uint8_t *buffer);
 bool TD_FLASH_DeclareVariable(uint8_t *variable, uint16_t size, uint8_t *index);
 void TD_FLASH_WriteVariables(void);
 void TD_FLASH_DeleteVariables(void);
+void TD_FLASH_SetVariablesVersion(uint32_t version);
 
 __RAMFUNCTION void TD_FLASH_ErasePage(uint32_t *blockStart);
 __RAMFUNCTION void TD_FLASH_WriteWord(uint32_t *address, uint32_t data);

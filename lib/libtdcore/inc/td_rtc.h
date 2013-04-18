@@ -2,7 +2,7 @@
  * @file
  * @brief Real-Time Clock (RTC) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -163,7 +163,7 @@ typedef void (*TD_RTC_handler_t)(void);
  *************************   PROTOTYPES   **************************************
  ******************************************************************************/
 
-/** @addtogroup RTC_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup RTC_USER_FUNCTIONS User Functions
  * @{ */
 
 /***************************************************************************//**
@@ -297,7 +297,7 @@ time_t __time32(time_t *timer);
  **************************   PUBLIC VARIABLES   *******************************
  ******************************************************************************/
 
-/** @addtogroup RTC_PUBLIC_VARIABLES Public Variables
+/** @addtogroup RTC_USER_VARIABLES User Variables
  * @{ */
 /** @addtogroup RTC_EXTERN Extern Declarations
  * @{ */

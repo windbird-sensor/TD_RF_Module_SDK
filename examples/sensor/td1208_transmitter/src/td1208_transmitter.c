@@ -47,19 +47,50 @@
 #include <sensor_event.h>
 #include <sensor_register.h>
 
-#define DEVICE_CLASS 0x0001 //define your own device class
 
-#define BATTERY_LEVEL_LOW 2600 //battery low level in mV
-#define BATTERY_LEVEL_OK 3100 //battery low level in mV
+/*******************************************************************************
+ **************************   DEFINES   ****************************************
+ ******************************************************************************/
 
-#define TEMPERATURE_LEVEL_LOW 50 //temperature low level in 1/10 degrees
-#define TEMPERATURE_LEVEL_HIGH 550 //temperature high level in 1/10 degrees
-#define TEMPERATURE_CHECKING_INTERVAL 600 //temperature checking interval in seconds
+/** LED port */
+#define LED_PORT TIM2_PORT
 
-#define KEEPALIVE_INTERVAL 3600*24 //keepalive interval in seconds (24 hours)
+/** LED bit */
+#define LED_BIT	TIM2_BIT
+
+/** Define your current variable version */
+#define VARIABLES_VERSION 0x1
+
+/** Define your own device class */
+#define DEVICE_CLASS 0x0001
+
+/** Battery low level in mV */
+#define BATTERY_LEVEL_LOW 2600
+
+/** battery OK level in mV */
+#define BATTERY_LEVEL_OK 3100
+
+/** Temperature low level in 1/10 degrees */
+#define TEMPERATURE_LEVEL_LOW 50
+
+/** Temperature high level in 1/10 degrees */
+#define TEMPERATURE_LEVEL_HIGH 550
+
+/** Temperature checking interval in seconds */
+#define TEMPERATURE_CHECKING_INTERVAL 600
+
+/** Keepalive interval in hours */
+#define KEEPALIVE_INTERVAL 24
 
 
-static uint8_t led_timer=0xFF;
+/*******************************************************************************
+ **************************   PRIVATE VARIABLES   ******************************
+ ******************************************************************************/
+
+/** LED timer id */
+static uint8_t LedTimer=0xFF;
+
+/** Boot flash variable */
 static bool FirstBoot=false;
 
 /*******************************************************************************
@@ -79,12 +110,12 @@ static void set_led(bool state)
 	if(state)
 	{
 		//set LED on
-		GPIO_PinOutSet(TIM2_PORT, TIM2_BIT);
+		GPIO_PinOutSet(LED_PORT, LED_BIT);
 	}
 	else
 	{
 		//set LED off
-		 GPIO_PinOutClear(TIM2_PORT, TIM2_BIT);
+		 GPIO_PinOutClear(LED_PORT, LED_BIT);
 	}
 }
 
@@ -98,7 +129,7 @@ static void set_led(bool state)
 static void led_blink(uint32_t arg, uint8_t repetition)
 {
 	set_led((bool)(arg&0x1));
-	TD_SCHEDULER_SetArg(led_timer,!(arg&0x1));
+	TD_SCHEDULER_SetArg(LedTimer,!(arg&0x1));
 }
 
 /***************************************************************************//**
@@ -109,23 +140,22 @@ static void led_blink(uint32_t arg, uint8_t repetition)
  ******************************************************************************/
 static bool battery_user_callback(bool state, uint16_t level)
 {
-
 	tfp_printf("Battery user callback\r\n");
 
 	//if battery level is low
 	if(!state)
 	{
 		//setup blink every 2 seconds
-		led_timer=TD_SCHEDULER_Append(1, 0, 0, 0xFF, led_blink, 1);
+		LedTimer=TD_SCHEDULER_Append(1, 0, 0, 0xFF, led_blink, 1);
 	}
 	else
 	{
 		//if a timer was started
-		if(led_timer!=0xFF)
+		if(LedTimer!=0xFF)
 		{
 			//stop it
-			TD_SCHEDULER_Remove(led_timer);
-			led_timer=0xFF;
+			TD_SCHEDULER_Remove(LedTimer);
+			LedTimer=0xFF;
 		}
 
 		//set LED off
@@ -148,12 +178,13 @@ static bool temperature_user_callback(TemperatureState state, int16_t level)
 
 /***************************************************************************//**
  * @brief
- * Switch callback. Called on switch Events.
+ * Switch callback. Called on switch Events. Return false NOT to send the
+ * corresponding sensor event
  ******************************************************************************/
 bool switch_user_callback(GPIO_Port_TypeDef port, unsigned int bit, bool state)
 {
 	tfp_printf("Switch user callback, port: %d - bit: %d - state: %d\r\n",port, bit, state);
-	return true;
+	return false;
 }
 
 /***************************************************************************//**
@@ -162,6 +193,8 @@ bool switch_user_callback(GPIO_Port_TypeDef port, unsigned int bit, bool state)
  ******************************************************************************/
 void TD_USER_Setup(void)
 {
+	//Set variable version
+	TD_FLASH_SetVariablesVersion(VARIABLES_VERSION);
 
 	// Initialize the UART
 	init_printf(TD_UART_Init(9600, true, false),
@@ -169,11 +202,8 @@ void TD_USER_Setup(void)
 	    		TD_UART_Start,
 	    		TD_UART_Stop);
 
-	//Print out current temperature
-	tfp_printf("Temperature: %d.C\r\n",TD_MEASURE_VoltageTemperatureExtended(true)/10);
-
 	//Init LED
-	GPIO_PinModeSet(TIM2_PORT, TIM2_BIT, gpioModePushPull, 0);
+	GPIO_PinModeSet(LED_PORT, LED_BIT, gpioModePushPull, 0);
 
 	//Initialize the device as a transmitter with no local RF configuration.
 	TD_SENSOR_Init(SENSOR_TRANSMITTER,0,0);
@@ -181,6 +211,8 @@ void TD_USER_Setup(void)
 	//Register on Sensor and activate monitoring only once using persistent flash variable
 	if(!TD_FLASH_DeclareVariable((uint8_t *)&FirstBoot, 1, 0))
 	{
+		tfp_printf("Register and enable monitoring\r\n");
+
 		//Set the device class
 		TD_SENSOR_SetDeviceClass(DEVICE_CLASS);
 
@@ -194,7 +226,7 @@ void TD_USER_Setup(void)
 		TD_SENSOR_MonitorTemperature(true, TEMPERATURE_CHECKING_INTERVAL, TEMPERATURE_LEVEL_LOW, TEMPERATURE_LEVEL_HIGH, temperature_user_callback);
 
 		//Enable Switch Monitoring and setup a callback on event
-		TD_SENSOR_MonitorSwitch(true, USR0_PORT, USR0_BIT, true, true, true, true, switch_user_callback);
+		TD_SENSOR_MonitorSwitch(true, USR4_PORT, USR4_BIT, false, true, true, true, switch_user_callback);
 
 		//Enable KeepAlive Monitoring very 24 hours
 		TD_SENSOR_MonitorKeepAlive(true, KEEPALIVE_INTERVAL);
@@ -202,7 +234,14 @@ void TD_USER_Setup(void)
 		//Save on flash
 		FirstBoot=true;
 		TD_FLASH_WriteVariables();
+
+		//Process events if any
+		TD_SENSOR_Process();
 	}
+
+	//Print out current temperature
+	tfp_printf("Temperature: %d.C\r\n",TD_MEASURE_VoltageTemperatureExtended(true)/10);
+
 
 }
 

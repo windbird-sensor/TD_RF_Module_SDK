@@ -2,7 +2,7 @@
  * @file
  * @brief Main program for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -53,7 +53,7 @@
  * @{
  ******************************************************************************/
 
-/** @addtogroup MAIN_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup MAIN_USER_FUNCTIONS User Functions
  * @{ */
 /** @addtogroup MAIN_PROTOTYPES Extern Declarations
  * @{ */
@@ -71,7 +71,7 @@ extern void TD_USER_Loop(void);
  **************************   PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
-/** @addtogroup MAIN_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup MAIN_USER_FUNCTIONS User Functions
  * @{ */
 
 /***************************************************************************//**
@@ -88,7 +88,7 @@ extern void TD_USER_Loop(void);
  * @note
  *   If you use this main() function, you must provide 2 functions
  *   - TD_USER_Setup(), which will be called once at startup
- *   - TD_SUER_Loop(), which will be called after waking up by an event
+ *   - TD_SSER_Loop(), which will be called after waking up by an event
  *   If you provide your own main() function, it will take precedence over this
  *   one, which is completely possible. However, using the library main()
  *   function as a template for your implementation is recommended.

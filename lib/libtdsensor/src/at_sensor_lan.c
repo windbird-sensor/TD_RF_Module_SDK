@@ -2,7 +2,7 @@
  * @file at_sensor_lan.c
  * @brief AT Sensor LAN
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -32,9 +32,14 @@
  ******************************************************************************/
 
 #define USE_PRINTF
+
+#include <stdbool.h>
+#include <stdint.h>
+
 #include <at_parse.h>
-#include "sensor_config.h"
 #include <td_printf.h>
+
+#include "sensor_config.h"
 #include "td_sensor.h"
 #include "td_sensor_lan.h"
 #include "td_sensor_gateway.h"
@@ -112,8 +117,12 @@ static void sensor_lan_init(void)
  */
 static void sensor_lan_help(void)
 {
-	tfp_printf("--SENSOR LAN Commands--\r\n"
-
+	AT_printf(
+		"AT$LA? => LAN address\r\n"
+		"AT$LD= => Send LAN data\r\n"
+		"AT$LR= => Gateway registration\r\n"
+		"AT$LR => Device registration\r\n"
+		"AT$LZ => Sensor LAN Reset\r\n"
 	);
 }
 ;

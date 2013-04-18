@@ -2,7 +2,7 @@
  * @file sensor_data.c
  * @brief API for sending Data frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -33,10 +33,11 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+
 #include <td_utils.h>
+
 #include "sensor_send.h"
 #include "sensor_data.h"
-#include "sensor_event.h"
 #include "sensor_data_private.h"
 
 /***************************************************************************//**
@@ -101,7 +102,6 @@ static uint8_t data_stamp = -1;
  ******************************************************************************/
 static bool TD_SENSOR_SendData(SensorDataType data_type, uint8_t * data, uint8_t count)
 {
-
 	SRV_FRAME_DATA frame;
 	unsigned int i;
 	frame.type = data_type;
@@ -113,7 +113,6 @@ static bool TD_SENSOR_SendData(SensorDataType data_type, uint8_t * data, uint8_t
 	data_stamp = (data_stamp & 0x07) + 1;
 
 	return TD_SENSOR_Send(&data_profile, SRV_FRM_DATA, data_stamp, (uint8_t*) &frame, count + 1);
-
 }
 
 /** @} */
@@ -139,7 +138,6 @@ static bool TD_SENSOR_SendData(SensorDataType data_type, uint8_t * data, uint8_t
  *   True if the data has been sent (ie. the gateway has acknowledged the request)
  *   False if the ack from the gateway was never received.
  ******************************************************************************/
-
 bool TD_SENSOR_SetCellPhoneNumber(PhoneIndex index, uint8_t * phone_number)
 {
 	uint8_t count = 0;
@@ -179,7 +177,6 @@ bool TD_SENSOR_SetCellPhoneNumber(PhoneIndex index, uint8_t * phone_number)
  *	Interval between two repetitions in seconds
  *
  ******************************************************************************/
-
 void TD_SENSOR_SetDataTransmissionProfile(uint8_t repetition, uint32_t interval)
 {
 	data_profile.repetition = repetition;

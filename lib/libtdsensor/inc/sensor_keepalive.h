@@ -2,7 +2,7 @@
  * @file sensor_keepalive.h
  * @brief API for sending KeepAlive frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -38,9 +38,13 @@
 extern "C" {
 #endif
 
+/** @defgroup SENSOR_KEEPALIVE_USER_FUNCTIONS User Functions
+ *  @ingroup SENSOR_KEEPALIVE
+ *  @nosubgrouping
+ */
+
 /***************************************************************************//**
  * @addtogroup SENSOR_KEEPALIVE Sensor Keep-Alive
- *
  * @{
  ******************************************************************************/
 
@@ -52,9 +56,15 @@ extern "C" {
  * @{ */
 /** @addtogroup SENSOR_KEEPALIVE_PROTOTYPES Prototypes
  * @{ */
+
+/** @ingroup SENSOR_KEEPALIVE_USER_FUNCTIONS
+ * @{ */
+
 bool TD_SENSOR_SendKeepAlive();
 
 void TD_SENSOR_SetKeepAliveTransmissionProfile(uint8_t repetition,uint32_t interval);
+
+/** @} */
 
 /** @} */
 

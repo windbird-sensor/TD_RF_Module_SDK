@@ -2,7 +2,7 @@
  * @file
  * @brief Un Asynchronous Receiver/Transmitter (UART) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -62,7 +62,7 @@ typedef void    (*TD_UART_CALLBACK)(char);
  *************************   PROTOTYPES   **************************************
  ******************************************************************************/
 
-/** @addtogroup UART_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup UART_USER_FUNCTIONS User Functions
  * @{ */
 
 /***************************************************************************//**

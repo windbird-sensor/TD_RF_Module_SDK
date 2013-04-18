@@ -2,7 +2,7 @@
  * @file sensor_data.h
  * @brief API for sending Data frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -40,9 +40,13 @@
 extern "C" {
 #endif
 
+/** @defgroup SENSOR_DATA_USER_FUNCTIONS User Functions
+ *  @ingroup SENSOR_DATA
+ *  @nosubgrouping
+ */
+
 /***************************************************************************//**
  * @addtogroup SENSOR_DATA Sensor Data
- *
  * @{
  ******************************************************************************/
 
@@ -56,7 +60,10 @@ extern "C" {
 /** Data value index */
 typedef enum {
 
-	PHONE_1 = 0, PHONE_2 = 1, PHONE_3 = 2, PHONE_4 = 3
+	PHONE_1 = 0,
+	PHONE_2 = 1,
+	PHONE_3 = 2,
+	PHONE_4 = 3
 
 } PhoneIndex;
 
@@ -71,8 +78,13 @@ typedef enum {
 /** @addtogroup SENSOR_EVENT_PROTOTYPES Prototypes
  * @{ */
 
+/** @ingroup SENSOR_DATA_USER_FUNCTIONS
+ * @{ */
+
 bool TD_SENSOR_SetCellPhoneNumber(PhoneIndex index, uint8_t * phone_number);
 void TD_SENSOR_SetDataTransmissionProfile(uint8_t repetition, uint32_t interval);
+
+/** @} */
 
 /** @} */
 

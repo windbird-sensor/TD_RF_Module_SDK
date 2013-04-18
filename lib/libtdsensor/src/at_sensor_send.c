@@ -2,7 +2,7 @@
  * @file at_sensor_send.c
  * @brief AT Sensor Send
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -32,18 +32,24 @@
  ******************************************************************************/
 
 #define USE_PRINTF
+#include <stdint.h>
+#include <stdbool.h>
+
 #include <at_parse.h>
 #include <td_printf.h>
+
+#include "sensor_config.h"
 #include "sensor_data.h"
 #include "sensor_service.h"
 #include "sensor_register.h"
 #include "sensor_keepalive.h"
 #include "sensor_event.h"
-#include "sensor_config.h"
-#include "td_sensor.h"
 #include "sensor_raw.h"
+
+#include "td_sensor.h"
 #include "td_measure.h"
 #include "td_sensor_device.h"
+
 #include "at_sensor_send.h"
 
 /** RAW data buffer */
@@ -109,9 +115,6 @@ static AT_command_t const sensor_send_commands[] = {
 		{ "AT$ET=", AT_SENSOR_TEMP },
 		{ "AT$EV=", AT_SENSOR_BATTERY },
 
-		//GEOLOC
-		{ "AT$GL", AT_SENSOR_GETGEOLOC },
-
 		//KEEPALIVE
 		{ "AT$KA", AT_SENSOR_KEEPALIVE },
 
@@ -148,8 +151,19 @@ static void sensor_send_init(void) {
  * @brief Manufacturing test AT help
  */
 static void sensor_send_help(void) {
-	tfp_printf("--SENSOR SEND Commands--\r\n"
-
+	AT_printf(
+		"AT$DP= => Data phone\r\n"
+		"AT$EB => Boot event\r\n"
+		"AT$EC= => Connection event\r\n"
+		"AT$ER= => RSSI event\r\n"
+		"AT$ES= => Switch event\r\n"
+		"AT$ET= => Temperature event\r\n"
+		"AT$EV= => Battery event\r\n"
+		"AT$KA => Keep-Alive\r\n"
+		"AT$SSMS= => Service SMS\r\n"
+		"AT$STWT= => Service Tweet\r\n"
+		"AT$STWT= => Raw frame\r\n"
+		"AT$REG => Register frame\r\n"
 	);
 }
 ;
@@ -215,14 +229,14 @@ static int8_t sensor_send_parse(uint8_t token) {
 	case AT_SENSOR_CONNECTION:
 		if (AT_argc == 2) {
 
-			if (AT_atoll(AT_argv[0]) >= 1 && AT_atoll(AT_argv[0]) <= 15
-					&& (AT_argv[1][0] == '0' || AT_argv[1][0] == '1')) {
-				if (AT_argv[1][0] == '0') {
-					if (!TD_SENSOR_SendEventConnection(false, AT_atoll(AT_argv[0]))) {
+			if (AT_atoll(AT_argv[1]) >= 1 && AT_atoll(AT_argv[1]) <= 15
+					&& (AT_argv[0][0] == '0' || AT_argv[0][0] == '1')) {
+				if (AT_argv[0][0] == '0') {
+					if (!TD_SENSOR_SendEventConnection(false, AT_atoll(AT_argv[1]))) {
 						result = AT_ERROR;
 					}
-				} else if (AT_argv[1][0] == '1') {
-					if (!TD_SENSOR_SendEventConnection(true, AT_atoll(AT_argv[0]))) {
+				} else if (AT_argv[0][0] == '1') {
+					if (!TD_SENSOR_SendEventConnection(true, AT_atoll(AT_argv[1]))) {
 						result = AT_ERROR;
 					}
 				}

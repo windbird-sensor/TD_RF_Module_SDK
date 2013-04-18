@@ -2,7 +2,7 @@
  * @file td_sensor_gateway.h
  * @brief Sensor Gateway
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -37,6 +37,12 @@
 #include "td_lan.h"
 #include "sensor_send_private.h"
 
+
+/** @defgroup TD_SENSOR_GATEWAY_USER_FUNCTIONS User Functions
+ *  @ingroup TD_SENSOR_GATEWAY
+ *  @nosubgrouping
+ */
+
 /***************************************************************************//**
  * @addtogroup TD_SENSOR_GATEWAY Sensor LAN Gateway
  * @brief
@@ -53,11 +59,13 @@
 /** @addtogroup TD_SENSOR_GATEWAY_PROTOTYPES Prototypes
  * @{ */
 
-bool TD_SENSOR_GATEWAY_SendSigfox(SensorFrame * frame, uint8_t count,
-		TransmitProfile * profile);
+void TD_SENSOR_GATEWAY_Init();
+bool TD_SENSOR_GATEWAY_SendSigfox(SensorFrame * frame, uint8_t count,TransmitProfile * profile);
 
-void TD_SENSOR_GATEWAY_StartRegistration(
-		void (*callback)(uint32_t lan_address, uint32_t sigfox_id));
+/** @ingroup TD_SENSOR_GATEWAY_USER_FUNCTIONS
+ * @{ */
+
+void TD_SENSOR_GATEWAY_StartRegistration(void (*callback)(uint32_t lan_address, uint32_t sigfox_id));
 void TD_SENSOR_GATEWAY_StopRegistration();
 
 void TD_SENSOR_GATEWAY_StartReception();
@@ -66,7 +74,8 @@ void TD_SENSOR_GATEWAY_StopReception();
 void TD_SENSOR_GATEWAY_DeleteAllDevices();
 void TD_SENSOR_GATEWAY_DeleteDevice(uint32_t lan_address);
 
-void TD_SENSOR_GATEWAY_Init();
+/** @} */
+
 
 /** @} */
 

@@ -2,7 +2,7 @@
  * @file
  * @brief Temperature/Supply Voltage measure API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -47,7 +47,13 @@
  * @{
  ******************************************************************************/
 
+/** @addtogroup MEASURE_PRIVATE_VARIABLES Private Variables
+ * @{ */
+
+/** Battery level callback function */
 static void (*battery_callback)(void) = 0;
+
+/** @} */
 
 /*******************************************************************************
  **************************  PRIVATE FUNCTIONS   *******************************
@@ -118,23 +124,19 @@ static int32_t convertToCelsiusThenth(int32_t adc_result)
  **************************   PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
-/*******************************************************************************
- **************************   PUBLIC FUNCTIONS   *******************************
- ******************************************************************************/
-
-/** @addtogroup MEASURE_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup MEASURE_USER_FUNCTIONS User Functions
  * @{ */
 
 /***************************************************************************//**
  * @brief
- *   Measure Power Supply voltage or the temperature.
+ *   Accurately measure the Power Supply voltage or the temperature.
  *
  * @param[in] mode
  *   If true, measure the temperature, if false, measure the power supply voltage.
  *
  * @return
- *   The measured temperature is in 1/10 degrees Celsius, the power supply voltage
- *   is in mV.
+ *   The measured temperature is given in 1/10 degrees Celsius, the power supply
+ *    voltage is given in mV.
  ******************************************************************************/
 int32_t TD_MEASURE_VoltageTemperatureExtended(bool mode)
 {
@@ -177,7 +179,7 @@ int32_t TD_MEASURE_VoltageTemperatureExtended(bool mode)
 
 /***************************************************************************//**
  * @brief
- *   Measure Power Supply voltage or the temperature.
+ *   Measure the Power Supply voltage or the temperature.
  *
  * @param[in] mode
  *   If true, measure the temperature, if false, measure the power supply voltage.
@@ -191,8 +193,8 @@ int32_t TD_MEASURE_VoltageTemperatureExtended(bool mode)
  *   values directly in mV.
  *
  * @return
- *   The measured temperature in degrees Celsius, or the power supply voltage
- *   in 10s of mV plus 2 V if MSB is 0, plus 3 V if MSB is 1.
+ *   The measured temperature is given in degrees Celsius, and the power supply
+ *    voltage in 1/10s of mV plus 2 V if MSB is 0, or plus 3 V if MSB is 1.
  ******************************************************************************/
 uint8_t TD_MEASURE_VoltageTemperature(bool mode)
 {
@@ -224,7 +226,7 @@ uint8_t TD_MEASURE_VoltageTemperature(bool mode)
 
 /***************************************************************************//**
  * @brief
- *   Disable battery level monitoring
+ *   Disable the battery level monitoring.
  ******************************************************************************/
 void TD_MEASURE_DisableBatteryLevelMonitoring()
 {
@@ -241,17 +243,17 @@ void TD_MEASURE_DisableBatteryLevelMonitoring()
 
 /***************************************************************************//**
  * @brief
- *   Enable battery level monitoring
+ *   Enable battery level monitoring.
  *
  * @param[in] falling
  *  If true then the IRQ is triggered when battery level falls below level_mv.
  *  If false then the IRQ is triggered when battery level rise above level_mv.
  *
  * @param[in] level_mv
- *  Battery level to monitor in millivolts
+ *  Battery level to monitor in millivolts.
  *
  * @param[in] callback
- *  Pointer to the function to be called when the IRQ is triggered
+ *  Pointer to the function to be called when the IRQ is triggered.
  ******************************************************************************/
 void TD_MEASURE_EnableBatteryLevelMonitoring(bool falling, uint16_t level_mv, void (*callback)(void))
 {
@@ -279,7 +281,7 @@ void TD_MEASURE_EnableBatteryLevelMonitoring(bool falling, uint16_t level_mv, vo
 
 /***************************************************************************//**
  * @brief
- *   VCMP IRQ handler for battery monitoring
+ *   VCMP IRQ handler for battery monitoring.
  ******************************************************************************/
 void VCMP_IRQHandler(void)
 {

@@ -2,7 +2,7 @@
  * @file
  * @brief Un Asynchronous Receiver/Transmitter (UART) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -42,7 +42,7 @@
 
 /***************************************************************************//**
  * @addtogroup UART
- * @brief Un Asynchronous Receiver/Transmitter (UART) peripheral API for the TD1202 module
+ * @brief Asynchronous Receiver/Transmitter (UART) peripheral API for the TD1202 module
  * @{
  ******************************************************************************/
 
@@ -62,7 +62,7 @@
  **************************   PUBLIC VARIABLES   *******************************
  ******************************************************************************/
 
-/** @addtogroup UART_PUBLIC_VARIABLES Public Variables
+/** @addtogroup UART_USER_VARIABLES User Variables
  * @{ */
 
 /** UART receive callback function pointer */
@@ -77,16 +77,16 @@ volatile TD_UART_CALLBACK TD_UART_RxCallback = 0;
 /** @addtogroup UART_PRIVATE_VARIABLES Private Variables
  * @{ */
 
-/** share Flag for UART port with other GPIO function */
+/** Flag for sharing the UART port with other GPIO functions */
 static bool PortShared = false;
 
-/** Enable flag for UART */
+/** UART enable flag */
 static LEUART_Enable_TypeDef PortEnable = leuartDisable;
 
-/** UART Receive FIFO read index */
+/** UART receive FIFO read index */
 static int RxReadIndex = 0;
 
-/** UART Receive FIFO write index */
+/** UART receive FIFO write index */
 static int RxWriteIndex = 0;
 
 /** UART FIFO buffer */
@@ -98,7 +98,7 @@ static char RxBuffer[TD_UART_RXBUFSIZE];
  **************************   PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
-/** @addtogroup UART_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup UART_USER_FUNCTIONS User Functions
  * @{ */
 
 /***************************************************************************//**
@@ -109,7 +109,7 @@ static char RxBuffer[TD_UART_RXBUFSIZE];
  *   The baudrate in bps.
  *
  * @param[in] rxEnable
- *   Enable flag.
+ *   Enable receive flag.
  *
  * @param[in] shared
  *   Flag for sharing the UART port with alternative GPIO functions.
@@ -287,7 +287,7 @@ int TD_UART_AvailableChars(void)
 
 /***************************************************************************//**
  * @brief
- *   Flush the RX buffer
+ *   Flush the UART RX buffer.
  ******************************************************************************/
 void TD_UART_Flush(void)
 {
@@ -342,7 +342,7 @@ void LEUART0_IRQHandler(void)
 
     if (TD_UART_RxCallback != 0) {
 
-        // rx callback supplied
+        // RX callback supplied
     	(*TD_UART_RxCallback)(data);
     }
 

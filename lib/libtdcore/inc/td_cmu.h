@@ -2,7 +2,7 @@
  * @file
  * @brief CMU (Clock Management Unit) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -48,7 +48,7 @@ extern "C" {
  *****************************   PROTOTYPES   **********************************
  ******************************************************************************/
 
-/** @addtogroup CMU_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup CMU_USER_FUNCTIONS User Functions
  * @{ */
 /** @addtogroup CMU_PROTOTYPES Prototypes
  * @{ */

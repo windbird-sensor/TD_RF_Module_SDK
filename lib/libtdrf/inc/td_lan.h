@@ -163,28 +163,36 @@ typedef int (*TD_LAN_callback_t)(TD_LAN_frame_t *tx_frame, TD_LAN_frame_t *rx_fr
  *************************   PROTOTYPES   **************************************
  ******************************************************************************/
 
-/** @addtogroup LAN_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup LAN_USER_FUNCTIONS User Functions
  * @{ */
-/** @addtogroup LAN_PROTOTYPES Prototypes
+/** @addtogroup LAN_USER_PROTOTYPES Prototypes
  * @{ */
 
 bool TD_LAN_Init(bool init, uint32_t address, uint32_t mask);
 bool TD_LAN_Release(void);
-bool TD_LAN_Start(TD_LAN_mode_t transfer_mode, uint32_t count, TD_LAN_frame_t *tx_frame, TD_LAN_frame_t *rx_frame);
-void TD_LAN_Restart(void);
-void TD_LAN_Stop(TD_LAN_result_t result);
-void TD_LAN_Abort(void);
-void TD_LAN_Task(void);
 bool TD_LAN_Process(void);
-void TD_LAN_Abort(void);
 void TD_LAN_SetUserCallback(TD_LAN_callback_t callback);
 uint32_t TD_LAN_ComputeAddress(uint32_t id);
 bool TD_LAN_SendReceive(int count, uint8_t retries, TD_LAN_frame_t *tx_frame, TD_LAN_frame_t *rx_frame);
 bool TD_LAN_SendFrame(int32_t txcount, TD_LAN_frame_t *tx_frame, TD_LAN_frame_t *rx_frame);
 bool TD_LAN_ReceiveFrame(uint32_t rx_period, uint32_t limit, TD_LAN_frame_t *rx_frame);
 bool TD_LAN_ReceiveFrameSync(TD_LAN_frame_t *rx_frame);
-bool TD_LAN_SetFrequencyLevel(uint32_t frequency, int16_t level);
 int TD_LAN_ReadLatchedRSSI(void);
+
+/** @} */
+/** @} */
+
+/** @addtogroup LAN_PUBLIC_FUNCTIONS Public Functions
+ * @{ */
+/** @addtogroup LAN_PUBLIC_PROTOTYPES Prototypes
+ * @{ */
+
+bool TD_LAN_Start(TD_LAN_mode_t transfer_mode, uint32_t count, TD_LAN_frame_t *tx_frame, TD_LAN_frame_t *rx_frame);
+void TD_LAN_Restart(void);
+void TD_LAN_Stop(TD_LAN_result_t result);
+void TD_LAN_Abort(void);
+void TD_LAN_Task(void);
+bool TD_LAN_SetFrequencyLevel(uint32_t frequency, int16_t level);
 
 /** @} */
 /** @} */

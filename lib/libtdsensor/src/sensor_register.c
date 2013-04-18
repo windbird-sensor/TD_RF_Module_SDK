@@ -2,7 +2,7 @@
  * @file sensor_register.c
  * @brief API for sending Register frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -33,9 +33,10 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
+#include "sensor_config.h"
 #include "td_sensor.h"
 #include "sensor_send.h"
-#include "sensor_config.h"
 #include "sensor_register.h"
 #include "sensor_register_private.h"
 
@@ -43,8 +44,7 @@
  * @addtogroup SENSOR_REGISTER Sensor Register
  * @brief Sensor API for sending a Register Frame
  *
- *	The Register frame must be sent to register a new device on Sensor.
- *
+ * The Register frame must be sent to register a new device on Sensor.
  * @{
  ******************************************************************************/
 
@@ -54,9 +54,10 @@
 #define REGISTER_DEFAULT_REPETITON 3	///<Default retransmission repetitions
 #define REGISTER_DEFAULT_INTERVAL 120	///<Default retransmission interval in seconds
 #define REGISTER_PAYLOAD_SIZE 7
+
 /** @} */
 
-extern uint32_t SigfoxID;
+
 
 /*******************************************************************************
  ************************   PRIVATE VARIABLES   ********************************
@@ -68,6 +69,7 @@ extern uint32_t SigfoxID;
 static TransmitProfile register_profile = { REGISTER_DEFAULT_REPETITON, REGISTER_DEFAULT_INTERVAL };
 
 /** @} */
+
 
 /*******************************************************************************
  **************************  PUBLIC FUNCTIONS   *******************************
@@ -86,12 +88,13 @@ static TransmitProfile register_profile = { REGISTER_DEFAULT_REPETITON, REGISTER
  * @return
  *   True if the data has been sent over the Sigfox Network
  ******************************************************************************/
-
 bool TD_SENSOR_SendRegister()
 {
 	SRV_FRAME_REGISTER frame;
 	ModuleConfiguration * config;
+	uint32_t sigfox_id;
 
+	sigfox_id = TD_SENSOR_GetSigfoxID();
 	config = TD_SENSOR_GetModuleConfiguration();
 
 	frame.release = RELEASE & 0x07;
@@ -100,10 +103,10 @@ bool TD_SENSOR_SendRegister()
 	frame.device_class_byte1 = config->class >> 8;
 	frame.device_class_byte2 = config->class & 0xFF;
 
-	frame.sigfox_id_byte1 = SigfoxID >> 24;
-	frame.sigfox_id_byte2 = (SigfoxID >> 16) & 0xFF;
-	frame.sigfox_id_byte3 = (SigfoxID >> 8) & 0xFF;
-	frame.sigfox_id_byte4 = SigfoxID & 0xFF;
+	frame.sigfox_id_byte1 = sigfox_id >> 24;
+	frame.sigfox_id_byte2 = (sigfox_id >> 16) & 0xFF;
+	frame.sigfox_id_byte3 = (sigfox_id >> 8) & 0xFF;
+	frame.sigfox_id_byte4 = sigfox_id & 0xFF;
 
 	return TD_SENSOR_Send(&register_profile, SRV_FRM_REGISTER, 0, (uint8_t *) &frame, REGISTER_PAYLOAD_SIZE);
 }
@@ -119,7 +122,6 @@ bool TD_SENSOR_SendRegister()
  *	Interval between two repetitions in seconds
  *
  ******************************************************************************/
-
 void TD_SENSOR_SetRegisterTransmissionProfile(uint8_t repetition, uint32_t interval)
 {
 	register_profile.repetition = repetition;

@@ -2,7 +2,7 @@
  * @file sensor_service.c
  * @brief API for sending Service frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -63,6 +63,7 @@
 
 #define SERVICE_DEFAULT_REPETITON 3		///<Default retransmission repetitions
 #define SERVICE_DEFAULT_INTERVAL 120	///<Default retransmission interval in seconds
+
 /** @} */
 
 /*******************************************************************************
@@ -101,10 +102,8 @@ static uint8_t service_stamp = -1;
  *   True if the data has been sent (ie. the gateway has acknowledged the request)
  *   False if count>Data size or if the ack from the gateway was never received.
  ******************************************************************************/
-
 static bool TD_SENSOR_SendService(SensorServiceType service, uint8_t * data, uint8_t count)
 {
-
 	unsigned int i;
 	SRV_FRAME_SERVICE frame;
 
@@ -144,7 +143,6 @@ static bool TD_SENSOR_SendService(SensorServiceType service, uint8_t * data, uin
  *   True if the data has been sent (ie. the gateway has acknowledged the request)
  *   False if the ack from the gateway was never received.
  ******************************************************************************/
-
 bool TD_SENSOR_SendSMS(uint8_t * SMS)
 {
 	uint8_t count = 0;
@@ -170,7 +168,6 @@ bool TD_SENSOR_SendSMS(uint8_t * SMS)
  *   True if the data has been sent (ie. the gateway has acknowledged the request)
  *   False if the ack from the gateway was never received.
  ******************************************************************************/
-
 bool TD_SENSOR_SendTweet(uint8_t * Tweet)
 {
 	uint8_t count = 0;
@@ -197,7 +194,6 @@ bool TD_SENSOR_SendTweet(uint8_t * Tweet)
  *	Interval between two repetitions in seconds.
  *
  ******************************************************************************/
-
 void TD_SENSOR_SetServiceTransmissionProfile(uint8_t repetition, uint32_t interval)
 {
 	service_profile.repetition = repetition;

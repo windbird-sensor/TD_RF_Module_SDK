@@ -2,7 +2,7 @@
  * @file sensor_send_private.h
  * @brief Sensor Send Private
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -39,12 +39,11 @@
 
 /***************************************************************************//**
  * @addtogroup SENSOR_SEND Sensor Send
- *
- *  * @{
+ * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup SENSOR_SEND_TYPEDEFS Sensor Protocol Typedefs
+ * @addtogroup SENSOR_SEND_TYPEDEFS Typedefs
  * @{ */
 
 //packed is little endian so everything needs to be reversed!

@@ -1,8 +1,8 @@
 /***************************************************************************//**
  * @file sensor_data_private.h
- * @brief Service Data Private
+ * @brief Data Frame Private
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -38,8 +38,7 @@
 
 /***************************************************************************//**
  * @addtogroup SENSOR_DATA Sensor Data
- *
- *  * @{
+ * @{
  ******************************************************************************/
 
 /*******************************************************************************
@@ -52,8 +51,7 @@
 /** Data Types*/
 typedef enum {
 
-	DATA_PHONE,
-//DATA_TWITTER
+	DATA_PHONE
 
 } SensorDataType;
 

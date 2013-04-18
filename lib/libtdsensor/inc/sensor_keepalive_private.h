@@ -1,6 +1,6 @@
 /***************************************************************************//**
- * @file sensor_config.h
- * @brief Sensor Configuration
+ * @file sensor_keepalive_private.h
+ * @brief KeepAlive Frame Private
  * @author Telecom Design S.A.
  * @version 1.1.0
  ******************************************************************************
@@ -30,29 +30,31 @@
  * arising from your use of this Software.
  *
  ******************************************************************************/
+#ifndef SENSOR_KEEPALIVE_PRIVATE_H_
+#define SENSOR_KEEPALIVE_PRIVATE_H_
 
-#ifndef SENSOR_CONFIG_H_
-#define SENSOR_CONFIG_H_
+#include "sensor_private.h"
 
-#define DEFAULT_DEVICE_CLASS 0x0000
-#define RELEASE 2
-#define SUB_RELEASE 2
+/***************************************************************************//**
+ * @addtogroup SENSOR_KEEPALIVE Sensor Keep-Alive
+ * @{
+ ******************************************************************************/
+
+/***************************************************************************//**
+ * @addtogroup SENSOR_KEEPALIVE_TYPEDEFS Sensor Keep-Alive Typedefs
+ * @{ */
 
 
-#ifdef EFM32TG210F32
-#define MAX_DEVICE 3
-#define MAX_RETRANSMISSION 12
-#define MAX_TRANSMISSION_QUEUE 3
-#define SENSOR_MAX_SWITCH 3
-#define MAX_SENSOR_EVENT 5
-#define MAX_NACKED_SENSOR_EVENT 10
-#else
-#define MAX_DEVICE 16
-#define MAX_RETRANSMISSION 100
-#define MAX_TRANSMISSION_QUEUE 20
-#define SENSOR_MAX_SWITCH 8
-#define MAX_SENSOR_EVENT 20
-#define MAX_NACKED_SENSOR_EVENT 30
-#endif
+/**Keep-Alive Frame Structure*/
+typedef struct {
+	uint8_t voltage;
+	int8_t temperature;
+	uint8_t interval;
 
-#endif /* SENSOR_CONFIG_H_ */
+}__PACKED SRV_FRAME_KEEPALIVE;
+
+/** @} */
+
+/** @} (end addtogroup SENSOR_KEEPALIVE) */
+
+#endif /* SENSOR_KEEPALIVE_PRIVATE_H_ */

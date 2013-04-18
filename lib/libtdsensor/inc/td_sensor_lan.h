@@ -2,7 +2,7 @@
  * @file td_sensor_lan.h
  * @brief Sensor LAN
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -40,6 +40,13 @@
 #include "sensor_private.h"
 #include "sensor_send.h"
 
+/** @defgroup TD_SENSOR_LAN_USER_FUNCTIONS User Functions
+ *  @ingroup TD_SENSOR_LAN
+ *  @nosubgrouping
+ */
+
+
+
 /***************************************************************************//**
  * @addtogroup TD_SENSOR_LAN Sensor LAN
  *
@@ -53,14 +60,17 @@
 /** @addtogroup TD_SENSORLAN_DEFINES Defines
  * @{ */
 
-#define TD_SENSOR_LAN_PAYLOAD_SIZE TD_LAN_PAYLOAD_SIZE-1
-
 #define BROADCAST_ADDRESS 0x000000
 #define BROADCAST_MASK 0xFFFFFF
 #define NETWORK_MASK 0xFFFF00
+
+
+#define TD_SENSOR_LAN_PAYLOAD_SIZE TD_LAN_PAYLOAD_SIZE-1
+
 /** @} */
 
-/** @cond TD_PRIVATE */
+
+
 
 /*******************************************************************************
  **************************  TYPEDEFS   ****************************************
@@ -70,7 +80,10 @@
  * @{ */
 
 typedef enum {
-	LOCAL_REGISTER = 1, LOCAL_FORWARD = 2, LOCAL_KEEPALIVE = 3, LOCAL_DATA = 4
+	LOCAL_REGISTER = 1,
+	LOCAL_FORWARD = 2,
+	LOCAL_KEEPALIVE = 3,
+	LOCAL_DATA = 4
 
 } LocalFrameType;
 
@@ -119,6 +132,8 @@ typedef struct {
 
 /** @} */
 
+
+
 /*******************************************************************************
  *************************   PROTOTYPES   **************************************
  ******************************************************************************/
@@ -128,15 +143,21 @@ typedef struct {
 /** @addtogroup TD_SENSOR_LAN_PROTOTYPES Prototypes
  * @{ */
 
+
 bool TD_SENSOR_LAN_Init(bool gateway, uint32_t lan_frequency, int16_t lan_power_level);
 AckCode TD_SENSOR_LAN_SendFrame(LocalFrameType type, uint8_t * payload,	uint8_t count, uint8_t * data_rx);
-LanAddress * TD_SENSOR_LAN_GetAddress();
 bool TD_SENSOR_LAN_setLanAddress(uint32_t adress, uint32_t mask);
 
+/** @ingroup TD_SENSOR_LAN_USER_FUNCTIONS
+ * @{ */
+
+LanAddress * TD_SENSOR_LAN_GetAddress();
+
+/** @} */
 /** @} */
 /** @} */
 
-/** @endcond */
+
 
 /** @} (end addtogroup TD_SENSOR_LAN) */
 

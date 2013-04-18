@@ -2,7 +2,7 @@
  * @file sensor_send.h
  * @brief Service Send
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -78,8 +78,7 @@ typedef struct {
 /** @addtogroup SENSOR_SEND_PROTOTYPES Prototypes
  * @{ */
 
-bool TD_SENSOR_Send(TransmitProfile * profile, SensorFrameType frame_type,
-		uint8_t stamp, uint8_t * payload, uint8_t count);
+bool TD_SENSOR_Send(TransmitProfile * profile, SensorFrameType frame_type, uint8_t stamp, uint8_t * payload, uint8_t count);
 /** @} */
 
 /** @} */

@@ -2,7 +2,7 @@
  * @file sensor_send.c
  * @brief API for sending frames to Sensor
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -32,13 +32,9 @@
  ******************************************************************************/
 
 #include <stdbool.h>
-#include "td_lan.h"
-#include "td_sigfox.h"
-#include "td_printf.h"
-#include "sensor_config.h"
+
 #include "td_sensor.h"
 #include "td_sensor_device.h"
-#include "td_sensor_gateway.h"
 #include "td_sensor_transmitter.h"
 #include "sensor_send_private.h"
 #include "sensor_send.h"
@@ -83,9 +79,6 @@
  *
  *		Allows to trigger a service like sending an SMS or a Tweet. Remember that to send a SMS or a Rweet you must previously register
  *		a phone number or a twitter account by sending the corresponding SRV_FRM_DATA frame or by using Sensor Web Interface.
- *
- *
- *
  * @{
  ******************************************************************************/
 
@@ -93,10 +86,8 @@
  **************************  PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
-/** @addtogroup SENSOR_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup SENSOR_SEND_PUBLIC_FUNCTIONS Public Functions
  * @{ */
-
-/** @cond TD_PRIVATE */
 
 /***************************************************************************//**
  * @brief
@@ -121,7 +112,6 @@
  * @return
  *  True if the data has been sent over the Sigfox Network
  ******************************************************************************/
-
 bool TD_SENSOR_Send(TransmitProfile * profile, SensorFrameType frame_type, uint8_t stamp, uint8_t * payload, uint8_t count)
 {
 	SensorFrame frame;
@@ -153,8 +143,6 @@ bool TD_SENSOR_Send(TransmitProfile * profile, SensorFrameType frame_type, uint8
 		}
 	}
 }
-
-/** @endcond */
 
 /** @} */
 

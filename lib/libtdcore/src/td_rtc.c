@@ -2,7 +2,7 @@
  * @file
  * @brief Real-Time Clock (RTC) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -65,7 +65,7 @@
 #define TD_RTC_OVERFLOWED ((0x00FFFFFF + 1) % TD_RTC_TICKS_PER_SECOND)
 
 
-/** Use keepalive */
+/** Use keepalive flag */
 #define TD1202_KEEPALIVE
 
 /** @} */
@@ -74,7 +74,7 @@
  **************************   PUBLIC VARIABLES   *******************************
  ******************************************************************************/
 
-/** @addtogroup RTC_PUBLIC_VARIABLES Public Variables
+/** @addtogroup RTC_USER_VARIABLES User Variables
  * @{ */
 
 /** End of delay flag */
@@ -97,7 +97,7 @@ volatile bool TD_RTC_Overflow = false;
 /** @addtogroup RTC_PRIVATE_VARIABLES Private Variables
  * @{ */
 
-/** RTC initialization structure */
+/** RTC peripheral initialization structure */
 static RTC_Init_TypeDef RTCInit = {
 	.debugRun = false,
 	.comp0Top = false,
@@ -116,9 +116,10 @@ static TD_RTC_handler_t TD_RTC_UserHandler  = 0;
 /** The overflow RTC interrupt handler */
 static TD_RTC_handler_t TD_RTC_OverflowHandler  = 0;
 
+/** RTC overflow counter */
+static uint32_t TD_RTC_OverflowCounter = 0;
 
-static uint32_t rtcOverflowCounter = 0;
-static int   rtcOffsetTime = 0;
+static int   TD_RTC_OffsetTime = 0;
 
 #ifdef TD1202_KEEPALIVE
 /** The user keep-alive interrupt handler */
@@ -161,7 +162,7 @@ static void TD_RTC_DelayHandler(void)
  **************************   PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
-/** @addtogroup RTC_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup RTC_USER_FUNCTIONS User Functions
  * @{ */
 
 /***************************************************************************//**
@@ -201,7 +202,7 @@ void RTC_IRQHandler(void)
     }
 
     if (RTC->IF & RTC_IF_OF) {
-    	rtcOverflowCounter++;
+    	TD_RTC_OverflowCounter++;
 
     	// Overflow interrupt
     	RTC_IntClear(RTC_IF_OF);
@@ -455,7 +456,7 @@ uint32_t TD_RTC_TimeDiff(uint32_t reference)
  ******************************************************************************/
 void TD_RTC_SetOffsetTime(int delta)
 {
-	rtcOffsetTime = delta;
+	TD_RTC_OffsetTime = delta;
 }
 
 /***************************************************************************//**
@@ -466,7 +467,7 @@ void TD_RTC_SetOffsetTime(int delta)
  ******************************************************************************/
 uint32_t TD_RTC_GetOverflowCounter(void)
 {
-	return rtcOverflowCounter;
+	return TD_RTC_OverflowCounter;
 }
 
 /***************************************************************************//**
@@ -517,16 +518,16 @@ time_t __time32(time_t *timer)
 	time_t t;
 
 	// Add time based on number of counter overflows
-	t = rtcOverflowCounter * TD_RTC_OVERFLOW_PERIOD;
+	t = TD_RTC_OverflowCounter * TD_RTC_OVERFLOW_PERIOD;
 
 	// Correct if overflow interval is not an integer
 	if (TD_RTC_OVERFLOWED != 0) {
-		t += rtcOverflowCounter * TD_RTC_OVERFLOWED / TD_RTC_TICKS_PER_SECOND;
+		t += TD_RTC_OverflowCounter * TD_RTC_OVERFLOWED / TD_RTC_TICKS_PER_SECOND;
 	}
 
 	// Add the number of seconds for RTC
 	t += RTC->CNT / TD_RTC_TICKS_PER_SECOND;
-	t += rtcOffsetTime;
+	t += TD_RTC_OffsetTime;
 
 	// Copy system time to timer if not NULL
 	if (!timer) {

@@ -2,7 +2,7 @@
  * @file
  * @brief Scheduler API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -47,7 +47,7 @@
  *************************   PROTOTYPES   **************************************
  ******************************************************************************/
 
-/** @addtogroup SCHEDULER_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup SCHEDULER_USER_FUNCTIONS User Functions
  * @{ */
 
 /** @addtogroup SCHEDULER_PROTOTYPES Prototypes

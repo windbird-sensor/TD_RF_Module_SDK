@@ -19,7 +19,6 @@
 #include <td_core.h>
 #include <td_rtc.h>
 #include <td_uart.h>
-
 #include <td_printf.h>
 #include <at_parse.h>
 #if AT_MFG_TEST

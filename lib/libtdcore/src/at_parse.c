@@ -2,7 +2,7 @@
  * @file
  * @brief AT parser API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -50,7 +50,7 @@
  *   compatible command parser. Originally established by Hayes for its
  *   SmartModem 300 modem in 1981, this command set has  been further extended by
  *   other manufacturers and standardized by the ITU-T as "Recommendation V.250"
- *   and the 3GPP Consortium as " ETSI GSM 07.07 (3GPP TS 27.007)".
+ *   and the 3GPP Consortium as "ETSI GSM 07.07 (3GPP TS 27.007)".
  *
  *   # Implementation
  *
@@ -87,7 +87,7 @@
 /** @addtogroup AT_DEFINES Defines
  * @{ */
 
-/** Maximum AT extension number */
+/** Maximum number of AT extensions */
 #define AT_EXTENSION_NUMBER 8
 
 #ifndef AT_FORCE_BANNER
@@ -155,7 +155,7 @@ static char const AT_help[]= {
  *************************   PUBLIC VARIABLES   ********************************
  ******************************************************************************/
 
-/** @addtogroup AT_PUBLIC_VARIABLES Public Variables
+/** @addtogroup AT_USER_VARIABLES User Variables
  * @{ */
 
 /** AT parser extensions */
@@ -164,37 +164,37 @@ AT_extension_t *AT_extension[AT_EXTENSION_NUMBER] = {0};
 /** AT command buffer */
 char AT_buffer[AT_BUFFER_SIZE] = "";
 
-/** AT previous command */
+/** Previous AT command */
 char AT_previousCommand[AT_BUFFER_SIZE] = "";
 
 /** AT command argument array */
 char *AT_argv[AT_MAX_ARGS];
 
-/** AT number of arguments */
+/** Number of AT command arguments */
 int AT_argc = 0;
 
-/** AT last character pointer */
+/** Pointer to last character in AT command buffer */
 char *AT_last = &AT_buffer[0];
 
-/** AT persist buffer size */
+/** AT persist buffer */
 uint8_t AT_persist_buffer[AT_PERSIST_SIZE];
 
 /** AT parser state */
 AT_states AT_state = AT_A;
 
-/** AT verbosity flag */
+/** AT parser verbosity flag */
 bool AT_verbose = true;
 
-/** AT extended command result flag (print baudrate in connect string) */
+/** AT parser extended command result flag (print baudrate in connect string) */
 bool AT_extended = true;
 
-/** AT command echo flag */
+/** AT parser command echo flag */
 bool AT_echo = true;
 
-/** AT quiet result flag */
+/** AT parser quiet result flag */
 bool AT_quietResult = false;
 
-/** AT reboot banner display flag */
+/** AT parser reboot banner display flag */
 bool AT_banner = AT_FORCE_BANNER ? true : false;
 
 /** @} */
@@ -210,7 +210,7 @@ bool AT_banner = AT_FORCE_BANNER ? true : false;
  * @brief
  *   Save Persistent Buffer
  ******************************************************************************/
-static void AT_SavePersistBuffer()
+static void AT_SavePersistBuffer(void)
 {
 	int extension;
 	uint8_t persist_size = 1, extension_write, *persist_pointer;
@@ -249,18 +249,23 @@ static void AT_SavePersistBuffer()
  **************************   PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
-/** @addtogroup AT_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup AT_USER_FUNCTIONS User Functions
  * @{ */
 
 /***************************************************************************//**
  * @brief
  *   Tokenize a character for Hayes AT commands.
  *
+ * @details
+ *   This function implements the AT lexical analyzer by transforming the
+ *   received characters into recognized tokens.
+ *
  * @param[in] c
  *   The character to parse.
  *
- * @param[in] extension
- *   Pointer to the AT extension number.
+ * @param[out] extension
+ *   Pointer to the AT extension number that will be filled in with the
+ *   extension that implement the recognized token.
  *
  * @return
  *   Returns:
@@ -415,6 +420,12 @@ error:
  * @brief
  *   Output an AT string according to a format.
  *
+ * @note
+ *   This function pre-pend the required line termination depending on the AT
+ *   parser verbosity flag, and should be called for each new string output
+ *   sequence.
+ *   Each subsequent string output should then use tfp_printf().
+ *
  * @param[in] fmt
  *   Pointer to format string in printf format.
  *
@@ -435,7 +446,7 @@ void AT_printf(char *fmt, ...)
 
 /***************************************************************************//**
  * @brief
- *   Output the result of an AT command.
+ *   Output the #AT_results of an AT command.
  *
  * @param[in] result
  *   The AT_results_t result to output.
@@ -563,9 +574,6 @@ void AT_Init(void)
 				persist_size -= extension_read;
 			}
 		}
-	} else {
-		AT_SavePersistBuffer();
-		TD_FLASH_WriteVariables();
 	}
 
 	if (AT_verbose == true && AT_quietResult == false && AT_banner == true) {
@@ -576,6 +584,13 @@ void AT_Init(void)
 /***************************************************************************//**
  * @brief
  *   AT command parser.
+ *
+ * @details
+ *   This function is the main AT parser function to call when a new input
+ *   character is received from the main idle loop.
+ *
+ *   It will perform lexical analysis, argument collection and call the piece of
+ *   code in charge of handling the corresponding AT command.
  *
  * @param[in] c
  *   The new character to parse.

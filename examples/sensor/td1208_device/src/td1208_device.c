@@ -48,37 +48,37 @@
 #include <sensor_data.h>
 
 
-#define DEVICE_CLASS 0x0001 //define your own device class
+/*******************************************************************************
+ **************************   DEFINES   ****************************************
+ ******************************************************************************/
 
-static bool FirstBoot=0; //is the device already registered on sensor?
-static uint8_t led_timer=0xFF;
+/** LED port */
+#define LED_PORT TIM2_PORT
+
+/** LED bit */
+#define LED_BIT	TIM2_BIT
+
+/** Define your current variable version */
+#define VARIABLES_VERSION 0x1
+
+/** Define your own device class */
+#define DEVICE_CLASS 0x0001
+
+
+/*******************************************************************************
+ **************************   PRIVATE VARIABLES   ******************************
+ ******************************************************************************/
+
+/** LED timer id*/
+static uint8_t LedTimer=0xFF;
+
+/** Boot flash variable*/
+static bool FirstBoot=false;
+
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
  ******************************************************************************/
-
-
-/***************************************************************************//**
- * @brief
- *  Switch LED ON/OFF
- *
- * @param[in] state
- *  If true, switch ON the LED. If Flase switch it OFF.
- *
- ******************************************************************************/
-static void set_led(bool state)
-{
-	if(state)
-	{
-		//set LED on
-		GPIO_PinOutSet(TIM2_PORT, TIM2_BIT);
-	}
-	else
-	{
-		//set LED off
-		 GPIO_PinOutClear(TIM2_PORT, TIM2_BIT);
-	}
-}
 
 /***************************************************************************//**
  * @brief
@@ -90,8 +90,7 @@ static void set_led(bool state)
  ******************************************************************************/
 static void led_blink(uint32_t arg, uint8_t repetition)
 {
-	set_led((bool)(arg&0x1));
-	TD_SCHEDULER_SetArg(led_timer,!(arg&0x1));
+	GPIO_PinOutToggle(LED_PORT, LED_BIT);
 }
 
 
@@ -102,6 +101,8 @@ static void led_blink(uint32_t arg, uint8_t repetition)
  ******************************************************************************/
 void TD_USER_Setup(void)
 {
+	//Set variable version
+	TD_FLASH_SetVariablesVersion(VARIABLES_VERSION);
 
 	//Init serial interface
 	init_printf(TD_UART_Init(9600, true, false),
@@ -122,7 +123,7 @@ void TD_USER_Setup(void)
 		TD_SENSOR_SetDeviceClass(DEVICE_CLASS);
 
 		//Register on the Gateway
-		while(TD_SENSOR_DEVICE_RegisterKeepAlive(true,30,false,0,0) != ACK_OK)
+		while(TD_SENSOR_DEVICE_Register() != ACK_OK)
 		{
 			TD_RTC_Delay(T10S);
 		}
@@ -137,7 +138,7 @@ void TD_USER_Setup(void)
 		}
 
 		//Blink three times at 0.5s to let us know registration went fine.
-		led_timer=TD_SCHEDULER_Append(0, 16384, 0, 6, led_blink, 1);
+		LedTimer=TD_SCHEDULER_Append(0, 16384, 0, 6, led_blink, 1);
 
 		//Enable boot monitoring
 		TD_SENSOR_MonitorBoot(true,0);
@@ -145,6 +146,9 @@ void TD_USER_Setup(void)
 		//Save on flash
 		FirstBoot=true;
 		TD_FLASH_WriteVariables();
+
+		//Process events if any
+		TD_SENSOR_Process();
 	}
 }
 

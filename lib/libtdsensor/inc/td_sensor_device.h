@@ -2,7 +2,7 @@
  * @file td_sensor_device.h
  * @brief Sensor LAN Device
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -38,6 +38,13 @@
 #include "td_sensor_lan.h"
 #include "sensor_send.h"
 
+
+/** @defgroup TD_SENSOR_DEVICE_USER_FUNCTIONS User Functions
+ *  @ingroup TD_SENSOR_DEVICE
+ *  @nosubgrouping
+ */
+
+
 /***************************************************************************//**
  * @addtogroup TD_SENSOR_DEVICE Sensor LAN Device
  * @brief
@@ -65,15 +72,20 @@
 /** @addtogroup TD_SENSOR_DEVICE_PROTOTYPES Prototypes
  * @{ */
 
-/** @cond TD_PRIVATE */
+
 AckCode TD_SENSOR_DEVICE_Forward(uint8_t * payload, uint8_t count, uint8_t repetition, uint32_t interval);
 AckCode TD_SENSOR_DEVICE_KeepAlive(bool keepalive, uint32_t interval, bool rssi, int8_t level_low, int8_t level_ok);
-/** @endcond */
+
+
+/** @ingroup TD_SENSOR_DEVICE_USER_FUNCTIONS
+ * @{ */
 
 AckCode TD_SENSOR_DEVICE_Data(uint8_t * data, uint8_t count, uint8_t data_rx[TD_SENSOR_LAN_PAYLOAD_SIZE]);
 AckCode TD_SENSOR_DEVICE_Register();
-
 void TD_SENSOR_DEVICE_Reset();
+
+/** @} */
+
 
 /** @} */
 

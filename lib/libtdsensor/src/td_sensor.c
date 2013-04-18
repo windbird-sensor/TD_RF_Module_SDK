@@ -2,7 +2,7 @@
  * @file td_sensor.c
  * @brief Sensor Monitoring
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -37,17 +37,12 @@
 #include <td_flash.h>
 #include <td_measure.h>
 #include <td_gpio.h>
-#define USE_PRINTF
-#include <td_printf.h>
 #include <td_scheduler.h>
 
 #include "sensor_private.h"
 #include "sensor_config.h"
-#include "sensor_raw.h"
-#include "sensor_register.h"
 #include "sensor_keepalive.h"
 #include "sensor_event.h"
-#include "sensor_send.h"
 
 #include "td_sensor_lan.h"
 #include "td_sensor_device.h"
@@ -79,7 +74,7 @@
 /*Device only. Time to wait after all retries ended-up in collisions.*/
 #define NACK_WAIT_INTERVAL 3600
 
-/*Retries count for each event*/
+/*Local retries count for each event*/
 #define EVENT_BATTERY_RETRIES 2
 #define EVENT_BOOT_RETRIES 3
 #define EVENT_LOCAL_KEEPALIVE_RETRIES 3
@@ -96,22 +91,22 @@
 /** @addtogroup TD_SENSOR_TYPEDEFS Typedefs
  * @{ */
 
-/***************************************************************************//**
- * @brief
- *   Sensor Event
- ******************************************************************************/
+/** Sensor Event */
 typedef enum {
-	SENSOR_SEND_BATTERY, SENSOR_SEND_LOCAL_KEEPALIVE, SENSOR_SEND_SENSOR_KEEPALIVE, SENSOR_SEND_TEMPERATURE, SENSOR_SEND_SWITCH, SENSOR_SEND_BOOT
+	SENSOR_SEND_BATTERY,
+	SENSOR_SEND_LOCAL_KEEPALIVE,
+	SENSOR_SEND_SENSOR_KEEPALIVE,
+	SENSOR_SEND_TEMPERATURE,
+	SENSOR_SEND_SWITCH,
+	SENSOR_SEND_BOOT
 } SensorEvent;
 
-/***************************************************************************//**
- * @brief
- *   Sensor Machine State Event
- ******************************************************************************/
+
+ /**   Sensor Machine State Event*/
 typedef struct {
-	SensorEvent event :8; ///<event
-	uint8_t arg :8; ///<opt. arg
-	uint8_t retry :8; ///<collision retry
+	SensorEvent event :8;	///<event
+	uint8_t arg :8; 		///<opt. arg
+	uint8_t retry :8; 		///<collision retry
 }__PACKED SensorMachineStateEvent;
 
 /** @} */
@@ -123,16 +118,11 @@ typedef struct {
 /** @addtogroup TD_SENSOR_Private_Variables Private Variables
  * @{ */
 
-/***************************************************************************//**
- * @brief
- *   Local Module configuration
- ******************************************************************************/
+
+/**Local Module configuration*/
 static ModuleConfiguration Module;
 
-/***************************************************************************//**
- * @brief
- *   Sensor machine state events queue, count and index
- ******************************************************************************/
+/**Sensor machine state events queue, count and index*/
 static SensorMachineStateEvent EventQueue[MAX_SENSOR_EVENT];
 static uint8_t EventCount = 0;
 static uint8_t EventIndex = 0;
@@ -140,22 +130,11 @@ static uint8_t EventIndex = 0;
 /**Device only. Estimation of gateway business*/
 static bool GatewayBusy = false;
 
-/** @} */
-
-/*******************************************************************************
- **************************  PUBLIC VARIABLES   *******************************
- ******************************************************************************/
-
-/** @addtogroup TD_SENSOR_Public_Variables Public Variables
- * @{ */
-
-/***************************************************************************//**
- * @brief
- *   Local Sigfox ID and DeviceClass
- ******************************************************************************/
+/**Sigfox ID*/
 uint32_t SigfoxID;
 
 /** @} */
+
 
 /*******************************************************************************
  **************************  PRIVATE FUNCTIONS   *******************************
@@ -169,7 +148,6 @@ uint32_t SigfoxID;
  *   Module local variables initialization
  *
  ******************************************************************************/
-
 static void TD_SENSOR_PrivateInit()
 {
 	int i;
@@ -192,6 +170,7 @@ static void TD_SENSOR_PrivateInit()
 
 }
 
+
 /***************************************************************************//**
  * @brief
  *   Append an event to the queue
@@ -209,7 +188,7 @@ static void TD_SENSOR_AppendEvent(SensorEvent event, uint8_t arg, uint8_t retry)
 {
 	uint8_t index;
 
-	if (EventCount < MAX_SENSOR_EVENT) {
+	if (EventCount <= MAX_SENSOR_EVENT) {
 		//circular buffer
 		index = EventIndex + EventCount;
 		if (index >= MAX_SENSOR_EVENT) {
@@ -234,7 +213,6 @@ static void TD_SENSOR_AppendEvent(SensorEvent event, uint8_t arg, uint8_t retry)
  * @param[in] repetitions
  *	Timer argument. Not used.
  ******************************************************************************/
-
 static void TD_SENSOR_CollisionHandler(uint32_t arg, uint8_t repetitions)
 {
 	TD_SENSOR_AppendEvent((SensorEvent) (arg & 0xFF), (arg >> 8) & 0xFF, (arg >> 16) & 0xFF);
@@ -250,7 +228,6 @@ static void TD_SENSOR_CollisionHandler(uint32_t arg, uint8_t repetitions)
  * @param[in] repetitions
  *	Timer argument. Not used.
  ******************************************************************************/
-
 static void TD_SENSOR_GatewayBusyHandler(uint32_t arg, uint8_t repetitions)
 {
 	GatewayBusy = false;
@@ -266,7 +243,6 @@ static void TD_SENSOR_GatewayBusyHandler(uint32_t arg, uint8_t repetitions)
  * @param[in] repetitions
  *	Timer argument. Not used.
  ******************************************************************************/
-
 static void TD_SENSOR_KeepAliveCallback(uint32_t arg, uint8_t repetitions)
 {
 	TD_SENSOR_AppendEvent(SENSOR_SEND_SENSOR_KEEPALIVE, 0, EVENT_SENSOR_KEEPALIVE_RETRIES);
@@ -282,7 +258,6 @@ static void TD_SENSOR_KeepAliveCallback(uint32_t arg, uint8_t repetitions)
  * @param[in] repetitions
  *	Timer argument. Not used.
  ******************************************************************************/
-
 static void TD_SENSOR_ConnectionCallBack(uint32_t arg, uint8_t repetitions)
 {
 	TD_SENSOR_AppendEvent(SENSOR_SEND_LOCAL_KEEPALIVE, 0, EVENT_LOCAL_KEEPALIVE_RETRIES);
@@ -368,16 +343,45 @@ static void TD_SENSOR_SwitchCallBack()
 
 			temp_mask = 1 << Module.switches[i].bit;
 
+			//TODO: debounce
 			if (temp_mask & mask) {
 				bool state = (GPIO_PinInGet(Module.switches[i].port, Module.switches[i].bit)) ? true : false;
-				if (Module.switches[i].state != state) {
-					Module.switches[i].state = state;
-					TD_SENSOR_AppendEvent(SENSOR_SEND_SWITCH, i, EVENT_SWITCH_RETRIES);
 
-				}
+				TD_SENSOR_AppendEvent(SENSOR_SEND_SWITCH, (state<<7) | (i&0x7F), EVENT_SWITCH_RETRIES);
+
 			}
 		}
 	}
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Set callback and irq for a switch
+ *
+ ******************************************************************************/
+static void TD_SENSOR_SetSwitchMonitoring(GPIO_Port_TypeDef port, unsigned int bit, bool falling, bool rising, bool pull, bool pull_state,
+		bool (*switch_callback)(GPIO_Port_TypeDef port, unsigned int bit, bool state))
+{
+
+	if (((1<<bit) & 0xAAAAAAAA) != 0) {
+		//odd
+		TD_GPIO_SetCallback(TD_GPIO_USER_ODD, TD_SENSOR_SwitchCallBack,	Module.switch_mask & 0xAAAAAAAA);
+	} else {
+		//even
+		TD_GPIO_SetCallback(TD_GPIO_USER_EVEN, TD_SENSOR_SwitchCallBack, Module.switch_mask & 0x55555555);
+	}
+
+	Module.switch_count++;
+
+	if (pull) {
+		GPIO_PinModeSet(port, bit, gpioModeInputPullFilter, pull_state);
+	} else {
+		GPIO_PinModeSet(port, bit, gpioModeInput, 0);
+	}
+
+	//enable irq
+	GPIO_IntConfig(port, bit, rising, falling, true);
+
 }
 
 /***************************************************************************//**
@@ -395,6 +399,8 @@ static bool TD_SENSOR_EventProcess(SensorMachineStateEvent event)
 {
 	bool send_sigfox = true;
 	bool acked = false;
+	uint8_t switch_index;
+	bool switch_state;
 
 	switch (event.event) {
 	case SENSOR_SEND_BATTERY:
@@ -444,12 +450,14 @@ static bool TD_SENSOR_EventProcess(SensorMachineStateEvent event)
 
 	case SENSOR_SEND_SWITCH:
 
-		if (Module.switches[event.arg].user_callback != 0) {
-			send_sigfox = (*Module.switches[event.arg].user_callback)(Module.switches[event.arg].port, Module.switches[event.arg].bit,
-					Module.switches[event.arg].state);
+		switch_index = (event.arg&0x7F);
+		switch_state = (event.arg>>7);
+		if (Module.switches[switch_index].user_callback != 0) {
+			send_sigfox = (*Module.switches[switch_index].user_callback)(Module.switches[switch_index].port, Module.switches[switch_index].bit,
+					switch_state);
 		}
 		if (send_sigfox) {
-			acked = TD_SENSOR_SendEventSwitch(Module.switches[event.arg].port, Module.switches[event.arg].bit, Module.switches[event.arg].state);
+			acked = TD_SENSOR_SendEventSwitch(Module.switches[switch_index].port, Module.switches[switch_index].bit, switch_state);
 		}
 		break;
 
@@ -505,7 +513,6 @@ static bool TD_SENSOR_EventProcess(SensorMachineStateEvent event)
  *
  *
  ******************************************************************************/
-
 bool TD_SENSOR_MonitorSwitch(bool enable, GPIO_Port_TypeDef port, unsigned int bit, bool falling, bool rising, bool pull, bool pull_state,
 		bool (*switch_callback)(GPIO_Port_TypeDef port, unsigned int bit, bool state))
 {
@@ -519,7 +526,6 @@ bool TD_SENSOR_MonitorSwitch(bool enable, GPIO_Port_TypeDef port, unsigned int b
 
 		for (i = 0; i < SENSOR_MAX_SWITCH; i++) {
 			if (Module.switches[i].monitor == false) {
-				uint32_t bit_mask = 1 << bit;
 
 				Module.switches[i].monitor = true;
 				Module.switches[i].bit = bit;
@@ -531,26 +537,9 @@ bool TD_SENSOR_MonitorSwitch(bool enable, GPIO_Port_TypeDef port, unsigned int b
 				Module.switches[i].state = GPIO_PinInGet(port, bit);
 				Module.switches[i].user_callback = switch_callback;
 
-				Module.switch_mask |= bit_mask;
+				Module.switch_mask |= 1 << bit;
 
-				//odd
-				if ((bit_mask & 0xAAAAAAAA) != 0) {
-					TD_GPIO_SetCallback(TD_GPIO_USER_ODD, TD_SENSOR_SwitchCallBack, Module.switch_mask & 0xAAAAAAAA);
-				} else //even
-				{
-					TD_GPIO_SetCallback(TD_GPIO_USER_EVEN, TD_SENSOR_SwitchCallBack, Module.switch_mask & 0x55555555);
-				}
-
-				Module.switch_count++;
-
-				if (pull) {
-					GPIO_PinModeSet(port, bit, gpioModeInputPull, pull_state);
-				} else {
-					GPIO_PinModeSet(port, bit, gpioModeInput, 0);
-				}
-
-				//enable irq
-				GPIO_IntConfig(port, bit, rising, falling, true);
+				TD_SENSOR_SetSwitchMonitoring(port,bit,falling,rising, pull, pull_state, switch_callback);
 
 				return true;
 			}
@@ -576,7 +565,7 @@ bool TD_SENSOR_MonitorSwitch(bool enable, GPIO_Port_TypeDef port, unsigned int b
 				GPIO_IntConfig(port, bit, false, false, false);
 
 				Module.switches[i].monitor = false;
-				;
+
 				Module.switches[i].bit = 0xFF;
 				Module.switches[i].port = (GPIO_Port_TypeDef) 0xFF;
 				Module.switches[i].user_callback = 0;
@@ -830,34 +819,41 @@ bool TD_SENSOR_MonitorConnection(bool enable, uint32_t interval)
  *  @param[in] enable
  *  	Enable (true) or disable (false) keep-alive monitoring
  *
- *  @param[in] interval
- *  	Interval in seconds at which keep-alive should be sent.
+ *  @param[in] interval_hour
+ *  	Interval in hours at which keep-alive should be sent.
  *
  ******************************************************************************/
-bool TD_SENSOR_MonitorKeepAlive(bool enable, uint32_t interval)
+bool TD_SENSOR_MonitorKeepAlive(bool enable, uint8_t interval_hour)
 {
 	if (enable) {
 		//activate timer is not already activated
 		if (!Module.keepalive.monitor) {
-			Module.keepalive.timer = TD_SCHEDULER_Append(interval, 0, 0, 0xFF, TD_SENSOR_KeepAliveCallback, 0);
+
+			//send it once to let Sensor know about interval
+			TD_SENSOR_KeepAliveCallback(0,0);
+			Module.keepalive.timer = TD_SCHEDULER_Append(interval_hour*3600, 0, 0, 0xFF, TD_SENSOR_KeepAliveCallback, 0);
 
 			if (Module.keepalive.timer != 0xFF) {
 				Module.keepalive.monitor = true;
-				Module.keepalive.interval = interval;
+				Module.keepalive.interval = interval_hour;
 				return true;
 			}
-		} else //or only change interval
+		}
+		else //or only change interval
 		{
-			TD_SCHEDULER_SetInterval(Module.keepalive.timer, interval, 0, 0);
+			TD_SCHEDULER_SetInterval(Module.keepalive.timer, interval_hour*3600, 0, 0);
+			return true;
 		}
 
 	} else if (!enable && Module.keepalive.monitor) {
 		//else remove timer
 		Module.keepalive.monitor = false;
 		Module.keepalive.interval = 0;
+		TD_SENSOR_KeepAliveCallback(0,0);
 		TD_SCHEDULER_Remove(Module.keepalive.timer);
 		return true;
 	}
+
 	return false;
 }
 
@@ -869,18 +865,17 @@ void TD_SENSOR_Process()
 {
 	bool acked = false;
 
-	if (Module.type == SENSOR_GATEWAY || Module.type == SENSOR_TRANSMITTER) {
-		TD_SENSOR_TRANSMITTER_Process();
-	}
-
 	while (EventCount > 0) {
 		if (Module.type != SENSOR_DEVICE || (Module.type == SENSOR_DEVICE && !GatewayBusy)) {
+
 			SensorMachineStateEvent event;
 			event.event = EventQueue[EventIndex].event;
 			event.arg = EventQueue[EventIndex].arg;
 			event.retry = EventQueue[EventIndex].retry;
 
+			EventCount--;
 			EventIndex++;
+
 			if (EventIndex == MAX_SENSOR_EVENT) {
 				EventIndex = 0;
 			}
@@ -914,12 +909,8 @@ void TD_SENSOR_Process()
 					}
 				}
 
-				//in all cases remove the event and break
-				EventCount--;
+				//in all cases break
 				break;
-
-			} else {
-				EventCount--;
 			}
 
 		} else {
@@ -927,6 +918,10 @@ void TD_SENSOR_Process()
 		}
 
 	}
+
+	if (Module.type == SENSOR_GATEWAY || Module.type == SENSOR_TRANSMITTER) {
+			TD_SENSOR_TRANSMITTER_Process();
+		}
 
 }
 
@@ -1007,6 +1002,7 @@ ModuleType TD_SENSOR_GetModuleType()
 	return Module.type;
 }
 
+
 /***************************************************************************//**
  * @brief
  *  Returns Module's configuration.
@@ -1016,6 +1012,19 @@ ModuleConfiguration * TD_SENSOR_GetModuleConfiguration()
 {
 	return &Module;
 }
+
+
+/***************************************************************************//**
+ * @brief
+ *  Returns Module's Sigfox ID
+ * @return
+ *  Sigfox ID
+ ******************************************************************************/
+uint32_t  TD_SENSOR_GetSigfoxID()
+{
+	return SigfoxID;
+}
+
 
 /***************************************************************************//**
  * @brief
@@ -1029,35 +1038,39 @@ ModuleConfiguration * TD_SENSOR_GetModuleConfiguration()
  *	LAN frequency in Hz. Can be within 868000000..869700000 range.
  *
  * @param[in] lan_power_level
- *	LAN power level in dBm. Max is 14.
+ *	LAN power level in dBm. Range is -35..14.
  *
  * @return
  *   True if a valid SigfoxID could be found in flash.
  *   False otherwise.
  ******************************************************************************/
-
 bool TD_SENSOR_Init(ModuleType type, uint32_t lan_frequency, int16_t lan_power_level)
 {
 	TD_DEVICE device;
 	int i;
 
+	//read sigfox ID
 	if (TD_FLASH_DeviceRead(&device)) {
 		SigfoxID = device.Serial;
 
 	} else
 		return false;
 
+	//Init config if not in flash
 	if (!TD_FLASH_DeclareVariable((uint8_t *) &Module, sizeof(Module), 0)) {
 		TD_SENSOR_PrivateInit();
 	}
 
+	//set module type
 	Module.type = type;
 
+	//clear all pending irqs
 	NVIC_ClearPendingIRQ(GPIO_EVEN_IRQn);
 	NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
 	NVIC_EnableIRQ(GPIO_EVEN_IRQn);
 	NVIC_EnableIRQ(GPIO_ODD_IRQn);
 
+	//init depending on module type
 	if (Module.type == SENSOR_DEVICE) {
 		TD_SENSOR_LAN_Init(false, lan_frequency, lan_power_level);
 	} else if (Module.type == SENSOR_GATEWAY) {
@@ -1068,11 +1081,12 @@ bool TD_SENSOR_Init(ModuleType type, uint32_t lan_frequency, int16_t lan_power_l
 		TD_SENSOR_TRANSMITTER_Init();
 	}
 
+	//enable all monitoring according to flash values
+
 	if (Module.boot.monitor) {
 		TD_SENSOR_AppendEvent(SENSOR_SEND_BOOT, 0, EVENT_BOOT_RETRIES);
 	}
 
-	//start monitoring according to flash values
 	if (Module.battery.monitor) {
 		TD_SENSOR_MonitorBattery(1, Module.battery.level_low, Module.battery.level_ok, Module.battery.user_callback);
 	}
@@ -1095,11 +1109,12 @@ bool TD_SENSOR_Init(ModuleType type, uint32_t lan_frequency, int16_t lan_power_l
 
 	for (i = 0; i < SENSOR_MAX_SWITCH; i++) {
 		if (Module.switches[i].monitor) {
-			TD_SENSOR_MonitorSwitch(true, Module.switches[i].port, Module.switches[i].bit, Module.switches[i].falling, Module.switches[i].rising,
+			TD_SENSOR_SetSwitchMonitoring(Module.switches[i].port, Module.switches[i].bit, Module.switches[i].falling, Module.switches[i].rising,
 					Module.switches[i].pull, Module.switches[i].pull_state, Module.switches[i].user_callback);
 		}
 	}
 
+	//process in case of event
 	TD_SENSOR_Process();
 
 	return true;

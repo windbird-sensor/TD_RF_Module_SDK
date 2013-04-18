@@ -2,7 +2,7 @@
  * @file
  * @brief Timer peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -52,7 +52,7 @@ extern "C" {
  *************************   PROTOTYPES   **************************************
  ******************************************************************************/
 
-/** @addtogroup TIMER_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup TIMER_USER_FUNCTIONS User Functions
  * @{ */
 /** @addtogroup TIMER_PROTOTYPES Prototypes
  * @{ */
@@ -67,7 +67,7 @@ void TD_TIMER_Stop(void);
  **************************   PUBLIC VARIABLES   *******************************
  ******************************************************************************/
 
-/** @addtogroup TIMER_PUBLIC_VARIABLES Public Variables
+/** @addtogroup TIMER_USER_VARIABLES User Variables
  * @{ */
 /** @addtogroup TIMER_EXTERN Extern Declarations
  * @{ */

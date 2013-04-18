@@ -45,52 +45,51 @@
 #include <sensor_register.h>
 
 
-#define DEVICE_CLASS 0x0001 //define your own device class
-#define KEEPALIVE_INTERVAL 3600*24 //keep-alive every day
+/*******************************************************************************
+ **************************   DEFINES   ****************************************
+ ******************************************************************************/
 
-static bool FirstBoot=0; //is the device already registered on sensor?
-static uint8_t led_timer=0xFF;
+/** LED port */
+#define LED_PORT TIM2_PORT
+
+/** LED bit */
+#define LED_BIT	TIM2_BIT
+
+/** Define your current variable version */
+#define VARIABLES_VERSION 0x1
+
+/** Define your own device class */
+#define DEVICE_CLASS 0x0001
+
+/** Keepalive interval in hours */
+#define KEEPALIVE_INTERVAL 24
+
+
+/*******************************************************************************
+ **************************   PRIVATE VARIABLES   ******************************
+ ******************************************************************************/
+
+/** LED timer id*/
+static uint8_t LedTimer=0xFF;
+
+/** Boot flash variable*/
+static bool FirstBoot=false;
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
  ******************************************************************************/
-
-
-/***************************************************************************//**
- * @brief
- *  Switch LED ON/OFF
- *
- * @param[in] state
- *  If true, switch ON the LED. If Flase switch it OFF.
- *
- ******************************************************************************/
-static void set_led(bool state)
-{
-	if(state)
-	{
-		//set LED on
-		GPIO_PinOutSet(TIM2_PORT, TIM2_BIT);
-	}
-	else
-	{
-		//set LED off
-		GPIO_PinOutClear(TIM2_PORT, TIM2_BIT);
-	}
-}
-
 
 /***************************************************************************//**
  * @brief
  *  LED blinking. This function is being called by the Scheduler.
  *
  * @param[in] arg
- *  Argument passed by Scheduler.
+ *  Timer argument. Not used.
  *
  ******************************************************************************/
 static void led_blink(uint32_t arg, uint8_t repetition)
 {
-	set_led((bool)(arg&0x1));
-	TD_SCHEDULER_SetArg(led_timer,!(arg&0x1));
+	GPIO_PinOutToggle(LED_PORT, LED_BIT);
 }
 
 
@@ -102,16 +101,20 @@ static void led_blink(uint32_t arg, uint8_t repetition)
 static void StopRegistration(uint32_t arg, uint8_t repetition)
 {
 	TD_SENSOR_GATEWAY_StopRegistration();
-	set_led(false);
+	GPIO_PinOutClear(LED_PORT, LED_BIT);
 }
 
-
+/***************************************************************************//**
+ * @brief
+ *  Called on each new registration
+ *
+ ******************************************************************************/
 static void OnRegistration(uint32_t lan_address, uint32_t sigfox_id)
 {
 	tfp_printf("Device registered %02x - %02x \r\n", lan_address, sigfox_id);
 
-	//Blink 5 times at 0.5s to let us know about registration.
-	led_timer=TD_SCHEDULER_Append(0, 8192 , 0, 5, led_blink, 1);
+	//Blink 5 times at 0.25s to let us know about registration.
+	LedTimer=TD_SCHEDULER_Append(0, 8192 , 0, 10, led_blink, 1);
 }
 
 /***************************************************************************//**
@@ -120,6 +123,9 @@ static void OnRegistration(uint32_t lan_address, uint32_t sigfox_id)
  ******************************************************************************/
 void TD_USER_Setup(void)
 {
+	//Set variable version
+	TD_FLASH_SetVariablesVersion(VARIABLES_VERSION);
+
 	//Init serial interface
 	init_printf(TD_UART_Init(9600, true, false),
 		    		TD_UART_Putc,
@@ -127,7 +133,7 @@ void TD_USER_Setup(void)
 		    		TD_UART_Stop);
 
 	//Init LED
-	GPIO_PinModeSet(TIM2_PORT, TIM2_BIT, gpioModePushPull, 0);
+	GPIO_PinModeSet(LED_PORT, LED_BIT, gpioModePushPull, 0);
 
 	//Initialize the device as a transmitter with no local RF configuration.
 	TD_SENSOR_Init(SENSOR_GATEWAY,869312500,14);
@@ -150,13 +156,16 @@ void TD_USER_Setup(void)
 		//Save on flash
 		FirstBoot=true;
 		TD_FLASH_WriteVariables();
+
+		//Process events if any
+		TD_SENSOR_Process();
 	}
 
 	//Open registration
 	TD_SENSOR_GATEWAY_StartRegistration(OnRegistration);
 
 	//Set led on while registration is opened
-	set_led(true);
+	GPIO_PinOutSet(LED_PORT, LED_BIT);
 
 	//Close it in a 20 seconds. One shot timer.
 	TD_SCHEDULER_Append(30, 0, 0, 1, StopRegistration, 0);

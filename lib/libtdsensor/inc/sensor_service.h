@@ -2,7 +2,7 @@
  * @file sensor_service.h
  * @brief API for sending Service frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -41,10 +41,15 @@
 extern "C" {
 #endif
 
+
+/** @defgroup SENSOR_SERVICE_USER_FUNCTIONS User Functions
+ *  @ingroup SENSOR_SERVICE
+ *  @nosubgrouping
+ */
+
 /***************************************************************************//**
- * @addtogroup SENSOR_SERVICE Sensor Service
- *
- *  * @{
+ * @addtogroup SENSOR_SERVICE Sensor Service *
+ * @{
  ******************************************************************************/
 
 /*******************************************************************************
@@ -55,11 +60,15 @@ extern "C" {
  * @{ */
 /** @addtogroup SENSOR_SERVICE_PROTOTYPES Prototypes
  * @{ */
+/** @ingroup SENSOR_SERVICE_USER_FUNCTIONS
+ * @{ */
 
 bool TD_SENSOR_SendSMS(uint8_t * SMS);
 bool TD_SENSOR_SendTweet(uint8_t * Tweet);
 
 void TD_SENSOR_SetServiceTransmissionProfile(uint8_t count, uint32_t interval);
+
+/** @} */
 
 /** @} */
 

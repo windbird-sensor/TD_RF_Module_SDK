@@ -2,7 +2,7 @@
  * @file
  * @brief General Purpose IO (GPIO) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -89,7 +89,7 @@ typedef struct {
  *************************   PROTOTYPES   **************************************
  ******************************************************************************/
 
-/** @addtogroup GPIO_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup GPIO_USER_FUNCTIONS User Functions
  * @{ */
 
 /***************************************************************************//**
@@ -134,7 +134,7 @@ void TD_GPIO_Init(void);
  **************************   PUBLIC VARIABLES   *******************************
  ******************************************************************************/
 
-/** @addtogroup GPIO_PUBLIC_VARIABLES Public Variables
+/** @addtogroup GPIO_USER_VARIABLES User Variables
  * @{ */
 /** @addtogroup GPIO_EXTERN Extern Declarations
  * @{ */

@@ -45,6 +45,7 @@
 
 #include <td_sensor.h>
 
+
 #if AT_SENSOR
 #include <at_sensor.h>
 #include <at_sensor_lan.h>
@@ -133,6 +134,8 @@ void TD_USER_Setup(void)
 	AT_AddExtension(&sensor_lan_extension);
 	AT_AddExtension(&sensor_send_extension);
 #endif
+
+	TD_FLASH_SetVariablesVersion(VARIABLES_VERSION);
 
     // Initialize the AT command parser
     AT_Init();
