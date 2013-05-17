@@ -418,7 +418,7 @@ int main(int argc, char *argv[])
     bool ok;
 
     printf("cflash version %s\n", VERSION);
-    printf("Copyright (c) 2012-2013 Telecom Design S.A.\n")
+    printf("Copyright (c) 2012-2013 Telecom Design S.A.\n");
 
     while ((opt = getopt(argc, argv, "d:p:b:th?")) > 0) {
 
