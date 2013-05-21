@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workingSets>
 <workingSet editPageId="org.eclipse.cdt.ui.CElementWorkingSetPage" id="1369130684531_9" label="Common Libraries" name="Common Libraries">
-<item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/libtdrf" type="4"/>
 <item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/CMSIS" type="4"/>
-<item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/libtdcore" type="4"/>
 <item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/Device" type="4"/>
 <item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/emlib" type="4"/>
+<item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/libtdcore" type="4"/>
+<item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/libtdrf" type="4"/>
+<item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/libtdsensor" type="4"/>
 </workingSet>
 <workingSet editPageId="org.eclipse.cdt.ui.CElementWorkingSetPage" id="1369130789375_14" label="Core Examples" name="Core Examples">
 <item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/at_extended" type="4"/>
@@ -19,19 +20,17 @@
 </workingSet>
 <workingSet editPageId="org.eclipse.cdt.ui.CElementWorkingSetPage" id="1369130813984_15" label="Sensor Examples" name="Sensor Examples">
 <item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/td1208_device" type="4"/>
-<item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/td1208_transmitter" type="4"/>
 <item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/td1208_gateway" type="4"/>
-<item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/libtdsensor" type="4"/>
+<item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/td1208_transmitter" type="4"/>
 </workingSet>
 <workingSet editPageId="org.eclipse.cdt.ui.CElementWorkingSetPage" id="1369130718609_10" label="TD1202" name="TD1202">
 <item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/td1202_modem" type="4"/>
 <item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/td1202_template" type="4"/>
 </workingSet>
 <workingSet editPageId="org.eclipse.cdt.ui.CElementWorkingSetPage" id="1369130751546_11" label="TD1208" name="TD1208">
-<item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/td1208_gateway_template" type="4"/>
-<item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/td1208_transmitter_template" type="4"/>
-<item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/td1208_modem" type="4"/>
 <item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/td1208_device_template" type="4"/>
-<item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/libtdsensor" type="4"/>
+<item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/td1208_gateway_template" type="4"/>
+<item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/td1208_modem" type="4"/>
+<item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/td1208_transmitter_template" type="4"/>
 </workingSet>
 </workingSets>
