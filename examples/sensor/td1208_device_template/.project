@@ -3,6 +3,11 @@
 	<name>td1208_device_template</name>
 	<comment></comment>
 	<projects>
+		<project>Device</project>
+		<project>emlib</project>
+		<project>libtdcore</project>
+		<project>libtdrf</project>
+		<project>libtdsensor</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
