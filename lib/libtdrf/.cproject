@@ -12,13 +12,20 @@
 				</externalSettings>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-					<extension id="com.iar.cdt.errorParser.com.iar.cdt.errorParser.ErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.autotools.core.ErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" cleanCommand="rm -rf" description="" id="iar.arm.toolchain.project.library.configuration.debug.v5.4.0.1020096987" name="IAR Debug" parent="iar.arm.toolchain.project.library.configuration.debug.v5.4.0">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" cleanCommand="rm -rf" description="" id="iar.arm.toolchain.project.library.configuration.debug.v5.4.0.1020096987" name="IAR Debug" parent="iar.arm.toolchain.project.library.configuration.debug.v5.4.0.1020096987">
 					<folderInfo id="iar.arm.toolchain.project.library.configuration.debug.v5.4.0.1020096987." name="/" resourcePath="">
-						<toolChain id="iar.arm.toolchain.project.library.configuration.debug.toolchain.v5.4.0.1883478832" name="IAR Toolchain for ARM - 6.x" resourceTypeBasedDiscovery="false" superClass="iar.arm.toolchain.project.library.configuration.debug.toolchain.v5.4.0">
+						<toolChain id="iar.arm.toolchain.project.library.configuration.debug.toolchain.v5.4.0.1883478832" name="IAR Toolchain for ARM - 6.x" resourceTypeBasedDiscovery="false">
 							<option id="iar.arm.toolchain.option.cpuCore.v5.4.0.40000934" name="Processor core:" superClass="iar.arm.toolchain.option.cpuCore.v5.4.0" value="iar.arm.toolchain.option.cpuCore.Cortex-M3.v5.4.0" valueType="enumerated"/>
 							<option id="iar.arm.toolchain.option.endianMode.v5.4.0.386576777" name="Endian mode:" superClass="iar.arm.toolchain.option.endianMode.v5.4.0"/>
 							<option id="iar.arm.toolchain.option.bigEndianFormat.v5.4.0.679005885" name="Big-endian format:" superClass="iar.arm.toolchain.option.bigEndianFormat.v5.4.0"/>
@@ -36,79 +43,8 @@
 							<option id="iar.arm.toolchain.option.useDSPLibrary.v6.2.2.212413322" name="DSP Library" superClass="iar.arm.toolchain.option.useDSPLibrary.v6.2.2"/>
 							<option id="iar.arm.toolchain.option.semihosted.v5.4.0.865328976" name="Include semihosting interface" superClass="iar.arm.toolchain.option.semihosted.v5.4.0"/>
 							<option id="iar.arm.toolchain.option.lowLevelInterfaceCortex.v5.4.0.149013857" name="Library low-level&#10;interface implementation&#10;(Cortex-M cores):" superClass="iar.arm.toolchain.option.lowLevelInterfaceCortex.v5.4.0"/>
-							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF" id="iar.arm.toolchain.targetPlatform.v5.4.0.2147272740" isAbstract="false" name="IAR Target platform for ARM (ELF)" osList="win32,linux" superClass="iar.arm.toolchain.targetPlatform.v5.4.0"/>
-							<builder buildPath="${workspace_loc:/libtdrf-IAR/Debug}" id="iar.arm.toolchain.builder.2.365367373" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="iar.arm.toolchain.builder.2"/>
-							<tool id="iar.arm.toolchain.compiler.v5.4.1.114631796" name="IAR C/C++ Compiler for ARM" superClass="iar.arm.toolchain.compiler.v5.4.1">
-								<option defaultValue="true" id="iar.arm.toolchain.compiler.option.debugInfo.v5.4.0.1838617346" name="Generate debug information" superClass="iar.arm.toolchain.compiler.option.debugInfo.v5.4.0" valueType="boolean"/>
-								<option defaultValue="iar.arm.toolchain.compiler.option.optLevel.none.v5.4.0" id="iar.arm.toolchain.compiler.option.optLevel.v5.4.0.67697787" name="Optimization level:" superClass="iar.arm.toolchain.compiler.option.optLevel.v5.4.0" value="iar.arm.toolchain.compiler.option.optLevel.highSize.v5.4.0" valueType="enumerated"/>
-								<option id="iar.arm.toolchain.compiler.option.optCSE.v5.4.0.358312465" name="Disable common subexpression elimination" superClass="iar.arm.toolchain.compiler.option.optCSE.v5.4.0" value="false" valueType="boolean"/>
-								<option id="iar.arm.toolchain.compiler.option.optUnroll.v5.4.0.1940657426" name="Disable loop unrolling" superClass="iar.arm.toolchain.compiler.option.optUnroll.v5.4.0" value="false" valueType="boolean"/>
-								<option id="iar.arm.toolchain.compiler.option.optInline.v5.4.0.1658328810" name="Disable function inlining" superClass="iar.arm.toolchain.compiler.option.optInline.v5.4.0" value="false" valueType="boolean"/>
-								<option id="iar.arm.toolchain.compiler.option.optCodeMotion.v5.4.0.413521180" name="Disable code motion" superClass="iar.arm.toolchain.compiler.option.optCodeMotion.v5.4.0" value="false" valueType="boolean"/>
-								<option id="iar.arm.toolchain.compiler.option.optAliasAnalysis.v5.4.0.864127175" name="Disable type-based alias analysis" superClass="iar.arm.toolchain.compiler.option.optAliasAnalysis.v5.4.0" value="false" valueType="boolean"/>
-								<option id="iar.arm.toolchain.compiler.option.optStaticClustering.v5.4.0.620546343" name="Disable static clustering" superClass="iar.arm.toolchain.compiler.option.optStaticClustering.v5.4.0" value="false" valueType="boolean"/>
-								<option id="iar.arm.toolchain.compiler.option.optScheduling.v5.4.0.1223220259" name="Disable instruction scheduling" superClass="iar.arm.toolchain.compiler.option.optScheduling.v5.4.0" value="false" valueType="boolean"/>
-								<option id="iar.arm.toolchain.compiler.option.language.v6.1.0.832555083" name="Language" superClass="iar.arm.toolchain.compiler.option.language.v6.1.0"/>
-								<option id="iar.arm.toolchain.compiler.option.cppdialect.v6.1.0.826549250" name="C++ dialect" superClass="iar.arm.toolchain.compiler.option.cppdialect.v6.1.0"/>
-								<option id="iar.arm.toolchain.compiler.option.cpuMode.v5.4.0.1499193615" name="Processor mode:" superClass="iar.arm.toolchain.compiler.option.cpuMode.v5.4.0" value="iar.arm.toolchain.compiler.option.cpuMode.thumb.v5.4.0" valueType="enumerated"/>
-								<option id="iar.arm.toolchain.compiler.option.preserveComments.v6.2.0.509742377" name="Preserve comments" superClass="iar.arm.toolchain.compiler.option.preserveComments.v6.2.0"/>
-								<option id="iar.arm.toolchain.compiler.option.generateLineDirectives.v6.2.0.1798345152" name="Generate #line directives" superClass="iar.arm.toolchain.compiler.option.generateLineDirectives.v6.2.0"/>
-								<option id="iar.arm.toolchain.compiler.option.incPaths.v5.4.0.673652831" name="Additional include directories" superClass="iar.arm.toolchain.compiler.option.incPaths.v5.4.0" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32TG/Include}&quot;"/>
-								</option>
-								<option id="iar.arm.toolchain.compiler.option.defines.v5.4.0.1909225092" name="Defined Symbols:" superClass="iar.arm.toolchain.compiler.option.defines.v5.4.0" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="DEBUG"/>
-									<listOptionValue builtIn="false" value="DEBUG_EFM"/>
-									<listOptionValue builtIn="false" value="UART_LOADER=1"/>
-									<listOptionValue builtIn="false" value="EFM32TG210F32"/>
-								</option>
-								<inputType id="iar.arm.toolchain.compiler.inputType.v5.4.1.675262002" name="IAR C/C++ Compiler Input Type" superClass="iar.arm.toolchain.compiler.inputType.v5.4.1"/>
-							</tool>
-							<tool id="iar.arm.toolchain.assembler.v5.4.0.1999381945" name="IAR Assembler for ARM" superClass="iar.arm.toolchain.assembler.v5.4.0">
-								<option defaultValue="true" id="iar.arm.toolchain.assembler.option.debugInfo.v5.4.0.1551845725" name="Generate debug information" superClass="iar.arm.toolchain.assembler.option.debugInfo.v5.4.0" valueType="boolean"/>
-								<option id="iar.arm.toolchain.assembler.option.asmListContents.v6.2.0.1113177557" name="Include listing" superClass="iar.arm.toolchain.assembler.option.asmListContents.v6.2.0"/>
-								<option id="iar.arm.toolchain.assembler.option.includeMacroDefinitions.v6.2.0.93787433" name="Macro definitions" superClass="iar.arm.toolchain.assembler.option.includeMacroDefinitions.v6.2.0"/>
-								<option id="iar.arm.toolchain.assembler.option.includeMacroExpansions.v6.2.0.215923346" name="Macro expansions" superClass="iar.arm.toolchain.assembler.option.includeMacroExpansions.v6.2.0"/>
-								<option id="iar.arm.toolchain.assembler.option.includeAsmLinesOnly.v6.2.0.758499931" name="Assembled lines only" superClass="iar.arm.toolchain.assembler.option.includeAsmLinesOnly.v6.2.0"/>
-								<option id="iar.arm.toolchain.assembler.option.includeMultilineCode.v6.2.0.355270540" name="Multiline code" superClass="iar.arm.toolchain.assembler.option.includeMultilineCode.v6.2.0"/>
-								<option id="iar.arm.toolchain.assembler.option.crossRefDefines.v6.2.0.739860989" name="#defines" superClass="iar.arm.toolchain.assembler.option.crossRefDefines.v6.2.0"/>
-								<option id="iar.arm.toolchain.assembler.option.crossRefInternalSymbols.v6.2.0.1736794649" name="Internal symbols" superClass="iar.arm.toolchain.assembler.option.crossRefInternalSymbols.v6.2.0"/>
-								<option id="iar.arm.toolchain.assembler.option.crossRefDualLineSpacing.v6.2.0.889572564" name="Dual line spacing" superClass="iar.arm.toolchain.assembler.option.crossRefDualLineSpacing.v6.2.0"/>
-								<option id="iar.arm.toolchain.assembler.option.includePaths.v5.4.0.1957277449" name="Additional include directories:" superClass="iar.arm.toolchain.assembler.option.includePaths.v5.4.0" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32TG/Include}&quot;"/>
-								</option>
-								<option id="iar.arm.toolchain.assembler.option.definedSymbols.v5.4.0.1748069648" name="Defined symbols:" superClass="iar.arm.toolchain.assembler.option.definedSymbols.v5.4.0" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="DEBUG"/>
-									<listOptionValue builtIn="false" value="DEBUG_EFM"/>
-									<listOptionValue builtIn="false" value="UART_LOADER=1"/>
-									<listOptionValue builtIn="false" value="EFM32TG210F32"/>
-								</option>
-								<inputType id="iar.arm.toolchain.assembler.inputType.asmFile.v5.4.0.1087962592" name="IAR Assembler input type for ARM (asm, s)" superClass="iar.arm.toolchain.assembler.inputType.asmFile.v5.4.0"/>
-							</tool>
-							<tool commandLinePattern="${COMMAND} --create ${INPUTS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${FLAGS}" id="iar.arm.toolchain.linker.v5.4.0.1068484938" name="IAR Linker for ARM" superClass="iar.arm.toolchain.linker.v5.4.0">
-								<option id="iar.arm.toolchain.linker.option.icfFile.v5.4.0.1100718765" name="Linker configuration file:" superClass="iar.arm.toolchain.linker.option.icfFile.v5.4.0" value="${sdkLocation}/config/linker/EnergyMicro/EFM32TG210F32.icf" valueType="string"/>
-								<option id="iar.arm.toolchain.linker.option.devicePostProcess.v5.5.2.863355175" name="IElfToolPostProcess" superClass="iar.arm.toolchain.linker.option.devicePostProcess.v5.5.2"/>
-								<option id="iar.arm.toolchain.linker.option.performVFE.v6.2.2.1693424187" name="Perform C++ Virtual Function Elimination" superClass="iar.arm.toolchain.linker.option.performVFE.v6.2.2"/>
-								<option id="iar.arm.toolchain.linker.option.forceVFE.v6.2.2.73805237" name="Even if some modules are missing VFE information" superClass="iar.arm.toolchain.linker.option.forceVFE.v6.2.2"/>
-								<option id="iar.arm.toolchain.linker.option.fillPattern.v5.5.2.776889408" name="Fill pattern:" superClass="iar.arm.toolchain.linker.option.fillPattern.v5.5.2"/>
-								<option id="iar.arm.toolchain.linker.option.fillStart.v5.5.2.857120882" name="Start address:" superClass="iar.arm.toolchain.linker.option.fillStart.v5.5.2"/>
-								<option id="iar.arm.toolchain.linker.option.fillEnd.v5.5.2.1857421943" name="End address:" superClass="iar.arm.toolchain.linker.option.fillEnd.v5.5.2"/>
-								<option id="iar.arm.toolchain.linker.option.generateChecksum.v5.5.2.272434787" name="Generate checksum" superClass="iar.arm.toolchain.linker.option.generateChecksum.v5.5.2"/>
-								<option id="iar.arm.toolchain.linker.option.logFileInitializationDecisions.v5.4.0.807649266" name="Log initialization decisions" superClass="iar.arm.toolchain.linker.option.logFileInitializationDecisions.v5.4.0"/>
-								<option id="iar.arm.toolchain.linker.option.logFileModuleSelections.v5.4.0.1393999852" name="Log module selections" superClass="iar.arm.toolchain.linker.option.logFileModuleSelections.v5.4.0"/>
-								<option id="iar.arm.toolchain.linker.option.logFileSectionSelections.v5.4.0.885565338" name="Log section selections" superClass="iar.arm.toolchain.linker.option.logFileSectionSelections.v5.4.0"/>
-								<option id="iar.arm.toolchain.linker.option.logFileVeenerStatistics.v5.4.0.1889890476" name="Log veener statistics" superClass="iar.arm.toolchain.linker.option.logFileVeenerStatistics.v5.4.0"/>
-								<option id="iar.arm.toolchain.linker.option.logFileLibrarySelections.v5.5.0.1483993454" name="Log automatic library selection" superClass="iar.arm.toolchain.linker.option.logFileLibrarySelections.v5.5.0"/>
-								<option id="iar.arm.toolchain.linker.option.logFileRedirectedSymbols.v5.5.0.740516276" name="Log redirected symbols" superClass="iar.arm.toolchain.linker.option.logFileRedirectedSymbols.v5.5.0"/>
-								<option id="iar.arm.toolchain.linker.option.logFileUnusedFragments.v5.5.0.120292068" name="Log unused section fragments" superClass="iar.arm.toolchain.linker.option.logFileUnusedFragments.v5.5.0"/>
-							</tool>
-							<tool command="iarchive" commandLinePattern="${COMMAND} --create ${INPUTS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${FLAGS}" id="iar.arm.toolchain.archive.v5.4.0.1406551722" name="IAR Library Builder for ARM" superClass="iar.arm.toolchain.archive.v5.4.0"/>
+							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF" id="iar.arm.toolchain.targetPlatform.v5.4.0.2147272740" isAbstract="false" name="IAR Target platform for ARM (ELF)" osList="win32,linux"/>
+							<builder buildPath="${workspace_loc:/libtdrf-IAR/Debug}" enableCleanBuild="false" id="iar.arm.toolchain.builder.2.365367373" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder"/>
 						</toolChain>
 					</folderInfo>
 				</configuration>
@@ -126,13 +62,20 @@
 				</externalSettings>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-					<extension id="com.iar.cdt.errorParser.com.iar.cdt.errorParser.ErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.autotools.core.ErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" cleanCommand="rm -rf" description="" id="iar.arm.toolchain.project.library.configuration.release.v5.4.0.1397875337" name="IAR Release" parent="iar.arm.toolchain.project.library.configuration.release.v5.4.0">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" cleanCommand="rm -rf" description="" id="iar.arm.toolchain.project.library.configuration.release.v5.4.0.1397875337" name="IAR Release" parent="iar.arm.toolchain.project.library.configuration.release.v5.4.0.1397875337">
 					<folderInfo id="iar.arm.toolchain.project.library.configuration.release.v5.4.0.1397875337." name="/" resourcePath="">
-						<toolChain id="iar.arm.toolchain.project.library.configuration.release.toolchain.v5.4.0.406597065" name="IAR Toolchain for ARM - 6.x" resourceTypeBasedDiscovery="false" superClass="iar.arm.toolchain.project.library.configuration.release.toolchain.v5.4.0">
+						<toolChain id="iar.arm.toolchain.project.library.configuration.release.toolchain.v5.4.0.406597065" name="IAR Toolchain for ARM - 6.x" resourceTypeBasedDiscovery="false">
 							<option id="iar.arm.toolchain.option.cpuCore.v5.4.0.1498556217" name="Processor core:" superClass="iar.arm.toolchain.option.cpuCore.v5.4.0" value="iar.arm.toolchain.option.cpuCore.Cortex-M3.v5.4.0" valueType="enumerated"/>
 							<option id="iar.arm.toolchain.option.endianMode.v5.4.0.820937257" name="Endian mode:" superClass="iar.arm.toolchain.option.endianMode.v5.4.0"/>
 							<option id="iar.arm.toolchain.option.bigEndianFormat.v5.4.0.335425471" name="Big-endian format:" superClass="iar.arm.toolchain.option.bigEndianFormat.v5.4.0"/>
@@ -148,54 +91,8 @@
 							<option id="iar.arm.toolchain.option.libraryConfig.v5.4.0.1811574551" name="Library:" superClass="iar.arm.toolchain.option.libraryConfig.v5.4.0"/>
 							<option id="iar.arm.toolchain.option.misra-c.enable.970336848" name="Enable MISRA-C" superClass="iar.arm.toolchain.option.misra-c.enable"/>
 							<option id="iar.arm.toolchain.option.useDSPLibrary.v6.2.2.1855422516" name="DSP Library" superClass="iar.arm.toolchain.option.useDSPLibrary.v6.2.2"/>
-							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF" id="iar.arm.toolchain.targetPlatform.v5.4.0.1084232517" isAbstract="false" name="IAR Target platform for ARM (ELF)" osList="win32,linux" superClass="iar.arm.toolchain.targetPlatform.v5.4.0"/>
-							<builder buildPath="${workspace_loc:/libtdrf-IAR/Release}" id="iar.arm.toolchain.builder.2.457844276" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="iar.arm.toolchain.builder.2"/>
-							<tool id="iar.arm.toolchain.compiler.v5.4.1.429215287" name="IAR C/C++ Compiler for ARM" superClass="iar.arm.toolchain.compiler.v5.4.1">
-								<option defaultValue="true" id="iar.arm.toolchain.compiler.option.debugInfo.v5.4.0.206508553" name="Generate debug information" superClass="iar.arm.toolchain.compiler.option.debugInfo.v5.4.0" valueType="boolean"/>
-								<option defaultValue="iar.arm.toolchain.compiler.option.optLevel.none.v5.4.0" id="iar.arm.toolchain.compiler.option.optLevel.v5.4.0.191470806" name="Optimization level:" superClass="iar.arm.toolchain.compiler.option.optLevel.v5.4.0" value="iar.arm.toolchain.compiler.option.optLevel.highSize.v5.4.0" valueType="enumerated"/>
-								<option id="iar.arm.toolchain.compiler.option.optCSE.v5.4.0.1305297087" name="Disable common subexpression elimination" superClass="iar.arm.toolchain.compiler.option.optCSE.v5.4.0" value="false" valueType="boolean"/>
-								<option id="iar.arm.toolchain.compiler.option.optUnroll.v5.4.0.163786268" name="Disable loop unrolling" superClass="iar.arm.toolchain.compiler.option.optUnroll.v5.4.0" value="false" valueType="boolean"/>
-								<option id="iar.arm.toolchain.compiler.option.optInline.v5.4.0.1581235517" name="Disable function inlining" superClass="iar.arm.toolchain.compiler.option.optInline.v5.4.0" value="false" valueType="boolean"/>
-								<option id="iar.arm.toolchain.compiler.option.optCodeMotion.v5.4.0.1556282959" name="Disable code motion" superClass="iar.arm.toolchain.compiler.option.optCodeMotion.v5.4.0" value="false" valueType="boolean"/>
-								<option id="iar.arm.toolchain.compiler.option.optAliasAnalysis.v5.4.0.280192335" name="Disable type-based alias analysis" superClass="iar.arm.toolchain.compiler.option.optAliasAnalysis.v5.4.0" value="false" valueType="boolean"/>
-								<option id="iar.arm.toolchain.compiler.option.optStaticClustering.v5.4.0.2019554390" name="Disable static clustering" superClass="iar.arm.toolchain.compiler.option.optStaticClustering.v5.4.0" value="false" valueType="boolean"/>
-								<option id="iar.arm.toolchain.compiler.option.optScheduling.v5.4.0.1721688966" name="Disable instruction scheduling" superClass="iar.arm.toolchain.compiler.option.optScheduling.v5.4.0" value="false" valueType="boolean"/>
-								<option id="iar.arm.toolchain.compiler.option.cpuMode.v5.4.0.1136866965" name="Processor mode:" superClass="iar.arm.toolchain.compiler.option.cpuMode.v5.4.0" value="iar.arm.toolchain.compiler.option.cpuMode.thumb.v5.4.0" valueType="enumerated"/>
-								<option id="iar.arm.toolchain.compiler.option.incPaths.v5.4.0.31491157" name="Additional include directories" superClass="iar.arm.toolchain.compiler.option.incPaths.v5.4.0" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32TG/Include}&quot;"/>
-								</option>
-								<option id="iar.arm.toolchain.compiler.option.defines.v5.4.0.1251749072" name="Defined Symbols:" superClass="iar.arm.toolchain.compiler.option.defines.v5.4.0" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="NDEBUG"/>
-									<listOptionValue builtIn="false" value="UART_LOADER=1"/>
-									<listOptionValue builtIn="false" value="EFM32TG210F32"/>
-								</option>
-								<option id="iar.arm.toolchain.compiler.option.language.v6.1.0.1380172293" name="Language" superClass="iar.arm.toolchain.compiler.option.language.v6.1.0"/>
-								<option id="iar.arm.toolchain.compiler.option.cppdialect.v6.1.0.1232025850" name="C++ dialect" superClass="iar.arm.toolchain.compiler.option.cppdialect.v6.1.0"/>
-								<inputType id="iar.arm.toolchain.compiler.inputType.v5.4.1.1114952409" name="IAR C/C++ Compiler Input Type" superClass="iar.arm.toolchain.compiler.inputType.v5.4.1"/>
-							</tool>
-							<tool id="iar.arm.toolchain.assembler.v5.4.0.598008730" name="IAR Assembler for ARM" superClass="iar.arm.toolchain.assembler.v5.4.0">
-								<option defaultValue="true" id="iar.arm.toolchain.assembler.option.debugInfo.v5.4.0.953836845" name="Generate debug information" superClass="iar.arm.toolchain.assembler.option.debugInfo.v5.4.0" valueType="boolean"/>
-								<option id="iar.arm.toolchain.assembler.option.includePaths.v5.4.0.2141171493" name="Additional include directories:" superClass="iar.arm.toolchain.assembler.option.includePaths.v5.4.0" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32TG/Include}&quot;"/>
-								</option>
-								<option id="iar.arm.toolchain.assembler.option.definedSymbols.v5.4.0.553445651" name="Defined symbols:" superClass="iar.arm.toolchain.assembler.option.definedSymbols.v5.4.0" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="NDEBUG"/>
-									<listOptionValue builtIn="false" value="UART_LOADER=1"/>
-									<listOptionValue builtIn="false" value="EFM32TG210F32"/>
-								</option>
-								<inputType id="iar.arm.toolchain.assembler.inputType.asmFile.v5.4.0.790623912" name="IAR Assembler input type for ARM (asm, s)" superClass="iar.arm.toolchain.assembler.inputType.asmFile.v5.4.0"/>
-							</tool>
-							<tool commandLinePattern="${COMMAND} --create ${INPUTS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${FLAGS}" id="iar.arm.toolchain.linker.v5.4.0.943090190" name="IAR Linker for ARM" superClass="iar.arm.toolchain.linker.v5.4.0">
-								<option id="iar.arm.toolchain.linker.option.icfFile.v5.4.0.417312471" name="Linker configuration file:" superClass="iar.arm.toolchain.linker.option.icfFile.v5.4.0" value="${sdkLocation}/config/linker/EnergyMicro/EFM32TG210F32.icf" valueType="string"/>
-								<option id="iar.arm.toolchain.linker.option.devicePostProcess.v5.5.2.1222958193" name="IElfToolPostProcess" superClass="iar.arm.toolchain.linker.option.devicePostProcess.v5.5.2"/>
-							</tool>
-							<tool commandLinePattern="${COMMAND} --create ${INPUTS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${FLAGS}" id="iar.arm.toolchain.archive.v5.4.0.531583807" name="IAR Library Builder for ARM" superClass="iar.arm.toolchain.archive.v5.4.0"/>
+							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF" id="iar.arm.toolchain.targetPlatform.v5.4.0.1084232517" isAbstract="false" name="IAR Target platform for ARM (ELF)" osList="win32,linux"/>
+							<builder buildPath="${workspace_loc:/libtdrf-IAR/Release}" enableCleanBuild="false" id="iar.arm.toolchain.builder.2.457844276" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder"/>
 						</toolChain>
 					</folderInfo>
 				</configuration>
@@ -220,7 +117,7 @@
 							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level.556091433" name="Debug level" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.debugging.level.none" valueType="enumerated"/>
 							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor.230819465" name="Processor" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor" value="org.eclipse.cdt.cross.arm.gnu.base.option.mcpu.cortex-m3" valueType="enumerated"/>
 							<targetPlatform id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.platform.release.1916898930" isAbstract="false" name="Windows Platform" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.platform.release"/>
-							<builder autoBuildTarget="all" buildPath="${workspace_loc:/libtdrf/Release}" cleanBuildTarget="clean" command="cs-make" id="org.eclipse.cdt.build.core.internal.builder.1592210241" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<builder autoBuildTarget="all" buildPath="${workspace_loc:/libtdrf/Release}" cleanBuildTarget="clean" command="cs-make" enableCleanBuild="false" id="org.eclipse.cdt.build.core.internal.builder.1592210241" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
 							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.assembler.release.255631528" name="ARM Sourcery Windows GCC Assembler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.assembler.release">
 								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def.1808100414" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="NDEBUG"/>
@@ -287,7 +184,7 @@
 							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level.1163528318" name="Debug level" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.debugging.level.max" valueType="enumerated"/>
 							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor.1939709019" name="Processor" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor" value="org.eclipse.cdt.cross.arm.gnu.base.option.mcpu.cortex-m3" valueType="enumerated"/>
 							<targetPlatform id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.platform.debug.1040344818" isAbstract="false" name="Windows Platform" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.platform.debug"/>
-							<builder autoBuildTarget="all" buildPath="${workspace_loc:/libtdrf/Debug}" cleanBuildTarget="clean" command="cs-make" id="org.eclipse.cdt.build.core.internal.builder.663159982" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<builder autoBuildTarget="all" buildPath="${workspace_loc:/libtdrf/Debug}" cleanBuildTarget="clean" command="cs-make" enableCleanBuild="false" id="org.eclipse.cdt.build.core.internal.builder.663159982" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
 							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.assembler.debug.164662274" name="ARM Sourcery Windows GCC Assembler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.assembler.debug">
 								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def.324890967" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG"/>
@@ -340,7 +237,7 @@
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<project id="libtdrf.iar.arm.toolchain.project.library.v5.4.0.1919607681" name="Static Library" projectType="iar.arm.toolchain.project.library.v5.4.0"/>
+		<project id="libtdrf.iar.arm.toolchain.project.library.v5.4.0.1919607681" name="Static Library"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="org.eclipse.cdt.core.language.mapping">
@@ -353,28 +250,34 @@
 		</project-mappings>
 	</storageModule>
 	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="IAR Debug Covéa">
+			<resource resourceType="PROJECT" workspacePath="/libtdrf"/>
+		</configuration>
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/libtdrf-IAR"/>
+		</configuration>
 		<configuration configurationName="GCC Debug Covéa">
 			<resource resourceType="PROJECT" workspacePath="/libtdrf"/>
 		</configuration>
-		<configuration configurationName="IAR Release">
+		<configuration configurationName="GCC Release">
 			<resource resourceType="PROJECT" workspacePath="/libtdrf"/>
 		</configuration>
 		<configuration configurationName="IAR Debug">
 			<resource resourceType="PROJECT" workspacePath="/libtdrf"/>
 		</configuration>
-		<configuration configurationName="IAR Debug">
+		<configuration configurationName="GCC Debug 169 MHz">
 			<resource resourceType="PROJECT" workspacePath="/libtdrf"/>
 		</configuration>
-		<configuration configurationName="GCC Debug">
+		<configuration configurationName="IAR Release Covéa">
 			<resource resourceType="PROJECT" workspacePath="/libtdrf"/>
 		</configuration>
 		<configuration configurationName="IAR Release">
-			<resource resourceType="PROJECT" workspacePath="/libtdrf"/>
-		</configuration>
-		<configuration configurationName="GCC Debug">
 			<resource resourceType="PROJECT" workspacePath="/libtdrf"/>
 		</configuration>
 		<configuration configurationName="IAR Debug 169 MHz">
+			<resource resourceType="PROJECT" workspacePath="/libtdrf"/>
+		</configuration>
+		<configuration configurationName="GCC Debug">
 			<resource resourceType="PROJECT" workspacePath="/libtdrf"/>
 		</configuration>
 		<configuration configurationName="GCC Release 169 MHz">
@@ -383,41 +286,23 @@
 		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/libtdrf-IAR"/>
 		</configuration>
-		<configuration configurationName="Release">
-			<resource resourceType="PROJECT" workspacePath="/libtdrf-IAR"/>
-		</configuration>
-		<configuration configurationName="IAR Debug Covéa">
-			<resource resourceType="PROJECT" workspacePath="/libtdrf"/>
-		</configuration>
-		<configuration configurationName="GCC Release">
-			<resource resourceType="PROJECT" workspacePath="/libtdrf"/>
-		</configuration>
-		<configuration configurationName="IAR Release Covéa">
-			<resource resourceType="PROJECT" workspacePath="/libtdrf"/>
-		</configuration>
-		<configuration configurationName="GCC Debug 169 MHz">
-			<resource resourceType="PROJECT" workspacePath="/libtdrf"/>
-		</configuration>
 		<configuration configurationName="GCC Release Covéa">
 			<resource resourceType="PROJECT" workspacePath="/libtdrf"/>
 		</configuration>
 		<configuration configurationName="IAR Release 169 MHz">
 			<resource resourceType="PROJECT" workspacePath="/libtdrf"/>
 		</configuration>
-		<configuration configurationName="GCC Release">
-			<resource resourceType="PROJECT" workspacePath="/libtdrf"/>
-		</configuration>
 	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.release.v5.4.0.1397875337.104526837">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.591419393.1564666291;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.591419393.1564666291.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.assembler.release.1759635880;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.1404014131">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2053845689.689307699.157896723;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2053845689.689307699.157896723.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.c.compiler.debug.725600876;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.2076899620">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.591419393.1564666291;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.591419393.1564666291.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.assembler.release.1759635880;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.1404014131">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.release.v5.4.0.1397875337.104526837">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.debug.v5.4.0.1020096987.142887930">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
@@ -425,11 +310,11 @@
 		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.release.v5.4.0.1397875337">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2053845689.689307699">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
-		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.debug.v5.4.0.675028012.901119185;iar.arm.toolchain.project.library.configuration.debug.v5.4.0.675028012.901119185.;iar.arm.toolchain.compiler.v5.4.1.2046048201;iar.arm.toolchain.compiler.inputType.v5.4.1.652685500">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2053845689.689307699">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.591419393.1564666291">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
@@ -476,10 +361,10 @@
 		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.debug.v5.4.0.1020096987.142887930;iar.arm.toolchain.project.library.configuration.debug.v5.4.0.1020096987.142887930.;iar.arm.toolchain.compiler.v5.4.1.181209826;iar.arm.toolchain.compiler.inputType.v5.4.1.966537178">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.release.v5.4.0.1756431601.211464391;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1756431601.211464391.;iar.arm.toolchain.compiler.v5.4.1.1506142735;iar.arm.toolchain.compiler.inputType.v5.4.1.1534213812">
+		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.debug.v5.4.0.1020096987.1021239109">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.debug.v5.4.0.1020096987.1021239109">
+		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.release.v5.4.0.1756431601.211464391;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1756431601.211464391.;iar.arm.toolchain.compiler.v5.4.1.1506142735;iar.arm.toolchain.compiler.inputType.v5.4.1.1534213812">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.debug.v5.4.0.1020096987.1021239109;iar.arm.toolchain.project.library.configuration.debug.v5.4.0.1020096987.1021239109.;iar.arm.toolchain.compiler.v5.4.1.447231726;iar.arm.toolchain.compiler.inputType.v5.4.1.789463486">
@@ -488,14 +373,14 @@
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2053845689.689307699.420490790;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2053845689.689307699.420490790.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.c.compiler.debug.1263107285;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.1300597581">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.release.v5.4.0.1397875337.1658317672;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1397875337.1658317672.;iar.arm.toolchain.compiler.v5.4.1.720552976;iar.arm.toolchain.compiler.inputType.v5.4.1.1959892498">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2053845689.689307699.1929243311;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2053845689.689307699.1929243311.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.assembler.debug.164662274;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.1952824575">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2053845689.689307699.157896723">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2053845689.689307699.1929243311;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2053845689.689307699.1929243311.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.assembler.debug.164662274;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.1952824575">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.release.v5.4.0.1397875337.1658317672;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1397875337.1658317672.;iar.arm.toolchain.compiler.v5.4.1.720552976;iar.arm.toolchain.compiler.inputType.v5.4.1.1959892498">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.591419393.1564666291.254545001;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.591419393.1564666291.254545001.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.c.compiler.release.1582707372;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.988547929">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
@@ -506,11 +391,11 @@
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.591419393.1564666291.256399565;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.591419393.1564666291.256399565.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.c.compiler.release.1538631367;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.620978616">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.release.v5.4.0.1756431601;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1756431601.;iar.arm.toolchain.compiler.v5.4.1.1191919508;iar.arm.toolchain.compiler.inputType.v5.4.1.1844706378">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
-		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2053845689.689307699;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2053845689.689307699.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.c.compiler.debug.664917655;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.1682465277">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.release.v5.4.0.1756431601;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1756431601.;iar.arm.toolchain.compiler.v5.4.1.1191919508;iar.arm.toolchain.compiler.inputType.v5.4.1.1844706378">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.debug.v5.4.0.1020096987.742907962">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
@@ -530,10 +415,10 @@
 		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.debug.v5.4.0.1020096987;iar.arm.toolchain.project.library.configuration.debug.v5.4.0.1020096987.;iar.arm.toolchain.compiler.v5.4.1.114631796;iar.arm.toolchain.compiler.inputType.v5.4.1.675262002">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2053845689.689307699;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2053845689.689307699.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.assembler.debug.71385257;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.708177126">
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.591419393.1564666291.256399565;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.591419393.1564666291.256399565.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.assembler.release.1262686474;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.2004979250">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.591419393.1564666291.256399565;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.591419393.1564666291.256399565.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.assembler.release.1262686474;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.2004979250">
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2053845689.689307699;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2053845689.689307699.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.assembler.debug.71385257;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.708177126">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.release.v5.4.0.1397875337;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1397875337.;iar.arm.toolchain.compiler.v5.4.1.429215287;iar.arm.toolchain.compiler.inputType.v5.4.1.1114952409">
@@ -542,11 +427,12 @@
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.591419393.1564666291.134196643;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.591419393.1564666291.134196643.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.assembler.release.864406240;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.576019487">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.release.v5.4.0.1397875337.608040518;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1397875337.608040518.;iar.arm.toolchain.compiler.v5.4.1.1445346355;iar.arm.toolchain.compiler.inputType.v5.4.1.387662557">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
-		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.debug.v5.4.0.675028012;iar.arm.toolchain.project.library.configuration.debug.v5.4.0.675028012.;iar.arm.toolchain.compiler.v5.4.1.55005483;iar.arm.toolchain.compiler.inputType.v5.4.1.1820555451">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
 		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.library.configuration.release.v5.4.0.1397875337.608040518;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1397875337.608040518.;iar.arm.toolchain.compiler.v5.4.1.1445346355;iar.arm.toolchain.compiler.inputType.v5.4.1.387662557">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
+		</scannerConfigBuildInfo>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>
