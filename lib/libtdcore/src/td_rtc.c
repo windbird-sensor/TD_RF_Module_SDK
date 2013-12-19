@@ -2,7 +2,7 @@
  * @file
  * @brief Real-Time Clock (RTC) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 2.0.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
@@ -530,8 +530,8 @@ time_t __time32(time_t *timer)
 	t += TD_RTC_OffsetTime;
 
 	// Copy system time to timer if not NULL
-	if (!timer) {
-		timer = &t;
+	if (timer) {
+		*timer = t;
 	}
 	return t;
 }
