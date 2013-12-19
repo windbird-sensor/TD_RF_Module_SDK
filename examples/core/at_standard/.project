@@ -3,6 +3,10 @@
 	<name>at_standard</name>
 	<comment></comment>
 	<projects>
+		<project>Device</project>
+		<project>emlib</project>
+		<project>libtdcore</project>
+		<project>libtdrf</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
