@@ -16,24 +16,145 @@ and auto-generated API documentation to develop for the TD RF modules.</p>
 
 <p>The SDK source code and examples are no longer distributed with the TD RF Module SDK Tools zip file but
 are available through the <a href="https://github.com/Telecom-Design/TD_RF_Module_SDK">https://github.com/Telecom-Design/TD_RF_Module_SDK</a> Github repository
-once you register your Telecom Design Evaluation Board (EVB) by following the steps described on <a href="https://developers.insgroup.fr/">https://developers.insgroup.fr/</a>.</p>
+once you register your Telecom Design Evaluation Board (EVB) by following the steps described on
+<a href="https://developers.insgroup.fr/">https://developers.insgroup.fr/</a>.</p>
 
-<p>The following steps detail how to download the source code and import all projects into the Eclipse environment.</p>
+<p>The following steps detail how to download the source code and import all projects into the Eclipse
+environment.</p>
 
-<ul>
-<li>Navigate to the <code>"C:\TD\TD_RF_Module_SDK-v4.0.0\eclipse"</code> folder and double-click on the <code>"eclipse.exe"</code> icon</li>
+<ol>
+<li>Navigate to the <code>"C:\TD\TD_RF_Module_SDK-v4.0.0\eclipse"</code> folder and double-click on the
+ <code>"eclipse.exe"</code> icon</li>
 <li>Open the <code>"File"</code> menu and select the <code>"Import..."</code> item.</li>
-<li>In the <code>"Import"</code> dialog, unfold the <code>"Git"</code> folder by clicking on the <code>"+"</code> sign left to it, select the <code>"Projects from Git"</code> item and click on the <code>"Next &gt;"</code> button</li>
+<li>In the <code>"Import"</code> dialog, unfold the <code>"Git"</code> folder by clicking on the <code>"+"</code> sign left to it,
+ select the <code>"Projects from Git"</code> item and click on the <code>"Next &gt;"</code> button</li>
 <li>In the <code>"Import Projects from Git"</code>, select the <code>"URI"</code> icon ad click on the <code>"Next &gt;"</code> button</li>
-<li>Enter <code>The Github repository URL "https://github.com/Telecom-Design/TD_RF_Module_SDK.git"</code>in the <code>"URI"</code> field</li>
-<li>Enter your Github username and password in the <code>"User:"</code> and <code>"Password:"</code> fields, respectively and click on the <code>"Next &gt;"</code> button</li>
+<li>Enter The Github repository URL <code>"https://github.com/Telecom-Design/TD_RF_Module_SDK.git"</code>
+ in the <code>"URI"</code> field</li>
+<li>Enter your Github username and password in the <code>"User:"</code> and <code>"Password:"</code> fields,
+ respectively and click on the <code>"Next &gt;"</code> button</li>
 <li>Check the <code>"Master"</code> branch box and click on the <code>"Next &gt;"</code> button</li>
-<li>Enter <code>"C:\TD\TD_RF_Module_SDK-v4.0.0\Github\TD_RF_Module_SDK"</code> in the <code>"Directory:"</code> field and click on the <code>"Next &gt;"</code> button</li>
+<li>Enter <code>"C:\TD\TD_RF_Module_SDK-v4.0.0\Github\TD_RF_Module_SDK"</code> in the <code>"Directory:"</code> field and
+ click on the <code>"Next &gt;"</code> button</li>
 <li>Check the <code>"Import existing projects"</code> radio button and click on the <code>"Next &gt;"</code> button</li>
 <li>Click on the <code>"Finish"</code> button. The Git import will take place, this may take a while</li>
-</ul>
+</ol>
 
 <p>All the available libraries and examples should now be available in the Project Explorer panel.</p>
+
+<h1>Organizing the Sources</h1>
+
+<p>By default, all projects are presented in Eclipse at the same level without particular organization
+except that they are sorted alphabetically.</p>
+
+<p>In order to have a more logical organization, we must import an Eclipse "Working Set" that will
+provide a grouping of projects by categories.</p>
+
+<p>To do so, launch Eclipse by navigating to the <code>"C:\TD\TD_RF_Module_SDK-v4.0.0\eclipse"</code> folder and
+double-click on the <code>"eclipse.exe"</code> icon (if not already done) and:</p>
+
+<ol>
+<li>Open the <code>"File"</code> menu and select the <code>"Import..."</code> item.</li>
+<li>In the <code>"Import"</code> dialog, unfold the <code>"General"</code> folder by clicking on the <code>"+"</code> sign left to
+ it, select the <code>"Working Sets"</code> item and click on the <code>"Next &gt;"</code> button</li>
+<li>Enter <code>"C:\TD\TD_RF_Module_SDK-v4.0.0\Github\TD_RF_Module_SDK\TD_RF_Module_SDK.wst"</code> in the
+ <code>"Browse..."</code> field, check all working sets and click on the <code>"Finish"</code> button</li>
+<li>Click on the small downwards arrow in the top-right corner of the <code>"Project Explorer"</code> panel
+ and select the <code>"Select Working Sets..."</code> item</li>
+<li>In the <code>"Select Working Sets"</code> dialog, click on the <code>"Select All"</code>, then on the <code>"OK"</code> button</li>
+<li>Click on the small downwards arrow in the top-right corner of the <code>"Project Explorer"</code> panel
+ again and select the <code>"Top Level Elements &gt; Working Sets"</code> item</li>
+</ol>
+
+<p>All the available libraries and examples should now be better organized in the Project Explorer panel.</p>
+
+<h1>Compiling the Sources</h1>
+
+<p>With the exception of the binary-only static libraries in the <code>"libtddrivers"</code> and <code>"libtdrf"</code>
+projects, all deliverables are presented in source form only, and must be compiled to obtain an
+executable firmware.</p>
+
+<p>If we take the <code>"blink"</code> project as an example, here are the steps required to compile it:</p>
+
+<ol>
+<li>In order to avoid unnecessary rebuilds of the common libraries, it is best to set the right
+ build configuration for all these libraries: unfold the <code>"Common_Libraries"</code> working set in the
+ Project Explorer panel on the left side, then select all the projects by clicking on the first one
+ in the list, pressing the <code>"SHIFT"</code>key, then clicking on the last one in the list</li>
+<li>Click on the small downwards arrow right next to the <code>"Hammer"</code> icon in the top menu bar and
+ select the right build configuration corresponding to your board: <code>"TD1202"</code>, <code>"TD1204"</code> or
+ <code>"TD128"</code>, and <code>"Debug"</code> for building an executable firmware with integrated symbols suitable for
+ source code debugging, or <code>"Release"</code> for a stripped down firmware</li>
+<li>Unfold the <code>"Core_Examples"</code> working set in the Project Explorer panel on the left side, then
+ select the <code>"blink"</code> project</li>
+<li>Click again on the small downwards arrow right next to the <code>"Hammer"</code> icon in the top menu bar and
+ select the same build configuration as for the libraries above</li>
+<li>Compilation of the <code>"blink"</code>project and all the required dependencies will take place, which can
+ be monitored in the <code>"Console"</code> tab of the bottom panel</li>
+</ol>
+
+<p>The same procedure can be used for all the example projects when required.</p>
+
+<h1>Flashing / Debugging</h1>
+
+<p>Unlike some dedicated embedded Interactive Development Environments (IDEs), Eclipse dos not come with
+fixed Flash/Debug commands or menu buttons: they need to be added explicitly on a project by project basis.</p>
+
+<p>Fortunately, these Flash/Debug <code>"Launchers"</code> can be imported or duplicated to other projects easily:</p>
+
+<ol>
+<li>Open the <code>"File"</code> menu and select the <code>"Import..."</code> item.</li>
+<li>In the <code>"Import"</code> dialog, unfold the <code>"Run/Debug"</code> folder by clicking on the <code>"+"</code> sign left to it,
+ select the <code>"Launch Configurations"</code> item and click on the <code>"Next &gt;"</code> button</li>
+<li>Enter <code>"C:/TD/TD_RF_Module_SDK-v4.0.0/Github/TD_RF_Module_SDK/Eclipse Launchers"</code> in the <code>"Browse..."</code>
+ field, check the box in front of the <code>"Eclipse Launchers"</code> item and click on the <code>"Finish"</code> button</li>
+<li>All the default Flash/Debug <code>"Launchers"</code> will be added to the top menu <code>"Bug"</code> and <code>"Green Circle
+ with With Right Arrow and Briefcase"</code> icons</li>
+<li>If required, you can edit these <code>"Launchers"</code> by choosing the "Debug Configurations..."<code>or
+</code>"External Tools Configurations..." entries in the menu obtained by the small downwards arrow right
+ next to the corresponding <code>"Bug"</code> or <code>"Green Circle with With Right Arrow and Briefcase"</code> icon</li>
+<li>In the dialog windows that opens, you can edit a given configuration directly and click on the
+ <code>"Apply"</code> and <code>"Close"</code> buttons, or you an duplicate it by right-clicking on it and selecting the
+ <code>"Duplicate"</code> entry in the contextual menu that pops up</li>
+</ol>
+
+<p>Then, to flash a firmware to the TD12xx board:</p>
+
+<ol>
+<li>Select the desired project in the Project Explorer panel on the left side</li>
+<li>Right-click on the project and select the <code>"Build Configurations &gt; Set Active &gt;"</code> and the desired
+ build configuration as explained above</li>
+<li>Optionally click on the <code>"Hammer"</code> icon in the top menu bar to build the project</li>
+<li>Click on the  the small downwards arrow right next to the <code>"Green Circle with With Right Arrow and
+ Briefcase"</code> icon and select <code>"Flash Selected Project"</code> in the contextual menu</li>
+</ol>
+
+<p>Similarly, to debug a firmware on the TD12xx board:</p>
+
+<ol>
+<li>Select the desired project in the Project Explorer panel on the left side</li>
+<li>Right-click on the project and select the <code>"Build Configurations &gt; Set Active &gt;"</code> and the desired
+ build configuration as explained above, this must be a <code>"Debug"</code>one</li>
+<li>If this is the first time you debug this project, you must edit/add a <code>"Launcher"</code> by choosing the
+ "Debug Configurations..."<code>entry in the menu obtained by the small downwards arrow right next to the
+</code>"Bug"` icon</li>
+<li>In the dialog windows that opens, you can edit a given configuration directly (you only need to
+ change the <code>"Project:"</code> and <code>"C/C++ Application:"</code> values) and click on the <code>"Apply"</code> and <code>"Close"</code>
+ buttons, or you an duplicate an existing one by right-clicking on it and selecting the <code>"Duplicate"</code>
+ entry in the contextual menu that pops up, then changing these same values</li>
+<li>Click on the  the small downwards arrow right next to the <code>"Bug"</code> icon and select the
+ <code>"Debug TD12xx"</code> entry in the contextual menu that corresponds to your board</li>
+<li>The first time you launch a debug session, Eclipse will prompt you if you want to switch to a new
+ <code>"Debug Perspective"</code> (a window panel organization purposed for debugging): click on <code>"Yes"</code></li>
+<li>The firmware will optionally be built and flashed to the module, the execution will stop early in
+ the program execution, giving you an opportunity to single-step, continue, explore variables as
+  expected from a source-level debugger</li>
+<li>When finished, you can cleanly disconnect from the running application by right-clicking on the
+ <code>"Debug TD12xx"</code> entry in the tree under the "Debug" panel, select the <code>"Terminate/Disconnect All"</code>
+ entry in the contextual menu, clicking on the <code>"XX"</code> icon at the top of this panel, then clinking
+ on the <code>"C/C++"</code> button located at the top right of the main window to return to the normal C/C++
+ edit panel organization</li>
+</ol>
 
 <h1>Release Notes</h1>
 
