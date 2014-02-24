@@ -95,7 +95,7 @@ The same procedure can be used for all the example projects when required.
 Flashing / Debugging
 ====================
 
-Unlike some dedicated embedded Interactive Development Environments (IDEs), Eclipse dos not come with
+Unlike some dedicated embedded Interactive Development Environments (IDEs), Eclipse does not come with
 fixed Flash/Debug commands or menu buttons: they need to be added explicitly on a project by project basis.
 
 Fortunately, these Flash/Debug `"Launchers"` can be imported or duplicated to other projects easily:
