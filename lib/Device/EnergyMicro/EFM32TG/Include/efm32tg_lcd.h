@@ -2,7 +2,7 @@
  * @file
  * @brief efm32tg_lcd Register and Bit Field definitions
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -377,62 +377,62 @@ typedef struct
 /* Bit fields for LCD SYNCBUSY */
 #define _LCD_SYNCBUSY_RESETVALUE           0x00000000UL                         /**< Default value for LCD_SYNCBUSY */
 #define _LCD_SYNCBUSY_MASK                 0x000F00FFUL                         /**< Mask for LCD_SYNCBUSY */
-#define LCD_SYNCBUSY_CTRL                  (0x1UL << 0)                         /**< LCD_CTRL Register Busy */
+#define LCD_SYNCBUSY_CTRL                  (0x1UL << 0)                         /**< CTRL Register Busy */
 #define _LCD_SYNCBUSY_CTRL_SHIFT           0                                    /**< Shift value for LCD_CTRL */
 #define _LCD_SYNCBUSY_CTRL_MASK            0x1UL                                /**< Bit mask for LCD_CTRL */
 #define _LCD_SYNCBUSY_CTRL_DEFAULT         0x00000000UL                         /**< Mode DEFAULT for LCD_SYNCBUSY */
 #define LCD_SYNCBUSY_CTRL_DEFAULT          (_LCD_SYNCBUSY_CTRL_DEFAULT << 0)    /**< Shifted mode DEFAULT for LCD_SYNCBUSY */
-#define LCD_SYNCBUSY_BACTRL                (0x1UL << 1)                         /**< LCD_BACTRL Register Busy */
+#define LCD_SYNCBUSY_BACTRL                (0x1UL << 1)                         /**< BACTRL Register Busy */
 #define _LCD_SYNCBUSY_BACTRL_SHIFT         1                                    /**< Shift value for LCD_BACTRL */
 #define _LCD_SYNCBUSY_BACTRL_MASK          0x2UL                                /**< Bit mask for LCD_BACTRL */
 #define _LCD_SYNCBUSY_BACTRL_DEFAULT       0x00000000UL                         /**< Mode DEFAULT for LCD_SYNCBUSY */
 #define LCD_SYNCBUSY_BACTRL_DEFAULT        (_LCD_SYNCBUSY_BACTRL_DEFAULT << 1)  /**< Shifted mode DEFAULT for LCD_SYNCBUSY */
-#define LCD_SYNCBUSY_AREGA                 (0x1UL << 2)                         /**< LCD_AREGA Register Busy */
+#define LCD_SYNCBUSY_AREGA                 (0x1UL << 2)                         /**< AREGA Register Busy */
 #define _LCD_SYNCBUSY_AREGA_SHIFT          2                                    /**< Shift value for LCD_AREGA */
 #define _LCD_SYNCBUSY_AREGA_MASK           0x4UL                                /**< Bit mask for LCD_AREGA */
 #define _LCD_SYNCBUSY_AREGA_DEFAULT        0x00000000UL                         /**< Mode DEFAULT for LCD_SYNCBUSY */
 #define LCD_SYNCBUSY_AREGA_DEFAULT         (_LCD_SYNCBUSY_AREGA_DEFAULT << 2)   /**< Shifted mode DEFAULT for LCD_SYNCBUSY */
-#define LCD_SYNCBUSY_AREGB                 (0x1UL << 3)                         /**< LCD_AREGB Register Busy */
+#define LCD_SYNCBUSY_AREGB                 (0x1UL << 3)                         /**< AREGB Register Busy */
 #define _LCD_SYNCBUSY_AREGB_SHIFT          3                                    /**< Shift value for LCD_AREGB */
 #define _LCD_SYNCBUSY_AREGB_MASK           0x8UL                                /**< Bit mask for LCD_AREGB */
 #define _LCD_SYNCBUSY_AREGB_DEFAULT        0x00000000UL                         /**< Mode DEFAULT for LCD_SYNCBUSY */
 #define LCD_SYNCBUSY_AREGB_DEFAULT         (_LCD_SYNCBUSY_AREGB_DEFAULT << 3)   /**< Shifted mode DEFAULT for LCD_SYNCBUSY */
-#define LCD_SYNCBUSY_SEGD0L                (0x1UL << 4)                         /**< LCD_SEGD0L Register Busy */
+#define LCD_SYNCBUSY_SEGD0L                (0x1UL << 4)                         /**< SEGD0L Register Busy */
 #define _LCD_SYNCBUSY_SEGD0L_SHIFT         4                                    /**< Shift value for LCD_SEGD0L */
 #define _LCD_SYNCBUSY_SEGD0L_MASK          0x10UL                               /**< Bit mask for LCD_SEGD0L */
 #define _LCD_SYNCBUSY_SEGD0L_DEFAULT       0x00000000UL                         /**< Mode DEFAULT for LCD_SYNCBUSY */
 #define LCD_SYNCBUSY_SEGD0L_DEFAULT        (_LCD_SYNCBUSY_SEGD0L_DEFAULT << 4)  /**< Shifted mode DEFAULT for LCD_SYNCBUSY */
-#define LCD_SYNCBUSY_SEGD1L                (0x1UL << 5)                         /**< LCD_SEGD1L Register Busy */
+#define LCD_SYNCBUSY_SEGD1L                (0x1UL << 5)                         /**< SEGD1L Register Busy */
 #define _LCD_SYNCBUSY_SEGD1L_SHIFT         5                                    /**< Shift value for LCD_SEGD1L */
 #define _LCD_SYNCBUSY_SEGD1L_MASK          0x20UL                               /**< Bit mask for LCD_SEGD1L */
 #define _LCD_SYNCBUSY_SEGD1L_DEFAULT       0x00000000UL                         /**< Mode DEFAULT for LCD_SYNCBUSY */
 #define LCD_SYNCBUSY_SEGD1L_DEFAULT        (_LCD_SYNCBUSY_SEGD1L_DEFAULT << 5)  /**< Shifted mode DEFAULT for LCD_SYNCBUSY */
-#define LCD_SYNCBUSY_SEGD2L                (0x1UL << 6)                         /**< LCD_SEGD2L Register Busy */
+#define LCD_SYNCBUSY_SEGD2L                (0x1UL << 6)                         /**< SEGD2L Register Busy */
 #define _LCD_SYNCBUSY_SEGD2L_SHIFT         6                                    /**< Shift value for LCD_SEGD2L */
 #define _LCD_SYNCBUSY_SEGD2L_MASK          0x40UL                               /**< Bit mask for LCD_SEGD2L */
 #define _LCD_SYNCBUSY_SEGD2L_DEFAULT       0x00000000UL                         /**< Mode DEFAULT for LCD_SYNCBUSY */
 #define LCD_SYNCBUSY_SEGD2L_DEFAULT        (_LCD_SYNCBUSY_SEGD2L_DEFAULT << 6)  /**< Shifted mode DEFAULT for LCD_SYNCBUSY */
-#define LCD_SYNCBUSY_SEGD3L                (0x1UL << 7)                         /**< LCD_SEGD3L Register Busy */
+#define LCD_SYNCBUSY_SEGD3L                (0x1UL << 7)                         /**< SEGD3L Register Busy */
 #define _LCD_SYNCBUSY_SEGD3L_SHIFT         7                                    /**< Shift value for LCD_SEGD3L */
 #define _LCD_SYNCBUSY_SEGD3L_MASK          0x80UL                               /**< Bit mask for LCD_SEGD3L */
 #define _LCD_SYNCBUSY_SEGD3L_DEFAULT       0x00000000UL                         /**< Mode DEFAULT for LCD_SYNCBUSY */
 #define LCD_SYNCBUSY_SEGD3L_DEFAULT        (_LCD_SYNCBUSY_SEGD3L_DEFAULT << 7)  /**< Shifted mode DEFAULT for LCD_SYNCBUSY */
-#define LCD_SYNCBUSY_SEGD4L                (0x1UL << 16)                        /**< LCD_SEGD4L Register Busy */
+#define LCD_SYNCBUSY_SEGD4L                (0x1UL << 16)                        /**< SEGD4L Register Busy */
 #define _LCD_SYNCBUSY_SEGD4L_SHIFT         16                                   /**< Shift value for LCD_SEGD4L */
 #define _LCD_SYNCBUSY_SEGD4L_MASK          0x10000UL                            /**< Bit mask for LCD_SEGD4L */
 #define _LCD_SYNCBUSY_SEGD4L_DEFAULT       0x00000000UL                         /**< Mode DEFAULT for LCD_SYNCBUSY */
 #define LCD_SYNCBUSY_SEGD4L_DEFAULT        (_LCD_SYNCBUSY_SEGD4L_DEFAULT << 16) /**< Shifted mode DEFAULT for LCD_SYNCBUSY */
-#define LCD_SYNCBUSY_SEGD5L                (0x1UL << 17)                        /**< LCD_SEGD5L Register Busy */
+#define LCD_SYNCBUSY_SEGD5L                (0x1UL << 17)                        /**< SEGD5L Register Busy */
 #define _LCD_SYNCBUSY_SEGD5L_SHIFT         17                                   /**< Shift value for LCD_SEGD5L */
 #define _LCD_SYNCBUSY_SEGD5L_MASK          0x20000UL                            /**< Bit mask for LCD_SEGD5L */
 #define _LCD_SYNCBUSY_SEGD5L_DEFAULT       0x00000000UL                         /**< Mode DEFAULT for LCD_SYNCBUSY */
 #define LCD_SYNCBUSY_SEGD5L_DEFAULT        (_LCD_SYNCBUSY_SEGD5L_DEFAULT << 17) /**< Shifted mode DEFAULT for LCD_SYNCBUSY */
-#define LCD_SYNCBUSY_SEGD6L                (0x1UL << 18)                        /**< LCD_SEGD6L Register Busy */
+#define LCD_SYNCBUSY_SEGD6L                (0x1UL << 18)                        /**< SEGD6L Register Busy */
 #define _LCD_SYNCBUSY_SEGD6L_SHIFT         18                                   /**< Shift value for LCD_SEGD6L */
 #define _LCD_SYNCBUSY_SEGD6L_MASK          0x40000UL                            /**< Bit mask for LCD_SEGD6L */
 #define _LCD_SYNCBUSY_SEGD6L_DEFAULT       0x00000000UL                         /**< Mode DEFAULT for LCD_SYNCBUSY */
 #define LCD_SYNCBUSY_SEGD6L_DEFAULT        (_LCD_SYNCBUSY_SEGD6L_DEFAULT << 18) /**< Shifted mode DEFAULT for LCD_SYNCBUSY */
-#define LCD_SYNCBUSY_SEGD7L                (0x1UL << 19)                        /**< LCD_SEGD7L Register Busy */
+#define LCD_SYNCBUSY_SEGD7L                (0x1UL << 19)                        /**< SEGD7L Register Busy */
 #define _LCD_SYNCBUSY_SEGD7L_SHIFT         19                                   /**< Shift value for LCD_SEGD7L */
 #define _LCD_SYNCBUSY_SEGD7L_MASK          0x80000UL                            /**< Bit mask for LCD_SEGD7L */
 #define _LCD_SYNCBUSY_SEGD7L_DEFAULT       0x00000000UL                         /**< Mode DEFAULT for LCD_SYNCBUSY */

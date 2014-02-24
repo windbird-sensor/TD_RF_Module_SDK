@@ -1,11 +1,11 @@
 /***************************************************************************//**
- * @file sensor_raw.h
+ * @file
  * @brief API for sending Raw frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.1.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -41,37 +41,22 @@
 extern "C" {
 #endif
 
+	/***************************************************************************//**
+	 * @addtogroup SENSOR_RAW Sensor Raw
+	 * @{
+	 ******************************************************************************/
 
-/** @defgroup SENSOR_RAW_USER_FUNCTIONS User Functions
- *  @ingroup SENSOR_RAW
- *  @nosubgrouping
- */
+	/*******************************************************************************
+	 *************************   PROTOTYPES   **************************************
+	 ******************************************************************************/
 
-/***************************************************************************//**
- * @addtogroup SENSOR_RAW Sensor Raw
- * @{
- ******************************************************************************/
+	/** @addtogroup SENSOR_RAW_USER_FUNCTIONS User Functions
+	 * @{ */
+	bool TD_SENSOR_SendRaw(uint8_t *msg, uint8_t count);
+	void TD_SENSOR_SetRawTransmissionProfile(uint8_t count, uint32_t interval);
 
-/*******************************************************************************
- *************************   PROTOTYPES   **************************************
- ******************************************************************************/
-
-/** @addtogroup SENSOR_RAW_PUBLIC_FUNCTIONS Public Functions
- * @{ */
-/** @addtogroup SENSOR_RAW_PROTOTYPES Prototypes
- * @{ */
-/** @ingroup SENSOR_RAW_USER_FUNCTIONS
- * @{ */
-bool TD_SENSOR_SendRaw(uint8_t * msg, uint8_t count);
-
-void TD_SENSOR_SetRawTransmissionProfile(uint8_t count, uint32_t interval);
-
-/** @} */
-
-/** @} */
-
-/** @} */
-/** @} (end addtogroup SENSOR_RAW) */
+	/** @} */
+	/** @} (end addtogroup SENSOR_RAW) */
 
 #ifdef __cplusplus
 }

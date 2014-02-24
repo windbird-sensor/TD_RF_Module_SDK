@@ -2,7 +2,7 @@
  * @file
  * @brief General Purpose IO (GPIO) peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -33,8 +33,10 @@
 #ifndef __EM_GPIO_H
 #define __EM_GPIO_H
 
-#include <stdbool.h>
 #include "em_device.h"
+#if defined(GPIO_COUNT) && (GPIO_COUNT > 0)
+
+#include <stdbool.h>
 #include "em_bitband.h"
 #include "em_assert.h"
 
@@ -151,7 +153,7 @@ void GPIO_PinModeSet(GPIO_Port_TypeDef port,
                      GPIO_Mode_TypeDef mode,
                      unsigned int out);
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+# if defined( GPIO_CTRL_EM4RET )
 __STATIC_INLINE void GPIO_EM4SetPinRetention(bool enable);
 #endif
 
@@ -191,6 +193,7 @@ __STATIC_INLINE void GPIO_DbgSWDIOEnable(bool enable)
 }
 
 
+#if defined( GPIO_ROUTE_SWOPEN )
 /***************************************************************************//**
  * @brief
  *   Enable/Disable serial wire output pin.
@@ -208,12 +211,12 @@ __STATIC_INLINE void GPIO_DbgSWOEnable(bool enable)
 {
   BITBAND_Peripheral(&(GPIO->ROUTE), _GPIO_ROUTE_SWOPEN_SHIFT, (unsigned int)enable);
 }
-
+#endif
 
 void GPIO_DriveModeSet(GPIO_Port_TypeDef port, GPIO_DriveMode_TypeDef mode);
 
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+# if defined( _GPIO_EM4WUEN_MASK )
 /**************************************************************************//**
  * @brief
  *   Disable GPIO pin wake-up from EM4.
@@ -228,8 +231,10 @@ __STATIC_INLINE void GPIO_EM4DisablePinWakeup(uint32_t pinmask)
 
   GPIO->EM4WUEN &= ~pinmask;
 }
+#endif
 
 
+# if defined( _GPIO_EM4WUEN_MASK )
 /**************************************************************************//**
  * @brief
  *   Enable GPIO pin wake-up from EM4. When the function exits,
@@ -260,7 +265,9 @@ __STATIC_INLINE void GPIO_EM4EnablePinWakeup(uint32_t pinmask,
 
   GPIO->CMD = GPIO_CMD_EM4WUCLR;            /* Clear wake-up logic */
 }
+#endif
 
+#if defined( _GPIO_EM4WUCAUSE_MASK )
 /**************************************************************************//**
  * @brief
  *   Check which GPIO pin(s) that caused a wake-up from EM4.
@@ -273,8 +280,10 @@ __STATIC_INLINE uint32_t GPIO_EM4GetPinWakeupCause(void)
 {
   return GPIO->EM4WUCAUSE & _GPIO_EM4WUCAUSE_MASK;
 }
+#endif
 
 
+# if defined( GPIO_CTRL_EM4RET )
 /**************************************************************************//**
  * @brief
  *   Enable GPIO pin retention of output enable, output value, pull enable and
@@ -307,8 +316,8 @@ __STATIC_INLINE void GPIO_EM4SetPinRetention(bool enable)
  *
  * @param[in] val
  *   Bitwise logic OR of one or more of:
- *   @li GPIO_INSENSE_INTSENSE - interrupt input sensing.
- *   @li GPIO_INSENSE_PRSSENSE - peripheral reflex system input sensing.
+ *   @li GPIO_INSENSE_INT - interrupt input sensing.
+ *   @li GPIO_INSENSE_PRS - peripheral reflex system input sensing.
  *
  * @param[in] mask
  *   Mask containing bitwise logic OR of bits similar as for @p val used to indicate
@@ -685,3 +694,5 @@ __STATIC_INLINE void GPIO_Unlock(void)
 #endif
 
 #endif /* __EM_GPIO_H */
+
+#endif /* defined(GPIO_COUNT) && (GPIO_COUNT > 0) */

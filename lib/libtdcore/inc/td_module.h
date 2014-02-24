@@ -2,10 +2,10 @@
  * @file
  * @brief Public definitions for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -34,72 +34,93 @@
 #ifndef __TD_MODULE_H
 #define __TD_MODULE_H
 
+#include "td_config_ext.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+	/***************************************************************************//**
+	 * @addtogroup Compiler Compiler-specific Definitions
+	 * @brief Compiler Compiler-specific Definitions
+	 * @{
+	 ******************************************************************************/
+
 #if defined(__ICCARM__)
 
-/** Macro for packing structure depending on the used compiler */
+	/** Macro for packing structure depending on the used compiler */
 #define __PACKED                __packed
 
-/** Macro for aligning structure depending on the used compiler */
+	/** Macro for aligning structure depending on the used compiler */
 #define __ALIGN(i)              __align(i)
 
-/** Macro for RAM function declaration depending on the used compiler */
+	/** Macro for RAM function declaration depending on the used compiler */
 #define __RAMFUNCTION           __ramfunc
+
+	/** __WEAK is already defined in compiler include */
 
 #elif defined(__GNUC__)
 
+	/** Macro for packing structure depending on the used compiler */
 #define __PACKED                __attribute__((packed))
 
+	/** Macro for aligning structure depending on the used compiler */
 #define __ALIGN(i)              __attribute__((aligned(i)))
 
-#define __RAMFUNCTION           __attribute__((section(".data.ram")))
+
+	/** Macro for RAM function declaration depending on the used compiler */
+#define __RAMFUNCTION           __attribute__((section(".data.ram @ ")))
+
+	/** __WEAK for defining link symbols only if they are not already defined */
+#define __WEAK					__attribute__((weak))
 
 #endif
 
-/***************************************************************************//**
- * @addtogroup Revision
- * @brief TDxxxx RF module revision
- * @{
- ******************************************************************************/
+	/** @} (end addtogroup Compiler) */
 
-/** Module P/N in decimal format */
+	/***************************************************************************//**
+	 * @addtogroup Revision
+	 * @brief TDxxxx RF module revision
+	 * @{
+	 ******************************************************************************/
+
+	/** Module P/N in decimal format */
 #define IN1201                  1201
 
-/** Module P/N in string format */
+	/** Module P/N in string format */
 #define	MODULE_PN               "IN1201"
 
-/** Module revision index */
-#define REVISION_D              4	///< Revision D
-#define REVISION_E              5	///< Revision E
-#define REVISION_F              6	///< Revision F
-#define REVISION_VBC4           7	///< VBC4
+	/** Module revision index */
+#define REVISION_D              4	///< Module TD1202 Revision D
+#define REVISION_E              5	///< Module TD1202 Revision E
+#define REVISION_F              6	///< Module TD1202/TD1208 Revision F
+#define REVISION_VBC4           7	///< VBC4, all revisions
+#define REVISION_TD1204         8	///< Module TD1204, all revisions
+#define REVISION_TD1205         9	///< Module TD1205, all revisions
+#define REVISION_TD1202			10	///< Module TD1202, all revisions
+#define REVISION_TD1208			11	///< Module TD1208, all revisions
+#define REVISION_CUSTOM         0xFF///< All other implementation that must define all their config before including td_config.h. See td_config.h doc
 
-#ifndef MODULE_REVISION
+	/* This define enables to build a very small subset of the TD_CORE library
+	 * and externally controlled system timer
+	 */
+//#define LIB_TDCORE_TINY
 
-/** Module reveision */
-#define MODULE_REVISION         REVISION_F
+	/** @} (end addtogroup Revision) */
 
-#define GATEWAY_DEBUG				///< Default build configuration
-#endif
+	/***************************************************************************//**
+	 * @addtogroup Pinout TDxxxx RF Module Pinout
+	 * @brief TDxxxx RF module pinout
+	 * @{
+	 ******************************************************************************/
 
-/** @} (end addtogroup Revision) */
+	/***************************************************************************//**
+	 * @addtogroup Port_A Port A
+	 * @brief TDxxxx RF module port A
+	 * @{
+	 ******************************************************************************/
 
-/***************************************************************************//**
- * @addtogroup Pinout TD1202 Module Pinout
- * @brief TDxxxx RF module pinout
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup Port_A Port A
- * @brief TDxxxx RF module port A
- * @{
- ******************************************************************************/
-
-/**I/O definitions */
+	/**I/O definitions */
 #define	SDA_PORT                gpioPortA           /**< I2C Data port */
 #define	SDA_BIT                 0					/**< I2C Data bit */
 #define	SDA_MASK                (1 << SDA_BIT)		/**< I2C Data mask */
@@ -115,13 +136,13 @@ extern "C" {
 #define	NIRQ_RF_MASK            (1 << NIRQ_RF_BIT)	/**< RF IRQ mask */
 #define NIRQ_RF_PIN             3					/**< RF IRQ pin */
 
-/** @} (end addtogroup Port_A) */
+	/** @} (end addtogroup Port_A) */
 
-/***************************************************************************//**
- * @addtogroup Port_B Port B
- * @brief TDxxxx RF module port B
- * @{
- ******************************************************************************/
+	/***************************************************************************//**
+	 * @addtogroup Port_B Port B
+	 * @brief TDxxxx RF module port B
+	 * @{
+	 ******************************************************************************/
 
 #define	LFXTAL_P_PORT           gpioPortB           /**< Positive 32768 Hz Crystal port */
 #define	LFXTAL_P_BIT            7					/**< Positive 32768 Hz Crystal bit */
@@ -148,13 +169,13 @@ extern "C" {
 #define	GP2_MASK                (1 << GP2_BIT)		/**< RF GPIO 2 mask */
 #define	GP2_PIN                 13					/**< RF GPIO 2 pin */
 
-/** @} (end addtogroup Port_B) */
+	/** @} (end addtogroup Port_B) */
 
-/***************************************************************************//**
- * @addtogroup Port_C Port C
- * @brief TDxxxx RF module port C
- * @{
- ******************************************************************************/
+	/***************************************************************************//**
+	 * @addtogroup Port_C Port C
+	 * @brief TDxxxx RF module port C
+	 * @{
+	 ******************************************************************************/
 
 #define	USR2_PORT               gpioPortC           /**< User GPIO 2 port */
 #define	USR2_BIT                0					/**< User GPIO 2 bit */
@@ -166,18 +187,6 @@ extern "C" {
 #define	USR3_MASK               (1 << USR3_BIT)		/**< User GPIO 31 mask */
 #define	USR3_PIN                6					/**< User GPIO 3 pin */
 
-#if (MODULE_REVISION == REVISION_VBC4)
-#define	GP1_PORT                gpioPortC           /**< RF GPIO 1 port */
-#define	GP1_BIT                 15					/**< RF GPIO 1 bit */
-#define	GP1_MASK                (1 << GP1_BIT)		/**< RF GPIO 1 mask */
-#define	GP1_PIN                 24					/**< RF GPIO 1 pin */
-#else
-#define	GP1_PORT                gpioPortC           /**< RF GPIO 1 port */
-#define	GP1_BIT                 13					/**< RF GPIO 1 bit */
-#define	GP1_MASK                (1 << GP1_BIT)		/**< RF GPIO 1 mask */
-#define	GP1_PIN                 22					/**< RF GPIO 1 pin */
-#endif
-
 #define	USR4_PORT               gpioPortC           /**< User GPIO 4 port */
 #define	USR4_BIT                14					/**< User GPIO 4 bit */
 #define	USR4_MASK               (1 << USR4_BIT)		/**< User GPIO 4 mask */
@@ -188,13 +197,13 @@ extern "C" {
 #define	USR1_MASK               (1 << USR1_BIT)		/**< User GPIO 1 mask */
 #define	USR1_PIN                24					/**< User GPIO 1 pin */
 
-/** @} (end addtogroup Port_C) */
+	/** @} (end addtogroup Port_C) */
 
-/***************************************************************************//**
- * @addtogroup Port_D Port D
- * @brief TDxxxx RF module port D
- * @{
- ******************************************************************************/
+	/***************************************************************************//**
+	 * @addtogroup Port_D Port D
+	 * @brief TDxxxx RF module port D
+	 * @{
+	 ******************************************************************************/
 
 #define TX_PORT                 gpioPortD           /**< RS232 TX (Out) port */
 #define TX_BIT                  4					/**< RS232 TX (Out) bit */
@@ -216,13 +225,13 @@ extern "C" {
 #define TIM2_MASK               (1 << TIM2_BIT)		/**< Timer 2 mask */
 #define TIM2_PIN                19					/**< Timer 2 pin */
 
-/** @} (end addtogroup Port_D) */
+	/** @} (end addtogroup Port_D) */
 
-/***************************************************************************//**
- * @addtogroup Port_E Port E
- * @brief TDxxxx RF module port E
- * @{
- ******************************************************************************/
+	/***************************************************************************//**
+	 * @addtogroup Port_E Port E
+	 * @brief TDxxxx RF module port E
+	 * @{
+	 ******************************************************************************/
 
 #define SDI_RF_PORT             gpioPortE           /**< RF SPI MOSI (Out) port */
 #define SDI_RF_BIT              10					/**< RF SPI MOSI (Out) bit */
@@ -244,13 +253,13 @@ extern "C" {
 #define NSEL_RF_MASK            (1 << NSEL_RF_BIT)	/**< RF Chip Select (Out) mask */
 #define NSEL_RF_PIN             32					/**< RF Chip Select (Out) pin */
 
-/** @} (end addtogroup Port_E) */
+	/** @} (end addtogroup Port_E) */
 
-/***************************************************************************//**
- * @addtogroup Port_F Port F
- * @brief TDxxxx RF module port_F
- * @{
- ******************************************************************************/
+	/***************************************************************************//**
+	 * @addtogroup Port_F Port F
+	 * @brief TDxxxx RF module port_F
+	 * @{
+	 ******************************************************************************/
 
 #define DB3_PORT                gpioPortF           /**< JTAG SWDCLK Clock (In) port */
 #define DB3_BIT                 0					/**< JTAG SWDCLK Clock (In) bit */
@@ -262,27 +271,15 @@ extern "C" {
 #define DB2_MASK                (1 << DB2_BIT)		/**< JTAG SWDIO Data I/O mask */
 #define DB2_PIN                 26					/**< JTAG SWDIO Data I/O pin */
 
-#if (MODULE_REVISION == REVISION_VBC4)
-#define POWER_CRYSTAL_PORT      gpioPortB           /**< Power RF Crystal port */
-#define POWER_CRYSTAL_BIT       11					/**< Power RF Crystal bit */
-#define POWER_CRYSTAL_MASK      (1 << POWER_CRYSTAL_BIT)	/**< Power RF Crystal mask */
-#define POWER_CRYSTAL_PIN       10					/**< Power RF Crystal pin */
-#else
-#define POWER_CRYSTAL_PORT      gpioPortF           /**< Power RF Crystal port */
-#define POWER_CRYSTAL_BIT       2					/**< Power RF Crystal bit */
-#define POWER_CRYSTAL_MASK      (1 << POWER_CRYSTAL_BIT)	/**< Power RF Crystal mask */
-#define POWER_CRYSTAL_PIN       27					/**< Power RF Crystal pin */
-#endif
+	/** @} (end addtogroup Port_F) */
 
-/** @} (end addtogroup Port_F) */
+	/***************************************************************************//**
+	 * @addtogroup RF_Interface RF Interface
+	 * @brief TDxxxx RF module RF chip interface
+	 * @{
+	 ******************************************************************************/
 
-/***************************************************************************//**
- * @addtogroup RF_Interface RF Interface
- * @brief TDxxxx RF module RF chip interface
- * @{
- ******************************************************************************/
-
-/** RF Chip interface */
+	/** RF Chip interface */
 #define DATA_RF_PORT            GP1_PORT			/**< RF Data port */
 #define DATA_RF_BIT             GP1_BIT				/**< RF Data bit */
 #define DATA_RF_MASK            GP1_MASK			/**< RF Data mask */
@@ -301,8 +298,8 @@ extern "C" {
 #define IRQ1_PORT               GP2_PORT			/**< RF IRQ1 port */
 #define IRQ1_BIT                GP2_BIT				/**< RF IRQ1 bit */
 
-/** @} (end addtogroup RF_Interface) */
-/** @} (end addtogroup Pinout) */
+	/** @} (end addtogroup RF_Interface) */
+	/** @} (end addtogroup Pinout) */
 
 #ifdef __cplusplus
 }

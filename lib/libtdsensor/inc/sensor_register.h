@@ -1,11 +1,11 @@
 /***************************************************************************//**
- * @file sensor_register.c
+ * @file
  * @brief API for sending Register frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.2.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -31,49 +31,34 @@
  *
  ******************************************************************************/
 
-#ifndef SENSOR_REGISTER_H_
-#define SENSOR_REGISTER_H_
+#ifndef __SENSOR_REGISTER_H
+#define __SENSOR_REGISTER_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+	/***************************************************************************//**
+	 * @addtogroup SENSOR_REGISTER Sensor Register
+	 * @{
+	 ******************************************************************************/
 
-/** @defgroup SENSOR_REGISTER_USER_FUNCTIONS User Functions
- *  @ingroup SENSOR_REGISTER
- *  @nosubgrouping
- */
+	/*******************************************************************************
+	 *************************   PROTOTYPES   **************************************
+	 ******************************************************************************/
 
-/***************************************************************************//**
- * @addtogroup SENSOR_REGISTER Sensor Register
- * @{
- ******************************************************************************/
+	/** @addtogroup SENSOR_REGISTER_USER_FUNCTIONS User Functions
+	 * @{ */
 
-/*******************************************************************************
- *************************   PROTOTYPES   **************************************
- ******************************************************************************/
+	bool TD_SENSOR_SendRegister(void);
+	void TD_SENSOR_SetRegisterTransmissionProfile(uint8_t repetition, uint32_t interval);
 
-/** @addtogroup SENSOR_REGISTER_PUBLIC_FUNCTIONS Public Functions
- * @{ */
-/** @addtogroup SENSOR_REGISTER_PROTOTYPES Prototypes
- * @{ */
+	/** @} */
 
-/** @ingroup SENSOR_REGISTER_USER_FUNCTIONS
- * @{ */
-
-bool TD_SENSOR_SendRegister();
-
-void TD_SENSOR_SetRegisterTransmissionProfile(uint8_t repetition, uint32_t interval);
-
-/** @} */
-
-/** @} */
-
-/** @} */
-/** @} (end addtogroup SENSOR_REGISTER) */
+	/** @} (end addtogroup SENSOR_REGISTER) */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* SENSOR_REGISTER_H_ */
+#endif // __SENSOR_REGISTER_H

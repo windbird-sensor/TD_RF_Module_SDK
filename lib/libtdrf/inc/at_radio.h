@@ -2,10 +2,10 @@
  * @file
  * @brief RF chip information AT command extension for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -40,40 +40,40 @@
 extern "C" {
 #endif
 
-/***************************************************************************//**
- * @addtogroup AT_RF_INFO RF Information AT Extension
- * @brief RF chip information AT command extension for the TD1202 module
- * @{
- ******************************************************************************/
+	/***************************************************************************//**
+	 * @addtogroup AT_RF_INFO RF Information AT Extension
+	 * @brief RF chip information AT command extension for the TDxxxx RF modules
+	 * @{
+	 ******************************************************************************/
 
-/*******************************************************************************
- *************************   DEFINES   *****************************************
- ******************************************************************************/
+	/*******************************************************************************
+	 *************************   DEFINES   *****************************************
+	 ******************************************************************************/
 
-/** @addtogroup AT_RF_INFO_DEFINES Defines
- * @{ */
+	/** @addtogroup AT_RF_INFO_DEFINES Defines
+	 * @{ */
 
-/** Alias for the RF chip information AT extension */
+	/** Alias for the RF chip information AT extension */
 #define AT_RADIO_EXTENSION radio_extension,
 
-/** @} */
+	/** @} */
 
-/*******************************************************************************
- **************************   PUBLIC VARIABLES   *******************************
- ******************************************************************************/
+	/*******************************************************************************
+	 **************************   PUBLIC VARIABLES   *******************************
+	 ******************************************************************************/
 
-/** @addtogroup AT_RF_INFO_PUBLIC_VARIABLES Public Variables
- * @{ */
-/** @addtogroup AT_RF_INFO_EXTERN Extern Declarations
- * @{ */
+	/** @addtogroup AT_RF_INFO_GLOBAL_VARIABLES Global Variables
+	 * @{ */
+	/** @addtogroup AT_RF_INFO_EXTERN Extern Declarations
+	 * @{ */
 
-/** The RF chip information AT extension structure */
-extern AT_extension_t radio_extension;
+	/** The RF chip information AT extension structure */
+	extern AT_extension_t radio_extension;
 
-/** @} */
-/** @} */
+	/** @} */
+	/** @} */
 
-/** @} (end addtogroup AT_RF_INFO) */
+	/** @} (end addtogroup AT_RF_INFO) */
 
 #ifdef __cplusplus
 }

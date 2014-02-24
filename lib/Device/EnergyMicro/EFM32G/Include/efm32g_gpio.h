@@ -2,7 +2,7 @@
  * @file
  * @brief efm32g_gpio Register and Bit Field definitions
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -1039,16 +1039,12 @@ typedef struct
 #define GPIO_ROUTE_SWOPEN_DEFAULT                         (_GPIO_ROUTE_SWOPEN_DEFAULT << 2)     /**< Shifted mode DEFAULT for GPIO_ROUTE */
 #define _GPIO_ROUTE_SWLOCATION_SHIFT                      8                                     /**< Shift value for GPIO_SWLOCATION */
 #define _GPIO_ROUTE_SWLOCATION_MASK                       0x300UL                               /**< Bit mask for GPIO_SWLOCATION */
-#define _GPIO_ROUTE_SWLOCATION_DEFAULT                    0x00000000UL                          /**< Mode DEFAULT for GPIO_ROUTE */
 #define _GPIO_ROUTE_SWLOCATION_LOC0                       0x00000000UL                          /**< Mode LOC0 for GPIO_ROUTE */
+#define _GPIO_ROUTE_SWLOCATION_DEFAULT                    0x00000000UL                          /**< Mode DEFAULT for GPIO_ROUTE */
 #define _GPIO_ROUTE_SWLOCATION_LOC1                       0x00000001UL                          /**< Mode LOC1 for GPIO_ROUTE */
-#define _GPIO_ROUTE_SWLOCATION_LOC2                       0x00000002UL                          /**< Mode LOC2 for GPIO_ROUTE */
-#define _GPIO_ROUTE_SWLOCATION_LOC3                       0x00000003UL                          /**< Mode LOC3 for GPIO_ROUTE */
-#define GPIO_ROUTE_SWLOCATION_DEFAULT                     (_GPIO_ROUTE_SWLOCATION_DEFAULT << 8) /**< Shifted mode DEFAULT for GPIO_ROUTE */
 #define GPIO_ROUTE_SWLOCATION_LOC0                        (_GPIO_ROUTE_SWLOCATION_LOC0 << 8)    /**< Shifted mode LOC0 for GPIO_ROUTE */
+#define GPIO_ROUTE_SWLOCATION_DEFAULT                     (_GPIO_ROUTE_SWLOCATION_DEFAULT << 8) /**< Shifted mode DEFAULT for GPIO_ROUTE */
 #define GPIO_ROUTE_SWLOCATION_LOC1                        (_GPIO_ROUTE_SWLOCATION_LOC1 << 8)    /**< Shifted mode LOC1 for GPIO_ROUTE */
-#define GPIO_ROUTE_SWLOCATION_LOC2                        (_GPIO_ROUTE_SWLOCATION_LOC2 << 8)    /**< Shifted mode LOC2 for GPIO_ROUTE */
-#define GPIO_ROUTE_SWLOCATION_LOC3                        (_GPIO_ROUTE_SWLOCATION_LOC3 << 8)    /**< Shifted mode LOC3 for GPIO_ROUTE */
 
 /* Bit fields for GPIO INSENSE */
 #define _GPIO_INSENSE_RESETVALUE                          0x00000003UL                     /**< Default value for GPIO_INSENSE */

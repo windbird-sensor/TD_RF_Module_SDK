@@ -2,7 +2,7 @@
  * @file
  * @brief efm32lg_msc Register and Bit Field definitions
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -81,7 +81,7 @@ typedef struct
 
 /* Bit fields for MSC READCTRL */
 #define _MSC_READCTRL_RESETVALUE                0x00000001UL                              /**< Default value for MSC_READCTRL */
-#define _MSC_READCTRL_MASK                      0x000301FFUL                              /**< Mask for MSC_READCTRL */
+#define _MSC_READCTRL_MASK                      0x000300FFUL                              /**< Mask for MSC_READCTRL */
 #define _MSC_READCTRL_MODE_SHIFT                0                                         /**< Shift value for MSC_MODE */
 #define _MSC_READCTRL_MODE_MASK                 0x7UL                                     /**< Bit mask for MSC_MODE */
 #define _MSC_READCTRL_MODE_WS0                  0x00000000UL                              /**< Mode WS0 for MSC_READCTRL */
@@ -123,11 +123,6 @@ typedef struct
 #define _MSC_READCTRL_RAMCEN_MASK               0x80UL                                    /**< Bit mask for MSC_RAMCEN */
 #define _MSC_READCTRL_RAMCEN_DEFAULT            0x00000000UL                              /**< Mode DEFAULT for MSC_READCTRL */
 #define MSC_READCTRL_RAMCEN_DEFAULT             (_MSC_READCTRL_RAMCEN_DEFAULT << 7)       /**< Shifted mode DEFAULT for MSC_READCTRL */
-#define MSC_READCTRL_PREFETCH                   (0x1UL << 8)                              /**< Prefetch Mode */
-#define _MSC_READCTRL_PREFETCH_SHIFT            8                                         /**< Shift value for MSC_PREFETCH */
-#define _MSC_READCTRL_PREFETCH_MASK             0x100UL                                   /**< Bit mask for MSC_PREFETCH */
-#define _MSC_READCTRL_PREFETCH_DEFAULT          0x00000000UL                              /**< Mode DEFAULT for MSC_READCTRL */
-#define MSC_READCTRL_PREFETCH_DEFAULT           (_MSC_READCTRL_PREFETCH_DEFAULT << 8)     /**< Shifted mode DEFAULT for MSC_READCTRL */
 #define _MSC_READCTRL_BUSSTRATEGY_SHIFT         16                                        /**< Shift value for MSC_BUSSTRATEGY */
 #define _MSC_READCTRL_BUSSTRATEGY_MASK          0x30000UL                                 /**< Bit mask for MSC_BUSSTRATEGY */
 #define _MSC_READCTRL_BUSSTRATEGY_DEFAULT       0x00000000UL                              /**< Mode DEFAULT for MSC_READCTRL */
@@ -143,7 +138,7 @@ typedef struct
 
 /* Bit fields for MSC WRITECTRL */
 #define _MSC_WRITECTRL_RESETVALUE               0x00000000UL                                /**< Default value for MSC_WRITECTRL */
-#define _MSC_WRITECTRL_MASK                     0x0000003FUL                                /**< Mask for MSC_WRITECTRL */
+#define _MSC_WRITECTRL_MASK                     0x00000003UL                                /**< Mask for MSC_WRITECTRL */
 #define MSC_WRITECTRL_WREN                      (0x1UL << 0)                                /**< Enable Write/Erase Controller  */
 #define _MSC_WRITECTRL_WREN_SHIFT               0                                           /**< Shift value for MSC_WREN */
 #define _MSC_WRITECTRL_WREN_MASK                0x1UL                                       /**< Bit mask for MSC_WREN */
@@ -154,30 +149,10 @@ typedef struct
 #define _MSC_WRITECTRL_IRQERASEABORT_MASK       0x2UL                                       /**< Bit mask for MSC_IRQERASEABORT */
 #define _MSC_WRITECTRL_IRQERASEABORT_DEFAULT    0x00000000UL                                /**< Mode DEFAULT for MSC_WRITECTRL */
 #define MSC_WRITECTRL_IRQERASEABORT_DEFAULT     (_MSC_WRITECTRL_IRQERASEABORT_DEFAULT << 1) /**< Shifted mode DEFAULT for MSC_WRITECTRL */
-#define MSC_WRITECTRL_WDOUBLE                   (0x1UL << 2)                                /**< Write two words at a time */
-#define _MSC_WRITECTRL_WDOUBLE_SHIFT            2                                           /**< Shift value for MSC_WDOUBLE */
-#define _MSC_WRITECTRL_WDOUBLE_MASK             0x4UL                                       /**< Bit mask for MSC_WDOUBLE */
-#define _MSC_WRITECTRL_WDOUBLE_DEFAULT          0x00000000UL                                /**< Mode DEFAULT for MSC_WRITECTRL */
-#define MSC_WRITECTRL_WDOUBLE_DEFAULT           (_MSC_WRITECTRL_WDOUBLE_DEFAULT << 2)       /**< Shifted mode DEFAULT for MSC_WRITECTRL */
-#define MSC_WRITECTRL_LPWRITE                   (0x1UL << 3)                                /**< Low-Power Erase */
-#define _MSC_WRITECTRL_LPWRITE_SHIFT            3                                           /**< Shift value for MSC_LPWRITE */
-#define _MSC_WRITECTRL_LPWRITE_MASK             0x8UL                                       /**< Bit mask for MSC_LPWRITE */
-#define _MSC_WRITECTRL_LPWRITE_DEFAULT          0x00000000UL                                /**< Mode DEFAULT for MSC_WRITECTRL */
-#define MSC_WRITECTRL_LPWRITE_DEFAULT           (_MSC_WRITECTRL_LPWRITE_DEFAULT << 3)       /**< Shifted mode DEFAULT for MSC_WRITECTRL */
-#define MSC_WRITECTRL_LPERASE                   (0x1UL << 4)                                /**< Low-Power Erase */
-#define _MSC_WRITECTRL_LPERASE_SHIFT            4                                           /**< Shift value for MSC_LPERASE */
-#define _MSC_WRITECTRL_LPERASE_MASK             0x10UL                                      /**< Bit mask for MSC_LPERASE */
-#define _MSC_WRITECTRL_LPERASE_DEFAULT          0x00000000UL                                /**< Mode DEFAULT for MSC_WRITECTRL */
-#define MSC_WRITECTRL_LPERASE_DEFAULT           (_MSC_WRITECTRL_LPERASE_DEFAULT << 4)       /**< Shifted mode DEFAULT for MSC_WRITECTRL */
-#define MSC_WRITECTRL_RWWEN                     (0x1UL << 5)                                /**< Read-While-Write Enable */
-#define _MSC_WRITECTRL_RWWEN_SHIFT              5                                           /**< Shift value for MSC_RWWEN */
-#define _MSC_WRITECTRL_RWWEN_MASK               0x20UL                                      /**< Bit mask for MSC_RWWEN */
-#define _MSC_WRITECTRL_RWWEN_DEFAULT            0x00000000UL                                /**< Mode DEFAULT for MSC_WRITECTRL */
-#define MSC_WRITECTRL_RWWEN_DEFAULT             (_MSC_WRITECTRL_RWWEN_DEFAULT << 5)         /**< Shifted mode DEFAULT for MSC_WRITECTRL */
 
 /* Bit fields for MSC WRITECMD */
 #define _MSC_WRITECMD_RESETVALUE                0x00000000UL                             /**< Default value for MSC_WRITECMD */
-#define _MSC_WRITECMD_MASK                      0x0000133FUL                             /**< Mask for MSC_WRITECMD */
+#define _MSC_WRITECMD_MASK                      0x0000113FUL                             /**< Mask for MSC_WRITECMD */
 #define MSC_WRITECMD_LADDRIM                    (0x1UL << 0)                             /**< Load MSC_ADDRB into ADDR */
 #define _MSC_WRITECMD_LADDRIM_SHIFT             0                                        /**< Shift value for MSC_LADDRIM */
 #define _MSC_WRITECMD_LADDRIM_MASK              0x1UL                                    /**< Bit mask for MSC_LADDRIM */
@@ -213,11 +188,6 @@ typedef struct
 #define _MSC_WRITECMD_ERASEMAIN0_MASK           0x100UL                                  /**< Bit mask for MSC_ERASEMAIN0 */
 #define _MSC_WRITECMD_ERASEMAIN0_DEFAULT        0x00000000UL                             /**< Mode DEFAULT for MSC_WRITECMD */
 #define MSC_WRITECMD_ERASEMAIN0_DEFAULT         (_MSC_WRITECMD_ERASEMAIN0_DEFAULT << 8)  /**< Shifted mode DEFAULT for MSC_WRITECMD */
-#define MSC_WRITECMD_ERASEMAIN1                 (0x1UL << 9)                             /**< Mass erase region 1 */
-#define _MSC_WRITECMD_ERASEMAIN1_SHIFT          9                                        /**< Shift value for MSC_ERASEMAIN1 */
-#define _MSC_WRITECMD_ERASEMAIN1_MASK           0x200UL                                  /**< Bit mask for MSC_ERASEMAIN1 */
-#define _MSC_WRITECMD_ERASEMAIN1_DEFAULT        0x00000000UL                             /**< Mode DEFAULT for MSC_WRITECMD */
-#define MSC_WRITECMD_ERASEMAIN1_DEFAULT         (_MSC_WRITECMD_ERASEMAIN1_DEFAULT << 9)  /**< Shifted mode DEFAULT for MSC_WRITECMD */
 #define MSC_WRITECMD_CLEARWDATA                 (0x1UL << 12)                            /**< Clear WDATA state */
 #define _MSC_WRITECMD_CLEARWDATA_SHIFT          12                                       /**< Shift value for MSC_CLEARWDATA */
 #define _MSC_WRITECMD_CLEARWDATA_MASK           0x1000UL                                 /**< Bit mask for MSC_CLEARWDATA */

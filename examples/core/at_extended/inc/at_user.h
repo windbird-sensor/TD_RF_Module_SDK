@@ -1,11 +1,11 @@
 /***************************************************************************//**
  * @file
- * @brief User AT command extension for the TD1202 module.
+ * @brief User AT command extension for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.0.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,

@@ -2,7 +2,7 @@
  * @file
  * @brief Pulse Counter (PCNT) peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -33,8 +33,10 @@
 #ifndef __EM_PCNT_H
 #define __EM_PCNT_H
 
-#include <stdbool.h>
 #include "em_device.h"
+#if defined(PCNT_COUNT) && (PCNT_COUNT > 0)
+
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,6 +51,23 @@ extern "C" {
  * @addtogroup PCNT
  * @{
  ******************************************************************************/
+
+/*******************************************************************************
+ *******************************   DEFINES   ***********************************
+ ******************************************************************************/
+/** PCNT Counter register sizes. */
+#if defined _EFM32_GECKO_FAMILY
+#define PCNT0_CNT_SIZE    (8)   /** PCNT0 counter is  8 bits. */
+#else
+#define PCNT0_CNT_SIZE   (16)   /** PCNT0 counter is 16 bits. */
+#endif
+#ifdef PCNT1
+#define PCNT1_CNT_SIZE    (8)   /** PCNT1 counter is  8 bits. */
+#endif
+#ifdef PCNT2
+#define PCNT2_CNT_SIZE    (8)   /** PCNT2 counter is  8 bits. */
+#endif
+
 
 /*******************************************************************************
  ********************************   ENUMS   ************************************
@@ -71,7 +90,7 @@ typedef enum
 } PCNT_Mode_TypeDef;
 
 
-#if (defined (_EFM32_TINY_FAMILY) || defined (_EFM32_GIANT_FAMILY) || defined (_EFM32_WONDER_FAMILY))
+#if defined( _PCNT_CTRL_CNTEV_MASK)
 /** Counter event selection.
  *  Note: unshifted values are being used for enumeration because multiple
  *  configuration structure members use this type definition. */
@@ -89,8 +108,10 @@ typedef enum
   /** Never counts. */
   pcntCntEventNone = _PCNT_CTRL_CNTEV_NONE
 } PCNT_CntEvent_TypeDef;
+#endif
 
 
+#if defined( _PCNT_INPUT_MASK )
 /** PRS sources for @p s0PRS and @p s1PRS. */
 typedef enum
 {
@@ -101,7 +122,13 @@ typedef enum
   pcntPRSCh4 = 4,     /**< PRS channel 4. */
   pcntPRSCh5 = 5,     /**< PRS channel 5. */
   pcntPRSCh6 = 6,     /**< PRS channel 6. */
-  pcntPRSCh7 = 7      /**< PRS channel 7. */
+  pcntPRSCh7 = 7,     /**< PRS channel 7. */
+#if defined( PCNT_INPUT_S0PRSSEL_PRSCH11 )
+  pcntPRSCh8 = 8,     /**< PRS channel 8. */
+  pcntPRSCh9 = 9,     /**< PRS channel 9. */
+  pcntPRSCh10 = 10,   /**< PRS channel 10. */
+  pcntPRSCh11 = 11    /**< PRS channel 11. */
+#endif
 } PCNT_PRSSel_TypeDef;
 
 
@@ -149,7 +176,7 @@ typedef struct
   /** Enable filter, only available in #pcntModeOvsSingle mode. */
   bool                  filter;
 
-#if (defined (_EFM32_TINY_FAMILY) || defined (_EFM32_GIANT_FAMILY) || defined (_EFM32_WONDER_FAMILY))
+#if defined( PCNT_CTRL_HYST )
   /** Set to true to enable hysteresis. When its enabled, the PCNT will always
    *  overflow and underflow to TOP/2. */
   bool                  hyst;
@@ -186,7 +213,7 @@ typedef struct
     false,                                    /* Up-counting. */                    \
     false                                     /* Filter disabled. */                \
   }
-#elif (defined (_EFM32_TINY_FAMILY) || defined (_EFM32_GIANT_FAMILY) || defined (_EFM32_WONDER_FAMILY))
+#else
 /** Default config for PCNT init structure. */
 #define PCNT_INIT_DEFAULT                                                                        \
   { pcntModeDisable,                          /* Disabled by default. */                         \
@@ -225,7 +252,7 @@ __STATIC_INLINE uint32_t PCNT_CounterGet(PCNT_TypeDef *pcnt)
 }
 
 
-#if (defined (_EFM32_TINY_FAMILY) || defined (_EFM32_GIANT_FAMILY) || defined (_EFM32_WONDER_FAMILY))
+#if defined( _PCNT_AUXCNT_MASK )
 /***************************************************************************//**
  * @brief
  *   Get auxiliary counter value.
@@ -278,7 +305,7 @@ void PCNT_Enable(PCNT_TypeDef *pcnt, PCNT_Mode_TypeDef mode);
 void PCNT_FreezeEnable(PCNT_TypeDef *pcnt, bool enable);
 void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init);
 
-#if (defined (_EFM32_TINY_FAMILY) || defined (_EFM32_GIANT_FAMILY) || defined (_EFM32_WONDER_FAMILY))
+#if defined( _PCNT_INPUT_MASK )
 void PCNT_PRSInputEnable(PCNT_TypeDef *pcnt,
                          PCNT_PRSInput_TypeDef prsInput,
                          bool enable);
@@ -457,4 +484,5 @@ void PCNT_TopSet(PCNT_TypeDef *pcnt, uint32_t val);
 }
 #endif
 
+#endif /* defined(PCNT_COUNT) && (PCNT_COUNT > 0) */
 #endif /* __EM_PCNT_H */

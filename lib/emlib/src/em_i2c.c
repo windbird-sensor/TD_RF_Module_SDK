@@ -2,7 +2,7 @@
  * @file
  * @brief Inter-integrated Circuit (I2C) Peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -30,8 +30,9 @@
  * arising from your use of this Software.
  *
  ******************************************************************************/
-#include "em_device.h"
 #include "em_i2c.h"
+#if defined(I2C_COUNT) && (I2C_COUNT > 0)
+
 #include "em_cmu.h"
 #include "em_bitband.h"
 #include "em_assert.h"
@@ -53,12 +54,11 @@
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 
-#if defined(_EFM32_GECKO_FAMILY) || defined(_EFM32_TINY_FAMILY)
+#if (I2C_COUNT == 1)
 /** Validation of I2C register block pointer reference for assert statements. */
 #define I2C_REF_VALID(ref)    ((ref) == I2C0)
-#endif
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#elif (I2C_COUNT == 2)
 /** Validation of I2C register block pointer reference for assert statements. */
 #define I2C_REF_VALID(ref)    ((ref == I2C0) || (ref == I2C1))
 #endif
@@ -132,7 +132,7 @@ typedef struct
  * Lookup table for Nlow + Nhigh setting defined by CLHR. Set undefined
  * index (0x3) to reflect default setting just in case.
  */
-static const uint8_t i2cNSum[] = { 4 + 4, 6 + 3, 11 + 3, 4 + 4 };
+static const uint8_t i2cNSum[] = { 4 + 4, 6 + 3, 11 + 6, 4 + 4 };
 
 /** Transfer state info for ongoing master mode transfer */
 static I2C_Transfer_TypeDef i2cTransfer[I2C_COUNT];
@@ -236,11 +236,6 @@ void I2C_BusFreqSet(I2C_TypeDef *i2c,
   n = (uint32_t)(i2cNSum[type]);
 
   div = (refFreq - (4 * freq)) / (n * freq);
-  EFM_ASSERT(div);
-  if (div)
-  {
-    div--;
-  }
 
   /* Clock divisor must be at least 1 in slave mode according to reference */
   /* manual (in which case there is normally no need to set bus frequency). */
@@ -294,7 +289,7 @@ void I2C_Init(I2C_TypeDef *i2c, const I2C_Init_TypeDef *init)
 
   BITBAND_Peripheral(&(i2c->CTRL),
                      _I2C_CTRL_SLAVE_SHIFT,
-                     ~((unsigned int)(init->master)));
+                     init->master? 0 : 1);
 
   I2C_BusFreqSet(i2c, init->refFreq, init->freq, init->clhr);
 
@@ -473,6 +468,10 @@ I2C_TransferReturn_TypeDef I2C_Transfer(I2C_TypeDef *i2c)
           if (seq->flags & I2C_FLAG_READ)
           {
             transfer->state = i2cStateWFData;
+            if(seq->buf[transfer->bufIndx].len==1)
+            {
+              i2c->CMD  = I2C_CMD_NACK;
+            }
           }
           else
           {
@@ -628,28 +627,43 @@ I2C_TransferReturn_TypeDef I2C_Transfer(I2C_TypeDef *i2c)
     case i2cStateWFData:
       if (pending & I2C_IF_RXDATAV)
       {
-        uint8_t data;
+        uint8_t       data;
+        unsigned int  rxLen = seq->buf[transfer->bufIndx].len;
 
         /* Must read out data in order to not block further progress */
         data = (uint8_t)(i2c->RXDATA);
 
         /* Make sure not storing beyond end of buffer just in case */
-        if (transfer->offset < seq->buf[transfer->bufIndx].len)
+        if (transfer->offset < rxLen)
         {
           seq->buf[transfer->bufIndx].data[transfer->offset++] = data;
         }
 
         /* If we have read all requested data, then the sequence should end */
-        if (transfer->offset >= seq->buf[transfer->bufIndx].len)
+        if (transfer->offset >= rxLen)
         {
+          /* If there is only one byte to receive we need to transmit the
+             NACK now, before the stop. */
+          if (1 == rxLen)
+          {
+            i2c->CMD  = I2C_CMD_NACK;
+          }
+            
           transfer->state = i2cStateWFStopSent;
-          i2c->CMD        = I2C_CMD_NACK;
           i2c->CMD        = I2C_CMD_STOP;
         }
         else
         {
           /* Send ACK and wait for next byte */
           i2c->CMD = I2C_CMD_ACK;
+
+          if ( (1<rxLen) && (transfer->offset == (rxLen-1)) )
+          {
+            /* If there is more than one byte to receive and this is the next
+               to last byte we need to transmit the NACK now, before receiving
+               the last byte. */
+            i2c->CMD  = I2C_CMD_NACK;
+          }
         }
       }
       goto done;
@@ -794,3 +808,4 @@ I2C_TransferReturn_TypeDef I2C_TransferInit(I2C_TypeDef *i2c,
 
 /** @} (end addtogroup I2C) */
 /** @} (end addtogroup EM_Library) */
+#endif /* defined(I2C_COUNT) && (I2C_COUNT > 0) */

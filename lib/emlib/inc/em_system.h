@@ -2,7 +2,7 @@
  * @file
  * @brief System API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -61,6 +61,16 @@ typedef struct
   uint8_t minor; /**< Minor revision number */
 } SYSTEM_ChipRevision_TypeDef;
 
+#if defined( __FPU_PRESENT ) && ( __FPU_PRESENT == 1 )
+/** Floating point coprocessor access modes. */
+typedef enum
+{
+  fpuAccessDenied         = (0x0 << 20),  /**< Access denied, any attempted access generates a NOCP UsageFault. */
+  fpuAccessPrivilegedOnly = (0x5 << 20),  /**< Privileged access only, an unprivileged access generates a NOCP UsageFault. */
+  fpuAccessReserved       = (0xA << 20),  /**< Reserved. */
+  fpuAccessFull           = (0xF << 20)   /**< Full access. */
+} SYSTEM_FpuAccess_TypeDef;
+#endif
 
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************
@@ -68,6 +78,21 @@ typedef struct
 
 void     SYSTEM_ChipRevisionGet(SYSTEM_ChipRevision_TypeDef *rev);
 uint32_t SYSTEM_GetCalibrationValue(volatile uint32_t *regAddress);
+
+#if defined( __FPU_PRESENT ) && ( __FPU_PRESENT == 1 )
+/***************************************************************************//**
+ * @brief
+ *   Set floating point coprocessor (FPU) access mode.
+ *
+ * @param[in] accessMode
+ *   Floating point coprocessor access mode. See @ref SYSTEM_FpuAccess_TypeDef
+ *   for details.
+ ******************************************************************************/
+__STATIC_INLINE void SYSTEM_FpuAccessModeSet(SYSTEM_FpuAccess_TypeDef accessMode)
+{
+  SCB->CPACR = (SCB->CPACR & ~(0xF << 20)) | accessMode;
+}
+#endif
 
 /***************************************************************************//**
  * @brief
@@ -98,6 +123,11 @@ __STATIC_INLINE uint8_t SYSTEM_GetProdRev(void)
  * @brief
  *   Get the SRAM size (in KB).
  *
+ * @note
+ *   This function retrievs the correct value by reading the chip device
+ *   info structure. If your binary is made for one specific device only,
+ *   the \#define SRAM_SIZE can be used instead.
+ *
  * @return
  *   The size of the internal SRAM (in KB).
  ******************************************************************************/
@@ -118,6 +148,11 @@ __STATIC_INLINE uint16_t SYSTEM_GetSRAMSize(void)
 /***************************************************************************//**
  * @brief
  *   Get the flash size (in KB).
+ *
+ * @note
+ *   This function retrievs the correct value by reading the chip device
+ *   info structure. If your binary is made for one specific device only,
+ *   the \#define FLASH_SIZE can be used instead.
  *
  * @return
  *   The size of the internal flash (in KB).
@@ -141,17 +176,27 @@ __STATIC_INLINE uint16_t SYSTEM_GetFlashSize(void)
  * @brief
  *   Get the flash page size in bytes.
  *
+ * @note
+ *   This function retrievs the correct value by reading the chip device
+ *   info structure. If your binary is made for one specific device only,
+ *   the \#define FLASH_PAGE_SIZE can be used instead.
+ *
  * @return
  *   The page size of the internal flash in bytes.
  ******************************************************************************/
 __STATIC_INLINE uint32_t SYSTEM_GetFlashPageSize(void)
 {
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
-  return SYSTEM_GetFlashSize()<512 ? 2048 : 4096;
-#else
-  /* _EFM32_GECKO_FAMILY || _EFM32_TINY_FAMILY */
-  return  512;
+#if defined(_EFM32_GIANT_FAMILY)
+  if (SYSTEM_GetProdRev() < 18)
+  {
+    /* Early Giant/Leopard devices did not have MEMINFO in DEVINFO. */
+    return FLASH_PAGE_SIZE;
+  }
 #endif
+  uint32_t tmp = (DEVINFO->MEMINFO & _DEVINFO_MEMINFO_FLASH_PAGE_SIZE_MASK)
+                 >> _DEVINFO_MEMINFO_FLASH_PAGE_SIZE_SHIFT;
+
+  return 1 << ((tmp + 10) & 0xFF);
 }
 
 /***************************************************************************//**

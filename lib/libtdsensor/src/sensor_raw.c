@@ -1,11 +1,11 @@
 /***************************************************************************//**
- * @file sensor_raw.c
+ * @file
  * @brief API for sending Raw frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.1.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -39,15 +39,19 @@
  * @brief Sensor API for sending a Raw Frame.
  *
  * @details
- *	The raw frames allows to send up to 10 bytes to Sensor.
+ *	The raw frames allows to send up to 10 raw bytes to Sensor.
  * @{
+ ******************************************************************************/
+
+/*******************************************************************************
+ *************************   DEFINES   *****************************************
  ******************************************************************************/
 
 /** @addtogroup SENSOR_RAW_DEFINES Defines
  * @{ */
 
-#define RAW_DEFAULT_REPETITON 3 	///<Default retransmission repetition
-#define RAW_DEFAULT_INTERVAL 120		///<Default retransmission interval in seconds
+#define RAW_DEFAULT_REPETITON 0 	///< Default retransmission repetition
+#define RAW_DEFAULT_INTERVAL 0		///< Default retransmission interval in seconds
 
 /** @} */
 
@@ -55,11 +59,14 @@
  *************************   PRIVATE VARIABLES   ****************************************
  ******************************************************************************/
 
-/** @addtogroup SENSOR_RAW_PRIVATE_VARIABLES Private Variables
+/** @addtogroup SENSOR_RAW_LOCAL_VARIABLES Local Variables
  * @{ */
 
-static TransmitProfile raw_profile = { RAW_DEFAULT_REPETITON, RAW_DEFAULT_INTERVAL };
-static uint8_t raw_stamp = -1;
+/** Transmission profile */
+static TD_SENSOR_TransmitProfile_t Profile = {RAW_DEFAULT_REPETITON, RAW_DEFAULT_INTERVAL};
+
+/** Redundancy counter for Sensor raw data */
+static uint8_t Stamp = -1;
 
 /** @} */
 
@@ -67,50 +74,48 @@ static uint8_t raw_stamp = -1;
  **************************  PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
-/** @addtogroup SENSOR_RAW_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup SENSOR_RAW_USER_FUNCTIONS User Functions
  * @{ */
 
 /***************************************************************************//**
  * @brief
  *   Send a RAW frame to Sensor.
  *
- *
  * @param[in] msg
- *   Pointer to message data. Message length must be <= 10
+ *   Pointer to the raw message data.
  *
  * @param[in] count
- *  Message length.
+ *  Message length, must be <= 10 bytes.
  *
  * @return
- *   True if the data has been sent over the Sigfox Network
+ *   Returns true if the data has been sent over the SIGFOX network, false
+ *   otherwise.
  ******************************************************************************/
-bool TD_SENSOR_SendRaw(uint8_t * msg, uint8_t count)
+bool TD_SENSOR_SendRaw(uint8_t *msg, uint8_t count)
 {
-	if (count > 10)
+	if (count > 10) {
 		return false;
-
-	raw_stamp = (raw_stamp & 0x07) + 1;
-	return TD_SENSOR_Send(&raw_profile, SRV_FRM_RAW, raw_stamp, msg, count);
-
+	}
+	Stamp = (Stamp & 0x07) + 1;
+	return TD_SENSOR_Send(&Profile, SRV_FRM_RAW, Stamp, msg, count);
 }
 
 /***************************************************************************//**
  * @brief
- *   Set a transmission profile to a given frame type
+ *   Set a transmission profile for a raw frame type.
  *
  * @param[in] repetition
- *	Number of repetition
+ *	Number of repetitions.
  *
  * @param[in] interval
- *	Interval between two repetitions in seconds
- *
+ *	Interval between two repetitions in seconds.
  ******************************************************************************/
 void TD_SENSOR_SetRawTransmissionProfile(uint8_t repetition, uint32_t interval)
 {
-	raw_profile.repetition = repetition;
-	raw_profile.interval = interval;
+	Profile.repetition = repetition;
+	Profile.interval = interval;
 }
 
 /** @} */
 
-/** @} */
+/** @} (end addtogroup SENSOR_RAW) */

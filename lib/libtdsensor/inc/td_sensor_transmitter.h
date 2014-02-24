@@ -1,11 +1,11 @@
 /***************************************************************************//**
- * @file td_sensor_transmitter.h
+ * @file
  * @brief Sensor Transmitter
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.1.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -31,33 +31,74 @@
  *
  ******************************************************************************/
 
-#ifndef TD_SENSOR_TRANSMITTER_H_
-#define TD_SENSOR_TRANSMITTER_H_
+#ifndef __TD_SENSOR_TRANSMITTER_H
+#define __TD_SENSOR_TRANSMITTER_H
 
-#include "sensor_send_private.h"
+#include "sensor_send.h"
+#include "td_sensor.h"
 
-/***************************************************************************//**
- * @addtogroup TD_SENSOR_TRANSMITTER Sensor Transmitter
- * @{
- ******************************************************************************/
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/*******************************************************************************
- *************************   PROTOTYPES   **************************************
- ******************************************************************************/
+	/***************************************************************************//**
+	 * @addtogroup TD_SENSOR_TRANSMITTER Sensor Transmitter
+	 * @{
+	 ******************************************************************************/
 
-/** @addtogroup TD_SENSOR_TRANSMITTER_PUBLIC_FUNCTIONS Public Functions
- * @{ */
-/** @addtogroup TD_SENSOR_TRANSMITTER_PROTOTYPES Prototypes
- * @{ */
+	/*******************************************************************************
+	 *************************   TYPEDEFS     **************************************
+	 ******************************************************************************/
 
-bool TD_SENSOR_TRANSMITTER_SendSigfox(SensorFrame * frame, uint8_t count, uint8_t entry_id, TransmitProfile * profile);
-void TD_SENSOR_TRANSMITTER_Process();
-void TD_SENSOR_TRANSMITTER_Init();
+	/** @addtogroup TD_SENSOR_TRANSMITTER_TYPEDEFS Typedefs
+	 * @{ */
 
-/** @} */
+	/** Retransmission structure */
+	typedef struct {
+		uint8_t payload[10];					///< Data payload to retransmit
+		uint8_t timer; 							///< Timer ID to be able to stop it when receiving an ACK
+	} TD_SENSOR_TRANSMITTER_Retransmission_t;
 
-/** @} */
+	/** structure tu retransmit a SIGFOX frame */
+	typedef struct {
+		uint8_t data[12];						///< SIGFOX payload data
+		uint8_t count;							///< SIGFOX transmit retry count
+	} TD_SENSOR_TRANSMITTER_Transmission_t;
 
-/** @} (end addtogroup TD_SENSOR_TRANSMITTER) */
+	/* Function pointer for code removal purposes */
+	typedef void (*TD_SENSOR_TRANSMITTER_Init_t)(void);
 
-#endif /* TD_SENSOR_TRANSMITTER_H_ */
+	/* Function pointer for code removal purposes */
+	typedef void (*TD_SENSOR_TRANSMITTER_Process_t)(void);
+
+	/** @} */
+
+	/*******************************************************************************
+	 *************************   PROTOTYPES   **************************************
+	 ******************************************************************************/
+
+	/** @addtogroup TD_SENSOR_TRANSMITTER_GLOBAL_FUNCTIONS Global Functions
+	 * @{ */
+
+	bool TD_SENSOR_TRANSMITTER_SendSigfox(TD_SENSOR_Frame_t *frame, uint8_t count, uint8_t entry_id, TD_SENSOR_TransmitProfile_t *profile);
+	void TD_SENSOR_TRANSMITTER_Process(void);
+	void TD_SENSOR_TRANSMITTER_Init(void);
+	void TD_SENSOR_TRANSMITTER_SetRetry(uint8_t retries);
+	uint8_t TD_SENSOR_TRANSMITTER_LenToRealDuration(uint8_t length);
+
+	/** @} */
+
+	/** @addtogroup TD_SENSOR_TRANSMITTER_USER_FUNCTIONS User Functions
+	 * @{ */
+
+	void TD_SENSOR_TRANSMITTER_MonitorDutyCycle(bool enable);
+
+	/** @} */
+
+	/** @} (end addtogroup TD_SENSOR_TRANSMITTER) */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // __TD_SENSOR_TRANSMITTER_H

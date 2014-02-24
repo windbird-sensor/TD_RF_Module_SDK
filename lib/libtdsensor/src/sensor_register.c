@@ -1,11 +1,11 @@
 /***************************************************************************//**
- * @file sensor_register.c
+ * @file
  * @brief API for sending Register frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.2.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -34,11 +34,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "sensor_config.h"
 #include "td_sensor.h"
 #include "sensor_send.h"
 #include "sensor_register.h"
-#include "sensor_register_private.h"
 
 /***************************************************************************//**
  * @addtogroup SENSOR_REGISTER Sensor Register
@@ -48,34 +46,60 @@
  * @{
  ******************************************************************************/
 
+/*******************************************************************************
+ ************************   DEFINES   *****************************************
+ ******************************************************************************/
+
 /** @addtogroup SENSOR_REGISTER_DEFINES Defines
  * @{ */
 
-#define REGISTER_DEFAULT_REPETITON 3	///<Default retransmission repetitions
-#define REGISTER_DEFAULT_INTERVAL 120	///<Default retransmission interval in seconds
-#define REGISTER_PAYLOAD_SIZE 7
+#define REGISTER_PAYLOAD_SIZE		7	///< Register payload size in bytes
+#define REGISTER_DEFAULT_REPETITON	0	///< Default retransmission repetitions
+#define REGISTER_DEFAULT_INTERVAL	0	///< Default retransmission interval in seconds
 
 /** @} */
 
+/*******************************************************************************
+ ************************   TYPEDEFS   *****************************************
+ ******************************************************************************/
 
+/** @addtogroup SENSOR_REGISTER_TYPEDEFS Typedefs
+ * @{ */
+
+/** Register Frame Structure */
+typedef struct {
+	uint8_t sub_release : 4;			///< UDM sub-release number
+	uint8_t release : 4;				///< UDM release number
+	uint8_t device_class_byte1 : 8;		///< Device class MSB
+	uint8_t device_class_byte2 : 8;		///< Device class LSB
+	uint8_t sigfox_id_byte1 : 8;		///< SIGFOX ID MSB
+	uint8_t sigfox_id_byte2 : 8;		///< SIGFOX ID lower MSB
+	uint8_t sigfox_id_byte3 : 8;		///< SIGFOX ID upper LSB
+	uint8_t sigfox_id_byte4 : 8;		///< SIGFOX ID LSB
+} __PACKED TD_SENSOR_REGISTER_Frame_t;
+
+/** @} */
 
 /*******************************************************************************
  ************************   PRIVATE VARIABLES   ********************************
  ******************************************************************************/
 
-/** @addtogroup SENSOR_REGISTER_PRIVATE_VARIABLES Private Variables
+/** @addtogroup SENSOR_REGISTER_LOCAL_VARIABLES Local Variables
  * @{ */
 
-static TransmitProfile register_profile = { REGISTER_DEFAULT_REPETITON, REGISTER_DEFAULT_INTERVAL };
+/** Register Transmit Profile */
+static TD_SENSOR_TransmitProfile_t Profile = {REGISTER_DEFAULT_REPETITON, REGISTER_DEFAULT_INTERVAL};
+
+/** Register Stamp */
+static uint8_t Stamp = -1;
 
 /** @} */
-
 
 /*******************************************************************************
  **************************  PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
-/** @addtogroup SENSOR_REGISTER_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup SENSOR_REGISTER_USER_FUNCTIONS User Functions
  * @{ */
 
 /***************************************************************************//**
@@ -83,51 +107,49 @@ static TransmitProfile register_profile = { REGISTER_DEFAULT_REPETITON, REGISTER
  *   Send a Register frame to Sensor.
  *
  * @details
- * 	 Only a registered device can get be seen on Sensor. This frame must be sent before any other.
+ * 	 Only a registered device can be seen on Sensor. This frame must be sent before
+ * 	 any other.
  *
  * @return
- *   True if the data has been sent over the Sigfox Network
+ *   Returns true if the data has been sent over the SIGFOX network, false
+ *   otherwise.
  ******************************************************************************/
-bool TD_SENSOR_SendRegister()
+bool TD_SENSOR_SendRegister(void)
 {
-	SRV_FRAME_REGISTER frame;
-	ModuleConfiguration * config;
+	TD_SENSOR_REGISTER_Frame_t frame;
+	TD_SENSOR_Configuration_t *config;
 	uint32_t sigfox_id;
 
+	Stamp = (Stamp & 0x07) + 1;
 	sigfox_id = TD_SENSOR_GetSigfoxID();
 	config = TD_SENSOR_GetModuleConfiguration();
-
 	frame.release = RELEASE & 0x07;
 	frame.sub_release = SUB_RELEASE & 0x07;
-
 	frame.device_class_byte1 = config->class >> 8;
 	frame.device_class_byte2 = config->class & 0xFF;
-
 	frame.sigfox_id_byte1 = sigfox_id >> 24;
 	frame.sigfox_id_byte2 = (sigfox_id >> 16) & 0xFF;
 	frame.sigfox_id_byte3 = (sigfox_id >> 8) & 0xFF;
 	frame.sigfox_id_byte4 = sigfox_id & 0xFF;
-
-	return TD_SENSOR_Send(&register_profile, SRV_FRM_REGISTER, 0, (uint8_t *) &frame, REGISTER_PAYLOAD_SIZE);
+	return TD_SENSOR_Send(&Profile, SRV_FRM_REGISTER, Stamp, (uint8_t *) &frame, REGISTER_PAYLOAD_SIZE);
 }
 
 /***************************************************************************//**
  * @brief
- *   Set a transmission profile to a given frame type
+ *   Set a transmission profile for a register frame type.
  *
  * @param[in] repetition
- *	Number of repetition
+ *	Number of repetitions.
  *
  * @param[in] interval
- *	Interval between two repetitions in seconds
- *
+ *	Interval between two repetitions in seconds.
  ******************************************************************************/
 void TD_SENSOR_SetRegisterTransmissionProfile(uint8_t repetition, uint32_t interval)
 {
-	register_profile.repetition = repetition;
-	register_profile.interval = interval;
+	Profile.repetition = repetition;
+	Profile.interval = interval;
 }
 
 /** @} */
 
-/** @} */
+/** @} (end addtogroup SENSOR_REGISTER) */

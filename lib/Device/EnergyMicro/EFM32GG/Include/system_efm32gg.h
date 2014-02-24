@@ -2,7 +2,7 @@
  * @file
  * @brief CMSIS Cortex-M3 System Layer for EFM32GG devices.
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -136,5 +136,4 @@ void SystemLFXOClockSet(uint32_t freq);
 #ifdef __cplusplus
 }
 #endif
-
 #endif /* __SYSTEM_EFM32GG_H */

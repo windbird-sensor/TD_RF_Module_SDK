@@ -2,10 +2,10 @@
  * @file
  * @brief Un Asynchronous Receiver/Transmitter (UART) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 2.0.2
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -33,16 +33,18 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
 #include <em_cmu.h>
 #include <em_gpio.h>
 #include <em_leuart.h>
+
 #include "td_core.h"
 #include "td_uart.h"
 #include "td_rtc.h"
 
 /***************************************************************************//**
  * @addtogroup UART
- * @brief Asynchronous Receiver/Transmitter (UART) peripheral API for the TD1202 module
+ * @brief Asynchronous Receiver/Transmitter (UART) peripheral API for the TDxxxx RF modules
  * @{
  ******************************************************************************/
 
@@ -56,13 +58,24 @@
 /** Receive buffer size */
 #define TD_UART_RXBUFSIZE               61
 
+//#define DEBUG_UART
+#ifdef DEBUG_UART
+
+/** printf macro for UART debug */
+#define DEBUG_PRINTF(...) tfp_printf(__VA_ARGS__)
+#else
+
+/** printf macro for UART debug */
+#define DEBUG_PRINTF(...)
+#endif
+
 /** @} */
 
 /*******************************************************************************
  **************************   PUBLIC VARIABLES   *******************************
  ******************************************************************************/
 
-/** @addtogroup UART_USER_VARIABLES User Variables
+/** @addtogroup UART_GLOBAL_VARIABLES Global Variables
  * @{ */
 
 /** UART receive callback function pointer */
@@ -74,7 +87,7 @@ volatile TD_UART_CALLBACK TD_UART_RxCallback = 0;
  *************************   PRIVATE VARIABLES   *******************************
  ******************************************************************************/
 
-/** @addtogroup UART_PRIVATE_VARIABLES Private Variables
+/** @addtogroup UART_LOCAL_VARIABLES Local Variables
  * @{ */
 
 /** Flag for sharing the UART port with other GPIO functions */
@@ -119,71 +132,65 @@ static char RxBuffer[TD_UART_RXBUFSIZE];
  ******************************************************************************/
 void *TD_UART_Init(uint32_t speed, bool rxEnable, bool shared)
 {
-    	// Define the LEUART0 initialization data
-		LEUART_Init_TypeDef init = LEUART_INIT_DEFAULT;
+	// Define the LEUART0 initialization data
+	LEUART_Init_TypeDef init = LEUART_INIT_DEFAULT;
 
-    if (speed > 9600) {
-        CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_CORELEDIV2);
-        CMU_ClockDivSet(cmuClock_LEUART0, cmuClkDiv_4);
+	if (speed > 9600) {
+		CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_CORELEDIV2);
+		CMU_ClockDivSet(cmuClock_LEUART0, cmuClkDiv_4);
 
-        // 14MHz/2 prescaled by 4
-        init.refFreq = 1750000;
-    } else {
-        CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
-        CMU_ClockDivSet(cmuClock_LEUART0, cmuClkDiv_1);
-        init.refFreq = 0;
-    }
+		// 14MHz/2 pre-scaled by 4
+		init.refFreq = 1750000;
+	} else {
+		CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
+		CMU_ClockDivSet(cmuClock_LEUART0, cmuClkDiv_1);
+		init.refFreq = 0;
+	}
 
-    // Enable the LEUART0 clock
-    CMU_ClockEnable(cmuClock_LEUART0, true);
+	// Enable the LEUART0 clock
+	CMU_ClockEnable(cmuClock_LEUART0, true);
+	init.enable     = leuartDisable;
+	init.baudrate   = speed;
 
-    init.enable     = leuartDisable;
-    init.baudrate   = speed;
+	// Reseting and initializing LEUART0
+	LEUART_Reset(LEUART0);
+	LEUART_Init(LEUART0, &init);
 
-    // Reseting and initializing LEUART0
-    LEUART_Reset(LEUART0);
-    LEUART_Init(LEUART0, &init);
+	// TX PORT
+	GPIO_PinModeSet(TX_PORT, TX_BIT, gpioModePushPull, 1);
 
-    // TX PORT
-    GPIO_PinModeSet(TX_PORT, TX_BIT, gpioModePushPull, 1);
+	// Always enable TX
+	PortEnable = leuartEnableTx;
+	if (rxEnable) {
 
-    // Always enable tx
-    PortEnable = leuartEnableTx;
+		// RX PORT
+		GPIO_PinModeSet(RX_PORT, RX_BIT, gpioModeInputPull, 1);
 
-    if (rxEnable) {
+		// Clear previous RX interrupts
+		LEUART_IntClear(LEUART0, LEUART_IF_RXDATAV);
+		NVIC_ClearPendingIRQ(LEUART0_IRQn);
 
-        // RX PORT
-    	GPIO_PinModeSet(RX_PORT, RX_BIT, gpioModeInputPull, 1);
+		// Enable RX interrupts
+		LEUART_IntEnable(LEUART0, LEUART_IF_RXDATAV);
+		NVIC_EnableIRQ(LEUART0_IRQn);
 
-        // Set the output GPIO register to 0 provides a 300 nA power saving
-//        GPIO_PinOutClear(RX_PORT, RX_BIT);
+		// Enable RX
+		PortEnable |= leuartEnableRx;
+	}
+	if (!shared) {
 
-        // Clear previous RX interrupts
-    	LEUART_IntClear(LEUART0, LEUART_IF_RXDATAV);
-        NVIC_ClearPendingIRQ(LEUART0_IRQn);
+		// Port will not be shared
+		// Temporarily set this flag to set initial route
+		PortShared = true;
+		TD_UART_Start(LEUART0);
+	}
 
-        // Enable RX interrupts
-        LEUART_IntEnable(LEUART0, LEUART_IF_RXDATAV);
-        NVIC_EnableIRQ(LEUART0_IRQn);
+	// Save port shared flag
+	PortShared = shared;
 
-        // Enable rx
-        PortEnable |= leuartEnableRx;
-    }
-
-    if (!shared) {
-
-    	// Port will not be shared
-        // Temporarily set this flag to set initial route
-    	PortShared = true;
-    	TD_UART_Start(LEUART0);
-    }
-
-    // Save port shared flag
-    PortShared = shared;
-
-    // Eventually enable uart
-    LEUART_Enable(LEUART0, PortEnable);
-    return(LEUART0);
+	// Eventually enable UART
+	LEUART_Enable(LEUART0, PortEnable);
+	return(LEUART0);
 }
 
 /***************************************************************************//**
@@ -195,20 +202,20 @@ void *TD_UART_Init(uint32_t speed, bool rxEnable, bool shared)
  ******************************************************************************/
 void TD_UART_Start(void *p)
 {
-    if (PortShared) {
+	if (PortShared) {
 
-    	// Enable LEUART0 TX and RX route
-    	if (PortEnable & leuartEnableRx) {
-            LEUART0->ROUTE = LEUART_ROUTE_TXPEN | LEUART_ROUTE_RXPEN | LEUART_ROUTE_LOCATION_LOC0;
-            LEUART0->CMD = LEUART_CMD_TXDIS | LEUART_CMD_RXDIS | LEUART_CMD_CLEARTX | LEUART_CMD_CLEARRX;
-            LEUART0->CMD = LEUART_CMD_TXEN | LEUART_CMD_RXEN;
-        } else {
-            LEUART0->ROUTE = LEUART_ROUTE_TXPEN | LEUART_ROUTE_LOCATION_LOC0;
-            LEUART0->CMD = LEUART_CMD_TXDIS | LEUART_CMD_CLEARTX;
-            LEUART0->CMD = LEUART_CMD_TXEN;
-        }
-        TD_RTC_CalibratedDelay(1000);
-    }
+		// Enable LEUART0 TX and RX route
+		if (PortEnable & leuartEnableRx) {
+			LEUART0->ROUTE = LEUART_ROUTE_TXPEN | LEUART_ROUTE_RXPEN | LEUART_ROUTE_LOCATION_LOC0;
+			LEUART0->CMD = LEUART_CMD_TXDIS | LEUART_CMD_RXDIS | LEUART_CMD_CLEARTX | LEUART_CMD_CLEARRX;
+			LEUART0->CMD = LEUART_CMD_TXEN | LEUART_CMD_RXEN;
+		} else {
+			LEUART0->ROUTE = LEUART_ROUTE_TXPEN | LEUART_ROUTE_LOCATION_LOC0;
+			LEUART0->CMD = LEUART_CMD_TXDIS | LEUART_CMD_CLEARTX;
+			LEUART0->CMD = LEUART_CMD_TXEN;
+		}
+		// TD_RTC_CalibratedDelay(1000);
+	}
 }
 
 /***************************************************************************//**
@@ -220,14 +227,14 @@ void TD_UART_Start(void *p)
  ******************************************************************************/
 void TD_UART_Stop(void *p)
 {
-    // Wait end of transmission
+	// Wait end of transmission
 	while (!(LEUART0->STATUS & LEUART_STATUS_TXC));
+	if (PortShared) {
 
-    if (PortShared) {
-        // Disable LEUART0 TX and RX route
-    	LEUART0->CMD = LEUART_CMD_TXDIS | LEUART_CMD_RXDIS | LEUART_CMD_CLEARTX | LEUART_CMD_CLEARRX;
-        LEUART0->ROUTE = 0;
-    }
+		// Disable LEUART0 TX and RX route
+		LEUART0->CMD = LEUART_CMD_TXDIS | LEUART_CMD_RXDIS | LEUART_CMD_CLEARTX | LEUART_CMD_CLEARRX;
+		LEUART0->ROUTE = 0;
+	}
 }
 
 /***************************************************************************//**
@@ -242,7 +249,7 @@ void TD_UART_Stop(void *p)
  ******************************************************************************/
 void TD_UART_Putc(void *p, char c)
 {
-    LEUART_Tx(LEUART0, c);
+	LEUART_Tx(LEUART0, c);
 }
 
 /***************************************************************************//**
@@ -254,21 +261,21 @@ void TD_UART_Putc(void *p, char c)
  ******************************************************************************/
 int TD_UART_GetChar(void)
 {
-    int c;
+	int c;
 
-    if (RxReadIndex == RxWriteIndex) {
-        return -1;
-    }
-    c = RxBuffer[RxReadIndex++];
-    if (RxReadIndex == TD_UART_RXBUFSIZE) {
+	if (RxReadIndex == RxWriteIndex) {
+		return -1;
+	}
+	c = RxBuffer[RxReadIndex++];
+	if (RxReadIndex == TD_UART_RXBUFSIZE) {
 
-    	// Wrapped Rx read Index
-    	RxReadIndex = 0;
-    }
-    if (RxReadIndex == RxWriteIndex) {
-        RxReadIndex = RxWriteIndex = 0;
-    }
-    return c;
+		// Wrapped RX read Index
+		RxReadIndex = 0;
+	}
+	if (RxReadIndex == RxWriteIndex) {
+		RxReadIndex = RxWriteIndex = 0;
+	}
+	return c;
 }
 
 /***************************************************************************//**
@@ -291,7 +298,7 @@ int TD_UART_AvailableChars(void)
  ******************************************************************************/
 void TD_UART_Flush(void)
 {
-        RxReadIndex = RxWriteIndex = 0;
+	RxReadIndex = RxWriteIndex = 0;
 }
 
 /***************************************************************************//**
@@ -303,11 +310,11 @@ void TD_UART_Flush(void)
  ******************************************************************************/
 void TD_UART_SendString(char *string)
 {
-    char c;
+	char c;
 
-    while ((c = *string++) != '\0') {
-        LEUART_Tx(LEUART0, c);
-    }
+	while ((c = *string++) != '\0') {
+		LEUART_Tx(LEUART0, c);
+	}
 }
 
 /***************************************************************************//**
@@ -322,45 +329,47 @@ void TD_UART_SendString(char *string)
  ******************************************************************************/
 void TD_UART_Send(char *buffer, char length)
 {
-    int i;
+	int i;
 
-    // Check that the transmit buffer is empty
-    for (i = 0; i < length; i++) {
-        LEUART_Tx(LEUART0, buffer[i]);
-    }
+	// Check that the transmit buffer is empty
+	for (i = 0; i < length; i++) {
+		LEUART_Tx(LEUART0, buffer[i]);
+	}
 }
 
-#if LOADER_TRANSMITTER == 0
 /***************************************************************************//**
  * @brief
  *   UART interrupt handler.
  ******************************************************************************/
 void LEUART0_IRQHandler(void)
 {
-    // Get the received byte
+	// Get the received byte
+	DEBUG_PRINTF("IF:%02X ST:0x%02X EX:0x%02X\r\n", LEUART0->IF, LEUART0->STATUS, (LEUART0->RXDATAXP) >> 8);
 	char data = LEUART0->RXDATA;
 
-    if (TD_UART_RxCallback != 0) {
+	if (TD_UART_RxCallback != 0) {
 
-        // RX callback supplied
-    	(*TD_UART_RxCallback)(data);
-    }
+		// RX callback supplied
+		(*TD_UART_RxCallback)(data);
+	}
 
-    if (RxWriteIndex < TD_UART_RXBUFSIZE) {
+	if (RxWriteIndex < TD_UART_RXBUFSIZE) {
 
-        // Enough space in receive buffer
-        // Save the received byte
-    	RxBuffer[RxWriteIndex++] = data;
-    } else {
-        if (RxWriteIndex == RxReadIndex) {
+		// Enough room in receive buffer
+		// Save the received byte
+		RxBuffer[RxWriteIndex++] = data;
+		TD_WakeMainLoop();
+	} else {
+		if (RxWriteIndex == RxReadIndex) {
 
-        	// Buffer overflow
-            return;
-        }
-        RxWriteIndex = 0;
-    }
+			// Buffer overflow
+			TD_WakeMainLoop();
+			return;
+		}
+		RxWriteIndex = 0;
+		TD_WakeMainLoop();
+	}
 }
-#endif
 
 /** @} */
 

@@ -2,10 +2,10 @@
  * @file
  * @brief SIGFOX AT command extension for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -40,40 +40,40 @@
 extern "C" {
 #endif
 
-/***************************************************************************//**
- * @addtogroup AT_SIGFOX SIGFOX AT Extension
- * @brief SIGFOX AT command extension for the TD1202 module
- * @{
- ******************************************************************************/
+	/***************************************************************************//**
+	 * @addtogroup AT_SIGFOX SIGFOX AT Extension
+	 * @brief SIGFOX AT command extension for the TDxxxx RF modules
+	 * @{
+	 ******************************************************************************/
 
-/*******************************************************************************
- *************************   DEFINES   *****************************************
- ******************************************************************************/
+	/*******************************************************************************
+	 *************************   DEFINES   *****************************************
+	 ******************************************************************************/
 
-/** @addtogroup AT_SIGFOX_DEFINES Defines
- * @{ */
+	/** @addtogroup AT_SIGFOX_DEFINES Defines
+	 * @{ */
 
-/** Alias for the SIGFOX AT extension */
+	/** Alias for the SIGFOX AT extension */
 #define AT_SIGFOX_EXTENSION sigfox_extension,
 
-/** @} */
+	/** @} */
 
-/*******************************************************************************
- **************************   PUBLIC VARIABLES   *******************************
- ******************************************************************************/
+	/*******************************************************************************
+	 **************************   PUBLIC VARIABLES   *******************************
+	 ******************************************************************************/
 
-/** @addtogroup AT_SIGFOX_PUBLIC_VARIABLES Public Variables
- * @{ */
-/** @addtogroup AT_SIGFOX_EXTERN Extern Declarations
- * @{ */
+	/** @addtogroup AT_SIGFOX_GLOBAL_VARIABLES Global Variables
+	 * @{ */
+	/** @addtogroup AT_SIGFOX_EXTERN Extern Declarations
+	 * @{ */
 
-/** The SIGFOX AT extension structure */
-extern AT_extension_t sigfox_extension;
+	/** The SIGFOX AT extension structure */
+	extern AT_extension_t sigfox_extension;
 
-/** @} */
-/** @} */
+	/** @} */
+	/** @} */
 
-/** @} (end addtogroup AT_SIGFOX) */
+	/** @} (end addtogroup AT_SIGFOX) */
 
 #ifdef __cplusplus
 }

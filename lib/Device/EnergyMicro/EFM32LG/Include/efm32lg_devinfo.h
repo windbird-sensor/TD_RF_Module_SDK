@@ -2,7 +2,7 @@
  * @file
  * @brief efm32lg_devinfo Register and Bit Field definitions
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -48,7 +48,8 @@ typedef struct
   __I uint32_t AUXHFRCOCAL1; /**< AUXHFRCO calibration register 1 */
   __I uint32_t HFRCOCAL0;    /**< HFRCO calibration register 0 */
   __I uint32_t HFRCOCAL1;    /**< HFRCO calibration register 1 */
-  uint32_t     RESERVED2[3]; /**< Reserved */
+  __I uint32_t MEMINFO;      /**< Memory information */
+  uint32_t     RESERVED2[2]; /**< Reserved */
   __I uint32_t UNIQUEL;      /**< Low 32 bits of device unique number */
   __I uint32_t UNIQUEH;      /**< High 32 bits of device unique number */
   __I uint32_t MSIZE;        /**< Flash and SRAM Memory size in KiloBytes */
@@ -126,6 +127,8 @@ typedef struct
 #define _DEVINFO_HFRCOCAL1_BAND21_SHIFT            0            /**< 21MHz tuning value for HFRCO, shift */
 #define _DEVINFO_HFRCOCAL1_BAND28_MASK             0x0000FF00UL /**< 28MHz tuning value for HFRCO, shift */
 #define _DEVINFO_HFRCOCAL1_BAND28_SHIFT            8            /**< 28MHz tuning value for HFRCO, mask */
+#define _DEVINFO_MEMINFO_FLASH_PAGE_SIZE_MASK      0xFF000000UL /**< Flash page size (refer to ref.man for encoding) mask */
+#define _DEVINFO_MEMINFO_FLASH_PAGE_SIZE_SHIFT     24           /**< Flash page size shift */
 #define _DEVINFO_UNIQUEL_MASK                      0xFFFFFFFFUL /**< Lower part of  64-bit device unique number */
 #define _DEVINFO_UNIQUEL_SHIFT                     0            /**< Unique Low 32-bit shift */
 #define _DEVINFO_UNIQUEH_MASK                      0xFFFFFFFFUL /**< High part of  64-bit device unique number */

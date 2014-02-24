@@ -3,7 +3,7 @@
  * @brief Watchdog (WDOG) peripheral API
  *   devices.
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -32,6 +32,8 @@
  *
  ******************************************************************************/
 #include "em_wdog.h"
+#if defined(WDOG_COUNT) && (WDOG_COUNT > 0)
+
 #include "em_bitband.h"
 
 /***************************************************************************//**
@@ -87,12 +89,23 @@ void WDOG_Enable(bool enable)
  ******************************************************************************/
 void WDOG_Feed(void)
 {
+  /* The watchdog should not be fed while it is disabled */
+  if ( !(WDOG->CTRL & WDOG_CTRL_EN) )
+  {
+    return;
+  }
+
   /* If a previous clearing is being synchronized to LF domain, then there */
   /* is no point in waiting for it to complete before clearing over again. */
   /* This avoids stalling the core in the typical use case where some idle loop */
   /* keeps clearing the watchdog. */
   if (WDOG->SYNCBUSY & WDOG_SYNCBUSY_CMD)
+  {
     return;
+  }
+  /* Before writing to the WDOG_CMD register we also need to make sure that 
+   * any previous write to WDOG_CTRL is complete. */
+  while ( WDOG->SYNCBUSY & WDOG_SYNCBUSY_CTRL );
 
   WDOG->CMD = WDOG_CMD_CLEAR;
 }
@@ -208,3 +221,4 @@ void WDOG_Lock(void)
 
 /** @} (end addtogroup WDOG) */
 /** @} (end addtogroup EM_Library) */
+#endif /* defined(WDOG_COUNT) && (WDOG_COUNT > 0) */

@@ -2,10 +2,10 @@
  * @file
  * @brief Real-Time Clock (RTC) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 2.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -34,34 +34,38 @@
 #ifndef __TD_RTC_H
 #define __TD_RTC_H
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <time.h>
+
 #include <efm32.h>
 #include <em_rtc.h>
+#include <em_assert.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/***************************************************************************//**
- * @addtogroup RTC
- * @brief Real-Time Clock (RTC) peripheral API for the TD1202 module
- * @{
- ******************************************************************************/
+	/***************************************************************************//**
+	 * @addtogroup RTC
+	 * @brief Real-Time Clock (RTC) peripheral API for the TDxxxx RF modules
+	 * @{
+	 ******************************************************************************/
 
-/*******************************************************************************
- *************************   DEFINES   *****************************************
- ******************************************************************************/
+	/*******************************************************************************
+	 *************************   DEFINES   *****************************************
+	 ******************************************************************************/
 
-/** @addtogroup RTC_DEFINES Defines
- * @{ */
+	/** @addtogroup RTC_DEFINES Defines
+	 * @{ */
 
-/***************************************************************************//**
- * @addtogroup Timing Durations
- * @brief Duration values in ticks based on 32768 Hz clock
- * @{
- ******************************************************************************/
+	/***************************************************************************//**
+	 * @addtogroup Timing Durations
+	 * @brief Duration values in ticks based on 32768 Hz clock
+	 * @{
+	 ******************************************************************************/
 
-/** Duration values in ticks based on 32768 Hz clock */
+	/** Duration values in ticks based on 32768 Hz clock */
 #define  T0S               0							/**< 0 s */
 #define  T20MICROS         1							/**< 20 µs */
 #define  T50MICROS         2							/**< 50 µs */
@@ -99,10 +103,12 @@ extern "C" {
 #define  T20_2MS           ((32768 * 202) / 10000)		/**< 20 ms */
 #define  T24MS             ((32768 * 240) / 10000)		/**< 24 ms */
 #define  T24_5MS           ((32768 * 245) / 10000)		/**< 24 ms */
-#define  T27_6MS           ((32768 * 276) / 10000)		/**< 27 ms */   
+#define  T26_6MS           ((32768 * 266) / 10000)		/**< 26.6 ms */
+#define  T27_6MS           ((32768 * 276) / 10000)		/**< 27 ms */
 #define  T38MS             ((32768 * 380) / 10000)		/**< 38 ms */
 #define  T44MS             ((32768 * 440) / 10000)		/**< 44 ms */
 #define  T50MS             ((32768 * 500) / 10000)		/**< 50 ms */
+#define  T70MS             ((32768 * 700) / 10000)		/**< 70 ms */
 #define  T100MS            ((32768 * 1000) / 10000)		/**< 100 ms */
 #define  T200MS            ((32768 * 2000) / 10000)		/**< 200 ms */
 #define  T250MS            ((32768 * 2500) / 10000)		/**< 250 ms */
@@ -134,179 +140,182 @@ extern "C" {
 #define  TICK32768_BYDAY   (T24H)						/**< Number of 32768 hz ticks /day */
 #define  TICK1MMBYDAY      (24 * 60)					/**< Number of 1 min ticks /day */
 
-/** @} (end addtogroup Timing Durations) */
+	/** @} (end addtogroup Timing Durations) */
 
-/** The RTC comparator number used by system */
+	/** The RTC comparator number used by system */
 #define TD_RTC_SYSTEM		0
 
-/** The RTC comparator number used by user */
+	/** The RTC comparator number used by user */
 #define TD_RTC_USER			1
 
-/** Macro to get the current RTC timestamp */
+	/** Macro to get the current RTC timestamp */
 #define TD_RTC_Now()        RTC_CounterGet()
 
-/** @} */
+	/* Use this to trace wakeup cause*/
+//#define WAKE_MAIN_LOOP_DEBUG
 
-/*******************************************************************************
- *************************   TYPEDEFS   ****************************************
- ******************************************************************************/
-
-/** @addtogroup RTC_TYPEDEFS Typedefs
- * @{ */
-
-/** RTC Interrupt handler function type */
-typedef void (*TD_RTC_handler_t)(void);
-
-/** @} */
-
-/*******************************************************************************
- *************************   PROTOTYPES   **************************************
- ******************************************************************************/
-
-/** @addtogroup RTC_USER_FUNCTIONS User Functions
- * @{ */
-
-/***************************************************************************//**
-  * @brief
-  *   Program an absolute alarm.
-  *
-  * @param[in] count
-  *   Absolute count in 1/32768 s ticks at which the alarm will occur.
-  ******************************************************************************/
- static __INLINE void TD_RTC_AlarmAt(uint32_t count)
- {
-	 RTC_CompareSet(TD_RTC_SYSTEM, count);
- }
-
-/***************************************************************************//**
- * @brief
- *   Program a relative alarm.
- *
- * @param[in] delay
- *   Relative delay in 1/32768 s ticks before the alarm will occur.
- ******************************************************************************/
-static __INLINE void TD_RTC_AlarmAfter(uint32_t delay)
-{
-	RTC_CompareSet(TD_RTC_SYSTEM, delay + RTC_CounterGet());
+#ifdef WAKE_MAIN_LOOP_DEBUG
+	/** Macro to force a main loop iteration */
+#define TD_WakeMainLoop()		{ \
+	tfp_printf("W%s:%d\r\n", __FILE__, __LINE__);\
+	BackgroundRoundWanted = true; \
 }
-
-/***************************************************************************//**
- * @brief
- *   Program a relative alarm.
- *
- * @param[in] delay
- *   Relative delay in 1/32768 s ticks before the alarm will occur.
- ******************************************************************************/
-static __INLINE void TD_RTC_UserAlarmAfter(uint32_t delay)
-{
-	RTC_CompareSet(TD_RTC_USER, (delay + RTC_CounterGet()) & 0xFFFFFF);
+#else
+	/** Macro to force a main loop iteration */
+#define TD_WakeMainLoop()		{ \
+	BackgroundRoundWanted = true; \
 }
+#endif
+	/** @} */
 
-/***************************************************************************//**
- * @brief
- *   Abort an RTC delay.
- ******************************************************************************/
-static __INLINE void TD_RTC_Abort(void)
-{
-    extern volatile bool TD_RTC_AbortDelay;
-    TD_RTC_AbortDelay = true;
-}
+	/*******************************************************************************
+	 *************************   TYPEDEFS   ****************************************
+	 ******************************************************************************/
 
-/***************************************************************************//**
- * @brief
- *   Acknowledge a keep-alive interrupt.
- ******************************************************************************/
-static __INLINE void TD_RTC_AckKeepAlive(void)
-{
-	extern volatile bool TD_RTC_KeepAlive;
-	TD_RTC_KeepAlive = false;
-}
+	/** @addtogroup RTC_TYPEDEFS Typedefs
+	 * @{ */
 
-/***************************************************************************//**
- * @brief
- *   Enable/disable the system RTC IRQ.
- *
- * @param[in] enable
- *   The enable state.
- ******************************************************************************/
-static __INLINE void TD_RTC_EnableSystemInterrupts(bool enable)
-{
-	if (enable) {
-		RTC_IntEnable(RTC_IF_COMP0);
-	} else {
-		RTC_IntDisable(RTC_IF_COMP0);
+	/** RTC Interrupt handler function type */
+	typedef void (*TD_RTC_handler_t)(void);
+
+	/** @} */
+
+	/*******************************************************************************
+	 **************************   PUBLIC VARIABLES   *******************************
+	 ******************************************************************************/
+
+	/** @addtogroup RTC_GLOBAL_VARIABLES Global Variables
+	 * @{ */
+
+	/** Flag to ask for an additional background loop round upon IRQ wake-up */
+	extern volatile bool BackgroundRoundWanted;
+
+	/** @} */
+
+	/*******************************************************************************
+	 *************************   PROTOTYPES   **************************************
+	 ******************************************************************************/
+
+	/** @addtogroup RTC_USER_FUNCTIONS User Functions
+	 * @{ */
+
+	/***************************************************************************//**
+	  * @brief
+	  *   Program an absolute alarm.
+	  *
+	  * @param[in] count
+	  *   Absolute count in 1/32768 s ticks at which the alarm will occur.
+	  *   If count is less than 2 unit more than actual count, timer will wait a full loop (0xFFFFFF)
+	  *   If count is between 2 and 4 unit more than actual count, behaviour is not defined (full loop or immediate)
+	  *   Alarm will only trig handler set TD_RTC_SetSystemHandler.
+	  ******************************************************************************/
+	static __INLINE void TD_RTC_AlarmAt(uint32_t count)
+	{
+		RTC_CompareSet(TD_RTC_SYSTEM, count & 0xFFFFFF);
 	}
-}
 
-/***************************************************************************//**
- * @brief
- *   Enable/disable the user RTC IRQ.
- *
- * @param[in] enable
- *   The enable state.
- ******************************************************************************/
-static __INLINE void TD_RTC_EnableUserInterrupts(bool enable)
-{
-	if (enable) {
-		RTC_IntEnable(RTC_IF_COMP1);
-	} else {
-		RTC_IntDisable(RTC_IF_COMP1);
+	/***************************************************************************//**
+	 * @brief
+	 *   Abort an RTC delay.
+	 ******************************************************************************/
+	static __INLINE void TD_RTC_Abort(void)
+	{
+		extern volatile bool TD_RTC_AbortDelay;
+		TD_RTC_AbortDelay = true;
 	}
-}
 
-/***************************************************************************//**
- * @brief
- *   Clear the system RTC IRQ.
- ******************************************************************************/
-static __INLINE void TD_RTC_ClearSystemInterrupts(void)
-{
-	RTC_IntClear(RTC_IFC_COMP0);
-}
+	/***************************************************************************//**
+	 * @brief
+	 *   Acknowledge a keep-alive interrupt.
+	 ******************************************************************************/
+	static __INLINE void TD_RTC_AckKeepAlive(void)
+	{
+		extern volatile bool TD_RTC_KeepAlive;
+		TD_RTC_KeepAlive = false;
+	}
 
-/***************************************************************************//**
- * @brief
- *   Clear the user RTC IRQ.
- ******************************************************************************/
-static __INLINE void TD_RTC_ClearUserInterrupts(void)
-{
-	RTC_IntClear(RTC_IFC_COMP1);
-}
+	/***************************************************************************//**
+	 * @brief
+	 *   Enable/disable the system RTC IRQ.
+	 *
+	 * @param[in] enable
+	 *   The enable state.
+	 ******************************************************************************/
+	static __INLINE void TD_RTC_EnableSystemInterrupts(bool enable)
+	{
+		if (enable) {
+			RTC_IntEnable(RTC_IF_COMP0);
+		} else {
+			RTC_IntDisable(RTC_IF_COMP0);
+		}
+	}
 
-/** @addtogroup RTC_PROTOTYPES Prototypes
- * @{ */
+	/***************************************************************************//**
+	 * @brief
+	 *   Enable/disable the user RTC IRQ.
+	 *
+	 * @param[in] enable
+	 *   The enable state.
+	 ******************************************************************************/
+	static __INLINE void TD_RTC_EnableUserInterrupts(bool enable)
+	{
+		if (enable) {
+			RTC_IntEnable(RTC_IF_COMP1);
+		} else {
+			RTC_IntDisable(RTC_IF_COMP1);
+		}
+	}
 
-void TD_RTC_Init(TD_RTC_handler_t function);
-void TD_RTC_Process(void);
-bool TD_RTC_Delay(uint32_t duration);
-void TD_RTC_Sleep(void);
-TD_RTC_handler_t TD_RTC_SetSystemHandler(TD_RTC_handler_t function);
-TD_RTC_handler_t TD_RTC_SetUserHandler(TD_RTC_handler_t function);
-void TD_RTC_SetKeepAliveHandler(TD_RTC_handler_t function, uint32_t period);
-void TD_RTC_CalibratedDelay(uint32_t udelay);
-uint32_t TD_RTC_TimeDiff(uint32_t reference);
-uint32_t TD_RTC_GetOverflowCounter(void);
-bool TD_RTC_IsOverflowed(void);
-void TD_RTC_SetOffsetTime(int delta);
-void TD_RTC_Process(void);
-time_t __time32(time_t *timer);
+	/***************************************************************************//**
+	 * @brief
+	 *   Clear the system RTC IRQ.
+	 ******************************************************************************/
+	static __INLINE void TD_RTC_ClearSystemInterrupts(void)
+	{
+		RTC_IntClear(RTC_IFC_COMP0);
+	}
 
-/** @} */
-/** @} */
+	/***************************************************************************//**
+	 * @brief
+	 *   Clear the user RTC IRQ.
+	 ******************************************************************************/
+	static __INLINE void TD_RTC_ClearUserInterrupts(void)
+	{
+		RTC_IntClear(RTC_IFC_COMP1);
+	}
 
-/*******************************************************************************
- **************************   PUBLIC VARIABLES   *******************************
- ******************************************************************************/
+	void TD_RTC_Init(TD_RTC_handler_t function);
+	void TD_RTC_Process(void);
+	bool TD_RTC_Delay(uint32_t duration);
+	void TD_RTC_Sleep(void);
+	TD_RTC_handler_t TD_RTC_SetSystemHandler(TD_RTC_handler_t function);
+	TD_RTC_handler_t TD_RTC_SetUserHandler(TD_RTC_handler_t function);
+	void TD_RTC_SetKeepAliveHandler(TD_RTC_handler_t function, uint32_t period);
+	void TD_RTC_CalibratedDelay(uint32_t udelay);
+	uint32_t TD_RTC_TimeDiff(uint32_t reference);
+	uint32_t TD_RTC_GetOverflowCounter(void);
+	bool TD_RTC_IsOverflowed(void);
+	void TD_RTC_ClearOverflow(void);
+	void TD_RTC_SetOffsetTime(int delta);
+	void TD_RTC_AlarmAfter(int32_t delay);
+	void TD_RTC_UserAlarmAfter(int32_t delay);
+	time_t __time32(time_t *timer);
 
-/** @addtogroup RTC_USER_VARIABLES User Variables
- * @{ */
-/** @addtogroup RTC_EXTERN Extern Declarations
- * @{ */
+	/** @} */
 
+	/*******************************************************************************
+	 **************************   PUBLIC VARIABLES   *******************************
+	 ******************************************************************************/
 
-/** @} */
-/** @} */
+	/** @addtogroup RTC_GLOBAL_VARIABLES Global Variables
+	 * @{ */
+	/** @addtogroup RTC_EXTERN External Declarations
+	 * @{ */
 
-/** @} (end addtogroup RTC) */
+	/** @} */
+	/** @} */
+
+	/** @} (end addtogroup RTC) */
 
 #ifdef __cplusplus
 }

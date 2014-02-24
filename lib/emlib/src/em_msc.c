@@ -2,7 +2,7 @@
  * @file
  * @brief Flash controller (MSC) Peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -31,18 +31,19 @@
  *
  ******************************************************************************/
 #include "em_msc.h"
+#if defined(MSC_COUNT) && (MSC_COUNT > 0)
+
 #include "em_system.h"
-#if defined (_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( _MSC_TIMEBASE_MASK )
 #include "em_cmu.h"
 #endif
 #include "em_assert.h"
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
-#define FLASH_PAGE_SIZE  (FLASH_SIZE<(512*1024) ? 2048 : 4096)
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+
+#if defined( MSC_WRITECTRL_WDOUBLE )
 #define WORDS_PER_DATA_PHASE (FLASH_SIZE<(512*1024) ? 1 : 2)
 #else
-  /* _EFM32_GECKO_FAMILY || _EFM32_TINY_FAMILY */
-#define FLASH_PAGE_SIZE  (512)
 #define WORDS_PER_DATA_PHASE (1)
 #endif
 
@@ -67,6 +68,7 @@ msc_Return_TypeDef MscLoadAddress(uint32_t *address) __attribute__ ((section(".r
 #endif /* __CROSSWORKS_ARM */
 #endif /* __GNUC__ */
 
+/** @endcond */
 
 /***************************************************************************//**
  * @addtogroup EM_Library
@@ -92,7 +94,7 @@ msc_Return_TypeDef MscLoadAddress(uint32_t *address) __attribute__ ((section(".r
  ******************************************************************************/
 void MSC_Init(void)
 {
-#if defined (_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( _MSC_TIMEBASE_MASK )
   uint32_t freq, cycles;
 #endif
   /* Unlock the MSC */
@@ -100,7 +102,7 @@ void MSC_Init(void)
   /* Disable writing to the flash */
   MSC->WRITECTRL &= ~MSC_WRITECTRL_WREN;
 
-#if defined (_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( _MSC_TIMEBASE_MASK )
   /* Configure MSC->TIMEBASE according to selected frequency */
   freq = CMU_ClockFreqGet(cmuClock_AUX);
 
@@ -246,12 +248,12 @@ msc_Return_TypeDef MscLoadAddress(uint32_t* address)
 #pragma diag_suppress=Ta023
 #endif
 
-msc_Return_TypeDef MscLoadData(uint32_t* data, int num) 
-{                         
+msc_Return_TypeDef MscLoadData(uint32_t* data, int num)
+{
   int      timeOut  = MSC_PROGRAM_TIMEOUT;
   int      i;
-  
-  /* Wait for the MSC to be ready for a new data word. 
+
+  /* Wait for the MSC to be ready for a new data word.
    * Due to the timing of this function, the MSC should
    * already by ready */
   timeOut = MSC_PROGRAM_TIMEOUT;
@@ -259,7 +261,7 @@ msc_Return_TypeDef MscLoadData(uint32_t* data, int num)
   {
     timeOut--;
   }
-  
+
   /* Check for timeout */
   if (timeOut == 0)
     return mscReturnTimeOut;
@@ -457,7 +459,7 @@ msc_Return_TypeDef MSC_WriteWord(uint32_t *address, void const *data, int numByt
    * page boundary, so we need to align the address of double word write
    * cycles to an even address.
    */
-  
+
   if ((((uint32_t) address) % FLASH_PAGE_SIZE + numBytes)
       > FLASH_PAGE_SIZE)
   {
@@ -473,12 +475,12 @@ msc_Return_TypeDef MSC_WriteWord(uint32_t *address, void const *data, int numByt
       numWords--;
     }
   }
-  
+
   /* If there is an odd number of words remaining to be written,
    * we write the last word now because this has to be written
    * as a single word and will simplify the for() loop below writing
    * double words. */
-  
+
   if (numWords & 0x1)
   {
     MSC->WRITECTRL &= ~MSC_WRITECTRL_WDOUBLE;
@@ -488,7 +490,7 @@ msc_Return_TypeDef MSC_WriteWord(uint32_t *address, void const *data, int numByt
     if (mscReturnOk != retval) goto msc_write_word_exit;
     numWords--;
   }
-  
+
   MSC->WRITECTRL |= MSC_WRITECTRL_WDOUBLE;
 
 #endif /* (defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)) && (2==WORDS_PER_DATA_PHASE) */
@@ -560,7 +562,7 @@ msc_Return_TypeDef MSC_WriteWord(uint32_t *address, void const *data, int numByt
 #endif /* __CC_ARM */
 
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( _MSC_MASSLOCK_MASK )
 /***************************************************************************//**
  * @brief
  *   Erase entire flash in one operation
@@ -612,3 +614,4 @@ msc_Return_TypeDef MSC_MassErase(void)
 
 /** @} (end addtogroup MSC) */
 /** @} (end addtogroup EM_Library) */
+#endif /* defined(MSC_COUNT) && (MSC_COUNT > 0) */

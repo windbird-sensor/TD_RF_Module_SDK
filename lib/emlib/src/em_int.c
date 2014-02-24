@@ -2,7 +2,7 @@
  * @file
  * @brief Interrupt enable/disable unit API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -41,6 +41,7 @@
 /***************************************************************************//**
  * @addtogroup INT
  * @brief Safe nesting interrupt disable/enable API
+ * @{
  * @details
  *  This module contains functions to safely disable and enable interrupts
  *  at cpu level. INT_Disable() disables interrupts and increments a lock

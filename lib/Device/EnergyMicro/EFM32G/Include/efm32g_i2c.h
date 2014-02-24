@@ -2,7 +2,7 @@
  * @file
  * @brief efm32g_i2c Register and Bit Field definitions
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -680,13 +680,13 @@ typedef struct
 #define I2C_ROUTE_SCLPEN_DEFAULT          (_I2C_ROUTE_SCLPEN_DEFAULT << 1)   /**< Shifted mode DEFAULT for I2C_ROUTE */
 #define _I2C_ROUTE_LOCATION_SHIFT         8                                  /**< Shift value for I2C_LOCATION */
 #define _I2C_ROUTE_LOCATION_MASK          0x300UL                            /**< Bit mask for I2C_LOCATION */
-#define _I2C_ROUTE_LOCATION_DEFAULT       0x00000000UL                       /**< Mode DEFAULT for I2C_ROUTE */
 #define _I2C_ROUTE_LOCATION_LOC0          0x00000000UL                       /**< Mode LOC0 for I2C_ROUTE */
+#define _I2C_ROUTE_LOCATION_DEFAULT       0x00000000UL                       /**< Mode DEFAULT for I2C_ROUTE */
 #define _I2C_ROUTE_LOCATION_LOC1          0x00000001UL                       /**< Mode LOC1 for I2C_ROUTE */
 #define _I2C_ROUTE_LOCATION_LOC2          0x00000002UL                       /**< Mode LOC2 for I2C_ROUTE */
 #define _I2C_ROUTE_LOCATION_LOC3          0x00000003UL                       /**< Mode LOC3 for I2C_ROUTE */
-#define I2C_ROUTE_LOCATION_DEFAULT        (_I2C_ROUTE_LOCATION_DEFAULT << 8) /**< Shifted mode DEFAULT for I2C_ROUTE */
 #define I2C_ROUTE_LOCATION_LOC0           (_I2C_ROUTE_LOCATION_LOC0 << 8)    /**< Shifted mode LOC0 for I2C_ROUTE */
+#define I2C_ROUTE_LOCATION_DEFAULT        (_I2C_ROUTE_LOCATION_DEFAULT << 8) /**< Shifted mode DEFAULT for I2C_ROUTE */
 #define I2C_ROUTE_LOCATION_LOC1           (_I2C_ROUTE_LOCATION_LOC1 << 8)    /**< Shifted mode LOC1 for I2C_ROUTE */
 #define I2C_ROUTE_LOCATION_LOC2           (_I2C_ROUTE_LOCATION_LOC2 << 8)    /**< Shifted mode LOC2 for I2C_ROUTE */
 #define I2C_ROUTE_LOCATION_LOC3           (_I2C_ROUTE_LOCATION_LOC3 << 8)    /**< Shifted mode LOC3 for I2C_ROUTE */

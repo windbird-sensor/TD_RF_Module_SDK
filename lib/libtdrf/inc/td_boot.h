@@ -2,10 +2,10 @@
  * @file
  * @brief UART/RF bootloader API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 2.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -41,27 +41,58 @@
 extern "C" {
 #endif
 
-/***************************************************************************//**
- * @addtogroup BOOT Bootloader
- * @brief RF bootloader API for the TD1202 module
- * @{
- ******************************************************************************/
+	/***************************************************************************//**
+	 * @addtogroup BOOT Bootloader
+	 * @brief RF bootloader API for the TDxxxx RF modules
+	 * @{
+	 ******************************************************************************/
 
-/*******************************************************************************
- *************************   PROTOTYPES   **************************************
- ******************************************************************************/
+	/*******************************************************************************
+	 ***********************   ENUMERATIONS   **************************************
+	 ******************************************************************************/
 
-/** @addtogroup BOOT_USER_FUNCTIONS User Functions
- * @{ */
-/** @addtogroup BOOT_PROTOTYPES Prototypes
- * @{ */
+	/** @addtogroup BOOT_ENUMERATIONS Enumerations
+	 * @{ */
 
-void TD_BOOT_Init(bool LedPolarity, uint8_t ProductType);
+	/** Bootloader operation modes */
+	typedef enum {
+		MODE_BOOT,					/**< Used in bootloader mode */
+		MODE_BOOT_EXIT,				/**< Used at exit bootloader mode */
+		MODE_POWER_ON,				/**< Power on TCXO and RF chip */
+		MODE_FULL,					/**< Full reconfigure mode */
+		MODE_FULL_APP,				/**< Full reconfigure in app mode (no ramfunc use) */
+		MODE_GPIO					/**< Reconfigure only GPIO */
+	}
+	TD_BOOT_radio_mode_t;
 
-/** @} */
-/** @} */
+	/** @} */
 
-/** @} (end addtogroup BOOT) */
+	/*******************************************************************************
+	 *************************   TYPEDEFS   ****************************************
+	 ******************************************************************************/
+
+	/** @addtogroup BOOT_USER_TYPEDEFS Typedefs
+	 * @{ */
+
+	/** Bootloader handling function pointer */
+	typedef void (*TD_BOOT_Handler_t)(bool LedPolarity, uint8_t ProductType);
+
+	/** @} */
+
+	/*******************************************************************************
+	 *************************   PROTOTYPES   **************************************
+	 ******************************************************************************/
+
+	/** @addtogroup BOOT_USER_FUNCTIONS User Functions
+	 * @{ */
+
+	void TD_BOOT_Init(bool LedPolarity, uint8_t ProductType);
+	void TD_BOOT_ConfigureRadio(TD_BOOT_radio_mode_t Mode);
+	void TD_BOOT_Exec_InitData(unsigned short const *data, unsigned char len);
+
+	/** @} */
+
+	/** @} (end addtogroup BOOT) */
 
 #ifdef __cplusplus
 }

@@ -2,7 +2,7 @@
  * @file
  * @brief efm32gg_acmp Register and Bit Field definitions
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -309,21 +309,23 @@ typedef struct
 #define ACMP_IFC_WARMUP_DEFAULT            (_ACMP_IFC_WARMUP_DEFAULT << 1) /**< Shifted mode DEFAULT for ACMP_IFC */
 
 /* Bit fields for ACMP ROUTE */
-#define _ACMP_ROUTE_RESETVALUE             0x00000000UL                       /**< Default value for ACMP_ROUTE */
-#define _ACMP_ROUTE_MASK                   0x00000701UL                       /**< Mask for ACMP_ROUTE */
-#define ACMP_ROUTE_ACMPPEN                 (0x1UL << 0)                       /**< ACMP Output Pin Enable */
-#define _ACMP_ROUTE_ACMPPEN_SHIFT          0                                  /**< Shift value for ACMP_ACMPPEN */
-#define _ACMP_ROUTE_ACMPPEN_MASK           0x1UL                              /**< Bit mask for ACMP_ACMPPEN */
-#define _ACMP_ROUTE_ACMPPEN_DEFAULT        0x00000000UL                       /**< Mode DEFAULT for ACMP_ROUTE */
-#define ACMP_ROUTE_ACMPPEN_DEFAULT         (_ACMP_ROUTE_ACMPPEN_DEFAULT << 0) /**< Shifted mode DEFAULT for ACMP_ROUTE */
-#define _ACMP_ROUTE_LOCATION_SHIFT         8                                  /**< Shift value for ACMP_LOCATION */
-#define _ACMP_ROUTE_LOCATION_MASK          0x700UL                            /**< Bit mask for ACMP_LOCATION */
-#define _ACMP_ROUTE_LOCATION_LOC0          0x00000000UL                       /**< Mode LOC0 for ACMP_ROUTE */
-#define _ACMP_ROUTE_LOCATION_LOC1          0x00000001UL                       /**< Mode LOC1 for ACMP_ROUTE */
-#define _ACMP_ROUTE_LOCATION_LOC2          0x00000002UL                       /**< Mode LOC2 for ACMP_ROUTE */
-#define ACMP_ROUTE_LOCATION_LOC0           (_ACMP_ROUTE_LOCATION_LOC0 << 8)   /**< Shifted mode LOC0 for ACMP_ROUTE */
-#define ACMP_ROUTE_LOCATION_LOC1           (_ACMP_ROUTE_LOCATION_LOC1 << 8)   /**< Shifted mode LOC1 for ACMP_ROUTE */
-#define ACMP_ROUTE_LOCATION_LOC2           (_ACMP_ROUTE_LOCATION_LOC2 << 8)   /**< Shifted mode LOC2 for ACMP_ROUTE */
+#define _ACMP_ROUTE_RESETVALUE             0x00000000UL                        /**< Default value for ACMP_ROUTE */
+#define _ACMP_ROUTE_MASK                   0x00000701UL                        /**< Mask for ACMP_ROUTE */
+#define ACMP_ROUTE_ACMPPEN                 (0x1UL << 0)                        /**< ACMP Output Pin Enable */
+#define _ACMP_ROUTE_ACMPPEN_SHIFT          0                                   /**< Shift value for ACMP_ACMPPEN */
+#define _ACMP_ROUTE_ACMPPEN_MASK           0x1UL                               /**< Bit mask for ACMP_ACMPPEN */
+#define _ACMP_ROUTE_ACMPPEN_DEFAULT        0x00000000UL                        /**< Mode DEFAULT for ACMP_ROUTE */
+#define ACMP_ROUTE_ACMPPEN_DEFAULT         (_ACMP_ROUTE_ACMPPEN_DEFAULT << 0)  /**< Shifted mode DEFAULT for ACMP_ROUTE */
+#define _ACMP_ROUTE_LOCATION_SHIFT         8                                   /**< Shift value for ACMP_LOCATION */
+#define _ACMP_ROUTE_LOCATION_MASK          0x700UL                             /**< Bit mask for ACMP_LOCATION */
+#define _ACMP_ROUTE_LOCATION_LOC0          0x00000000UL                        /**< Mode LOC0 for ACMP_ROUTE */
+#define _ACMP_ROUTE_LOCATION_DEFAULT       0x00000000UL                        /**< Mode DEFAULT for ACMP_ROUTE */
+#define _ACMP_ROUTE_LOCATION_LOC1          0x00000001UL                        /**< Mode LOC1 for ACMP_ROUTE */
+#define _ACMP_ROUTE_LOCATION_LOC2          0x00000002UL                        /**< Mode LOC2 for ACMP_ROUTE */
+#define ACMP_ROUTE_LOCATION_LOC0           (_ACMP_ROUTE_LOCATION_LOC0 << 8)    /**< Shifted mode LOC0 for ACMP_ROUTE */
+#define ACMP_ROUTE_LOCATION_DEFAULT        (_ACMP_ROUTE_LOCATION_DEFAULT << 8) /**< Shifted mode DEFAULT for ACMP_ROUTE */
+#define ACMP_ROUTE_LOCATION_LOC1           (_ACMP_ROUTE_LOCATION_LOC1 << 8)    /**< Shifted mode LOC1 for ACMP_ROUTE */
+#define ACMP_ROUTE_LOCATION_LOC2           (_ACMP_ROUTE_LOCATION_LOC2 << 8)    /**< Shifted mode LOC2 for ACMP_ROUTE */
 
 /** @} End of group EFM32GG_ACMP */
 

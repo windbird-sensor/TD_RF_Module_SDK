@@ -2,7 +2,7 @@
  * @file
  * @brief Flash controller module (MSC) peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -33,16 +33,16 @@
 #ifndef __EM_MSC_H
 #define __EM_MSC_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "em_device.h"
+#if defined(MSC_COUNT) && (MSC_COUNT > 0)
 
 #include <stdint.h>
 #include <stdbool.h>
-
-#include "em_device.h"
 #include "em_bitband.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /***************************************************************************//**
  * @addtogroup EM_Library
@@ -86,7 +86,7 @@ typedef enum
 } msc_Return_TypeDef;
 
 
-#if defined (_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( _MSC_READCTRL_BUSSTRATEGY_MASK )
 /** Strategy for prioritized bus access */
 typedef enum {
   mscBusStrategyCPU = MSC_READCTRL_BUSSTRATEGY_CPU, /**< Prioritize CPU bus accesses */
@@ -180,7 +180,7 @@ __STATIC_INLINE void MSC_IntSet(uint32_t flags)
 }
 
 
-#if defined(_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( MSC_IF_CHOF ) && defined( MSC_IF_CMOF )
 /***************************************************************************//**
  * @brief
  *   Starts measuring cache hit ratio.
@@ -291,6 +291,7 @@ __STATIC_INLINE void MSC_EnableCache(bool enable)
 }
 
 
+#if defined( MSC_READCTRL_ICCDIS )
 /***************************************************************************//**
  * @brief
  *   Enable or disable instruction cache functionality in IRQs
@@ -301,6 +302,7 @@ __STATIC_INLINE void MSC_EnableCacheIRQs(bool enable)
 {
   BITBAND_Peripheral(&(MSC->READCTRL), _MSC_READCTRL_ICCDIS_SHIFT, ~enable);
 }
+#endif
 
 
 /***************************************************************************//**
@@ -316,7 +318,7 @@ __STATIC_INLINE void MSC_EnableAutoCacheFlush(bool enable)
 #endif
 
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( _MSC_READCTRL_BUSSTRATEGY_MASK )
 /***************************************************************************//**
  * @brief
  *   Configure which unit should get priority on system bus.
@@ -332,7 +334,8 @@ __STATIC_INLINE void MSC_BusStrategy(mscBusStrategy_Typedef mode)
 #ifdef __CC_ARM  /* MDK-ARM compiler */
 msc_Return_TypeDef MSC_WriteWord(uint32_t *address, void const *data, int numBytes);
 msc_Return_TypeDef MSC_ErasePage(uint32_t *startAddress);
-#if defined (_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+
+#if defined( _MSC_MASSLOCK_MASK )
 msc_Return_TypeDef MSC_MassErase(void);
 #endif
 #endif /* __CC_ARM */
@@ -340,7 +343,8 @@ msc_Return_TypeDef MSC_MassErase(void);
 #ifdef __ICCARM__ /* IAR compiler */
 __ramfunc msc_Return_TypeDef MSC_WriteWord(uint32_t *address, void const *data, int numBytes);
 __ramfunc msc_Return_TypeDef MSC_ErasePage(uint32_t *startAddress);
-#if defined (_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+
+#if defined( _MSC_MASSLOCK_MASK )
 __ramfunc msc_Return_TypeDef MSC_MassErase(void);
 #endif
 #endif /* __ICCARM__ */
@@ -349,13 +353,16 @@ __ramfunc msc_Return_TypeDef MSC_MassErase(void);
 #ifdef __CROSSWORKS_ARM  /* Rowley Crossworks */
 msc_Return_TypeDef MSC_WriteWord(uint32_t *address, void const *data, int numBytes) __attribute__ ((section(".fast")));
 msc_Return_TypeDef MSC_ErasePage(uint32_t *startAddress) __attribute__ ((section(".fast")));
-#if defined (_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+
+#if defined( _MSC_MASSLOCK_MASK )
 msc_Return_TypeDef MSC_MassErase(void) __attribute__ ((section(".fast")));
 #endif
+
 #else /* Sourcery G++ */
 msc_Return_TypeDef MSC_WriteWord(uint32_t *address, void const *data, int numBytes) __attribute__ ((section(".ram")));
 msc_Return_TypeDef MSC_ErasePage(uint32_t *startAddress) __attribute__ ((section(".ram")));
-#if defined (_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+
+#if defined( _MSC_MASSLOCK_MASK )
 msc_Return_TypeDef MSC_MassErase(void) __attribute__ ((section(".ram")));
 #endif
 
@@ -369,4 +376,5 @@ msc_Return_TypeDef MSC_MassErase(void) __attribute__ ((section(".ram")));
 }
 #endif
 
+#endif /* defined(MSC_COUNT) && (MSC_COUNT > 0) */
 #endif /* __EM_MSC_H */

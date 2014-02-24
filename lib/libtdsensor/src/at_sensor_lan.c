@@ -1,11 +1,11 @@
 /***************************************************************************//**
- * @file at_sensor_lan.c
+ * @file
  * @brief AT Sensor LAN
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.1.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -31,105 +31,183 @@
  *
  ******************************************************************************/
 
-#define USE_PRINTF
-
 #include <stdbool.h>
 #include <stdint.h>
 
 #include <at_parse.h>
+#include <td_core.h>
 #include <td_printf.h>
 
-#include "sensor_config.h"
 #include "td_sensor.h"
 #include "td_sensor_lan.h"
 #include "td_sensor_gateway.h"
 #include "td_sensor_device.h"
 #include "at_sensor_lan.h"
 
-// ****************************************************************************
-// TYPES:
-// ****************************************************************************
+/***************************************************************************//**
+ * @addtogroup AT_SENSOR_LAN Sensor LAN AT Command Extension
+ * @brief Sensor LAN AT command extension for the TDxxxx RF modules
+ * @{
+ ******************************************************************************/
 
-/** Manufacturing test AT command tokens */
+/*******************************************************************************
+ ***********************   ENUMERATIONS   **************************************
+ ******************************************************************************/
+
+/** @addtogroup AT_SENSOR_LAN_ENUMERATIONS Enumerations
+ * @{ */
+
+/** Sensor LAN AT command tokens */
 typedef enum sensor_lan_tokens_t {
 	AT_EXTENSION_BASE = AT_BASE_LAST,
 
-	//GENERAL
+	// General
 	AT_SENSOR_LAN_GET_ADDRESS,
 
-	//GATEWAY
+	// Gateway
 	AT_SENSOR_LAN_SET_REGISTRATION,
 	AT_SENSOR_LAN_REMOVE_DEVICE,
 	AT_SENSOR_LAN_REMOVE_ALL_DEVICES,
+	AT_SENSOR_LAN_ENABLE_RX,
 
-	//DEVICE
+	// Device
 	AT_SENSOR_LAN_REGISTER,
 	AT_SENSOR_LAN_DATA,
 	AT_SENSOR_LAN_RESET_ADDRESS,
-
 } sensor_lan_tokens;
 
-// ****************************************************************************
-// CONSTANTS:
-// ****************************************************************************
+/** @} */
 
-/** AT command set */
+/*******************************************************************************
+ *************************  CONSTANTS   ****************************************
+ ******************************************************************************/
+
+/** @addtogroup AT_SENSOR_LAN_CONSTANTS Constants
+ * @{ */
+
+/** Sensor LAN AT command set */
 static AT_command_t const sensor_lan_commands[] = {
 
-	{ "AT$LA?", AT_SENSOR_LAN_GET_ADDRESS },
-	{ "AT$LD=", AT_SENSOR_LAN_DATA },
-	{ "AT$LRD=", AT_SENSOR_LAN_REMOVE_DEVICE },
-	{ "AT$LRAD", AT_SENSOR_LAN_REMOVE_ALL_DEVICES },
-	{ "AT$LR=",	AT_SENSOR_LAN_SET_REGISTRATION },
-	{ "AT$LR", AT_SENSOR_LAN_REGISTER },
-	{ "AT$LZ", AT_SENSOR_LAN_RESET_ADDRESS },
-	{ 0, 0 }
-
+	{"AT$LA?", AT_SENSOR_LAN_GET_ADDRESS},
+	{"AT$LD=", AT_SENSOR_LAN_DATA},
+	{"AT$LRD=", AT_SENSOR_LAN_REMOVE_DEVICE},
+	{"AT$LRAD", AT_SENSOR_LAN_REMOVE_ALL_DEVICES},
+	{"AT$LR=",	AT_SENSOR_LAN_SET_REGISTRATION},
+	{"AT$LRX=", AT_SENSOR_LAN_ENABLE_RX},
+	{"AT$LR", AT_SENSOR_LAN_REGISTER},
+	{"AT$LZ", AT_SENSOR_LAN_RESET_ADDRESS},
+	{0, 0}
 };
 
-// ****************************************************************************
-// LOCALS:
-// ****************************************************************************
+/** @} */
+
+/*******************************************************************************
+ ************************   PRIVATE VARIABLES   ********************************
+ ******************************************************************************/
+
+/** @addtogroup AT_SENSOR_LAN_LOCAL_VARIABLES Local Variables
+ * @{ */
 
 /** Data buffer */
-uint8_t data_buffer[16];
+static uint8_t data_buffer[16];
 
 /** Data RX buffer */
-uint8_t data_rx_buffer[16];
+static uint8_t data_rx_buffer[16];
 
-/** Data len */
-uint8_t data_length;
+/** Data length */
+static uint8_t data_length;
 
-// ****************************************************************************
-// CODE:
-// ****************************************************************************
+/** @} */
 
-/**
- * @brief Manufacturing test AT command parser init.
- */
-static void sensor_lan_init(void)
+/*******************************************************************************
+ **************************  PRIVATE FUNCTIONS   *******************************
+ ******************************************************************************/
+
+/** @addtogroup AT_SENSOR_LAN_LOCAL_FUNCTIONS Local Functions
+ * @{ */
+
+/***************************************************************************//**
+ * @brief
+ *   Callback function for LAN data reception.
+ *
+ * @param[in] data
+ *   Pointer to the data buffer containing the received data.
+ *
+ * @param[in] length
+ *   Length in bytes of the received data.
+ *
+ * @param[in] reply
+ *   Pointer to the buffer that will receive the reply data.
+ *
+ * @return
+ *   Returns the number of bytes in the reply buffer.
+ ******************************************************************************/
+static int8_t LanDataCallback(uint8_t *data, uint8_t length, uint8_t *reply)
 {
+	int i;
 
+	tfp_printf("RX: ");
+	for (i = 0; i < length; i++) {
+		tfp_printf("%02x ", data[i]);
+	}
+	tfp_printf("\r\n");
+	return 0;
 }
 
-/**
- * @brief Manufacturing test AT help
- */
+/***************************************************************************//**
+ * @brief
+ *   Callback function for LAN data device reception.
+ *
+ * @param[in] broadcast
+ *   Flag set if the received data is coming from a broadcast message.
+ *
+ * @param[in] address
+ *   The sender address.
+ *
+ * @param[in] data
+ *   Pointer to the data buffer containing the received data.
+ *
+ * @param[in] length
+ *   Length in bytes of the received data.
+ *
+ * @param[in] reply
+ *   Pointer to the buffer that will receive the reply data.
+ *
+ * @return
+ *   Returns the number of bytes in the reply buffer.
+ ******************************************************************************/
+static int8_t DeviceDataCallback(bool broadcast, uint32_t address, uint8_t *data, uint8_t length, uint8_t *reply)
+{
+	return LanDataCallback(data, length, reply);
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Initialization AT extension function for Sensor LAN.
+ ******************************************************************************/
+static void sensor_lan_init(void)
+{
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Help AT extension function for Sensor LAN.
+ ******************************************************************************/
 static void sensor_lan_help(void)
 {
 	AT_printf(
 		"AT$LA? => LAN address\r\n"
 		"AT$LD= => Send LAN data\r\n"
 		"AT$LR= => Gateway registration\r\n"
+		"AT$LRX= => LAN reception\r\n"
 		"AT$LR => Device registration\r\n"
 		"AT$LZ => Sensor LAN Reset\r\n"
 	);
 }
-;
 
 /***************************************************************************//**
  * @brief
- *   Parser AT extension function for TD Sensor LAN.
+ *   Parser AT extension function for Sensor LAN.
  *
  * @param[in] token
  *   The token to parse.
@@ -139,33 +217,24 @@ static void sensor_lan_help(void)
  ******************************************************************************/
 static int8_t sensor_lan_parse(uint8_t token)
 {
-
 	int i, j;
-	char * message;
+	char *message;
 	char hex[] = "0x00", c;
-
 	int8_t result = AT_OK;
-
-	ModuleType type = TD_SENSOR_GetModuleType();
-	LanAddress * lan_address = TD_SENSOR_LAN_GetAddress();
+	TD_SENSOR_ModuleType_t type = TD_SENSOR_GetModuleType();
+	const TD_SENSOR_LAN_Address_t *lan_address = TD_SENSOR_LAN_GetAddress();
 
 	switch (token) {
-	/****************************GENERAL***************************/
-
 	case AT_SENSOR_LAN_GET_ADDRESS:
 		if (AT_argc == 0 && type != SENSOR_TRANSMITTER) {
-
-			AT_printf("Address: %02x, Mask: %02x", lan_address->address,lan_address->mask);
-
+			AT_printf("Address: %02x, Mask: %02x", lan_address->address, lan_address->mask);
 		} else {
 			result = AT_ERROR;
 		}
 		break;
 
-		/*****************************GATEWAY****************************/
 	case AT_SENSOR_LAN_SET_REGISTRATION:
 		if (AT_argc == 1 && type == SENSOR_GATEWAY) {
-
 			switch (AT_argv[0][0]) {
 			case '1':
 				TD_SENSOR_GATEWAY_StartRegistration(0);
@@ -178,52 +247,83 @@ static int8_t sensor_lan_parse(uint8_t token)
 			default:
 				result = AT_ERROR;
 				break;
-
 			}
+		} else {
+			result = AT_ERROR;
+		}
+		break;
 
+	case AT_SENSOR_LAN_ENABLE_RX:
+		if (AT_argc == 1 && type == SENSOR_GATEWAY) {
+			switch (AT_argv[0][0]) {
+			case '1':
+				TD_SENSOR_GATEWAY_SetDataCallback(LanDataCallback);
+				TD_SENSOR_GATEWAY_StartReception();
+				break;
+
+			case '0':
+				TD_SENSOR_GATEWAY_SetDataCallback(0);
+				TD_SENSOR_GATEWAY_StopReception();
+				break;
+
+			default:
+				result = AT_ERROR;
+				break;
+			}
+		} else if (AT_argc == 1 && type == SENSOR_DEVICE){
+			switch (AT_argv[0][0]) {
+			case '1':
+				TD_SENSOR_DEVICE_SetDataCallback(DeviceDataCallback);
+				TD_SENSOR_DEVICE_StartReception();
+				break;
+
+			case '0':
+				TD_SENSOR_DEVICE_SetDataCallback(0);
+				TD_SENSOR_DEVICE_StopReception();
+				break;
+
+			default:
+				result = AT_ERROR;
+				break;
+			}
 		} else {
 			result = AT_ERROR;
 		}
 		break;
 
 	case AT_SENSOR_LAN_REMOVE_DEVICE:
-
 		if (AT_argc == 1 && type == SENSOR_GATEWAY) {
 			TD_SENSOR_GATEWAY_DeleteDevice(AT_atoll(AT_argv[0]));
-
 		} else {
 			result = AT_ERROR;
 		}
 		break;
 
 	case AT_SENSOR_LAN_REMOVE_ALL_DEVICES:
-
 		if (AT_argc == 0 && type == SENSOR_GATEWAY) {
 			TD_SENSOR_GATEWAY_DeleteAllDevices();
-
 		} else {
 			result = AT_ERROR;
 		}
 		break;
 
 	case AT_SENSOR_LAN_REGISTER:
-
 		if (AT_argc == 0 && type == SENSOR_DEVICE) {
 			if (TD_SENSOR_DEVICE_Register() != ACK_OK) {
 				result = AT_ERROR;
 			}
-
 		} else {
 			result = AT_ERROR;
 		}
-
 		break;
 
 	case AT_SENSOR_LAN_DATA:
-
-		if (AT_argc == 1) {
-
-			message = AT_argv[0];
+		if ((type == SENSOR_GATEWAY && AT_argc == 2) || (type == SENSOR_DEVICE  && AT_argc == 1)) {
+			if (type == SENSOR_GATEWAY) {
+				message = AT_argv[1];
+			} else {
+				message = AT_argv[0];
+			}
 			for (i = 0; message[i]; i++) {
 				if (message[i] == ' ' || message[i] == '\t') {
 					for (j = i; message[j]; j++) {
@@ -234,7 +334,6 @@ static int8_t sensor_lan_parse(uint8_t token)
 					}
 				}
 			}
-
 			for (i = 0; i < 32 && message[i]; i++) {
 				c = message[i];
 				if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')
@@ -253,22 +352,34 @@ static int8_t sensor_lan_parse(uint8_t token)
 				result = AT_ERROR;
 			} else {
 				data_length = i >> 1;
-
-				if (TD_SENSOR_DEVICE_Data(data_buffer, data_length,	data_rx_buffer) != ACK_OK) {
-					result = AT_ERROR;
-				} else {
-					tfp_dump("RX: ", (unsigned char *) data_rx_buffer, 15);
+				if (type == SENSOR_GATEWAY) {
+					if (TD_SENSOR_GATEWAY_SendDataByAddress(AT_atoll(AT_argv[0]),
+							data_buffer,
+							data_length,
+							data_rx_buffer) != ACK_OK) {
+						result = AT_ERROR;
+						break;
+					}
+				} else if (type == SENSOR_DEVICE) {
+					if (TD_SENSOR_DEVICE_Data(data_buffer, data_length,	data_rx_buffer) != ACK_OK) {
+						result = AT_ERROR;
+						break;
+					}
 				}
 
+				// Everything went fine, print acknowledgment
+				tfp_printf("ACK: ");
+				for (i = 0; i < data_length; i++) {
+					tfp_printf("%02X ", data_rx_buffer[i]);
+				}
+				tfp_printf("\r\n");
 			}
 		} else {
 			result = AT_ERROR;
 		}
-
 		break;
 
 	case AT_SENSOR_LAN_RESET_ADDRESS:
-
 		if (AT_argc != 0 || type == SENSOR_TRANSMITTER) {
 			result = AT_ERROR;
 		} else if (AT_argc == 0 && type == SENSOR_DEVICE) {
@@ -278,24 +389,32 @@ static int8_t sensor_lan_parse(uint8_t token)
 		} else {
 			result = AT_ERROR;
 		}
-
 		break;
 
 	default:
 		result = AT_NOTHING;
 		break;
 	}
-
 	return result;
 }
 
-/**
- * Manufacturing test AT extension
- */
+/** @} */
+
+/*******************************************************************************
+ *************************   PUBLIC VARIABLES   ********************************
+ ******************************************************************************/
+
+/** @addtogroup AT_SENSOR_LAN_GLOBAL_VARIABLES Global Variables
+ * @{ */
+
+/** AT extension structure for Sensor LAN */
 AT_extension_t sensor_lan_extension = {
-		.commands = sensor_lan_commands,
-		.init =	sensor_lan_init,
-		.help = sensor_lan_help,
-		.parse = sensor_lan_parse
+	.commands = sensor_lan_commands,
+	.init =	sensor_lan_init,
+	.help = sensor_lan_help,
+	.parse = sensor_lan_parse
 };
 
+/** @} */
+
+/** @} (end addtogroup AT_SENSOR_LAN) */

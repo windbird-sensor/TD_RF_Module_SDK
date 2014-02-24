@@ -2,10 +2,10 @@
  * @file
  * @brief Timer peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -31,16 +31,20 @@
  *
  ******************************************************************************/
 
+#include <stdint.h>
+#include <stdbool.h>
+
 #include <em_cmu.h>
 #include <em_timer.h>
 #include <em_gpio.h>
+
 #include "td_core.h"
 #include "td_timer.h"
 #include "td_gpio.h"
 
 /***************************************************************************//**
  * @addtogroup TIMER
- * @brief Timer peripheral API for the TD1202 module
+ * @brief Timer peripheral API for the TDxxxx RF modules
  * @{
  *
  * @note
@@ -52,7 +56,7 @@
  **************************   PUBLIC VARIABLES   *******************************
  ******************************************************************************/
 
-/** @addtogroup TIMER_USER_VARIABLES User Variables
+/** @addtogroup TIMER_GLOBAL_VARIABLES Global Variables
  * @{ */
 
 /** Flag for timer enabled */
@@ -67,12 +71,11 @@ uint32_t TickUser = 0;
  *************************   PRIVATE VARIABLES   *******************************
  ******************************************************************************/
 
-/** @addtogroup TIMER_PRIVATE_VARIABLES Private Variables
+/** @addtogroup TIMER_LOCAL_VARIABLES Local Variables
  * @{ */
 
 /** Select CC channel parameters */
-static TIMER_InitCC_TypeDef timerCCInit =
-{
+static TIMER_InitCC_TypeDef timerCCInit = {
 	.eventCtrl  = timerEventEveryEdge,
 	.edge       = timerEdgeBoth,
 	.prsSel     = timerPRSSELCh0,
@@ -87,8 +90,7 @@ static TIMER_InitCC_TypeDef timerCCInit =
 };
 
 /** Select timer parameters */
-static TIMER_Init_TypeDef timerInit =
-{
+static TIMER_Init_TypeDef timerInit = {
 	.enable     = true,
 	.debugRun   = false,
 	.prescale   = timerPrescale1,
@@ -119,7 +121,7 @@ void TIMER1_IRQHandler(void)
 {
 	// Clear flag for TIMER1 overflow interrupt
 	TIMER_IntClear(TIMER1, TIMER_IF_OF);
-    TickUser++;
+	TickUser++;
 }
 
 /***************************************************************************//**

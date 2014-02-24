@@ -2,10 +2,10 @@
  * @file
  * @brief Flash controller (MSC) peripheral API for the TDxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 2.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -36,90 +36,125 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
 #include "td_module.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/***************************************************************************//**
- * @addtogroup FLASH
- * @brief Flash controller (MSC) Peripheral API for the TD1202 module
- * @{
- ******************************************************************************/
+	/***************************************************************************//**
+	 * @addtogroup FLASH
+	 * @brief Flash controller (MSC) Peripheral API for the TDxxxx RF modules
+	 * @{
+	 ******************************************************************************/
 
-/*******************************************************************************
- *******************************   DEFINES   ***********************************
- ******************************************************************************/
+	/*******************************************************************************
+	 *******************************   DEFINES   ***********************************
+	 ******************************************************************************/
 
-/** @addtogroup FLASH_DEFINES Defines
- * @{ */
+	/** @addtogroup FLASH_DEFINES Defines
+	 * @{ */
 
-/** Size of one flash page */
-#define FLASH_PAGE_SIZE            	0x200
+	/** Number of words in a flash page */
+#define FLASH_E2P_SIZE_WORD        	(FLASH_PAGE_SIZE / sizeof (uint32_t))
 
-/** Number of words in a flash page */
-#define FLASH_E2P_SIZE_WORD        	(FLASH_PAGE_SIZE / sizeof(uint32_t))
+	/** Deprecated names, please use TD_FLASH_ReadVariable() instead, compatibility only */
+#define TD_FLASH_ReadDataBuffer TD_FLASH_ReadVariable
 
-/** @} */
+	/** Deprecated names, please use TD_FLASH_DeclareVariable() instead, compatibility only */
+#define TD_FLASH_DeclareFlashVariable TD_FLASH_DeclareVariable
 
-/*******************************************************************************
- *************************   TYPEDEFS   ****************************************
- ******************************************************************************/
+	/** Deprecated names, please use TD_FLASH_WriteVariables() instead, compatibility only */
+#define TD_FLASH_UpdateFlashVariables TD_FLASH_WriteVariables
 
-/** @addtogroup FLASH_TYPEDEFS Typedefs
- * @{ */
+	/** Deprecated names, please use TD_FLASH_DeleteVariables() instead, compatibility only */
+#define TD_FLASH_DeleteFlashVariables TD_FLASH_DeleteVariables
 
-/** TD1202 device descriptor */
-typedef struct _TD_DEVICE {
-    uint32_t    Serial;            	/**< Serial number (SIGFOX ID). */
-    uint32_t    Key1;				/**< Reserved. */
-    uint64_t    Key2;				/**< Reserved. */
-    uint8_t     ModResult;			/**< Module manufacturing test result. */
-    uint8_t     ProdResult;			/**< Product manufacturing test result. */
-    uint8_t     LedMask1;			/**< Obsolete. */
-    uint8_t     LedMask2;			/**< Obsolete. */
-} TD_DEVICE;
+	/** @} */
 
-/** TD1202 extended device descriptor */
-typedef struct _TD_DEVICE_EXT {
-	uint16_t	DeviceVersion;		/**< Device descriptor version */
-    uint8_t		TDSerial[12];		/**< Serial number (Standard TD ID). */
-    uint8_t		PK[16];				/**< SIGFOX 128-bit private key */
-} TD_DEVICE_EXT;
+	/*******************************************************************************
+	 *************************   TYPEDEFS   ****************************************
+	 ******************************************************************************/
 
-/** @} */
+	/** @addtogroup FLASH_TYPEDEFS Typedefs
+	 * @{ */
 
-/*******************************************************************************
- *************************   PROTOTYPES   **************************************
- ******************************************************************************/
+	/** TDxxxx RF module device descriptor */
+	typedef struct _TD_DEVICE {
+		uint32_t    Serial;            	/**< Descriptor version 0 or 1 serial number (SIGFOX ID). */
+		uint32_t    Key1;				/**< Reserved. */
+		uint64_t    Key2;				/**< Reserved. */
+		uint8_t     ModResult;			/**< Descriptor version 0 or 1 module manufacturing test result. */
+		uint8_t     ProdResult;			/**< Descriptor version 0 or 1 final product manufacturing test result. */
+		uint8_t     LedMask1;			/**< Obsolete. */
+		uint8_t     LedMask2;			/**< Obsolete. */
+	} TD_DEVICE;
 
-/** @addtogroup FLASH_USER_FUNCTIONS User Functions
- * @{ */
-/** @addtogroup FLASH_PROTOTYPES Prototypes
- * @{ */
+	/** TDxxxx RF module extended device descriptor */
+	typedef struct _TD_DEVICE_EXT {
+		uint16_t	DeviceVersion;		/**< Device descriptor version */
+		uint8_t		TDSerial[12];		/**< Descriptor version 1 or 2 Serial number (Standard TD ID). */
+		uint8_t		PK[16];				/**< Descriptor version 2 SIGFOX 128-bit private key */
+		uint32_t    Serial;            	/**< Descriptor version 2 serial number (SIGFOX ID). */
+		uint8_t     ModResult;			/**< Descriptor version 2 module manufacturing test result. */
+		uint8_t     ProdResult;			/**< Descriptor version 2 final product manufacturing test result. */
+	} TD_DEVICE_EXT;
 
-void TD_FLASH_Write(void *buffer, uint32_t count);
-bool TD_FLASH_Read(void *buffer, uint32_t count);
-bool TD_FLASH_DeviceRead(TD_DEVICE *device);
-bool TD_FLASH_DeviceReadExtended(TD_DEVICE *device, TD_DEVICE_EXT *device_ext);
-uint16_t TD_FLASH_ReadVariable(uint8_t index, uint8_t *buffer);
+	/** Flash Logger function typedef to permit "dynamic linking" */
+	typedef void (*TD_FLASH_InitLogger_t)(bool reset,
+										  uint8_t id,
+										  uint8_t data_size,
+										  uint32_t first_page_adress,
+										  uint32_t last_page_adress);
 
-bool TD_FLASH_DeclareVariable(uint8_t *variable, uint16_t size, uint8_t *index);
-void TD_FLASH_WriteVariables(void);
-void TD_FLASH_DeleteVariables(void);
-void TD_FLASH_SetVariablesVersion(uint32_t version);
+	/**
+	 * Flash variable structure
+	 *
+	 * @note
+	 *  Each variable is assigned a unique virtual address automatically when first
+	 *  written to, or when using the declare function.
+	 */
+	typedef struct {
+		uint8_t *data_pointer;			/**< Variable data pointer. */
+		uint16_t data_size;				/**< Variable data size. */
+	} TD_FLASH_variable_t;
 
-__RAMFUNCTION void TD_FLASH_ErasePage(uint32_t *blockStart);
-__RAMFUNCTION void TD_FLASH_WriteWord(uint32_t *address, uint32_t data);
+	/** @} */
 
-void TD_FLASH_Init(void);
-void TD_Flash_Deinit(void);
+	/*******************************************************************************
+	 *************************   PROTOTYPES   **************************************
+	 ******************************************************************************/
 
-/** @} */
-/** @} */
+	/** @addtogroup FLASH_USER_FUNCTIONS User Functions
+	 * @{ */
 
-/** @} (end addtogroup FLASH) */
+	void TD_FLASH_Write(void *buffer, uint32_t count);
+	bool TD_FLASH_Read(void *buffer, uint32_t count);
+	bool TD_FLASH_DeviceRead(TD_DEVICE *device);
+	bool TD_FLASH_DeviceReadExtended(TD_DEVICE *device, TD_DEVICE_EXT *device_ext);
+	uint16_t TD_FLASH_ReadVariable(uint8_t index, uint8_t *buffer);
+	bool TD_FLASH_DeclareVariable(uint8_t *variable, uint16_t size, uint8_t *index);
+	void TD_FLASH_WriteVariables(void);
+	void TD_FLASH_DeleteVariables(void);
+	void TD_FLASH_SetVariablesVersion(uint32_t version);
+	void TD_FLASH_DumpVariables(uint8_t *data);
+	__RAMFUNCTION void TD_FLASH_ErasePage(uint32_t *blockStart);
+	__RAMFUNCTION void TD_FLASH_WriteWord(uint32_t *address, uint32_t data);
+	void TD_FLASH_Init(void);
+	void TD_FLASH_Deinit(void);
+	void TD_FLASH_InitLogger(bool reset,
+							 uint8_t id,
+							 uint8_t data_size,
+							 uint32_t first_page_adress,
+							 uint32_t last_page_adress);
+	void TD_FLASH_LoggerWrite(uint8_t id, uint32_t *data);
+	void TD_FLASH_LoggerResetRead(uint8_t id);
+	bool TD_FLASH_LoggerReadNext(uint8_t id, uint32_t *data);
+
+	/** @} */
+
+	/** @} (end addtogroup FLASH) */
 
 #ifdef __cplusplus
 }

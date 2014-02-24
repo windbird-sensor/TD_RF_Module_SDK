@@ -2,10 +2,10 @@
  * @file
  * @brief General Purpose IO (GPIO) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 2.0.2
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -40,18 +40,18 @@
 extern "C" {
 #endif
 
-/***************************************************************************//**
- * @addtogroup GPIO
- * @brief General Purpose IO (GPIO) peripheral API for the TD1202 module
- * @{
- ******************************************************************************/
+	/***************************************************************************//**
+	 * @addtogroup GPIO
+	 * @brief General Purpose IO (GPIO) peripheral API for the TDxxxx RF modules
+	 * @{
+	 ******************************************************************************/
 
-/*******************************************************************************
- *************************   DEFINES   *****************************************
- ******************************************************************************/
+	/*******************************************************************************
+	 *************************   DEFINES   *****************************************
+	 ******************************************************************************/
 
-/** @addtogroup GPIO_DEFINES Defines
- * @{ */
+	/** @addtogroup GPIO_DEFINES Defines
+	 * @{ */
 
 #define TD_GPIO_USER		0								///< User GPIO IRQ hook
 #define TD_GPIO_SYSTEM		1								///< System GPIO IRQ hook
@@ -65,87 +65,88 @@ extern "C" {
 #define TD_GPIO_ODD_MASK	0xAAAAAAAA						///< Mask for odd interrupts
 #define TD_GPIO_EVEN_MASK	0x55555555						///< Mask for even interrupts
 
-/** @} */
+	/** @} */
 
-/*******************************************************************************
- *************************   TYPEDEFS   ****************************************
- ******************************************************************************/
+	/*******************************************************************************
+	 *************************   TYPEDEFS   ****************************************
+	 ******************************************************************************/
 
-/** @addtogroup GPIO_TYPEDEFS Typedefs
- * @{ */
+	/** @addtogroup GPIO_TYPEDEFS Typedefs
+	 * @{ */
 
-/** Interrupt process callback function */
-typedef void (*TD_GPIO_callback_t)(void);
+	/** Interrupt process callback function. mask contains bitfield of one or multiple I/O that triggered IRQ */
+	typedef void (*TD_GPIO_callback_t)(uint32_t mask);
 
-/** GPIO IRQ hook structure */
-typedef struct {
-	TD_GPIO_callback_t callback;	///< callback function to handle this GPIO IRQ
-	uint32_t mask;					///< mask to apply for matching this GPIO IRQ
-} TD_GPIO_hook_t;
+	/** GPIO IRQ hook structure */
+	typedef struct {
+		TD_GPIO_callback_t callback;	///< callback function to handle this GPIO IRQ
+		uint32_t mask;					///< mask to apply for matching this GPIO IRQ
+	} TD_GPIO_hook_t;
 
-/** @} */
+	/** @} */
 
-/*******************************************************************************
- *************************   PROTOTYPES   **************************************
- ******************************************************************************/
+	/*******************************************************************************
+	 *************************   PROTOTYPES   **************************************
+	 ******************************************************************************/
 
-/** @addtogroup GPIO_USER_FUNCTIONS User Functions
- * @{ */
+	/** @addtogroup GPIO_USER_FUNCTIONS User Functions
+	 * @{ */
 
-/***************************************************************************//**
- * @brief
- *   Default GPIO IRQ processing function.
- ******************************************************************************/
-static __INLINE void TD_GPIO_DefaultHook(void)
-{
-}
+	/***************************************************************************//**
+	 * @brief
+	 *   Default GPIO IRQ processing function.
+	 ******************************************************************************/
+	static __INLINE void TD_GPIO_DefaultHook(void)
+	{
+	}
 
-/***************************************************************************//**
- * @brief
- *   Register a callback function for processing interrupts matching a given bit mask.
- *
- * @ param[in] type
- *   The type of callback to set up.
- *
- * @param[in] callback
- *   Pointer to callback function called when an interrupt matching the mask is
- *   received.
- *
- * @param[in] mask
- *   Mask for testing a received even interrupts against.
- ******************************************************************************/
-static __INLINE void TD_GPIO_SetCallback(int type, TD_GPIO_callback_t callback, uint32_t mask)
-{
+	/***************************************************************************//**
+	 * @brief
+	 *   Register a callback function for processing interrupts matching a given bit mask.
+	 *
+	 * @ param[in] type
+	 *   The type of callback to set up.
+	 *
+	 * @param[in] callback
+	 *   Pointer to callback function called when an interrupt matching the mask is
+	 *   received.
+	 *
+	 * @param[in] mask
+	 *   Mask for testing a received even interrupts against.
+	 ******************************************************************************/
+	static __INLINE void TD_GPIO_SetCallback(int type, TD_GPIO_callback_t callback, uint32_t mask)
+	{
+		extern TD_GPIO_hook_t TD_GPIO_Hooks[];
+
+		TD_GPIO_Hooks[type].callback = callback;
+		TD_GPIO_Hooks[type].mask = mask;
+	}
+
+	/** @addtogroup GPIO_PROTOTYPES Prototypes
+	 * @{ */
+
+	void TD_GPIO_Init(void);
+	void TD_GPIO_Dump(void);
+
+	/** @} */
+	/** @} */
+
+	/*******************************************************************************
+	 **************************   PUBLIC VARIABLES   *******************************
+	 ******************************************************************************/
+
+	/** @addtogroup GPIO_GLOBAL_VARIABLES Global Variables
+	 * @{ */
+	/** @addtogroup GPIO_EXTERN External Declarations
+	 * @{ */
+
+	/** Array of GPIO IRQ hooks for system/user/odd/even IRQs */
 	extern TD_GPIO_hook_t TD_GPIO_Hooks[];
 
-	TD_GPIO_Hooks[type].callback = callback;
-	TD_GPIO_Hooks[type].mask = mask;
-}
+	/** @} */
+	/** @} */
 
-/** @addtogroup GPIO_PROTOTYPES Prototypes
- * @{ */
-
-void TD_GPIO_Init(void);
-
-/** @} */
-/** @} */
-
-/*******************************************************************************
- **************************   PUBLIC VARIABLES   *******************************
- ******************************************************************************/
-
-/** @addtogroup GPIO_USER_VARIABLES User Variables
- * @{ */
-/** @addtogroup GPIO_EXTERN Extern Declarations
- * @{ */
-
-/** Array of GPIO IRQ hooks for system/user/odd/even IRQs */
-extern TD_GPIO_hook_t TD_GPIO_Hooks[];
-
-/** @} */
-/** @} */
-
-/** @} (end addtogroup GPIO) */
+	/** @} (end addtogroup GPIO) */
 
 #ifdef __cplusplus
 }

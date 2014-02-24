@@ -2,10 +2,10 @@
  * @file
  * @brief General Purpose IO (GPIO) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 2.0.2
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -31,15 +31,21 @@
  *
   ******************************************************************************/
 
-#include <em_cmu.h>
+#include <stdint.h>
 #include <stdbool.h>
+
+#include <em_cmu.h>
 #include <em_gpio.h>
+
 #include "td_core.h"
 #include "td_gpio.h"
+#include "td_utils.h"
+#include "td_rtc.h"
+#include "td_printf.h"
 
 /***************************************************************************//**
  * @addtogroup GPIO
- * @brief General Purpose IO (GPIO) peripheral API for the TD1202 module
+ * @brief General Purpose IO (GPIO) peripheral API for the TDxxxx RF modules
  * @{
  ******************************************************************************/
 
@@ -47,7 +53,7 @@
  **************************   PUBLIC VARIABLES   *******************************
  ******************************************************************************/
 
-/** @addtogroup GPIO_USER_VARIABLES User Variables
+/** @addtogroup GPIO_GLOBAL_VARIABLES Global Variables
  * @{ */
 
 /** Array of GPIO IRQ hooks for system/user/odd/even IRQs */
@@ -78,37 +84,39 @@ TD_GPIO_hook_t TD_GPIO_Hooks[TD_GPIO_MAX_HOOKS];
  ******************************************************************************/
 void GPIO_ODD_IRQHandler(void)
 {
-	uint32_t flag, mask;
+	uint32_t flag;
 	uint32_t system_mask = TD_GPIO_Hooks[TD_GPIO_SYSTEM_ODD].mask;
-	uint32_t user_mask =TD_GPIO_Hooks[TD_GPIO_USER_ODD].mask;
+	uint32_t user_mask = TD_GPIO_Hooks[TD_GPIO_USER_ODD].mask;
 
-    // Get interrupt bits
-	flag = GPIO_IntGet() & TD_GPIO_ODD_MASK;
-
-    // Save it
-	mask = flag;
-
-    // System hook set on odd IRQ
-	if (TD_GPIO_Hooks[TD_GPIO_SYSTEM_ODD].callback &&
-			(mask & system_mask)) {
-
-		// Remember that this interrupt source has been processed
-		mask &= ~system_mask;
-
-        // Call the IRQ hook
-		TD_GPIO_Hooks[TD_GPIO_SYSTEM_ODD].callback();
-    }
-
-    // User hook on odd IRQ
-	if (TD_GPIO_Hooks[TD_GPIO_USER_ODD].callback &&
-			(mask & user_mask)) {
-
-        // Call the IRQ hook
-		TD_GPIO_Hooks[TD_GPIO_USER_ODD].callback();
-    }
+	// Get interrupt bits
+	flag = (GPIO_IntGet() & TD_GPIO_ODD_MASK) & GPIO_IntGetEnabled();
 
 	// Acknowledge IRQ
-    GPIO_IntClear(flag & (system_mask | user_mask));
+	// We acknowledge all IRQ read, for this IRQ (EVEN) and enabled
+	// even if theses IRQ are not used (otherwise, it will infinitely reenter in this IRQ)
+	GPIO_IntClear(flag);
+#ifdef WAKE_MAIN_LOOP_DEBUG
+	tfp_printf("IO:0x%08X\r\n");
+#endif
+
+	// System hook set on odd IRQ
+	if (TD_GPIO_Hooks[TD_GPIO_SYSTEM_ODD].callback && (flag & system_mask)) {
+
+		// Call the IRQ hook
+		TD_GPIO_Hooks[TD_GPIO_SYSTEM_ODD].callback(flag & system_mask);
+
+		// Remember that this interrupt source has been processed
+		flag &= ~system_mask;
+		TD_WakeMainLoop();
+	}
+
+	// User hook on odd IRQ
+	if (TD_GPIO_Hooks[TD_GPIO_USER_ODD].callback && (flag & user_mask)) {
+
+		// Call the IRQ hook
+		TD_GPIO_Hooks[TD_GPIO_USER_ODD].callback(flag & user_mask);
+		TD_WakeMainLoop();
+	}
 }
 
 /***************************************************************************//**
@@ -121,60 +129,133 @@ void GPIO_ODD_IRQHandler(void)
  ******************************************************************************/
 void GPIO_EVEN_IRQHandler(void)
 {
-	uint32_t flag, mask;
+	uint32_t flag;
 	uint32_t system_mask = TD_GPIO_Hooks[TD_GPIO_SYSTEM_EVEN].mask;
-	uint32_t user_mask =TD_GPIO_Hooks[TD_GPIO_USER_EVEN].mask;
+	uint32_t user_mask = TD_GPIO_Hooks[TD_GPIO_USER_EVEN].mask;
 
-    // Get interrupt bits
-	flag = GPIO_IntGet() & TD_GPIO_EVEN_MASK;
+	// Get interrupt bits
+	flag = GPIO_IntGet() & TD_GPIO_EVEN_MASK & GPIO_IntGetEnabled();
 
-    // Save it
-	mask = flag;
+	// Acknowledge IRQ.
+	// We acknowledge all IRQ read, for this IRQ (EVEN) and enabled
+	// even if theses IRQ are not used (otherwise, it will infinitely reenter in this IRQ)
+	GPIO_IntClear(flag);
+#ifdef WAKE_MAIN_LOOP_DEBUG
+	tfp_printf("IO:0x%08X\r\n");
+#endif
+	// System hook set on odd IRQ
+	if (TD_GPIO_Hooks[TD_GPIO_SYSTEM_EVEN].callback && (flag & system_mask)) {
 
-    // System hook set on odd IRQ
-	if (TD_GPIO_Hooks[TD_GPIO_SYSTEM_EVEN].callback &&
-			(mask & system_mask)) {
+		// Call the IRQ hook
+		TD_GPIO_Hooks[TD_GPIO_SYSTEM_EVEN].callback(flag & system_mask);
 
 		// Remember that this interrupt source has been processed
-		mask &= ~system_mask;
+		flag &= ~system_mask;
+		TD_WakeMainLoop();
+	}
 
-        // Call the IRQ hook
-		TD_GPIO_Hooks[TD_GPIO_SYSTEM_EVEN].callback();
-    }
+	// User hook on even IRQ
+	if (TD_GPIO_Hooks[TD_GPIO_USER_EVEN].callback && (flag & user_mask)) {
 
-    // User hook on even IRQ
-	if (TD_GPIO_Hooks[TD_GPIO_USER_EVEN].callback &&
-			(mask & user_mask)) {
-
-        // Call the IRQ hook
-		TD_GPIO_Hooks[TD_GPIO_USER_EVEN].callback();
-    }
-
-	// Acknowledge IRQ
-    GPIO_IntClear(flag & (system_mask | user_mask));
+		// Call the IRQ hook
+		TD_GPIO_Hooks[TD_GPIO_USER_EVEN].callback(flag & user_mask);
+		TD_WakeMainLoop();
+	}
 }
 
 /***************************************************************************//**
  * @brief
- *   Initialize the GPIO peripheral for the TD1202 module.
+ *   Initialize the GPIO peripheral for the TDxxxx RF modules.
  ******************************************************************************/
 void TD_GPIO_Init(void)
 {
-	int i;
 
 	// Enable the GPIO module clock
 	CMU_ClockEnable(cmuClock_GPIO, true);
 
-    // Start LFXO and wait until it is stable
+	// Start LFXO and wait until it is stable
 	CMU_OscillatorEnable(cmuOsc_LFXO, true, true);
 
 	// Initialize IRQ hooks
-	for (i = 0; i < TD_GPIO_MAX_HOOKS; i++) {
-		TD_GPIO_Hooks[i].callback = 0;
-		TD_GPIO_Hooks[i].mask = 0;
-	}
+	memset(TD_GPIO_Hooks, 0, sizeof(TD_GPIO_hook_t)*TD_GPIO_MAX_HOOKS);
 }
 
+/***************************************************************************//**
+ * @brief
+ *   Dump all GPIO configuration
+ ******************************************************************************/
+void TD_GPIO_Dump(void)
+{
+	uint8_t i, j, md;
+	uint64_t mode;
+	uint32_t d;
+	char *txt;
+	for (i = 0; i < 6; i++) {
+		tfp_printf("--Port%c--\r\n", 'A' + i);
+		mode = GPIO->P[i].MODEL;
+		mode = mode | (((uint64_t)GPIO->P[i].MODEH) << 32);
+		d = GPIO->P[i].DOUT;
+		for (j = 0; j < 16; j++) {
+			md = mode & 0xF;
+			mode = mode >> 4;
+			switch (md) {
+			case 0:
+				txt = "DIS";
+				break;
+			case 1:
+				txt = "IN";
+				break;
+			case 2:
+				txt = "INP";
+				break;
+			case 3:
+				txt = "INPF";
+				break;
+			case 4:
+				txt = "OUT";
+				break;
+			case 5:
+				txt = "OUTD";
+				break;
+			case 6:
+				txt = "WOR";
+				break;
+			case 7:
+				txt = "WORP";
+				break;
+			case 8:
+				txt = "WAN";
+				break;
+			case 9:
+				txt = "WANF";
+				break;
+			case 10:
+				txt = "WANP";
+				break;
+			case 11:
+				txt = "WANPF";
+				break;
+			case 12:
+				txt = "WAND";
+				break;
+			case 13:
+				txt = "WANDF";
+				break;
+			case 14:
+				txt = "WANDP";
+				break;
+			case 15:
+				txt = "WANDPF";
+				break;
+			}
+			tfp_printf("%01X)%6s:%d|  ", j, txt, d & 1);
+			d >>= 1;
+			if ((j & 3) == 3) {
+				tfp_printf("\r\n");
+			}
+		}
+	}
+}
 /** @} */
 
 /** @} (end addtogroup GPIO) */

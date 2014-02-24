@@ -1,0 +1,186 @@
+﻿<style type="text/css">html,body {font-family: Helvetica, Arial, Verdana, sans-serif;}</style>
+<h1>Welcome to TD RF Module SDK (powered by Telecom Design)</h1>
+
+<p>The TD RF Module SDK provides a complete Rapid Embedded Development Environment for the TD RF modules.</p>
+
+<p>The TD RF Module SDK contains all the Eclipse projects, static libraries, exampels with soruce codes
+and auto-generated API documentation to develop for the TD RF modules.</p>
+
+<p>Further details on the TD RF Module SDK can be found at <a href="https://developers.insgroup.fr/">https://developers.insgroup.fr/</a></p>
+
+<p>We hope you enjoy using the TD RF Module SDK!</p>
+
+<p><em>The Telecom Design Team</em></p>
+
+<h1>Getting the Sources</h1>
+
+<p>The SDK source code and examples are no longer distributed with the TD RF Module SDK Tools zip file but
+are available through the <a href="https://github.com/Telecom-Design/TD_RF_Module_SDK">https://github.com/Telecom-Design/TD_RF_Module_SDK</a> Github repository
+once you register your Telecom Design Evaluation Board (EVB) by following the steps described on <a href="https://developers.insgroup.fr/">https://developers.insgroup.fr/</a>.</p>
+
+<p>The following steps detail how to download the source code and import all projects into the Eclipse environment.</p>
+
+<ul>
+<li>Navigate to the <code>"C:\TD\TD_RF_Module_SDK-v4.0.0\eclipse"</code> folder and double-click on the <code>"eclipse.exe"</code> icon</li>
+<li>Open the <code>"File"</code> menu and select the <code>"Import..."</code> item.</li>
+<li>In the <code>"Import"</code> dialog, unfold the <code>"Git"</code> folder by clicking on the <code>"+"</code> sign left to it, select the <code>"Projects from Git"</code> item and click on the <code>"Next &gt;"</code> button</li>
+<li>In the <code>"Import Projects from Git"</code>, select the <code>"URI"</code> icon ad click on the <code>"Next &gt;"</code> button</li>
+<li>Enter <code>The Github repository URL "https://github.com/Telecom-Design/TD_RF_Module_SDK.git"</code>in the <code>"URI"</code> field</li>
+<li>Enter your Github username and password in the <code>"User:"</code> and <code>"Password:"</code> fields, respectively and click on the <code>"Next &gt;"</code> button</li>
+<li>Check the <code>"Master"</code> branch box and click on the <code>"Next &gt;"</code> button</li>
+<li>Enter <code>"C:\TD\TD_RF_Module_SDK-v4.0.0\Github\TD_RF_Module_SDK"</code> in the <code>"Directory:"</code> field and click on the <code>"Next &gt;"</code> button</li>
+<li>Check the <code>"Import existing projects"</code> radio button and click on the <code>"Next &gt;"</code> button</li>
+<li>Click on the <code>"Finish"</code> button. The Git import will take place, this may take a while</li>
+</ul>
+
+<p>All the available libraries and examples should now be available in the Project Explorer panel.</p>
+
+<h1>Release Notes</h1>
+
+<h2>v4.0.0 (February 2014)</h2>
+
+<ul>
+<li>This release is a major update of TD RF Module SDK.</li>
+</ul>
+
+<h3>Release Notes</h3>
+
+<h4>Major Updates</h4>
+
+<ul>
+<li>Supports the TD1204 products with GPS and 3D accelerometer functions</li>
+<li>Supports modules with SIGFOX ID >= 0x10000 (still retaining compatibility with smaller 16 bit IDs)</li>
+<li>Now supports SIGFOX protocol V1 by default</li>
+</ul>
+
+<h4>Minor Updates</h4>
+
+<h5><strong>libtdcore</strong></h5>
+
+<ul>
+<li>Battery level monitoring (with IRQs) available</li>
+<li>Optional printf int64 support</li>
+<li>Stdlib atoll support</li>
+</ul>
+
+<h4>Additions</h4>
+
+<h5><strong>libtdcore</strong></h5>
+
+<ul>
+<li>Added watchdog module</li>
+<li>Added the <code>AT CORE</code> module which implements basic "system" AT command</li>
+<li>Added the <code>SPI</code> module to manage sharing of the SPI bus (multiple peripherals on the same SPI bus)</li>
+<li>Added a link-time <code>OPTION</code> mechanism to customize the behavior and/or limits of binary-only objects/libraries</li>
+<li>Added a fully configurable <code>TRAP</code> system to handle System/User code faults</li>
+<li>Added system dumps debugging tools</li>
+</ul>
+
+<h5><strong>libtdsensor</strong></h5>
+
+<ul>
+<li>Added a retransmission profile system</li>
+<li>Added a custom BootEvent</li>
+<li>Added queue handling for message transmission</li>
+<li>Added a <em>forward</em> option (optional gateway)</li>
+<li>Extension of the <strong>Device</strong> and <strong>Gateway</strong> APIs</li>
+<li>Extension of the set of Sensor Events</li>
+</ul>
+
+<h5><strong>libtdgeoloc</strong></h5>
+
+<ul>
+<li>First release</li>
+</ul>
+
+<h5><strong>libtddrivers</strong></h5>
+
+<ul>
+<li>First release</li>
+</ul>
+
+<h4>Bug Fixes</h4>
+
+<h5><strong>libtdcore</strong></h5>
+
+<h6>AT Parser:</h6>
+
+<ul>
+<li>Upon startup, if a parser extension module has no persistent data stored, its store function will be called immediately to fix it</li>
+<li>Correction on numeric parameter read in AT command (function AT_atoll) on value with leading spaces characters eg. " <code>123</code>": the first digit was incorrectly dropped and result set to 23</li>
+</ul>
+
+<h6>Flash:</h6>
+
+<ul>
+<li>Corrections on "user variables" handling</li>
+</ul>
+
+<h6>GPIO:</h6>
+
+<ul>
+<li>Modification of behavior in the IRQ handling. List of I/O that actually trigged interrupt (mask) must no longer be read by <code>GPIO_IntGet()</code> but is directly passed to the to Hook callback registered for I/O interrupt handling</li>
+</ul>
+
+<h6>System:</h6>
+
+<ul>
+<li>A fully deterministic, guaranted main loop processing (including the <code>TD_USER_Loop</code> function) can be trigged by calling the <code>TD_WakeMainLoop()</code> function, all others systems (while(flags) processing) must be removed. <code>TD_WakeMainLoop()</code> must be used in user interrupt handlers</li>
+</ul>
+
+<h6>RTC:</h6>
+
+<ul>
+<li>Major correction on low level function to allow calls in all possible context (background task, IRQs), with all special RTC cases handled</li>
+<li>Know limitation : a call to <code>TD_RTC_Delay()</code> while in IRQ handling will result in an active wait (not energy efficient). However, calling a wait function like <code>TD_RTC_Delay()</code> in IRQ context is a bad practice</li>
+</ul>
+
+<h6>Scheduler:</h6>
+
+<ul>
+<li>Adding a Timer is now possible in IRQ context</li>
+<li>Major rewrite of the <strong>SCHEDULER</strong> processing to remove some race, full strengthening on <code>TD_SCHEDULER_AppendIrq()</code>, <code>TD_SCHEDULER_Append()</code>, <code>TD_SCHEDULER_Remove()</code> from anywhere in the user code, in any context</li>
+</ul>
+
+<h6>stdlib:</h6>
+
+<ul>
+<li>atoi now handles correctly signed value</li>
+</ul>
+
+<h5><strong>libtdrf</strong></h5>
+
+<h6>RF:</h6>
+
+<ul>
+<li>Bulletproof handling of RF chip mode (sleep/Idle/Receive/Transmit) transitions</li>
+</ul>
+
+<h6>LAN:</h6>
+
+<ul>
+<li>Major rewrite of LAN functions, it is heavily recommended to not mix devices with a <code>libtdrf</code> library older than v4.0.0</li>
+<li>Better error handling and reporting</li>
+</ul>
+
+<h6>BOOTLOADER:</h6>
+
+<ul>
+<li>Extension of the bootloader to provide customization parameters: LED status pin location, optional update blink indication, RF channel selection, etc.</li>
+</ul>
+
+<h2>v3.0.0 (May 2013)</h2>
+
+<ul>
+<li>First public release</li>
+</ul>
+
+<h3>Release Notes</h3>
+
+<p>New functionality contained in the TD RF Module SDK 3.0.0 include:</p>
+
+<ul>
+<li>The IDE is now based on the Eclipse “Juno” SR2 release.</li>
+<li>The compilation tools are now based on GCC 4.5.1.</li>
+<li>Support for CMSIS v2.0 (Cortex Microcontroller Software Interface Standard), including DSPLib</li>
+</ul>

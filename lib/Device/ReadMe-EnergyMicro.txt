@@ -104,4 +104,4 @@ If you download and install the "Simplicity Studio" package, you can easily
 keep up to date with the latest Energy Micro software deliveries, datasheets,
 app.notes, erratas and more.
 
-(C) Copyright Energy Micro AS, 2012
+(C) Copyright Energy Micro AS, 2013

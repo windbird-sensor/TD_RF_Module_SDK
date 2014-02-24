@@ -2,7 +2,7 @@
  * @file
  * @brief Analog Comparator (ACMP) peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -33,9 +33,11 @@
 #ifndef __EM_ACMP_H
 #define __EM_ACMP_H
 
+#include "em_device.h"
+#if defined(ACMP_COUNT) && (ACMP_COUNT > 0)
+
 #include <stdint.h>
 #include <stdbool.h>
-#include "em_device.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -131,11 +133,20 @@ typedef enum
   acmpChannel2V5  = _ACMP_INPUTSEL_NEGSEL_2V5,
   /** Scaled VDD reference */
   acmpChannelVDD  = _ACMP_INPUTSEL_NEGSEL_VDD,
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+
+#if defined( _ACMP_INPUTSEL_NEGSEL_DAC0CH0 )
   /** DAC0 channel 0 */
   acmpChannelDAC0Ch0 = _ACMP_INPUTSEL_NEGSEL_DAC0CH0,
+#endif
+
+#if defined( _ACMP_INPUTSEL_NEGSEL_DAC0CH1 )
   /** DAC0 channel 1 */
   acmpChannelDAC0Ch1 = _ACMP_INPUTSEL_NEGSEL_DAC0CH1,
+#endif
+
+#if defined( _ACMP_INPUTSEL_NEGSEL_CAPSENSE )
+  /** Capacitive sense mode */
+  acmpChannelCapSense = _ACMP_INPUTSEL_NEGSEL_CAPSENSE,
 #endif
 } ACMP_Channel_TypeDef;
 
@@ -347,7 +358,7 @@ __STATIC_INLINE uint32_t ACMP_IntGet(ACMP_TypeDef *acmp)
  *   Get enabled and pending ACMP interrupt flags.
  *   Useful for handling more interrupt sources in the same interrupt handler.
  *
- * @param[in] usart
+ * @param[in] acmp
  *   Pointer to ACMP peripheral register block.
  *
  * @note
@@ -397,4 +408,5 @@ __STATIC_INLINE void ACMP_IntSet(ACMP_TypeDef *acmp, uint32_t flags)
 }
 #endif
 
+#endif /* defined(ACMP_COUNT) && (ACMP_COUNT > 0) */
 #endif /* __EM_ACMP_H */

@@ -2,7 +2,7 @@
  * @file
  * @brief efm32lg_burtc_ret Register and Bit Field definitions
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -35,6 +35,6 @@
  *****************************************************************************/
 typedef struct
 {
-  __IO uint32_t REG; /**< Retention register  */
+  __IO uint32_t REG; /**< Retention Register  */
 } BURTC_RET_TypeDef;
 

@@ -3,7 +3,7 @@
  * @brief Reset Management Unit (RMU) peripheral module peripheral API
  *
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -32,6 +32,8 @@
  *
  ******************************************************************************/
 #include "em_rmu.h"
+#if defined(RMU_COUNT) && (RMU_COUNT > 0)
+
 #include "em_emu.h"
 #include "em_bitband.h"
 
@@ -53,6 +55,8 @@
 /***************************************************************************//**
  * @brief
  *   Disable/enable reset for various peripherals and signal sources
+ *
+ * @param[in] reset Reset types to enable/disable
  *
  * @param[in] enable
  *   @li false - Disable reset signal or flag
@@ -128,7 +132,7 @@ uint32_t RMU_ResetCauseGet(void)
   /* Inspect and decode bits. The decoding must be done in correct order, */
   /* since some reset causes may trigger other reset causes due to internal */
   /* design. We are only interested in the main cause. */
-#if defined(_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( RMU_RSTCAUSE_EM4RST )
   /* Clear "stray" bits if EM4 bit is set, they will always be active */
   if (ret & RMU_RSTCAUSE_EM4RST)
   {
@@ -160,7 +164,7 @@ uint32_t RMU_ResetCauseGet(void)
   {
     ret &= RMU_RSTCAUSE_LOCKUPRST | RMU_RSTCAUSE_SYSREQRST;
   }
-#if defined(_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( RMU_RSTCAUSE_BODAVDD0 )
   /* EM4 wake up and pin retention support */
   else if (ret & RMU_RSTCAUSE_BODAVDD0)
   {
@@ -173,7 +177,7 @@ uint32_t RMU_ResetCauseGet(void)
   else if (ret & (RMU_RSTCAUSE_EM4WURST|RMU_RSTCAUSE_EM4RST))
   {
     ret &= (RMU_RSTCAUSE_EM4WURST|
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( RMU_RSTCAUSE_BUMODERST )
             RMU_RSTCAUSE_BUMODERST|
 #endif
             RMU_RSTCAUSE_EM4RST);
@@ -183,7 +187,7 @@ uint32_t RMU_ResetCauseGet(void)
     ret &= (RMU_RSTCAUSE_EM4RST|RMU_RSTCAUSE_EXTRST);
   }
 #endif
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( RMU_RSTCAUSE_BUBODVDDDREG )
   /* Backup power domain support */
   else if (ret & (RMU_RSTCAUSE_BUBODVDDDREG))
   {
@@ -213,3 +217,4 @@ uint32_t RMU_ResetCauseGet(void)
 
 /** @} (end addtogroup RMU) */
 /** @} (end addtogroup EM_Library) */
+#endif /* defined(RMU_COUNT) && (RMU_COUNT > 0) */

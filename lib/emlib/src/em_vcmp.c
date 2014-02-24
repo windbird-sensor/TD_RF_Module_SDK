@@ -2,7 +2,7 @@
  * @file
  * @brief Voltage Comparator (VCMP) peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -30,8 +30,10 @@
  * arising from your use of this Software.
  *
  ******************************************************************************/
-#include "em_assert.h"
 #include "em_vcmp.h"
+#if defined(VCMP_COUNT) && (VCMP_COUNT > 0)
+
+#include "em_assert.h"
 
 /***************************************************************************//**
  * @addtogroup EM_Library
@@ -133,7 +135,7 @@ void VCMP_Init(const VCMP_Init_TypeDef *vcmpInit)
     while(!VCMP_Ready());
     VCMP_LowPowerRefSet(vcmpInit->lowPowerRef);
   }
-  
+
   /* Clear edge interrupt */
   VCMP_IntClear(VCMP_IF_EDGE);
 }
@@ -179,3 +181,4 @@ void VCMP_TriggerSet(int level)
 
 /** @} (end addtogroup VCMP) */
 /** @} (end addtogroup EM_Library) */
+#endif /* defined(VCMP_COUNT) && (VCMP_COUNT > 0) */

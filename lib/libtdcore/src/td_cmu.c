@@ -2,10 +2,10 @@
  * @file
  * @brief CMU (Clock Management Unit) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 2.0.2
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -33,12 +33,13 @@
 
 #include <efm32.h>
 #include <em_cmu.h>
+
 #include "td_core.h"
 #include "td_cmu.h"
 
 /***************************************************************************//**
  * @addtogroup CMU
- * @brief Clock management unit (CMU) Peripheral API for the TD1202 module
+ * @brief Clock management unit (CMU) Peripheral API for the TDxxxx RF modules
  * @{
  ******************************************************************************/
 
@@ -46,7 +47,7 @@
  **************************   PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
-/** @addtogroup CMU_USER_FUNCTIONS User Functions
+/** @addtogroup CMU_GLOBAL_FUNCTIONS Global Functions
  * @{ */
 
 /***************************************************************************//**
@@ -56,14 +57,14 @@
  ******************************************************************************/
 void TD_CMU_Init(bool external)
 {
-    if (external) {
+	if (external) {
 
-        // Start LFXO, and use LFXO for low-energy modules
-        CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
-        CMU_OscillatorEnable(cmuOsc_LFXO, true, true);
-    } else {
-        CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
-    }
+		// Start LFXO, and use LFXO for low-energy modules
+		CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
+		CMU_OscillatorEnable(cmuOsc_LFXO, true, true);
+	} else {
+		CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
+	}
 
 	// Enable the clock to the interface of the low energy modules
 	CMU_ClockEnable(cmuClock_CORELE, true);

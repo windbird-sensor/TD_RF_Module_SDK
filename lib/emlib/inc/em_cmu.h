@@ -2,7 +2,7 @@
  * @file
  * @brief Clock management unit (CMU) API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -33,8 +33,10 @@
 #ifndef __EM_CMU_H
 #define __EM_CMU_H
 
-#include <stdbool.h>
 #include "em_device.h"
+#if defined( CMU_PRESENT )
+
+#include <stdbool.h>
 #include "em_bitband.h"
 
 #ifdef __cplusplus
@@ -59,7 +61,7 @@ extern "C" {
 #define CMU_LFACLKSEL_REG          2
 #define CMU_LFBCLKSEL_REG          3
 #define CMU_DBGCLKSEL_REG          4
-#if defined (_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( USB_PRESENT )
 #define CMU_USBCCLKSEL_REG         5
 #endif
 
@@ -72,7 +74,7 @@ extern "C" {
 #define CMU_HFCORECLKDIV_REG       2
 #define CMU_LFAPRESC0_REG          3
 #define CMU_LFBPRESC0_REG          4
-#if defined (_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( _CMU_CTRL_HFCLKDIV_MASK )
 #define CMU_HFCLKDIV_REG           5
 #endif
 #define CMU_DIV_REG_POS            4
@@ -154,12 +156,14 @@ typedef enum
   cmuHFRCOBand_14MHz = _CMU_HFRCOCTRL_BAND_14MHZ,
   /** 21MHz RC band. */
   cmuHFRCOBand_21MHz = _CMU_HFRCOCTRL_BAND_21MHZ,
+#if defined( _CMU_HFRCOCTRL_BAND_28MHZ )
   /** 28MHz RC band. */
   cmuHFRCOBand_28MHz = _CMU_HFRCOCTRL_BAND_28MHZ
+#endif
 } CMU_HFRCOBand_TypeDef;
 
 
-#if defined(_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( _CMU_AUXHFRCOCTRL_BAND_MASK )
 /** AUX High frequency RC bands. */
 typedef enum
 {
@@ -173,8 +177,10 @@ typedef enum
   cmuAUXHFRCOBand_14MHz = _CMU_AUXHFRCOCTRL_BAND_14MHZ,
   /** 21MHz RC band. */
   cmuAUXHFRCOBand_21MHz = _CMU_AUXHFRCOCTRL_BAND_21MHZ,
+#if defined( _CMU_AUXHFRCOCTRL_BAND_28MHZ )
   /** 28MHz RC band. */
   cmuAUXHFRCOBand_28MHz = _CMU_AUXHFRCOCTRL_BAND_28MHZ
+#endif
 } CMU_AUXHFRCOBand_TypeDef;
 #endif
 
@@ -186,7 +192,7 @@ typedef enum
   /*******************/
 
   /** High frequency clock */
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( _CMU_CTRL_HFCLKDIV_MASK )
   cmuClock_HF = (CMU_HFCLKDIV_REG << CMU_DIV_REG_POS) |
                 (CMU_HFCLKSEL_REG << CMU_SEL_REG_POS) |
                 (CMU_NO_EN_REG << CMU_EN_REG_POS) |
@@ -339,6 +345,15 @@ typedef enum
                   (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
                   (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
                   (_CMU_HFPERCLKEN0_DAC0_SHIFT << CMU_EN_BIT_POS) |
+                  (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+#endif
+
+#if defined(_CMU_HFPERCLKEN0_IDAC0_MASK)
+  /** Digital to analog converter 0 clock. */
+  cmuClock_IDAC0 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+                  (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+                  (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+                  (_CMU_HFPERCLKEN0_IDAC0_SHIFT << CMU_EN_BIT_POS) |
                   (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
 #endif
 
@@ -570,7 +585,7 @@ typedef enum
   cmuOsc_HFXO,     /**< High frequency crystal oscillator. */
   cmuOsc_HFRCO,    /**< High frequency RC oscillator. */
   cmuOsc_AUXHFRCO, /**< Auxiliary high frequency RC oscillator. */
-#if defined(_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if !defined(_EFM32_GECKO_FAMILY)
   cmuOsc_ULFRCO    /**< Ultra low frequency RC oscillator. */
 #endif
 } CMU_Osc_TypeDef;
@@ -588,7 +603,7 @@ typedef enum
   cmuSelect_CORELEDIV2, /**< Core low energy clock divided by 2. */
   cmuSelect_AUXHFRCO,   /**< Auxilliary clock source can be used for debug clock */
   cmuSelect_HFCLK,      /**< Divided HFCLK on Giant for debug clock, undivided on Tiny Gecko and for USBC (not used on Gecko) */
-#if defined(_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if !defined(_EFM32_GECKO_FAMILY)
   cmuSelect_ULFRCO,     /**< Ultra low frequency RC oscillator. */
 #endif
 } CMU_Select_TypeDef;
@@ -607,10 +622,12 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref);
 
 CMU_HFRCOBand_TypeDef CMU_HFRCOBandGet(void);
 void CMU_HFRCOBandSet(CMU_HFRCOBand_TypeDef band);
-#if defined(_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+
+#if defined( _CMU_AUXHFRCOCTRL_BAND_MASK )
 CMU_AUXHFRCOBand_TypeDef CMU_AUXHFRCOBandGet(void);
 void CMU_AUXHFRCOBandSet(CMU_AUXHFRCOBand_TypeDef band);
 #endif
+
 void CMU_HFRCOStartupDelaySet(uint32_t delay);
 uint32_t CMU_HFRCOStartupDelayGet(void);
 
@@ -626,8 +643,11 @@ void CMU_LCDClkFDIVSet(uint32_t div);
 
 void CMU_FreezeEnable(bool enable);
 uint32_t CMU_Calibrate(uint32_t HFCycles, CMU_Osc_TypeDef reference);
+
+#if defined( _CMU_CALCTRL_UPSEL_MASK ) && defined( _CMU_CALCTRL_DOWNSEL_MASK )
 void CMU_CalibrateConfig(uint32_t downCycles, CMU_Osc_TypeDef downSel,
                          CMU_Osc_TypeDef upSel);
+#endif
 
 /***************************************************************************//**
  * @brief
@@ -777,7 +797,7 @@ __STATIC_INLINE uint32_t CMU_CalibrateCountGet(void)
 {
   /* Wait until calibration completes, UNLESS continuous calibration mode is  */
   /* active */
-#if defined (_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( CMU_CALCTRL_CONT )
   if (!(CMU->CALCTRL & CMU_CALCTRL_CONT))
   {
     while (CMU->STATUS & CMU_STATUS_CALBSY)
@@ -804,7 +824,7 @@ __STATIC_INLINE void CMU_CalibrateStart(void)
 }
 
 
-#if defined (_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( CMU_CMD_CALSTOP )
 /***************************************************************************//**
  * @brief
  *   Stop the calibration counters
@@ -813,8 +833,10 @@ __STATIC_INLINE void CMU_CalibrateStop(void)
 {
   CMU->CMD = CMU_CMD_CALSTOP;
 }
+#endif
 
 
+#if defined( CMU_CALCTRL_CONT )
 /***************************************************************************//**
  * @brief
  *   Configures continuous calibration mode
@@ -835,4 +857,5 @@ __STATIC_INLINE void CMU_CalibrateCont(bool enable)
 }
 #endif
 
+#endif /* defined( CMU_PRESENT ) */
 #endif /* __EM_CMU_H */

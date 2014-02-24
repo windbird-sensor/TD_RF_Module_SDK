@@ -23,9 +23,9 @@ ENTRY(__cs3_reset)
 MEMORY
 {
   rom (rx) : ORIGIN = 0x00000000, LENGTH = 131072-1024
+  eeprom (rw) : ORIGIN = 131072-512, LENGTH = 512
   sequence (rw) : ORIGIN = 131072-1024, LENGTH = 512
-  eeprom (r) : ORIGIN = 131072-512, LENGTH = 512
-  ram (rwx) : ORIGIN = 0x20000000, LENGTH = 16384
+  ram (rwx) : ORIGIN = 0x20000040, LENGTH = 16384-64
 }
 
 /* These force the linker to search for particular symbols from
@@ -49,6 +49,8 @@ PROVIDE(__cs3_stack = __cs3_region_start_ram + __cs3_region_size_ram);
 
 PROVIDE(__userrom_size = 512);
 PROVIDE(__userrom_start = ORIGIN(eeprom));
+PROVIDE(__traceram_start = ORIGIN(ram)-64);
+
 
 PROVIDE(__usersequence_size = 512);
 PROVIDE(__usersequence_start = ORIGIN(sequence));
@@ -143,18 +145,13 @@ SECTIONS
     __cs3_regions_end = .;
     . = ALIGN (8);
     *(.rom)
-    *(.rom.b .bss.rom)          
+    *(.rom.b .bss.rom)
     _etext = .;
-   
   } >rom
   /* __cs3_region_end_rom is deprecated */
   __cs3_region_end_rom = __cs3_region_start_rom + LENGTH(rom);
   __cs3_region_size_rom = LENGTH(rom);
-  
-  
-  
-   
-  
+
   .data : ALIGN (8)
   {
     __cs3_region_start_ram = .;
@@ -168,8 +165,6 @@ SECTIONS
     . = ALIGN (8);
     _edata = .;
   } >ram AT>rom
-   
-  
   .bss : ALIGN (8)
   {
     *(.shbss)
@@ -181,24 +176,29 @@ SECTIONS
     _end = .;
     __end = .;
   } >ram
-  
-  
-  .userrom : 
+
+
+  .usersequence :
   {
-     *(.userrom)    
-  } >eeprom
-  
-  .usersequence : 
-  {
-     *(.usersequence)    
+     *(.usersequence)
   } >sequence
-  
+
+
+  .userrom :
+  {
+   *(.userrom)
+  } >eeprom
+
+
   /* __cs3_region_end_ram is deprecated */
   __cs3_region_end_ram = __cs3_region_start_ram + LENGTH(ram);
   __cs3_region_size_ram = LENGTH(ram);
   __cs3_region_init_ram = LOADADDR (.data);
   __cs3_region_init_size_ram = _edata - ADDR (.data);
   __cs3_region_zero_size_ram = _end - _edata;
+
+  __cs3_rodata = LOADADDR (.rodata);
+
 
   .stab 0 (NOLOAD) : { *(.stab) }
   .stabstr 0 (NOLOAD) : { *(.stabstr) }

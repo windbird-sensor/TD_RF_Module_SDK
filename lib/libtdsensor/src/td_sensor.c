@@ -1,11 +1,11 @@
 /***************************************************************************//**
- * @file td_sensor.c
+ * @file
  * @brief Sensor Monitoring
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.1.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -34,82 +34,33 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <em_rmu.h>
+
+#include <td_rtc.h>
 #include <td_flash.h>
 #include <td_measure.h>
 #include <td_gpio.h>
+#include <td_utils.h>
+#include <td_trap.h>
 #include <td_scheduler.h>
+#include <td_core.h>
+#include <td_printf.h>
+#include <td_sigfox.h>
 
 #include "sensor_private.h"
-#include "sensor_config.h"
 #include "sensor_keepalive.h"
 #include "sensor_event.h"
-
+#include "td_sensor.h"
 #include "td_sensor_lan.h"
 #include "td_sensor_device.h"
 #include "td_sensor_gateway.h"
 #include "td_sensor_transmitter.h"
 
-#include "td_sensor.h"
-
 /***************************************************************************//**
  * @addtogroup TD_SENSOR Sensor Monitoring
  * @brief Sensor initialization and monitoring functions.
- *
  * @{
  ******************************************************************************/
-
-/*******************************************************************************
- **************************  DEFINES   ****************************************
- ******************************************************************************/
-
-/** @addtogroup TD_SENSOR_DEFINES Defines
- * @{ */
-
-/*Device only. Time to wait between two events.*/
-#define SIGFOX_TRANSMISSION_TIME 7
-
-/*Device only. Time to wait after a collision.*/
-#define COLLISION_WAIT_TIME 10
-
-/*Device only. Time to wait after all retries ended-up in collisions.*/
-#define NACK_WAIT_INTERVAL 3600
-
-/*Local retries count for each event*/
-#define EVENT_BATTERY_RETRIES 2
-#define EVENT_BOOT_RETRIES 3
-#define EVENT_LOCAL_KEEPALIVE_RETRIES 3
-#define EVENT_SENSOR_KEEPALIVE_RETRIES 3
-#define EVENT_SWITCH_RETRIES 2
-#define EVENT_TEMPERATURE_RETRIES 2
-
-/** @} */
-
-/*******************************************************************************
- **************************  TYPEDEFS   ****************************************
- ******************************************************************************/
-
-/** @addtogroup TD_SENSOR_TYPEDEFS Typedefs
- * @{ */
-
-/** Sensor Event */
-typedef enum {
-	SENSOR_SEND_BATTERY,
-	SENSOR_SEND_LOCAL_KEEPALIVE,
-	SENSOR_SEND_SENSOR_KEEPALIVE,
-	SENSOR_SEND_TEMPERATURE,
-	SENSOR_SEND_SWITCH,
-	SENSOR_SEND_BOOT
-} SensorEvent;
-
-
- /**   Sensor Machine State Event*/
-typedef struct {
-	SensorEvent event :8;	///<event
-	uint8_t arg :8; 		///<opt. arg
-	uint8_t retry :8; 		///<collision retry
-}__PACKED SensorMachineStateEvent;
-
-/** @} */
 
 /*******************************************************************************
  **************************  PRIVATE VARIABLES   *******************************
@@ -118,195 +69,324 @@ typedef struct {
 /** @addtogroup TD_SENSOR_Private_Variables Private Variables
  * @{ */
 
+/** Local module configuration */
+static TD_SENSOR_Configuration_t Module;
 
-/**Local Module configuration*/
-static ModuleConfiguration Module;
+/** Boot cause given by RMU */
+static int32_t BootCause = -1;
 
-/**Sensor machine state events queue, count and index*/
-static SensorMachineStateEvent EventQueue[MAX_SENSOR_EVENT];
-static uint8_t EventCount = 0;
-static uint8_t EventIndex = 0;
+/** Custom boot cause loaded from flash */
+static uint8_t CustomBootCause;
 
-/**Device only. Estimation of gateway business*/
-static bool GatewayBusy = false;
+/** Buffer in which to store configuration that must be persistent (boot monitoring, battery state) */
+uint32_t CurrentState[2];
 
-/**Sigfox ID*/
+/** Module SIGFOX ID */
 uint32_t SigfoxID;
 
-/** @} */
+/** Flag to know whether the configuration is already initialized or not */
+static bool ConfigInit = false;
 
+/** Flag to know whether the class is already initialized or not */
+static bool ConfigClass = false;
+
+/* Unexpected brown-out reboot counter */
+static uint32_t BrownOutReboot = 0;
+
+/** Switch state list top index */
+static uint8_t TD_SENSOR_SwitchStateList_top = 0;
+
+/** Switch state list bottom index */
+static uint8_t TD_SENSOR_SwitchStateList_bottom = 0;
+
+/* External declarations to allow code removal and optimization */
+extern TD_SENSOR_SwitchState_t *TD_SENSOR_SwitchStateList;
+extern TD_SENSOR_SwitchConfiguration_t *TD_SENSOR_SwitchConfig;
+extern TD_SENSOR_TRANSMITTER_Init_t const TD_SENSOR_TRANSMITTER_Init_;
+extern TD_SENSOR_TRANSMITTER_Process_t const TD_SENSOR_TRANSMITTER_Process_;
+extern TD_SENSOR_MonitorInit_t const TD_SENSOR_MonitorInit_;
+
+/** @} */
 
 /*******************************************************************************
  **************************  PRIVATE FUNCTIONS   *******************************
  ******************************************************************************/
 
-/** @addtogroup TD_SENSOR_PRIVATE_FUNCTIONS Private Functions
+/** @addtogroup TD_SENSOR_LOCAL_FUNCTIONS Local Functions
  * @{ */
 
 /***************************************************************************//**
  * @brief
- *   Module local variables initialization
- *
+ *   Initialize the module local variables.
  ******************************************************************************/
-static void TD_SENSOR_PrivateInit()
+void TD_SENSOR_InternalInit(void)
 {
-	int i;
-	for (i = 0; i < SENSOR_MAX_SWITCH; i++) {
-		Module.switches[i].monitor = false;
-	}
-	Module.switch_count = 0;
-	Module.switch_mask = 0;
+	memset(&Module, 0, sizeof(TD_SENSOR_Configuration_t));
 
-	Module.battery.state = true;
+	// Initialize  states
 	Module.temperature.state = TEMPERATURE_OK;
-	Module.rssi.monitor = false;
-	Module.temperature.monitor = false;
-	Module.connection.monitor = false;
-	Module.battery.monitor = false;
-	Module.boot.monitor = false;
-	Module.keepalive.monitor = false;
 
-	Module.class = DEFAULT_DEVICE_CLASS;
+	//Initialize timers
+	Module.temperature.timer = 0xFF;
+	Module.connection.timer = 0xFF;
+	Module.keepalive.timer = 0xFF;
 
+	// Initialize dynamic switch data
+	Module.switches = TD_SENSOR_SwitchConfig;
+	memset(TD_SENSOR_SwitchConfig,0,CONFIG_TD_SENSOR_MAX_SWITCH *
+		sizeof (TD_SENSOR_SwitchConfiguration_t));
 }
-
 
 /***************************************************************************//**
  * @brief
- *   Append an event to the queue
+ *   Save the module state to Flash memory.
+ ****************************************************************************/
+static void SaveCurrentStateToFlash(void)
+{
+	uint32_t temp;
+
+	CurrentState[0] = Module.battery.state & 0x01;
+	temp = Module.boot.monitor & 0x01;
+	CurrentState[0] |= temp << 1;
+	temp = CustomBootCause;
+	CurrentState[0] |= temp << 2;
+	CurrentState[1] = (uint32_t) Module.boot.user_callback;
+	TD_FLASH_WriteVariables();
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Restore the module state from Flash memory.
+ ****************************************************************************/
+static void LoadCurrentStateFromFlash(void)
+{
+	if (!TD_FLASH_DeclareVariable((uint8_t *) &CurrentState, sizeof (CurrentState), 0)) {
+		Module.battery.state = true;
+		Module.boot.monitor = false;
+		Module.boot.user_callback = 0;
+		CustomBootCause = 0;
+	} else {
+		Module.battery.state = CurrentState[0] & 0x01;
+		Module.boot.monitor = (CurrentState[0] >> 1) & 0x01;
+		Module.boot.user_callback = (bool ( *)(void)) CurrentState[1];
+		CustomBootCause = (CurrentState[0] >> 2) & 0xFF;
+	}
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Read and clear boot cause from RMU.
+ ******************************************************************************/
+static void ReadBootCause(void)
+{
+	if (BootCause == -1) {
+		BootCause = RMU_ResetCauseGet();
+		RMU_ResetCauseClear();
+	}
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Process a Sensor state event.
  *
  * @param[in] event
- *	Event to be processed.
+ *	 The Sensor event to process.
  *
  * @param[in] arg
- *	Optionnal arguments.
+ *   The event-specific argument. Currently, only used for Switch events for
+ *   holding switch index and state.
  *
- * @param[in] retry
- *	How many retries if the Gateway does not ack.
+ * @return
+ *   Returns true if the event was properly processed (i.e. the frame was
+ *   acknowledged by the gateway), false if the Gateway never acknowledged the
+ *   frame.
  ******************************************************************************/
-static void TD_SENSOR_AppendEvent(SensorEvent event, uint8_t arg, uint8_t retry)
+static bool TD_SENSOR_EventProcess(TD_SENSOR_Event_t event, uint8_t arg)
 {
-	uint8_t index;
+	bool send_sigfox = true;
+	bool acked = false;
+	uint8_t switch_index;
+	bool switch_state;
 
-	if (EventCount <= MAX_SENSOR_EVENT) {
-		//circular buffer
-		index = EventIndex + EventCount;
-		if (index >= MAX_SENSOR_EVENT) {
-			index -= MAX_SENSOR_EVENT;
+	switch (event) {
+	case SENSOR_SEND_BATTERY:
+		if (Module.battery.user_callback != 0) {
+			send_sigfox = (*Module.battery.user_callback)(Module.battery.state, Module.battery.level);
 		}
+		if (send_sigfox) {
+			acked = TD_SENSOR_SendEventBattery(Module.battery.state, Module.battery.level);
+		}
+		break;
 
-		EventQueue[index].event = event;
-		EventQueue[index].arg = arg;
-		EventQueue[index].retry = retry;
+	case SENSOR_SEND_BOOT:
+		if (Module.boot.user_callback != 0) {
+			send_sigfox = (*Module.boot.user_callback)();
+		}
+		if (send_sigfox) {
+			acked = TD_SENSOR_SendEventBootExt(BootCause & 0xFF, CustomBootCause, 0, 0);
+		}
+		break;
 
-		EventCount++;
+	case SENSOR_SEND_TEMPERATURE:
+		if (Module.temperature.user_callback != 0) {
+			send_sigfox = (*Module.temperature.user_callback)(Module.temperature.state, Module.temperature.level);
+		}
+		if (send_sigfox) {
+			acked = TD_SENSOR_SendEventTemperature(Module.temperature.state);
+		}
+		break;
+
+	// Device only
+	case SENSOR_SEND_LOCAL_KEEPALIVE:
+		if (Module.type == SENSOR_DEVICE) {
+			acked = TD_SENSOR_DEVICE_KeepAlive(true,
+				Module.connection.interval,
+				Module.rssi.monitor,
+				Module.rssi.level_low,
+				Module.rssi.level_ok);
+		} else if (Module.type == SENSOR_GATEWAY) {
+			TD_SENSOR_GATEWAY_SendKeepAliveBroadcast(true,
+				Module.connection.interval,
+				0,
+				0);
+		}
+		break;
+
+	case SENSOR_SEND_SENSOR_KEEPALIVE:
+		acked = TD_SENSOR_SendKeepAlive();
+		break;
+
+	case SENSOR_SEND_SWITCH:
+		switch_index = (arg & 0x7F);
+		switch_state = (arg >> 7);
+		if (Module.switches[switch_index].user_callback != 0) {
+			send_sigfox =
+				(*Module.switches[switch_index].user_callback)(Module.switches[switch_index].port,
+						Module.switches[switch_index].bit,
+						switch_state);
+		}
+		if (send_sigfox) {
+			acked =
+				TD_SENSOR_SendEventSwitch(Module.switches[switch_index].port,
+					Module.switches[switch_index].bit,
+					switch_state);
+		}
+		break;
+
+	default:
+		break;
 	}
+	return acked;
 }
 
 /***************************************************************************//**
  * @brief
- *   Collision handler, called by Scheduler
+ *   Keep-alive callback function, called by the Scheduler.
  *
  * @param[in] arg
- *	Timer argument. Contains information about event
+ *	 Timer argument. Not used.
  *
  * @param[in] repetitions
- *	Timer argument. Not used.
- ******************************************************************************/
-static void TD_SENSOR_CollisionHandler(uint32_t arg, uint8_t repetitions)
-{
-	TD_SENSOR_AppendEvent((SensorEvent) (arg & 0xFF), (arg >> 8) & 0xFF, (arg >> 16) & 0xFF);
-}
-
-/***************************************************************************//**
- * @brief
- *   Gateway busy Handler, called by Scheduler
- *
- * @param[in] arg
- *	Timer argument. Not used.
- *
- * @param[in] repetitions
- *	Timer argument. Not used.
- ******************************************************************************/
-static void TD_SENSOR_GatewayBusyHandler(uint32_t arg, uint8_t repetitions)
-{
-	GatewayBusy = false;
-}
-
-/***************************************************************************//**
- * @brief
- *   Keepalive callback, called by Scheduler
- *
- * @param[in] arg
- *	Timer argument. Not used.
- *
- * @param[in] repetitions
- *	Timer argument. Not used.
+ *	 Timer argument. Not used.
  ******************************************************************************/
 static void TD_SENSOR_KeepAliveCallback(uint32_t arg, uint8_t repetitions)
 {
-	TD_SENSOR_AppendEvent(SENSOR_SEND_SENSOR_KEEPALIVE, 0, EVENT_SENSOR_KEEPALIVE_RETRIES);
+	TD_SENSOR_EventProcess(SENSOR_SEND_SENSOR_KEEPALIVE, 0);
 }
 
 /***************************************************************************//**
  * @brief
- *   Connection callback, called by Scheduler
+ *   Connection callback function, called by the Scheduler when connection
+ *   monitoring is enabled.
  *
  * @param[in] arg
- *	Timer argument. Not used.
+ *	 Timer argument. Not used.
  *
  * @param[in] repetitions
- *	Timer argument. Not used.
+ *	 Timer argument. Not used.
  ******************************************************************************/
 static void TD_SENSOR_ConnectionCallBack(uint32_t arg, uint8_t repetitions)
 {
-	TD_SENSOR_AppendEvent(SENSOR_SEND_LOCAL_KEEPALIVE, 0, EVENT_LOCAL_KEEPALIVE_RETRIES);
+	TD_SENSOR_EventProcess(SENSOR_SEND_LOCAL_KEEPALIVE, 0);
 }
 
 /***************************************************************************//**
  * @brief
- *   Battery callback called by ADC
+ *   Apply the module configuration and start the related monitoring functions.
  ******************************************************************************/
-static void TD_SENSOR_BatteryCallBack(void)
+static void TD_SENSOR_ApplyMonitoringConfiguration(void)
 {
-	//toggle state
-	Module.battery.state = !Module.battery.state;
+	int i;
 
-	TD_SENSOR_AppendEvent(SENSOR_SEND_BATTERY, 0, EVENT_BATTERY_RETRIES);
-
-	//measure voltage if state is high or to provide it to the callback
-	if (Module.battery.state || Module.battery.user_callback != 0) {
-		Module.battery.level = TD_MEASURE_Voltage();
+	if (Module.boot.monitor) {
+		TD_SENSOR_EventProcess(SENSOR_SEND_BOOT, 0);
 	}
-
-	//toggle battery monitoring for hysteresis
-	if (Module.battery.state) {
-		TD_MEASURE_EnableBatteryLevelMonitoring(true, Module.battery.level_low, TD_SENSOR_BatteryCallBack);
-	} else {
-		TD_MEASURE_EnableBatteryLevelMonitoring(false, Module.battery.level_ok, TD_SENSOR_BatteryCallBack);
+	if (Module.battery.monitor) {
+		TD_SENSOR_MonitorBattery(1,
+			Module.battery.level_low,
+			Module.battery.level_ok,
+			Module.battery.user_callback);
 	}
-
+	if (Module.temperature.monitor) {
+		Module.temperature.monitor = false;
+		TD_SENSOR_MonitorTemperature(1,
+			Module.temperature.interval,
+			Module.temperature.level_low,
+			Module.temperature.level_high,
+			Module.temperature.user_callback);
+	}
+	if (Module.connection.monitor) {
+		Module.connection.monitor = false;
+		TD_SENSOR_MonitorConnection(true, Module.connection.interval);
+	}
+	if (Module.keepalive.monitor) {
+		Module.keepalive.monitor = false;
+		TD_SENSOR_MonitorKeepAlive(true, Module.keepalive.interval);
+	}
+	for (i = 0; i < CONFIG_TD_SENSOR_MAX_SWITCH; i++) {
+		if (Module.switches[i].monitor) {
+			if (!Module.switches[i].on_irq) {
+				TD_SENSOR_MonitorSwitch(true,
+					Module.switches[i].port,
+					Module.switches[i].bit,
+					Module.switches[i].falling,
+					Module.switches[i].rising,
+					Module.switches[i].pull,
+					Module.switches[i].pull_state,
+					Module.switches[i].user_callback);
+			} else {
+				TD_SENSOR_MonitorSwitchIrq(true,
+					Module.switches[i].port,
+					Module.switches[i].bit,
+					Module.switches[i].falling,
+					Module.switches[i].rising,
+					Module.switches[i].pull,
+					Module.switches[i].pull_state,
+					Module.switches[i].user_callback);
+			}
+		}
+	}
 }
 
 /***************************************************************************//**
  * @brief
- *   Temperature Callback called by Scheduler
+ *   Temperature callback function, called by the Scheduler.
  *
  * @param[in] arg
- *	Timer argument. Not used.
+ *	 Timer argument. Not used.
  *
  * @param[in] repetitions
- *	Timer argument. Not used.
+ *	 Timer argument. Not used.
  ******************************************************************************/
 static void TD_SENSOR_TemperatureCallBack(uint32_t arg, uint8_t repetitions)
 {
 	uint8_t prev_state;
 
-	//measure temperature and save previous state
-	Module.temperature.level = TD_MEASURE_TemperatureExtended();
+	// Measure temperature and save previous state
+	Module.temperature.level = (int16_t)TD_MEASURE_TemperatureExtended();
 	prev_state = Module.temperature.state;
 
-	//check state
+	// Check state
 	if (Module.temperature.level <= Module.temperature.level_low) {
 		Module.temperature.state = TEMPERATURE_LOW;
 	} else if (Module.temperature.level >= Module.temperature.level_high) {
@@ -315,40 +395,55 @@ static void TD_SENSOR_TemperatureCallBack(uint32_t arg, uint8_t repetitions)
 		Module.temperature.state = TEMPERATURE_OK;
 	}
 
-	//if state changed add an event
+	// If state changed, add an event
 	if (Module.temperature.state != prev_state) {
-		TD_SENSOR_AppendEvent(SENSOR_SEND_TEMPERATURE, 0, EVENT_TEMPERATURE_RETRIES);
+		TD_SENSOR_EventProcess(SENSOR_SEND_TEMPERATURE, 0);
 	}
 }
 
 /***************************************************************************//**
  * @brief
- *   Switch Callback called on GPIO IRQ
+ *   Switch callback function, called from GPIO IRQ processing.
+ *
+ * @param mask
+ *   Contains the IRQ mask.
  ******************************************************************************/
-static void TD_SENSOR_SwitchCallBack()
+static void TD_SENSOR_SwitchCallBack(uint32_t mask)
 {
 	int i;
+	bool state;
 	int done = 0;
+	uint8_t index;
 	uint32_t temp_mask = 0;
-	uint32_t mask = GPIO_IntGet();
 
-	//check irq for all switches
-	for (i = 0; i < SENSOR_MAX_SWITCH; i++) {
+	// Check IRQ mask for all switches
+	for (i = 0; i < CONFIG_TD_SENSOR_MAX_SWITCH; i++) {
 		if (done >= Module.switch_count) {
 			break;
 		}
-
-		if (Module.switches[i].bit != 0xFF && Module.switches[i].port != 0xFF) {
+		if (Module.switches[i].monitor) {
 			done++;
-
 			temp_mask = 1 << Module.switches[i].bit;
 
 			//TODO: debounce
 			if (temp_mask & mask) {
-				bool state = (GPIO_PinInGet(Module.switches[i].port, Module.switches[i].bit)) ? true : false;
+				state = GPIO_PinInGet(Module.switches[i].port, Module.switches[i].bit);
+				if (!Module.switches[i].on_irq) {
+					index = TD_SENSOR_SwitchStateList_top + 1;
+					if (index >= CONFIG_TD_SENSOR_MAX_SWITCH_EVENT) {
+						index = 0;
+					}
 
-				TD_SENSOR_AppendEvent(SENSOR_SEND_SWITCH, (state<<7) | (i&0x7F), EVENT_SWITCH_RETRIES);
+					// If too many pending, discards current event
+					if (TD_SENSOR_SwitchStateList_bottom != index) {
 
+						// Append to circular buffer
+						TD_SENSOR_SwitchStateList[TD_SENSOR_SwitchStateList_top].param = (state << 7) | i;
+						TD_SENSOR_SwitchStateList_top = index;
+					}
+				} else {
+					(*Module.switches[i].user_callback)(Module.switches[i].port, Module.switches[i].bit, state);
+				}
 			}
 		}
 	}
@@ -356,116 +451,254 @@ static void TD_SENSOR_SwitchCallBack()
 
 /***************************************************************************//**
  * @brief
- *   Set callback and irq for a switch
- *
+ *   Process non-IRQ switch events.
  ******************************************************************************/
-static void TD_SENSOR_SetSwitchMonitoring(GPIO_Port_TypeDef port, unsigned int bit, bool falling, bool rising, bool pull, bool pull_state,
-		bool (*switch_callback)(GPIO_Port_TypeDef port, unsigned int bit, bool state))
+static void TD_SENSOR_SwitchEventProcess(void)
 {
+	uint32_t mask;
+	TD_SENSOR_SwitchState_t tmp;
 
-	if (((1<<bit) & 0xAAAAAAAA) != 0) {
-		//odd
-		TD_GPIO_SetCallback(TD_GPIO_USER_ODD, TD_SENSOR_SwitchCallBack,	Module.switch_mask & 0xAAAAAAAA);
-	} else {
-		//even
-		TD_GPIO_SetCallback(TD_GPIO_USER_EVEN, TD_SENSOR_SwitchCallBack, Module.switch_mask & 0x55555555);
+	while (TD_SENSOR_SwitchStateList_bottom != TD_SENSOR_SwitchStateList_top){
+		mask=__get_PRIMASK();
+		__set_PRIMASK(1);
+		tmp.param = TD_SENSOR_SwitchStateList[TD_SENSOR_SwitchStateList_bottom].param;
+		TD_SENSOR_SwitchStateList_bottom++;
+		if (TD_SENSOR_SwitchStateList_bottom >= CONFIG_TD_SENSOR_MAX_SWITCH_EVENT){
+			TD_SENSOR_SwitchStateList_bottom = 0;
+		}
+		__set_PRIMASK(mask);
+
+		// If event is 0xFF it was canceled
+		if (tmp.param != 0xFF){
+			TD_SENSOR_EventProcess(SENSOR_SEND_SWITCH, tmp.param);
+		}
 	}
-
-	Module.switch_count++;
-
-	if (pull) {
-		GPIO_PinModeSet(port, bit, gpioModeInputPullFilter, pull_state);
-	} else {
-		GPIO_PinModeSet(port, bit, gpioModeInput, 0);
-	}
-
-	//enable irq
-	GPIO_IntConfig(port, bit, rising, falling, true);
-
 }
 
 /***************************************************************************//**
  * @brief
- *   Process any State event
+ *   Setup IRQ handlers for a switch monitoring.
  *
- * @param[in] event
- *	Event to be processed
+ * @param[in] port
+ *	 Port on which the switch is connected.
  *
- * @return
- *  True if event was properly processed (ie the frame was acked by the Gateway)
- *  False if the Gateway enver acked the frame.
+ * @param[in] bit
+ *	 Bit on which the switch is connected.
+ *
+ * @param[in] falling
+ *	 If true an IRQ will be triggered on falling edge.
+ *
+ * @param[in] rising
+ *	 If true an IRQ will be triggered on rising edge.
+ *
+ * @param[in] pull
+ *	 Enable pull-up or pull-down on the specified port, bit.
+ *
+ * @param[in] pull_state
+ *	 If pull is set to true, pull_state determines if the pin is pulled high
+ *	 (true) or pull-down (false).
+ *
+ * @param[in] switch_callback
+ *   Pointer to the callback function that will be called upon GPIO IRQ with the
+ *   following arguments:
+ *     - port: the Switch GPIO port that generated the IRQ
+ *     - bit: the Switch GPIO bit that generated the IRQ
+ *     - state: the Switch GPIO state that generated the IRQ
  ******************************************************************************/
-static bool TD_SENSOR_EventProcess(SensorMachineStateEvent event)
+static void TD_SENSOR_SetSwitchMonitoring(GPIO_Port_TypeDef port, unsigned int bit, bool falling, bool rising, bool pull, bool pull_state, bool (*switch_callback)(GPIO_Port_TypeDef port, unsigned int bit, bool state))
 {
-	bool send_sigfox = true;
-	bool acked = false;
-	uint8_t switch_index;
-	bool switch_state;
+	if (((1 << bit) & 0xAAAAAAAA) != 0) {
 
-	switch (event.event) {
-	case SENSOR_SEND_BATTERY:
+		// Odd
+		TD_GPIO_SetCallback(TD_GPIO_USER_ODD,
+				TD_SENSOR_SwitchCallBack,
+				Module.switch_mask & TD_GPIO_ODD_MASK);
+	} else {
 
-		if (Module.battery.user_callback != 0) {
-			send_sigfox = (*Module.battery.user_callback)(Module.battery.state, Module.battery.level);
-		}
-
-		if (send_sigfox) {
-			acked = TD_SENSOR_SendEventBattery(Module.battery.state, Module.battery.level);
-		}
-
-		break;
-
-	case SENSOR_SEND_BOOT:
-
-		if (Module.boot.user_callback != 0) {
-			send_sigfox = (*Module.boot.user_callback)();
-		}
-
-		if (send_sigfox) {
-			acked = TD_SENSOR_SendEventBoot();
-		}
-
-		break;
-
-	case SENSOR_SEND_TEMPERATURE:
-
-		if (Module.temperature.user_callback != 0) {
-			send_sigfox = (*Module.temperature.user_callback)(Module.temperature.state, Module.temperature.level);
-		}
-
-		if (send_sigfox) {
-			acked = TD_SENSOR_SendEventTemperature(Module.temperature.state);
-		}
-
-		break;
-
-		//device only
-	case SENSOR_SEND_LOCAL_KEEPALIVE:
-		acked = TD_SENSOR_DEVICE_KeepAlive(true, Module.connection.interval, Module.rssi.monitor, Module.rssi.level_low, Module.rssi.level_ok);
-		break;
-
-	case SENSOR_SEND_SENSOR_KEEPALIVE:
-		acked = TD_SENSOR_SendKeepAlive();
-		break;
-
-	case SENSOR_SEND_SWITCH:
-
-		switch_index = (event.arg&0x7F);
-		switch_state = (event.arg>>7);
-		if (Module.switches[switch_index].user_callback != 0) {
-			send_sigfox = (*Module.switches[switch_index].user_callback)(Module.switches[switch_index].port, Module.switches[switch_index].bit,
-					switch_state);
-		}
-		if (send_sigfox) {
-			acked = TD_SENSOR_SendEventSwitch(Module.switches[switch_index].port, Module.switches[switch_index].bit, switch_state);
-		}
-		break;
-
-	default:
-		break;
+		// Even
+		TD_GPIO_SetCallback(TD_GPIO_USER_EVEN,
+				TD_SENSOR_SwitchCallBack,
+				Module.switch_mask & TD_GPIO_EVEN_MASK);
 	}
+	if (pull) {
+		GPIO_PinModeSet(port, bit, gpioModeInputPull, pull_state);
+	} else {
+		GPIO_PinModeSet(port, bit, gpioModeInput, 0);
+	}
+	GPIO_IntConfig(port, bit, rising, falling, true);
+}
 
-	return acked;
+/***************************************************************************//**
+ * @brief
+ *	Configure Switch Monitoring.
+ *
+ * @param[in] enable
+ *	 Enable (true) or disable (false) switch monitoring.
+ *
+ * @param[in] port
+ *	 Port on which the switch is connected.
+ *
+ * @param[in] bit
+ *	 Bit on which the switch is connected.
+ *
+ * @param[in] falling
+ *	 If true an IRQ will be triggered on falling edge.
+ *
+ * @param[in] rising
+ *	 If true an IRQ will be triggered on rising edge.
+ *
+ * @param[in] pull
+ *	 Enable pull-up or pull-down on the specified port, bit.
+ *
+ * @param[in] pull_state
+ *	 If pull is set to true, pull_state determines if the pin is pulled high
+ *	 (true) or pull-down (false), otherwise it has no effect.
+ *
+ * @param[in] switch_callback
+ *   Pointer to the callback function that will be called upon GPIO IRQ with the
+ *   following arguments:
+ *     - port: the Switch GPIO port that generated the IRQ
+ *     - bit: the Switch GPIO bit that generated the IRQ
+ *     - state: the Switch GPIO state that generated the IRQ
+ *
+ * @param[in] irq
+ *   Set to true to enable IRQ switch monitoring, set to false to enable polled
+ *   switch monitoring.
+ *
+ * @details
+ *	 A Switch ON Sensor message will be sent on a falling edge and a Switch OFF
+ *	 message will be sent on a rising edge. It is therefore highly recommended
+ *	 to connect one side of your switch to the ground and activate pull-up on
+ *	 the corresponding GPIO.
+ ******************************************************************************/
+static bool TD_SENSOR_PrivateMonitorSwitch(bool enable, GPIO_Port_TypeDef port, unsigned int bit, bool falling, bool rising, bool pull, bool pull_state, bool (*switch_callback)(GPIO_Port_TypeDef port, unsigned int bit, bool state), bool irq)
+{
+	int i;
+	bool monitored = false;
+	int index = -1;
+	int alt_index = -1;
+	uint32_t mask_irq;
+	uint8_t j;
+
+	// If enable, append the GPIO to the list if not already there
+	if (enable) {
+		if (Module.switch_count >= CONFIG_TD_SENSOR_MAX_SWITCH) {
+			return false;
+		} else if (Module.switch_count == 0) {
+
+			// Enable GPIO IRQs
+			NVIC_EnableIRQ(GPIO_EVEN_IRQn);
+			NVIC_EnableIRQ(GPIO_ODD_IRQn);
+		}
+		monitored = false;
+		index = -1;
+		alt_index = -1;
+
+		// Make sure the bit/port is not already in the list
+		for (i = 0; i < CONFIG_TD_SENSOR_MAX_SWITCH; i++) {
+			if (Module.switches[i].bit == bit && Module.switches[i].port == port) {
+
+				// The best thing to dot is to reuse the previous index
+				index = i;
+				monitored = Module.switches[i].monitor;
+			}
+
+			// If it does not exist, use the first available slot
+			if (alt_index == -1 && !Module.switches[i].monitor) {
+				alt_index = i;
+			}
+		}
+		if (index == -1) {
+			if (alt_index == -1) {
+
+				//TODO: generate a trap
+			} else {
+				index = alt_index;
+			}
+		}
+
+		// If already running, stop IRQs for this pin
+		if (monitored) {
+			GPIO_IntConfig(port, bit, false, false, false);
+		}
+		Module.switches[index].monitor = true;
+		Module.switches[index].bit = bit;
+		Module.switches[index].port = port;
+		Module.switches[index].falling = falling;
+		Module.switches[index].rising = rising;
+		Module.switches[index].pull = pull;
+		Module.switches[index].pull_state = pull_state;
+		Module.switches[index].state = GPIO_PinInGet(port, bit);
+		Module.switches[index].user_callback = switch_callback;
+		Module.switches[index].on_irq = irq;
+		Module.switch_mask |= 1 << bit;
+		if (!monitored) {
+			Module.switch_count++;
+		}
+		TD_SENSOR_SetSwitchMonitoring(port,
+			bit,
+			falling,
+			rising,
+			pull,
+			pull_state,
+			switch_callback);
+		return true;
+	} else {
+
+		// Remove the GPIO from the list
+		for (i = 0; i < CONFIG_TD_SENSOR_MAX_SWITCH; i++) {
+			if (Module.switches[i].bit == bit
+					&& Module.switches[i].port == port) {
+				uint32_t mask = 1 << bit;
+				mask = ~mask;
+				Module.switch_mask &= mask;
+
+				// Disable IRQs
+				GPIO_IntConfig(port, bit, false, false, false);
+
+				// Then remove the mask
+				if ((bit & 0xAAAAAAAA) != 0) {
+
+					// Odd IRQ
+					TD_GPIO_SetCallback(TD_GPIO_USER_ODD,
+						TD_SENSOR_SwitchCallBack,
+						Module.switch_mask & TD_GPIO_ODD_MASK);
+				} else {
+
+					// Even IRQ
+					TD_GPIO_SetCallback(TD_GPIO_USER_EVEN,
+						TD_SENSOR_SwitchCallBack,
+						Module.switch_mask & TD_GPIO_EVEN_MASK);
+				}
+
+				// Now IRQ is removed. Remove also dereferenced call
+				mask_irq = __get_PRIMASK();
+				__set_PRIMASK(1);
+				j = TD_SENSOR_SwitchStateList_bottom;
+				while (j != TD_SENSOR_SwitchStateList_top) {
+
+					// There is an event we are removing in queue
+					if ((TD_SENSOR_SwitchStateList[j].param & 0x7F) == i) {
+
+						// Cancel it
+						TD_SENSOR_SwitchStateList[j].param = 0xFF;
+					}
+					j++;
+					if (j >= CONFIG_TD_SENSOR_MAX_SWITCH_EVENT) {
+						j = 0;
+					}
+				}
+				__set_PRIMASK(mask_irq);
+				Module.switches[i].monitor = false;
+				Module.switches[i].bit = 0xFF;
+				Module.switches[i].port = (GPIO_Port_TypeDef) 0xFF;
+				Module.switches[i].user_callback = 0;
+				Module.switch_count--;
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 /** @} */
@@ -474,143 +707,222 @@ static bool TD_SENSOR_EventProcess(SensorMachineStateEvent event)
  **************************  PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
-/** @addtogroup TD_SENSOR_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup TD_SENSOR_GLOBAL_FUNCTIONS Global Functions
  * @{ */
 
 /***************************************************************************//**
  * @brief
- *	Configure Switch Monitoring on the Module.
- *
- * @param[in] enable
- *	Enable (true) or disable (false) switch monitoring
- *
- * @param[in] port
- *	Port on which the module is connected.
- *
- * @param[in] bit
- *	Bit on which the module is connected.
- *
- * @param[in] falling
- *	If true an irq will be triggered on falling edge
- *
- * @param[in] rising
- *	If true an irq will be triggered on rising edge
- *
- * @param[in] pull
- *	Enable pull-up or pull-down on the specified port,bit.
- *
- * @param[in] pull_state
- *	If pull is set to true, pull_state determines if the pin is pulled high (true) or pull-down (false).
- *	Otherwise it has no effect.
- *
- * @param[in] switch_callback
- *	Callback to call when an irq for this specific switch occurs.
- *
- * @details
- *
- *	A Switch ON Sensor message will be sent on a falling edge and a Switch OFF message will be sent on a rising edge. It
- *	is therefore highly recommended to connect one side of your switch to the ground and activate pull-up on the GPIO.
- *
- *
+ *  Battery monitoring callback function, called after a SIGFOX transmission.
  ******************************************************************************/
-bool TD_SENSOR_MonitorSwitch(bool enable, GPIO_Port_TypeDef port, unsigned int bit, bool falling, bool rising, bool pull, bool pull_state,
-		bool (*switch_callback)(GPIO_Port_TypeDef port, unsigned int bit, bool state))
+void TD_SENSOR_BatteryCallBack(void)
 {
-	int i;
+	uint16_t battery_level_mv;
 
-	//if enable, append the GPIO in the list
-	if (enable) {
-		if (Module.switch_count >= SENSOR_MAX_SWITCH) {
-			return false;
-		}
+	if (Module.battery.monitor) {
+		battery_level_mv = (uint16_t) TD_SIGFOX_PowerVoltageExtended();
 
-		for (i = 0; i < SENSOR_MAX_SWITCH; i++) {
-			if (Module.switches[i].monitor == false) {
-
-				Module.switches[i].monitor = true;
-				Module.switches[i].bit = bit;
-				Module.switches[i].port = port;
-				Module.switches[i].falling = falling;
-				Module.switches[i].rising = rising;
-				Module.switches[i].pull = pull;
-				Module.switches[i].pull_state = pull_state;
-				Module.switches[i].state = GPIO_PinInGet(port, bit);
-				Module.switches[i].user_callback = switch_callback;
-
-				Module.switch_mask |= 1 << bit;
-
-				TD_SENSOR_SetSwitchMonitoring(port,bit,falling,rising, pull, pull_state, switch_callback);
-
-				return true;
-			}
-		}
-		return false;
-	} else //if disable remove the GPIO from the list
-	{
-		for (i = 0; i < SENSOR_MAX_SWITCH; i++) {
-			if (Module.switches[i].bit == bit && Module.switches[i].port == port) {
-				uint32_t mask = 1 << bit;
-				mask = ~mask;
-				Module.switch_mask &= mask;
-
-				if ((bit & 0xAAAAAAAA) != 0) {
-					//odd IRQ
-					TD_GPIO_SetCallback(TD_GPIO_USER_ODD, TD_SENSOR_SwitchCallBack, Module.switch_mask & 0xAAAAAAAA);
-				} else {
-					//even IRQ
-					TD_GPIO_SetCallback(TD_GPIO_USER_EVEN, TD_SENSOR_SwitchCallBack, Module.switch_mask & 0x55555555);
+		// If there was a previous SIGFOX transmission
+		if (battery_level_mv != 0) {
+			Module.battery.level = battery_level_mv;
+			if (Module.battery.state) {
+				if (battery_level_mv <= Module.battery.level_low) {
+					Module.battery.state = false;
+					SaveCurrentStateToFlash();
+					TD_SENSOR_EventProcess(SENSOR_SEND_BATTERY, 0);
 				}
-
-				//disable irq
-				GPIO_IntConfig(port, bit, false, false, false);
-
-				Module.switches[i].monitor = false;
-
-				Module.switches[i].bit = 0xFF;
-				Module.switches[i].port = (GPIO_Port_TypeDef) 0xFF;
-				Module.switches[i].user_callback = 0;
-				Module.switch_count--;
-
-				return true;
+			} else {
+				if (battery_level_mv >= Module.battery.level_ok) {
+					Module.battery.state = true;
+					SaveCurrentStateToFlash();
+					TD_SENSOR_EventProcess(SENSOR_SEND_BATTERY, 0);
+				}
 			}
 		}
-
 	}
-	return false;
 }
 
 /***************************************************************************//**
  * @brief
- *	Configure Temperature Monitoring on the Module.
+ *   Dump the Sensor configuration.
+ *******************************************************************************/
+void TD_SENSOR_Dump(void)
+{
+	int i;
+
+	tfp_printf("Boot %d call=%08x\r\n",
+		Module.boot.monitor,
+		Module.boot.user_callback);
+	tfp_printf("Bat %d, low=%d ok=%d call=%08x\r\n",
+		Module.battery.monitor,
+		Module.battery.level_low,
+		Module.battery.level_ok,
+		Module.battery.user_callback);
+	tfp_printf("Temp %d, int=%d low=%d high=%d call=%08x\r\n",
+		Module.temperature.monitor,
+		Module.temperature.interval,
+		Module.temperature.level_low,
+		Module.temperature.level_high,
+		Module.temperature.user_callback);
+	tfp_printf("Con %d, int=%d\r\n",
+		Module.connection.monitor,
+		Module.connection.interval);
+	tfp_printf("KA %d, int=%d\r\n",
+		Module.keepalive.monitor,
+		Module.keepalive.interval);
+	for (i = 0; i < CONFIG_TD_SENSOR_MAX_SWITCH; i++) {
+		tfp_printf("Switch %d Monitor: %d Port %d Bit %d\r\n",
+			i,
+			Module.switches[i].monitor,
+			Module.switches[i].port,
+			Module.switches[i].bit);
+	}
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Sensor monitoring initialization.
+ ******************************************************************************/
+void TD_SENSOR_MonitorInit(void)
+{
+	TD_SENSOR_ApplyMonitoringConfiguration();
+}
+
+/** @} */
+
+/** @addtogroup TD_SENSOR_USER_FUNCTIONS User Functions
+ * @{ */
+
+/***************************************************************************//**
+ * @brief
+ *	Configure a polled Switch Monitoring on a module pin.
  *
  * @param[in] enable
- *	Enable (true) or disable (false) temperature monitoring
+ *	Enable (true) or disable (false) switch monitoring.
  *
- * @param[in] interval
- *	Interval in seconds at which the temperature should be checked
+ * @param[in] port
+ *	Port on which the switch is connected.
  *
- * @param[in] level_low
- *	Temperature level in 1/10 Celsius Degrees at which a Temperature Low Event is being sent to Sensor
+ * @param[in] bit
+ *	Bit on which the switch is connected.
  *
- * @param[in] level_high
- *	Temperature level in 1/10 Celsius Degrees at which a Temperature High Event is being sent to Sensor
+ * @param[in] falling
+ *	If true an IRQ will be triggered on falling edge.
  *
- * @param[in] callback
- *  	Function being called on any Temperature Event.
+ * @param[in] rising
+ *	If true an IRQ will be triggered on rising edge.
+ *
+ * @param[in] pull
+ *	Enable pull-up or pull-down on the specified port, bit.
+ *
+ * @param[in] pull_state
+ *	If pull is set to true, pull_state determines if the pin is pulled high
+ *	(true) or pull-down (false), otherwise it has no effect.
+ *
+ * @param[in] switch_callback
+ *  Pointer to the callback function that will be called upon GPIO IRQ with the
+ *  following arguments:
+ *    - port: the Switch GPIO port that generated the IRQ
+ *    - bit: the Switch GPIO bit that generated the IRQ
+ *    - state: the Switch GPIO state that generated the IRQ
  *
  * @details
- *	A Temperature OK Event is sent once on Sensor if the current temperature is
- *	within the allowed range and if a Temperature High/Low Event has been previously sent.
+ *	A Switch ON Sensor message will be sent on a falling edge and a Switch OFF
+ *	message will be sent on a rising edge. It is therefore highly recommended to
+ *	connect one side of your switch to the ground and activate pull-up on the
+ *	corresponding GPIO.
+ *  The callback will be called within TD_SENSOR_Process().
  ******************************************************************************/
-void TD_SENSOR_MonitorTemperature(bool enable, uint32_t interval, int16_t level_low, int16_t level_high,
-		bool (*callback)(TemperatureState state, int16_t level))
+bool TD_SENSOR_MonitorSwitch(bool enable, GPIO_Port_TypeDef port, unsigned int bit, bool falling, bool rising, bool pull, bool pull_state, bool (*switch_callback)(GPIO_Port_TypeDef port, unsigned int bit, bool state))
 {
+	return TD_SENSOR_PrivateMonitorSwitch(enable, port, bit, falling, rising, pull, pull_state, switch_callback, false);
+}
 
+/***************************************************************************//**
+ * @brief
+ *	Configure an IRQ-based Switch Monitoring on a module pin.
+ *
+ * @param[in] enable
+ *	Enable (true) or disable (false) switch monitoring.
+ *
+ * @param[in] port
+ *	Port on which the switch is connected.
+ *
+ * @param[in] bit
+ *	Bit on which the switch is connected.
+ *
+ * @param[in] falling
+ *	If true an IRQ will be triggered on falling edge.
+ *
+ * @param[in] rising
+ *	If true an IRQ will be triggered on rising edge.
+ *
+ * @param[in] pull
+ *	Enable pull-up or pull-down on the specified port, bit.
+ *
+ * @param[in] pull_state
+ *	If pull is set to true, pull_state determines if the pin is pulled high
+ *	(true) or pull-down (false), otherwise it has no effect.
+ *
+ * @param[in] switch_callback
+ *  Pointer to the callback function that will be called upon GPIO IRQ with the
+ *  following arguments:
+ *    - port: the Switch GPIO port that generated the IRQ
+ *    - bit: the Switch GPIO bit that generated the IRQ
+ *    - state: the Switch GPIO state that generated the IRQ
+ *
+ * @details
+ *	A Switch ON Sensor message will be sent on a falling edge and a Switch OFF
+ *	message will be sent on a rising edge. It is therefore highly recommended to
+ *	connect one side of your switch to the ground and activate pull-up on the
+ *	corresponding GPIO.
+ *  The callback will be called within TD_SENSOR_Process().
+ ******************************************************************************/
+bool TD_SENSOR_MonitorSwitchIrq(bool enable, GPIO_Port_TypeDef port, unsigned int bit, bool falling, bool rising, bool pull, bool pull_state, bool (*switch_callback)(GPIO_Port_TypeDef port, unsigned int bit, bool state))
+{
+	return TD_SENSOR_PrivateMonitorSwitch(enable, port, bit, falling, rising, pull, pull_state, switch_callback, true);
+}
+
+/***************************************************************************//**
+ * @brief
+ *	Configure Temperature Monitoring on the module.
+ *
+ * @param[in] enable
+ *	Enable (true) or disable (false) temperature monitoring.
+ *
+ * @param[in] interval
+ *	Interval in seconds at which the temperature should be checked.
+ *
+ * @param[in] level_low
+ *	Temperature level in 1/10 Celsius degrees at which a "temperature low" event
+ *	is sent to Sensor.
+ *
+ * @param[in] level_high
+ *	Temperature level in 1/10 Celsius degrees at which a "temperature high" event
+ *	is sent to Sensor.
+ *
+ * @param[in] callback
+ *  Pointer to a function that will be called on any temperature event with the
+ *  following parameters:
+ *    - state: the temperature state that trigggered the event
+ *    - level: the current temperature level in 1/10 Celisus degrees.
+ *
+ * @details
+ *	A "temperature OK" event is sent once to Sensor if the current temperature is
+ *	back within the allowed range after a temperature high/low event has been
+ *	previously sent.
+ ******************************************************************************/
+void TD_SENSOR_MonitorTemperature(bool enable, uint32_t interval, int16_t level_low, int16_t level_high, bool (*callback)(TD_SENSOR_TemperatureState_t state, int16_t level))
+{
 	if (enable) {
 		if (!Module.temperature.monitor) {
-			//start timer
-			Module.temperature.timer = TD_SCHEDULER_Append(interval, 0, 0, 0xFF, TD_SENSOR_TemperatureCallBack, 0);
 
+			// Start timer
+			Module.temperature.timer = TD_SCHEDULER_Append(interval,
+				0,
+				0,
+				0xFF,
+				TD_SENSOR_TemperatureCallBack,
+				0);
 			if (Module.temperature.timer != 0xFF) {
 				Module.temperature.monitor = true;
 				Module.temperature.interval = interval;
@@ -618,58 +930,63 @@ void TD_SENSOR_MonitorTemperature(bool enable, uint32_t interval, int16_t level_
 				Module.temperature.level_high = level_high;
 				Module.temperature.user_callback = callback;
 
-				//check temp right now
+				// Check the temperature right now
 				TD_SENSOR_TemperatureCallBack(0, 0);
-
 			}
-		} else //modify settings
-		{
-			TD_SCHEDULER_SetInterval(Module.temperature.timer, interval, 0, 0);
+		} else {
 
+			// Modify the settings
+			TD_SCHEDULER_SetInterval(Module.temperature.timer, interval, 0, 0);
 			Module.temperature.interval = interval;
 			Module.temperature.level_low = level_low;
 			Module.temperature.level_high = level_high;
 			Module.temperature.user_callback = callback;
 
-			//check temp right now
+			// Check the temperature right now
 			TD_SENSOR_TemperatureCallBack(0, 0);
 		}
 	} else if (!enable && Module.temperature.monitor) {
 		TD_SCHEDULER_Remove(Module.temperature.timer);
-		Module.temperature.timer = 0;
+		Module.temperature.timer = 0xFF;
 		Module.temperature.monitor = false;
-		;
 	}
-
 }
 
 /***************************************************************************//**
  * @brief
- *   Configure RSSI Monitoring on gateway side. Keep alive monitoring
+ *   Configure RSSI Monitoring on gateway side. Keep-alive monitoring
  *   must be enabled to enable/disable RSSI.
  *
  *  @param[in] enable
- *  	Enable (true) or disable (false) RSSI monitoring
+ *   Enable (true) or disable (false) RSSI monitoring.
  *
  *  @param[in] level_low
- *  	RSSI level at which a RSSI Low Event is being sent to Sensor
+ *   RSSI level at which an "RSSI low" event is sent to Sensor.
  *
  *  @param[in] level_ok
- *  	RSSI level at which a RSSI OK Event is being sent to Sensor (this
- *  	only happens once after a RSSI Low Event occurred).
- *  @return
- *  	True if the Module is a Device, keepalive is enabled and if the gateway acked the keepalive frame.
+ *   RSSI level at which an "RSSI OK" event is sent to Sensor (this
+ *   only happens once after an "RSSI low/high" event occurred).
  *
+ *  @return
+ *  returns true if the module is a device, keep-alive is enabled and if the
+ *  gateway acknowledged the keep-alive frame, false otherwise.
  ******************************************************************************/
 bool TD_SENSOR_MonitorRSSI(bool enable, int8_t level_low, int8_t level_ok)
 {
-	//Only a Device can get RSSI monitored
+	// Only a Device can request RSSI monitoring
 	if (Module.type == SENSOR_DEVICE) {
 		if (Module.connection.monitor) {
 			if (enable) {
-				//if there is something to update
-				if (!Module.rssi.monitor || Module.rssi.level_low != level_low || Module.rssi.level_ok != level_ok) {
-					if (TD_SENSOR_DEVICE_KeepAlive(true, Module.connection.interval, true, level_low, level_ok) == ACK_OK) {
+
+				// If there is something to update
+				if (!Module.rssi.monitor ||
+					Module.rssi.level_low != level_low ||
+					Module.rssi.level_ok != level_ok) {
+					if (TD_SENSOR_DEVICE_KeepAlive(true,
+						Module.connection.interval,
+						true,
+						level_low,
+						level_ok) == ACK_OK) {
 						Module.rssi.level_low = level_low;
 						Module.rssi.level_ok = level_ok;
 						Module.rssi.monitor = true;
@@ -677,261 +994,249 @@ bool TD_SENSOR_MonitorRSSI(bool enable, int8_t level_low, int8_t level_ok)
 					}
 				}
 			} else if (Module.rssi.monitor) {
-				if (TD_SENSOR_DEVICE_KeepAlive(true, Module.connection.interval, false, 0, 0) == ACK_OK) {
+				if (TD_SENSOR_DEVICE_KeepAlive(true,
+						Module.connection.interval,
+						false,
+						0,
+						0) == ACK_OK) {
 					Module.rssi.monitor = false;
 					return true;
 				}
 			}
 		}
-
 	}
-
 	return false;
 }
 
 /***************************************************************************//**
  * @brief
- *   Configure Battery Monitoring
+ *   Configure Battery Monitoring. Battery level is checked after a SIGFOX
+ *   transmission while the battery is still fully loaded by a charge.
  *
  *  @param[in] enable
- *  	Enable (true) or disable (false) Battery monitoring
+ *   Enable (true) or disable (false) Battery monitoring.
  *
  *  @param[in] level_low
- *  	Battery level at which a Battery Low Event is being sent to Sensor
+ *   Battery level at which a "battery low" event is sent to Sensor.
  *
  *  @param[in] level_ok
- *  	Battery level at which a Battery OK Event is being sent to Sensor (this
- *  	only happens once after a Battery Low Event occurred).
+ *   Battery level at which a "battery OK" event is sent to Sensor (this
+ *   only happens once after a "battery low" event occurred).
  *
  *  @param[in] callback
- *  	Function being called on any Battery Event.
- *
+ *   Pointer to a callback function that will be called on any Battery Event
+ *   with the following arguments:
+ *     - state: the battery state
+ *     - level: the battery level in mV
  ******************************************************************************/
 void TD_SENSOR_MonitorBattery(bool enable, uint16_t level_low, uint16_t level_ok, bool (*callback)(bool state, uint16_t level))
 {
+	 // TODO: Measure battery level during LAN transmissions as well
 	Module.battery.monitor = enable;
-
 	if (enable) {
-		uint16_t voltage_mv;
-		voltage_mv = TD_MEASURE_VoltageExtended();
-
-		if (voltage_mv > level_low) {
-			Module.battery.state = true;
-		} else {
-			Module.battery.state = false;
-			EventQueue[EventCount].event = SENSOR_SEND_BATTERY;
-			EventCount++;
-		}
-
 		Module.battery.level_low = level_low;
 		Module.battery.level_ok = level_ok;
 		Module.battery.user_callback = callback;
-
-		if (Module.battery.state) {
-			TD_MEASURE_EnableBatteryLevelMonitoring(true, Module.battery.level_low, TD_SENSOR_BatteryCallBack);
-		} else {
-			TD_MEASURE_EnableBatteryLevelMonitoring(false, Module.battery.level_ok, TD_SENSOR_BatteryCallBack);
-		}
 	} else {
-		TD_MEASURE_DisableBatteryLevelMonitoring();
+		Module.battery.user_callback = 0;
 	}
-
 }
 
 /***************************************************************************//**
  * @brief
- *   Configure Boot Monitoring.
+ *   Configure Boot Monitoring. Monitoring will only take effect on next reboot.
  *
  *  @param[in] enable
- *  	Enable (true) or disable (false) boot monitoring
+ *   Enable (true) or disable (false) boot monitoring.
  *
  *  @param[in] callback
- *  	Function being called on Boot Event.
+ *   Pointer to a callback function that will be called on boot events.
  ******************************************************************************/
 void TD_SENSOR_MonitorBoot(bool enable, bool (*callback)(void))
 {
-	Module.boot.monitor = enable;
-	Module.boot.user_callback = callback;
+	if (enable != Module.boot.monitor || Module.boot.user_callback != callback) {
+		Module.boot.monitor = enable;
+		Module.boot.user_callback = callback;
+		SaveCurrentStateToFlash();
+	}
 }
 
 /***************************************************************************//**
  * @brief
- *   Configure Connection Monitoring on both gateway and module side. Configure
- *   the module to emit a local keep-alive frame on a given interval and configure
- *   the gateway to look for this keep-alive. A Connection Lost event
- *   will be sent to Sensor if the keep-alive was not received by the gateway. Also one
- *   Connection OK event will be emitted to Sensor if a keep-alive is being received after
- *   a Connection Lost event.
+ *   Save a custom boot cause value into Flash memory. As this value will be sent
+ *   in a boot event, custom boot cause can bee used alongside boot monitoring
+ *   to provide a mean to know exactly why a reboot occurred.
+ *
+ *  @param[in] cause
+ *   The custom boot cause to be saved into Flash memory.
+ ******************************************************************************/
+void TD_SENSOR_SetCustomBootCause(uint8_t cause)
+{
+	CustomBootCause = cause;
+	SaveCurrentStateToFlash();
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Configure Connection Monitoring. This requires the device and the gateway to
+ *   be already paired.
  *
  *  @param[in] enable
- *  	Enable (true) or disable (false) connection monitoring
+ *   Enable (true) or disable (false) connection monitoring.
  *
  *  @param[in] interval
- *  	Interval in seconds at which connection is being checked.
+ *   Interval in seconds at which connection is being checked.
  *
  * @return
- *   True if the Module is a Device and if a timer has been set.
- *   False otherwise.
+ *   Returns true if the module is a device or a gateway and if a timer could be
+ *   started, false otherwise.
+ *
+ * @details:
+ *    - If the module is a device: at every interval, a LAN frame will be sent to
+ *      the gateway. Each time the gateway receives it, it will arm a timer which
+ *      will expect the next keep-alive frame to be received from this device. If
+ *      the next keep-alive is not received on time, then the gateway will
+ *      transmit a connection lost event. If the gateway further receives a
+ *      keep-alive frame, it will send a connection OK event.
+ *
+ *    - If the module is a gateway: the gateway will broadcast a keep-alive
+ *      request to all devices at every given interval. Keep-alive handling must
+ *      be implemented on the device side by using the
+ *      TD_SENSOR_DEVICE_StartBroadcastReception and
+ *      TD_SENSOR_DEVICE_SetKeepAliveCallback API function calls.
  ******************************************************************************/
 bool TD_SENSOR_MonitorConnection(bool enable, uint32_t interval)
 {
-	if (Module.type == SENSOR_DEVICE) {
+	if (Module.type == SENSOR_DEVICE || Module.type == SENSOR_GATEWAY) {
 		if (enable) {
-			//if not already activated
-			if (!Module.connection.monitor) {
-				//activate keep alive monitoring even if gateway does not reply!
-				Module.connection.timer = TD_SCHEDULER_Append(interval, 0, 0, 0xFF, TD_SENSOR_ConnectionCallBack, 0);
 
+			// If not already enabled
+			if (!Module.connection.monitor) {
+
+				// Enable keep-alive monitoring even if the gateway does not reply!
+				Module.connection.timer = TD_SCHEDULER_Append(interval,
+					0,
+					0,
+					0xFF,
+					TD_SENSOR_ConnectionCallBack,
+					0);
 				if (Module.connection.timer != 0xFF) {
-					TD_SENSOR_DEVICE_KeepAlive(true, interval, Module.rssi.monitor, Module.rssi.level_low, Module.rssi.level_ok);
+					if (Module.type == SENSOR_DEVICE) {
+						TD_SENSOR_DEVICE_KeepAlive(true,
+							interval,
+							Module.rssi.monitor,
+							Module.rssi.level_low,
+							Module.rssi.level_ok);
+					} else {
+						TD_SENSOR_GATEWAY_SendKeepAliveBroadcast(true,
+							interval,
+							0,
+							0);
+					}
 					Module.connection.monitor = enable;
 					Module.connection.interval = interval;
 					return true;
+				} else {
+					return false;
 				}
+			} else {
 
-			} else //just change interval
-			{
-				TD_SCHEDULER_SetInterval(Module.connection.timer, interval, 0, 0);
+				// Just update the interval
+				TD_SCHEDULER_SetInterval(Module.connection.timer,
+					interval,
+					0,
+					0);
 				Module.connection.interval = interval;
 				return true;
 			}
-
 		} else if (!enable && Module.connection.monitor) {
-			if (TD_SENSOR_DEVICE_KeepAlive(false, 0, false, 0, 0) == ACK_OK) {
+			if (Module.type == SENSOR_DEVICE) {
+				if (TD_SENSOR_DEVICE_KeepAlive(false, 0, false, 0, 0) == ACK_OK) {
+					TD_SCHEDULER_Remove(Module.connection.timer);
+					Module.connection.monitor = false;
+					Module.rssi.monitor = false;
+					Module.connection.interval = 0;
+					Module.connection.timer = 0xFF;
+					return true;
+				} else {
+					return false;
+				}
+			} else if (Module.type == SENSOR_GATEWAY) {
 				TD_SCHEDULER_Remove(Module.connection.timer);
 				Module.connection.monitor = false;
 				Module.rssi.monitor = false;
 				Module.connection.interval = 0;
 				Module.connection.timer = 0xFF;
-				return true;
+			} else {
+				return false;
 			}
 		}
-
 		return true;
 	}
 	return false;
 }
-
 /***************************************************************************//**
  * @brief
- *  Sensor Keepalive Monitoring
+ *   Sensor Keepalive Monitoring. A keep-alive frame will be sent to SIGFOX
+ *   at fixed intervals.
  *
  *  @param[in] enable
- *  	Enable (true) or disable (false) keep-alive monitoring
+ *   Enable (true) or disable (false) keep-alive monitoring.
  *
  *  @param[in] interval_hour
- *  	Interval in hours at which keep-alive should be sent.
+ *   Interval in hours at which keep-alive frame are being sent.
  *
+ * @return
+ *   Returns true if a keep-alive timer has been successfully programmed or
+ *   removed, false otherwise.
  ******************************************************************************/
 bool TD_SENSOR_MonitorKeepAlive(bool enable, uint8_t interval_hour)
 {
 	if (enable) {
-		//activate timer is not already activated
+
+		// Enable timer if not already done
 		if (!Module.keepalive.monitor) {
 
-			//send it once to let Sensor know about interval
-			TD_SENSOR_KeepAliveCallback(0,0);
-			Module.keepalive.timer = TD_SCHEDULER_Append(interval_hour*3600, 0, 0, 0xFF, TD_SENSOR_KeepAliveCallback, 0);
-
+			// Send a keep-alive frame once to let Sensor know about the interval
+			TD_SENSOR_KeepAliveCallback(0, 0);
+			Module.keepalive.timer = TD_SCHEDULER_Append(interval_hour * 3600,
+				0,
+				0,
+				0xFF,
+				TD_SENSOR_KeepAliveCallback,
+				0);
 			if (Module.keepalive.timer != 0xFF) {
 				Module.keepalive.monitor = true;
 				Module.keepalive.interval = interval_hour;
 				return true;
 			}
-		}
-		else //or only change interval
-		{
-			TD_SCHEDULER_SetInterval(Module.keepalive.timer, interval_hour*3600, 0, 0);
+		} else {
+
+			// Only change interval
+			TD_SCHEDULER_SetInterval(Module.keepalive.timer,
+									 interval_hour * 3600,
+									 0,
+									 0);
 			return true;
 		}
-
 	} else if (!enable && Module.keepalive.monitor) {
-		//else remove timer
+
+		// Remove timer
 		Module.keepalive.monitor = false;
 		Module.keepalive.interval = 0;
-		TD_SENSOR_KeepAliveCallback(0,0);
+		TD_SENSOR_KeepAliveCallback(0, 0);
 		TD_SCHEDULER_Remove(Module.keepalive.timer);
 		return true;
 	}
-
 	return false;
 }
 
 /***************************************************************************//**
  * @brief
- *   Sensor State Machine processing. to be called in User Loop
+ *   Sensor reset. All monitoring, LAN configuration and managed devices are
+ *   deleted. Only the module type is unchanged.
  ******************************************************************************/
-void TD_SENSOR_Process()
-{
-	bool acked = false;
-
-	while (EventCount > 0) {
-		if (Module.type != SENSOR_DEVICE || (Module.type == SENSOR_DEVICE && !GatewayBusy)) {
-
-			SensorMachineStateEvent event;
-			event.event = EventQueue[EventIndex].event;
-			event.arg = EventQueue[EventIndex].arg;
-			event.retry = EventQueue[EventIndex].retry;
-
-			EventCount--;
-			EventIndex++;
-
-			if (EventIndex == MAX_SENSOR_EVENT) {
-				EventIndex = 0;
-			}
-
-			acked = TD_SENSOR_EventProcess(event);
-
-			//if the module is a device, events can't be processed at once
-			if (Module.type == SENSOR_DEVICE) {
-				//if frame not acked and there is still replies to process
-				if (!acked && event.retry > 0) {
-					uint32_t arg = 0;
-					event.retry--;
-					arg = ((event.retry << 16) & 0xFF) | ((event.arg << 8) & 0xFF) | (event.event & 0xFF);
-
-					//start one shot timer in 8 seconds
-					TD_SCHEDULER_Append(COLLISION_WAIT_TIME, 0, 0, 1, TD_SENSOR_CollisionHandler, arg);
-
-					//if there is no timer available the Event is lost
-				}
-				//if retries are not enough we want our events to be processed when the Gateway is back (except for local keepalive)
-				else if (!acked && event.retry == 0 && event.event != SENSOR_SEND_LOCAL_KEEPALIVE) {
-					uint32_t arg = 0;
-					arg = ((event.retry << 16) & 0xFF) | ((event.arg << 8) & 0xFF) | (event.event & 0xFF);
-
-					//start one shot timer in 3600 seconds
-					TD_SCHEDULER_Append(NACK_WAIT_INTERVAL, 0, 0, 1, TD_SENSOR_CollisionHandler, arg);
-				} else if (acked) {
-					//the gateway is now busy with sigfox, wait end of transmission
-					if (TD_SCHEDULER_Append(SIGFOX_TRANSMISSION_TIME, 0, 0, 1, TD_SENSOR_GatewayBusyHandler, 0) != 0xFF) {
-						GatewayBusy = true;
-					}
-				}
-
-				//in all cases break
-				break;
-			}
-
-		} else {
-			break;
-		}
-
-	}
-
-	if (Module.type == SENSOR_GATEWAY || Module.type == SENSOR_TRANSMITTER) {
-			TD_SENSOR_TRANSMITTER_Process();
-		}
-
-}
-
-/***************************************************************************//**
- * @brief
- *   Module reset. All monitoring and LAN configuration or devices are deleted.
- *    Only Module type is not altered.
- *
- ******************************************************************************/
-void TD_SENSOR_Reset()
+void TD_SENSOR_Reset(void)
 {
 	int i;
 
@@ -940,32 +1245,30 @@ void TD_SENSOR_Reset()
 		TD_SCHEDULER_Remove(Module.keepalive.timer);
 		Module.keepalive.timer = 0xFF;
 	}
-
 	if (Module.connection.timer != 0xFF) {
 		TD_SCHEDULER_Remove(Module.connection.timer);
 		Module.connection.timer = 0xFF;
 	}
-
 	if (Module.temperature.timer != 0xFF) {
 		TD_SCHEDULER_Remove(Module.temperature.timer);
 		Module.temperature.timer = 0xFF;
 	}
 
-	// Stop battery monitoring
-	TD_MEASURE_DisableBatteryLevelMonitoring();
-
 	// Stop switch monitoring
-	for (i = 0; i < SENSOR_MAX_SWITCH; i++) {
+	for (i = 0; i < CONFIG_TD_SENSOR_MAX_SWITCH; i++) {
 		if (Module.switches[i].monitor) {
 			//disable irq
-			GPIO_IntConfig(Module.switches[i].port, Module.switches[i].bit, false, false, false);
+			GPIO_IntConfig(Module.switches[i].port,
+						   Module.switches[i].bit,
+						   false,
+						   false,
+						   false);
 		}
 	}
-
 	TD_GPIO_SetCallback(TD_GPIO_USER_ODD, TD_SENSOR_SwitchCallBack, 0);
 	TD_GPIO_SetCallback(TD_GPIO_USER_EVEN, TD_SENSOR_SwitchCallBack, 0);
 
-	// Lan Reset
+	// Reset LAN
 	if (Module.type != SENSOR_TRANSMITTER) {
 		if (Module.type == SENSOR_GATEWAY) {
 			TD_SENSOR_GATEWAY_DeleteAllDevices();
@@ -974,152 +1277,274 @@ void TD_SENSOR_Reset()
 		}
 	}
 
-	// Init local variables
-	TD_SENSOR_PrivateInit();
+	// Reinitialize all local variables except the module type
+	TD_SENSOR_InternalInit();
 }
 
 /***************************************************************************//**
  * @brief
- *   Set the Device class
+ *   Set the device class.
  *
  *  @param[in] class
- *  	New Device Class
+ *   The new device class to use.
  ******************************************************************************/
 void TD_SENSOR_SetDeviceClass(uint16_t class)
 {
 	Module.class = class;
+	ConfigClass = true;
 }
 
 /***************************************************************************//**
  * @brief
- *   Return the Module type
+ *   Get the module type.
  *
  * @return
- *  Module type (Device, Gateway or Transmitter)
+ *  Returns the module type (device, gateway or transmitter).
  ******************************************************************************/
-ModuleType TD_SENSOR_GetModuleType()
+TD_SENSOR_ModuleType_t TD_SENSOR_GetModuleType(void)
 {
 	return Module.type;
 }
 
+/***************************************************************************//**
+ * @brief
+ *   Set the Module type but does NOT apply it. It should be called before
+ *   initialization to be taken into account.
+ ******************************************************************************/
+void TD_SENSOR_SetModuleType(TD_SENSOR_ModuleType_t type)
+{
+	Module.type = type;
+}
 
 /***************************************************************************//**
  * @brief
- *  Returns Module's configuration.
+ *  Get the module configuration.
  *
+ * @return
+ *  Returns a poitner to the module configuration.
  ******************************************************************************/
-ModuleConfiguration * TD_SENSOR_GetModuleConfiguration()
+TD_SENSOR_Configuration_t *TD_SENSOR_GetModuleConfiguration(void)
 {
 	return &Module;
 }
 
+/***************************************************************************//**
+ * @brief
+ *  Set the Mhodule configuration but does NOT apply it. It should be called
+ *  before initialization to be taken into account.
+ ******************************************************************************/
+void TD_SENSOR_SetModuleConfiguration(TD_SENSOR_Configuration_t *config)
+{
+	if (config != 0) {
+		ConfigInit = true;
+		memcpy(&Module, config, sizeof(TD_SENSOR_Configuration_t));
+		Module.switches = TD_SENSOR_SwitchConfig;
+		memset(TD_SENSOR_SwitchConfig,
+			0,
+			CONFIG_TD_SENSOR_MAX_SWITCH * sizeof (TD_SENSOR_SwitchConfiguration_t));
+		Module.switch_count = 0;
+		Module.switch_mask = 0;
+	}
+}
 
 /***************************************************************************//**
  * @brief
- *  Returns Module's Sigfox ID
+ *  Get the module SIGFOX ID.
+ *
  * @return
- *  Sigfox ID
+ *  Returns the module's SIGFOX ID.
  ******************************************************************************/
-uint32_t  TD_SENSOR_GetSigfoxID()
+uint32_t TD_SENSOR_GetSigfoxID(void)
 {
 	return SigfoxID;
 }
 
+/***************************************************************************//**
+ * @brief
+ * 	Get the boot cause according to the RMU (Reset Management Unit).
+ *
+ * @return
+ *  Returns a bit field containing the (possibly multiple) boot reasons.
+ *  See "ef32g_rmu.h" for details.
+ *    - POR (Power On Reset): 1
+ *    - Brown-out unregulated: 2
+ *    - Brown-out regulated: 4
+ *    - External reset: 8
+ *    - Watchdog timeout: 16
+ *    - Lock-up: 32
+ *    - Software reset: 64
+ ******************************************************************************/
+uint32_t TD_SENSOR_GetBootCause(void)
+{
+	return BootCause;
+}
 
 /***************************************************************************//**
  * @brief
- *   Init module as a gateway or as a device with a given configuration or load information
- *   from flash.
- *
- * @param[in] type
- *	Module type
- *
- * @param[in] lan_frequency
- *	LAN frequency in Hz. Can be within 868000000..869700000 range.
- *
- * @param[in] lan_power_level
- *	LAN power level in dBm. Range is -35..14.
+ * 	 Get the custom boot cause as saved in Flash memory using the
+ * 	 TD_SENSOR_SetCustomBootCause() function.
  *
  * @return
- *   True if a valid SigfoxID could be found in flash.
- *   False otherwise.
+ *   Returns the custom boot cause.
  ******************************************************************************/
-bool TD_SENSOR_Init(ModuleType type, uint32_t lan_frequency, int16_t lan_power_level)
+uint8_t TD_SENSOR_GetCustomBootCause(void)
+{
+	return CustomBootCause;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Check if the battery is dead or not.
+ *
+ * @details
+ *   The battery is considered dead if the the module rebooted twice
+ *   consecutively with a brown-out reboot cause.
+ *
+ *  @return
+ * 	 Returns true is the battery is considered dead, false otherwise.
+ ******************************************************************************/
+bool TD_SENSOR_IsBatteryDead(void)
+{
+	ReadBootCause();
+	if (!TD_FLASH_DeclareVariable((uint8_t *) &BrownOutReboot, sizeof(BrownOutReboot), 0)) {
+		BrownOutReboot = 0;
+	}
+	switch (BootCause) {
+	case RMU_RSTCAUSE_BODREGRST:
+	case RMU_RSTCAUSE_BODUNREGRST:
+		if (BrownOutReboot <= 1) {
+
+			// First brown-out reboot: give it a go but battery may be dead
+			// Second consecutive brown-out reboot: battery is declared dead
+			if (++BrownOutReboot == 2) {
+			}
+			TD_FLASH_WriteVariables();
+		}
+		break;
+
+	default:
+		if (BrownOutReboot >= 1) {
+
+			// Rebooting from another cause resets the brown-out counter
+			BrownOutReboot = 0;
+			TD_FLASH_WriteVariables();
+		}
+		break;
+	}
+	return BrownOutReboot >= 2 ? true : false;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Initialize the module as either a gateway, a device or a transmitter with
+ *   a given configuration.
+ *
+ * @param[in] type
+ *	The module type:
+ *		- SENSOR_DEVICE: the module will mainly communicate with a gateway which
+ *		will forward all messages to SIGFOX.
+ *		Note however that it may also send message directly to SIGFOX without
+ *		a gateway forward
+ *		- SENSOR_GATEWAY: the module is managing up to 15 devices. It can
+ *		communicate with the devices, forward frames from them and send frames
+ *		to SIGFOX
+ *		- SENSOR_TRANSMITTER: the module only send frames to SIGFOX and does not
+ *		use any LAN communication
+ *
+ * @param[in] lan_frequency
+ *	The frequency in Hz to use for LAN communications. The valid range is
+ *	868000000..869700000 Hz, default is 869312500 Hz.
+ *
+ * @param[in] lan_power_level
+ *	The power level in dBm to use for LAN communications. The valid range is
+ *	-35..14 dBm, default is 10 dBm.
+ *
+ * @return
+ *   Always returns true for a transmitter. Returns false for a gateway or a
+ *   device if the LAN could not be initialized properly.
+ ******************************************************************************/
+bool TD_SENSOR_Init(TD_SENSOR_ModuleType_t type, uint32_t lan_frequency, int16_t lan_power_level)
 {
 	TD_DEVICE device;
-	int i;
+	TD_SENSOR_DeviceClass_t temp_class;
+	bool ret = true;
 
-	//read sigfox ID
+	ReadBootCause();
+
+	// Read the SIGFOX ID
 	if (TD_FLASH_DeviceRead(&device)) {
 		SigfoxID = device.Serial;
-
-	} else
-		return false;
-
-	//Init config if not in flash
-	if (!TD_FLASH_DeclareVariable((uint8_t *) &Module, sizeof(Module), 0)) {
-		TD_SENSOR_PrivateInit();
 	}
+	if (!ConfigInit) {
 
-	//set module type
-	Module.type = type;
+		// If a class is provided, save it
+		if (ConfigClass) {
+			temp_class = Module.class;
+		}
 
-	//clear all pending irqs
-	NVIC_ClearPendingIRQ(GPIO_EVEN_IRQn);
-	NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
-	NVIC_EnableIRQ(GPIO_EVEN_IRQn);
-	NVIC_EnableIRQ(GPIO_ODD_IRQn);
+		// If the configuration is null, initialize the current configuration (setting class to 0)
+		TD_SENSOR_InternalInit();
 
-	//init depending on module type
-	if (Module.type == SENSOR_DEVICE) {
-		TD_SENSOR_LAN_Init(false, lan_frequency, lan_power_level);
-	} else if (Module.type == SENSOR_GATEWAY) {
-		TD_SENSOR_LAN_Init(true, lan_frequency, lan_power_level);
-	}
-
-	if (Module.type == SENSOR_GATEWAY || type == SENSOR_TRANSMITTER) {
-		TD_SENSOR_TRANSMITTER_Init();
-	}
-
-	//enable all monitoring according to flash values
-
-	if (Module.boot.monitor) {
-		TD_SENSOR_AppendEvent(SENSOR_SEND_BOOT, 0, EVENT_BOOT_RETRIES);
-	}
-
-	if (Module.battery.monitor) {
-		TD_SENSOR_MonitorBattery(1, Module.battery.level_low, Module.battery.level_ok, Module.battery.user_callback);
-	}
-
-	if (Module.temperature.monitor) {
-		Module.temperature.monitor = false;
-		TD_SENSOR_MonitorTemperature(1, Module.temperature.interval, Module.temperature.level_low, Module.temperature.level_high,
-				Module.temperature.user_callback);
-	}
-
-	if (Module.connection.monitor) {
-		Module.connection.monitor = false;
-		TD_SENSOR_MonitorConnection(true, Module.connection.interval);
-	}
-
-	if (Module.keepalive.monitor) {
-		Module.keepalive.monitor = false;
-		TD_SENSOR_MonitorKeepAlive(true, Module.keepalive.interval);
-	}
-
-	for (i = 0; i < SENSOR_MAX_SWITCH; i++) {
-		if (Module.switches[i].monitor) {
-			TD_SENSOR_SetSwitchMonitoring(Module.switches[i].port, Module.switches[i].bit, Module.switches[i].falling, Module.switches[i].rising,
-					Module.switches[i].pull, Module.switches[i].pull_state, Module.switches[i].user_callback);
+		// Apply back the class
+		if(ConfigClass) {
+			Module.class = temp_class;
 		}
 	}
 
-	//process in case of event
-	TD_SENSOR_Process();
+	// Load current state which must be persistent (boot monitoring, battery state...)
+	// from Flash memory
+	LoadCurrentStateFromFlash();
 
-	return true;
+	// Set the module type
+	Module.type = type;
+
+	// Provide default values for LAN parameters
+	if (lan_frequency == 0) {
+		lan_frequency = 869312500;
+		lan_power_level = 10;
+	}
+
+	// LAN and/or Transmitter initialization depending on module type
+	if (Module.type == SENSOR_DEVICE) {
+		if (TD_SENSOR_LAN_Init(false, lan_frequency, lan_power_level) == false) {
+			ret = false;
+		}
+	} else if (Module.type == SENSOR_GATEWAY) {
+		if (TD_SENSOR_LAN_Init(true, lan_frequency, lan_power_level) == false) {
+			ret = false;
+		}
+	}
+	if (Module.type == SENSOR_GATEWAY || Module.type == SENSOR_TRANSMITTER) {
+		TD_SENSOR_TRANSMITTER_Init_();
+	}
+	if ((void *) TD_SENSOR_MonitorInit_ != (void *) TD_TrapHere) {
+		TD_SENSOR_MonitorInit_();
+	}
+	return ret;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Sensor state machine processing, to be called from main user loop.
+ *
+ * @details
+ *   This function processes pending events and pending transmitter SIGFOX
+ *   frames.
+ ******************************************************************************/
+void TD_SENSOR_Process(void)
+{
+	// Process device events in queue
+	if (Module.type == SENSOR_DEVICE) {
+		TD_SENSOR_DEVICE_Process();
+	}
+
+	// Process frames in queue
+	TD_SENSOR_TRANSMITTER_Process();
+
+	// Process switch event in queue
+	TD_SENSOR_SwitchEventProcess();
 }
 
 /** @} */
 
-/** @} */
+/** @} (end addtogroup TD_SENSOR) */

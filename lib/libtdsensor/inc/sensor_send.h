@@ -1,11 +1,11 @@
 /***************************************************************************//**
- * @file sensor_send.h
+ * @file
  * @brief Service Send
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.2.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -31,57 +31,89 @@
  *
  ******************************************************************************/
 
-#ifndef SENSOR_SEND_H_
-#define SENSOR_SEND_H_
+#ifndef __SENSOR_SEND_H
+#define __SENSOR_SEND_H
 
 #include <stdbool.h>
 #include <stdint.h>
 #include "sensor_private.h"
 
-/***************************************************************************//**
- * @addtogroup SENSOR_SEND Sensor Send
- * @{
- ******************************************************************************/
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/***************************************************************************//**
- * @addtogroup SENSOR_SEND_TYPEDEFS Typedefs
- * @{ */
+	/***************************************************************************//**
+	 * @addtogroup SENSOR_SEND Sensor Send
+	 * @{
+	 ******************************************************************************/
 
-/** Sensor Frame Type */
-typedef enum {
-	SRV_FRM_EVENT,
-	SRV_FRM_DATA,
-	SRV_FRM_REGISTER,
-	SRV_FRM_KEEPALIVE,
-	SRV_FRM_RAW,
-	SRV_FRM_SERVICE,
-	SRV_FRM_GEOLOC,
+	/*******************************************************************************
+	 ***********************   ENUMERATIONS   **************************************
+	 ******************************************************************************/
 
-} SensorFrameType;
+	 /** @addtogroup SENSOR_SEND_ENUMERATIONS Enumerations
+	 * @{ */
 
-/**Transmit Profile*/
-typedef struct {
-	uint8_t repetition :4;
-	uint32_t interval :28;
+	/** Sensor Frame Type */
+	typedef enum {
+		SRV_FRM_EVENT,
+		SRV_FRM_DATA,
+		SRV_FRM_REGISTER,
+		SRV_FRM_KEEPALIVE,
+		SRV_FRM_RAW,
+		SRV_FRM_SERVICE,
+		SRV_FRM_GEOLOC,
+	} TD_SENSOR_FrameType_t;
 
-}__PACKED TransmitProfile;
-//NB: don't change order here!!
+	/** @} */
 
-/** @} */
+	/*******************************************************************************
+	 **********************************  TYPEDEFS   *******************************
+	 ******************************************************************************/
 
-/*******************************************************************************
- *************************   PROTOTYPES   **************************************
- ******************************************************************************/
+	/** @addtogroup SENSOR_SEND_TYPEDEFS Typedefs
+	 * @{ */
 
-/** @addtogroup SENSOR_SEND_PUBLIC_FUNCTIONS Public Functions
- * @{ */
-/** @addtogroup SENSOR_SEND_PROTOTYPES Prototypes
- * @{ */
+	/** Sensor frame header type */
+	typedef struct {
+		uint8_t cpt : 4;
+		uint8_t stamp : 3;
+		bool retry : 1;
+		TD_SENSOR_FrameType_t type : 4;
+		uint8_t entry_id : 4;
+	} __PACKED TD_SENSOR_FrameHeader_t;
 
-bool TD_SENSOR_Send(TransmitProfile * profile, SensorFrameType frame_type, uint8_t stamp, uint8_t * payload, uint8_t count);
-/** @} */
+	/** Sensor frame type */
+	typedef struct {
+		TD_SENSOR_FrameHeader_t header;
+		uint8_t payload[10];
+	} __PACKED TD_SENSOR_Frame_t;
 
-/** @} */
-/** @} (end addtogroup SENSOR_SEND) */
+	/** Transmit Profile*/
+	typedef struct {
+		uint8_t repetition : 4;
+		uint32_t interval : 28;
 
-#endif /* SENSOR_SEND_H_ */
+	} __PACKED TD_SENSOR_TransmitProfile_t;
+
+	/** @} */
+
+	/*******************************************************************************
+	 *************************   PROTOTYPES   **************************************
+	 ******************************************************************************/
+
+	/** @addtogroup SENSOR_SEND_GLOBAL_FUNCTIONS Global Functions
+	 * @{ */
+
+	bool TD_SENSOR_Send(TD_SENSOR_TransmitProfile_t *profile, TD_SENSOR_FrameType_t frame_type, uint8_t stamp, uint8_t *payload, uint8_t count);
+	void TD_SENSOR_SetTransmissionProfile(TD_SENSOR_FrameType_t type, uint8_t repetition, uint16_t interval);
+
+	/** @} */
+
+	/** @} (end addtogroup SENSOR_SEND) */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // __SENSOR_SEND_H

@@ -3,7 +3,7 @@
  * @brief CMSIS Cortex-M3 Peripheral Access Layer Header File
  *        for EFM EFM32TG840F8
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -118,26 +118,26 @@ typedef enum IRQn
 #define PART_NUMBER          "EFM32TG840F8" /**< Part Number */
 
 /** Memory Base addresses and limits */
-#define AES_MEM_BASE         ((uint32_t) 0x400E0000UL)  /**< AES base address  */
-#define AES_MEM_SIZE         ((uint32_t) 0x400UL)       /**< AES available address space  */
-#define AES_MEM_END          ((uint32_t) 0x400E03FFUL)  /**< AES end address  */
-#define AES_MEM_BITS         ((uint32_t) 0x10UL)        /**< AES used bits  */
-#define PER_MEM_BASE         ((uint32_t) 0x40000000UL)  /**< PER base address  */
-#define PER_MEM_SIZE         ((uint32_t) 0xE0000UL)     /**< PER available address space  */
-#define PER_MEM_END          ((uint32_t) 0x400DFFFFUL)  /**< PER end address  */
-#define PER_MEM_BITS         ((uint32_t) 0x20UL)        /**< PER used bits  */
-#define RAM_MEM_BASE         ((uint32_t) 0x20000000UL)  /**< RAM base address  */
-#define RAM_MEM_SIZE         ((uint32_t) 0x40000UL)     /**< RAM available address space  */
-#define RAM_MEM_END          ((uint32_t) 0x2003FFFFUL)  /**< RAM end address  */
-#define RAM_MEM_BITS         ((uint32_t) 0x18UL)        /**< RAM used bits  */
-#define RAM_CODE_MEM_BASE    ((uint32_t) 0x10000000UL)  /**< RAM_CODE base address  */
-#define RAM_CODE_MEM_SIZE    ((uint32_t) 0x4000UL)      /**< RAM_CODE available address space  */
-#define RAM_CODE_MEM_END     ((uint32_t) 0x10003FFFUL)  /**< RAM_CODE end address  */
-#define RAM_CODE_MEM_BITS    ((uint32_t) 0x14UL)        /**< RAM_CODE used bits  */
-#define FLASH_MEM_BASE       ((uint32_t) 0x0UL)         /**< FLASH base address  */
-#define FLASH_MEM_SIZE       ((uint32_t) 0x10000000UL)  /**< FLASH available address space  */
-#define FLASH_MEM_END        ((uint32_t) 0xFFFFFFFUL)   /**< FLASH end address  */
-#define FLASH_MEM_BITS       ((uint32_t) 0x28UL)        /**< FLASH used bits  */
+#define FLASH_MEM_BASE       ((uint32_t) 0x0UL)        /**< FLASH base address  */
+#define FLASH_MEM_SIZE       ((uint32_t) 0x10000000UL) /**< FLASH available address space  */
+#define FLASH_MEM_END        ((uint32_t) 0xFFFFFFFUL)  /**< FLASH end address  */
+#define FLASH_MEM_BITS       ((uint32_t) 0x28UL)       /**< FLASH used bits  */
+#define AES_MEM_BASE         ((uint32_t) 0x400E0000UL) /**< AES base address  */
+#define AES_MEM_SIZE         ((uint32_t) 0x400UL)      /**< AES available address space  */
+#define AES_MEM_END          ((uint32_t) 0x400E03FFUL) /**< AES end address  */
+#define AES_MEM_BITS         ((uint32_t) 0x10UL)       /**< AES used bits  */
+#define PER_MEM_BASE         ((uint32_t) 0x40000000UL) /**< PER base address  */
+#define PER_MEM_SIZE         ((uint32_t) 0xE0000UL)    /**< PER available address space  */
+#define PER_MEM_END          ((uint32_t) 0x400DFFFFUL) /**< PER end address  */
+#define PER_MEM_BITS         ((uint32_t) 0x20UL)       /**< PER used bits  */
+#define RAM_MEM_BASE         ((uint32_t) 0x20000000UL) /**< RAM base address  */
+#define RAM_MEM_SIZE         ((uint32_t) 0x40000UL)    /**< RAM available address space  */
+#define RAM_MEM_END          ((uint32_t) 0x2003FFFFUL) /**< RAM end address  */
+#define RAM_MEM_BITS         ((uint32_t) 0x18UL)       /**< RAM used bits  */
+#define RAM_CODE_MEM_BASE    ((uint32_t) 0x10000000UL) /**< RAM_CODE base address  */
+#define RAM_CODE_MEM_SIZE    ((uint32_t) 0x4000UL)     /**< RAM_CODE available address space  */
+#define RAM_CODE_MEM_END     ((uint32_t) 0x10003FFFUL) /**< RAM_CODE end address  */
+#define RAM_CODE_MEM_BITS    ((uint32_t) 0x14UL)       /**< RAM_CODE used bits  */
 
 /** Bit banding area */
 #define BITBAND_PER_BASE     ((uint32_t) 0x42000000UL) /**< Peripheral Address Space bit-band area */
@@ -146,6 +146,7 @@ typedef enum IRQn
 /** Flash and SRAM limits for EFM32TG840F8 */
 #define FLASH_BASE           (0x00000000UL) /**< Flash Base Address */
 #define FLASH_SIZE           (0x00002000UL) /**< Available Flash Memory */
+#define FLASH_PAGE_SIZE      512            /**< Flash Memory page size */
 #define SRAM_BASE            (0x20000000UL) /**< SRAM Base Address */
 #define SRAM_SIZE            (0x00000800UL) /**< Available SRAM Memory */
 #define __CM3_REV            0x201          /**< Cortex-M3 Core revision r2p1 */
@@ -160,24 +161,28 @@ typedef enum IRQn
 
 /* Part number capabilities */
 
-#define TIMER_PRESENT         /**< TIMER is available in this part */
-#define TIMER_COUNT         2 /**< 2 TIMERs available  */
+#define ACMP_PRESENT          /**< ACMP is available in this part */
+#define ACMP_COUNT          2 /**< 2 ACMPs available  */
 #define USART_PRESENT         /**< USART is available in this part */
 #define USART_COUNT         2 /**< 2 USARTs available  */
+#define TIMER_PRESENT         /**< TIMER is available in this part */
+#define TIMER_COUNT         2 /**< 2 TIMERs available  */
 #define LEUART_PRESENT        /**< LEUART is available in this part */
 #define LEUART_COUNT        1 /**< 1 LEUARTs available  */
 #define LETIMER_PRESENT       /**< LETIMER is available in this part */
 #define LETIMER_COUNT       1 /**< 1 LETIMERs available  */
 #define PCNT_PRESENT          /**< PCNT is available in this part */
 #define PCNT_COUNT          1 /**< 1 PCNTs available  */
-#define I2C_PRESENT           /**< I2C is available in this part */
-#define I2C_COUNT           1 /**< 1 I2Cs available  */
 #define ADC_PRESENT           /**< ADC is available in this part */
 #define ADC_COUNT           1 /**< 1 ADCs available  */
 #define DAC_PRESENT           /**< DAC is available in this part */
 #define DAC_COUNT           1 /**< 1 DACs available  */
-#define ACMP_PRESENT          /**< ACMP is available in this part */
-#define ACMP_COUNT          2 /**< 2 ACMPs available  */
+#define I2C_PRESENT           /**< I2C is available in this part */
+#define I2C_COUNT           1 /**< 1 I2Cs available  */
+#define AES_PRESENT
+#define AES_COUNT           1
+#define DMA_PRESENT
+#define DMA_COUNT           1
 #define LE_PRESENT
 #define LE_COUNT            1
 #define MSC_PRESENT
@@ -188,24 +193,20 @@ typedef enum IRQn
 #define RMU_COUNT           1
 #define CMU_PRESENT
 #define CMU_COUNT           1
-#define AES_PRESENT
-#define AES_COUNT           1
 #define LESENSE_PRESENT
 #define LESENSE_COUNT       1
-#define GPIO_PRESENT
-#define GPIO_COUNT          1
-#define PRS_PRESENT
-#define PRS_COUNT           1
-#define DMA_PRESENT
-#define DMA_COUNT           1
-#define OPAMP_PRESENT
-#define OPAMP_COUNT         1
-#define VCMP_PRESENT
-#define VCMP_COUNT          1
-#define LCD_PRESENT
-#define LCD_COUNT           1
 #define RTC_PRESENT
 #define RTC_COUNT           1
+#define GPIO_PRESENT
+#define GPIO_COUNT          1
+#define VCMP_PRESENT
+#define VCMP_COUNT          1
+#define PRS_PRESENT
+#define PRS_COUNT           1
+#define OPAMP_PRESENT
+#define OPAMP_COUNT         1
+#define LCD_PRESENT
+#define LCD_COUNT           1
 #define HFXTAL_PRESENT
 #define HFXTAL_COUNT        1
 #define LFXTAL_PRESENT
@@ -216,6 +217,8 @@ typedef enum IRQn
 #define DBG_COUNT           1
 #define BOOTLOADER_PRESENT
 #define BOOTLOADER_COUNT    1
+#define ANALOG_PRESENT
+#define ANALOG_COUNT        1
 
 #include "core_cm3.h"       /* Cortex-M3 processor and core peripherals */
 #include "system_efm32tg.h" /* System Header */
@@ -228,34 +231,34 @@ typedef enum IRQn
  * @brief Device Specific Peripheral Register Structures
  *****************************************************************************/
 
+#include "efm32tg_aes.h"
+#include "efm32tg_dma_ch.h"
+#include "efm32tg_dma.h"
 #include "efm32tg_msc.h"
 #include "efm32tg_emu.h"
 #include "efm32tg_rmu.h"
 #include "efm32tg_cmu.h"
-#include "efm32tg_aes.h"
 #include "efm32tg_lesense_st.h"
 #include "efm32tg_lesense_buf.h"
 #include "efm32tg_lesense_ch.h"
 #include "efm32tg_lesense.h"
-#include "efm32tg_gpio_p.h"
-#include "efm32tg_gpio.h"
-#include "efm32tg_prs_ch.h"
-#include "efm32tg_prs.h"
-#include "efm32tg_dma_ch.h"
-#include "efm32tg_dma.h"
+#include "efm32tg_rtc.h"
+#include "efm32tg_acmp.h"
+#include "efm32tg_usart.h"
 #include "efm32tg_timer_cc.h"
 #include "efm32tg_timer.h"
-#include "efm32tg_usart.h"
+#include "efm32tg_gpio_p.h"
+#include "efm32tg_gpio.h"
+#include "efm32tg_vcmp.h"
+#include "efm32tg_prs_ch.h"
+#include "efm32tg_prs.h"
 #include "efm32tg_leuart.h"
 #include "efm32tg_letimer.h"
 #include "efm32tg_pcnt.h"
-#include "efm32tg_i2c.h"
 #include "efm32tg_adc.h"
 #include "efm32tg_dac.h"
-#include "efm32tg_acmp.h"
-#include "efm32tg_vcmp.h"
+#include "efm32tg_i2c.h"
 #include "efm32tg_lcd.h"
-#include "efm32tg_rtc.h"
 #include "efm32tg_wdog.h"
 #include "efm32tg_dma_descriptor.h"
 #include "efm32tg_devinfo.h"
@@ -269,34 +272,36 @@ typedef enum IRQn
  * @{
  *****************************************************************************/
 
+#define AES_BASE          (0x400E0000UL) /**< AES base address  */
+#define DMA_BASE          (0x400C2000UL) /**< DMA base address  */
 #define MSC_BASE          (0x400C0000UL) /**< MSC base address  */
 #define EMU_BASE          (0x400C6000UL) /**< EMU base address  */
 #define RMU_BASE          (0x400CA000UL) /**< RMU base address  */
 #define CMU_BASE          (0x400C8000UL) /**< CMU base address  */
-#define AES_BASE          (0x400E0000UL) /**< AES base address  */
 #define LESENSE_BASE      (0x4008C000UL) /**< LESENSE base address  */
-#define GPIO_BASE         (0x40006000UL) /**< GPIO base address  */
-#define PRS_BASE          (0x400CC000UL) /**< PRS base address  */
-#define DMA_BASE          (0x400C2000UL) /**< DMA base address  */
-#define TIMER0_BASE       (0x40010000UL) /**< TIMER0 base address  */
-#define TIMER1_BASE       (0x40010400UL) /**< TIMER1 base address  */
+#define RTC_BASE          (0x40080000UL) /**< RTC base address  */
+#define ACMP0_BASE        (0x40001000UL) /**< ACMP0 base address  */
+#define ACMP1_BASE        (0x40001400UL) /**< ACMP1 base address  */
 #define USART0_BASE       (0x4000C000UL) /**< USART0 base address  */
 #define USART1_BASE       (0x4000C400UL) /**< USART1 base address  */
+#define TIMER0_BASE       (0x40010000UL) /**< TIMER0 base address  */
+#define TIMER1_BASE       (0x40010400UL) /**< TIMER1 base address  */
+#define GPIO_BASE         (0x40006000UL) /**< GPIO base address  */
+#define VCMP_BASE         (0x40000000UL) /**< VCMP base address  */
+#define PRS_BASE          (0x400CC000UL) /**< PRS base address  */
 #define LEUART0_BASE      (0x40084000UL) /**< LEUART0 base address  */
 #define LETIMER0_BASE     (0x40082000UL) /**< LETIMER0 base address  */
 #define PCNT0_BASE        (0x40086000UL) /**< PCNT0 base address  */
-#define I2C0_BASE         (0x4000A000UL) /**< I2C0 base address  */
 #define ADC0_BASE         (0x40002000UL) /**< ADC0 base address  */
 #define DAC0_BASE         (0x40004000UL) /**< DAC0 base address  */
-#define ACMP0_BASE        (0x40001000UL) /**< ACMP0 base address  */
-#define ACMP1_BASE        (0x40001400UL) /**< ACMP1 base address  */
-#define VCMP_BASE         (0x40000000UL) /**< VCMP base address  */
+#define I2C0_BASE         (0x4000A000UL) /**< I2C0 base address  */
 #define LCD_BASE          (0x4008A000UL) /**< LCD base address  */
-#define RTC_BASE          (0x40080000UL) /**< RTC base address  */
 #define WDOG_BASE         (0x40088000UL) /**< WDOG base address  */
 #define CALIBRATE_BASE    (0x0FE08000UL) /**< CALIBRATE base address */
 #define DEVINFO_BASE      (0x0FE081B0UL) /**< DEVINFO base address */
 #define ROMTABLE_BASE     (0xE00FFFD0UL) /**< ROMTABLE base address */
+#define LOCKBITS_BASE     (0x0FE04000UL) /**< Lock-bits page base address */
+#define USERDATA_BASE     (0x0FE00000UL) /**< User data page base address */
 
 /** @} End of group EFM32TG840F8_Peripheral_Base */
 
@@ -305,30 +310,30 @@ typedef enum IRQn
  * @{
  *****************************************************************************/
 
+#define AES          ((AES_TypeDef *) AES_BASE)             /**< AES base pointer */
+#define DMA          ((DMA_TypeDef *) DMA_BASE)             /**< DMA base pointer */
 #define MSC          ((MSC_TypeDef *) MSC_BASE)             /**< MSC base pointer */
 #define EMU          ((EMU_TypeDef *) EMU_BASE)             /**< EMU base pointer */
 #define RMU          ((RMU_TypeDef *) RMU_BASE)             /**< RMU base pointer */
 #define CMU          ((CMU_TypeDef *) CMU_BASE)             /**< CMU base pointer */
-#define AES          ((AES_TypeDef *) AES_BASE)             /**< AES base pointer */
 #define LESENSE      ((LESENSE_TypeDef *) LESENSE_BASE)     /**< LESENSE base pointer */
-#define GPIO         ((GPIO_TypeDef *) GPIO_BASE)           /**< GPIO base pointer */
-#define PRS          ((PRS_TypeDef *) PRS_BASE)             /**< PRS base pointer */
-#define DMA          ((DMA_TypeDef *) DMA_BASE)             /**< DMA base pointer */
-#define TIMER0       ((TIMER_TypeDef *) TIMER0_BASE)        /**< TIMER0 base pointer */
-#define TIMER1       ((TIMER_TypeDef *) TIMER1_BASE)        /**< TIMER1 base pointer */
+#define RTC          ((RTC_TypeDef *) RTC_BASE)             /**< RTC base pointer */
+#define ACMP0        ((ACMP_TypeDef *) ACMP0_BASE)          /**< ACMP0 base pointer */
+#define ACMP1        ((ACMP_TypeDef *) ACMP1_BASE)          /**< ACMP1 base pointer */
 #define USART0       ((USART_TypeDef *) USART0_BASE)        /**< USART0 base pointer */
 #define USART1       ((USART_TypeDef *) USART1_BASE)        /**< USART1 base pointer */
+#define TIMER0       ((TIMER_TypeDef *) TIMER0_BASE)        /**< TIMER0 base pointer */
+#define TIMER1       ((TIMER_TypeDef *) TIMER1_BASE)        /**< TIMER1 base pointer */
+#define GPIO         ((GPIO_TypeDef *) GPIO_BASE)           /**< GPIO base pointer */
+#define VCMP         ((VCMP_TypeDef *) VCMP_BASE)           /**< VCMP base pointer */
+#define PRS          ((PRS_TypeDef *) PRS_BASE)             /**< PRS base pointer */
 #define LEUART0      ((LEUART_TypeDef *) LEUART0_BASE)      /**< LEUART0 base pointer */
 #define LETIMER0     ((LETIMER_TypeDef *) LETIMER0_BASE)    /**< LETIMER0 base pointer */
 #define PCNT0        ((PCNT_TypeDef *) PCNT0_BASE)          /**< PCNT0 base pointer */
-#define I2C0         ((I2C_TypeDef *) I2C0_BASE)            /**< I2C0 base pointer */
 #define ADC0         ((ADC_TypeDef *) ADC0_BASE)            /**< ADC0 base pointer */
 #define DAC0         ((DAC_TypeDef *) DAC0_BASE)            /**< DAC0 base pointer */
-#define ACMP0        ((ACMP_TypeDef *) ACMP0_BASE)          /**< ACMP0 base pointer */
-#define ACMP1        ((ACMP_TypeDef *) ACMP1_BASE)          /**< ACMP1 base pointer */
-#define VCMP         ((VCMP_TypeDef *) VCMP_BASE)           /**< VCMP base pointer */
+#define I2C0         ((I2C_TypeDef *) I2C0_BASE)            /**< I2C0 base pointer */
 #define LCD          ((LCD_TypeDef *) LCD_BASE)             /**< LCD base pointer */
-#define RTC          ((RTC_TypeDef *) RTC_BASE)             /**< RTC base pointer */
 #define WDOG         ((WDOG_TypeDef *) WDOG_BASE)           /**< WDOG base pointer */
 #define CALIBRATE    ((CALIBRATE_TypeDef *) CALIBRATE_BASE) /**< CALIBRATE base pointer */
 #define DEVINFO      ((DEVINFO_TypeDef *) DEVINFO_BASE)     /**< DEVINFO base pointer */
@@ -352,8 +357,8 @@ typedef enum IRQn
 #define MSC_UNLOCK_CODE      0x1B71 /**< MSC unlock code */
 #define EMU_UNLOCK_CODE      0xADE8 /**< EMU unlock code */
 #define CMU_UNLOCK_CODE      0x580E /**< CMU unlock code */
-#define GPIO_UNLOCK_CODE     0xA534 /**< GPIO unlock code */
 #define TIMER_UNLOCK_CODE    0xCE80 /**< TIMER unlock code */
+#define GPIO_UNLOCK_CODE     0xA534 /**< GPIO unlock code */
 
 /** @} End of group EFM32TG840F8_UNLOCK */
 
@@ -392,5 +397,4 @@ typedef enum IRQn
 #ifdef __cplusplus
 }
 #endif
-
 #endif /* __EFM32TG840F8_H */

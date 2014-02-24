@@ -2,7 +2,7 @@
  * @file
  * @brief Direct memory access (DMA) API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -34,9 +34,11 @@
 #ifndef __EM_DMA_H
 #define __EM_DMA_H
 
+#include "em_device.h"
+#if defined( DMA_PRESENT )
+
 #include <stdio.h>
 #include <stdbool.h>
-#include "em_device.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -242,7 +244,7 @@ typedef struct
 } DMA_CfgDescr_TypeDef;
 
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( _DMA_LOOP0_MASK ) && defined( _DMA_LOOP1_MASK )
 /**
  * Configuration structure for loop mode
  */
@@ -253,8 +255,10 @@ typedef struct
   /** Width of transfer, reload value for nMinus1 */
   uint16_t  nMinus1;
 } DMA_CfgLoop_TypeDef;
+#endif
 
 
+#if defined( _DMA_RECT0_MASK )
 /**
  * Configuration structure for rectangular copy
  */
@@ -381,10 +385,15 @@ void DMA_CfgChannel(unsigned int channel, DMA_CfgChannel_TypeDef *cfg);
 void DMA_CfgDescr(unsigned int channel,
                   bool primary,
                   DMA_CfgDescr_TypeDef *cfg);
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( _DMA_LOOP0_MASK ) && defined( _DMA_LOOP1_MASK )
 void DMA_CfgLoop(unsigned int channel, DMA_CfgLoop_TypeDef *cfg);
-void DMA_CfgRect(unsigned int channel, DMA_CfgRect_TypeDef *cfg);
+#endif
 
+#if defined( _DMA_RECT0_MASK )
+void DMA_CfgRect(unsigned int channel, DMA_CfgRect_TypeDef *cfg);
+#endif
+
+#if defined( _DMA_LOOP0_MASK ) && defined( _DMA_LOOP1_MASK )
 /***************************************************************************//**
  * @brief
  *   Clear Loop configuration for channel
@@ -407,8 +416,10 @@ __STATIC_INLINE void DMA_ResetLoop(unsigned int channel)
     break;
   }
 }
+#endif
 
 
+#if defined( _DMA_RECT0_MASK )
 /***************************************************************************//**
  * @brief
  *   Clear Rect/2D DMA configuration for channel
@@ -446,4 +457,5 @@ void DMA_Reset(void);
 }
 #endif
 
+#endif /* defined( DMA_PRESENT ) */
 #endif /* __EM_DMA_H */

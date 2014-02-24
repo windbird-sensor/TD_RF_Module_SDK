@@ -1,12 +1,11 @@
 /***************************************************************************//**
- * @file sensor_event.c
-
+ * @file
  * @brief API for sending Event frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.2.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -36,15 +35,15 @@
 #include <stdint.h>
 
 #include "sensor_send.h"
+#include "sensor_data.h"
 #include "sensor_event.h"
-#include "sensor_event_private.h"
+#include "td_sensor_utils.h"
 
 /***************************************************************************//**
  * @addtogroup SENSOR_EVENT Sensor Event
  * @brief Sensor API for sending an Event frame
  *
  * @details
- *
  *
  *	Event Type values are:
  *
@@ -58,8 +57,6 @@
  *
  *	Indicate whether the connection with a device has been lost or not. The CONNECTION_LOST event indicate that the device didn't send a keep-alive on time.
  *	CONNECTION_OK means the connection with the device has been recovered. The Data field is used for both messages and indicates which device is concerned.
- *
- *
  *
  *	- RSSI_LOW & RSSI_OK
  *
@@ -78,8 +75,8 @@
  *
  *	- SWITCH_ON & SWITCH_OFF
  *
- *	Indicate whether a switch has been turned ON or OFF. The Data field is used for both messages and contains port and bit information
- *	for the switch.
+ *	Indicate whether a switch has been turned ON or OFF. The Data field is used
+ *	for both messages and contains port and bit information for the switch.
  * @{
  ******************************************************************************/
 
@@ -90,10 +87,24 @@
 /** @addtogroup SENSOR_EVENT_DEFINES Defines
  * @{ */
 
-#define EVENT_PAYLOAD_SIZE 1
+#define EVENT_PAYLOAD_SIZE		1	///< Event payload size in bytes
+#define EVENT_DEFAULT_REPETITON	0 	///< Default retransmission repetition
+#define EVENT_DEFAULT_INTERVAL	0	///< Default retransmission interval in seconds
 
-#define EVENT_DEFAULT_REPETITON 3 	///<Default retransmission repetition
-#define EVENT_DEFAULT_INTERVAL 120	///<Default retransmission interval in seconds
+/** @} */
+
+/*******************************************************************************
+ *************************   TYPEDEFS   *****************************************
+ ******************************************************************************/
+
+ /** @addtogroup SENSOR_EVENT_TYPEDEFS Typedefs
+ * @{ */
+
+/** Event Frame Structure */
+typedef struct {
+	TD_SENSOR_EVENT_Types_t type : 8;	///< The Sensor event type
+	uint8_t data[9];					///< The data payload
+} __PACKED TD_SENSOR_EVENT_Frame_t;
 
 /** @} */
 
@@ -101,54 +112,14 @@
  *************************   PRIVATE VARIABLES   ****************************************
  ******************************************************************************/
 
-/** @addtogroup SENSOR_EVENT_PRIVATE_VARIABLES Private Variables
+/** @addtogroup SENSOR_EVENT_LOCAL_VARIABLES Local Variables
  * @{ */
 
-static TransmitProfile event_profile = {EVENT_DEFAULT_REPETITON, EVENT_DEFAULT_INTERVAL};
-static uint8_t event_stamp = -1;
+/** Transmission profile */
+static TD_SENSOR_TransmitProfile_t Profile = {EVENT_DEFAULT_REPETITON, EVENT_DEFAULT_INTERVAL};
 
-/** @} */
-
-
-/*******************************************************************************
- **************************  PRIVATE FUNCTIONS   *******************************
- ******************************************************************************/
-
-/** @addtogroup SENSOR_EVENT_PRIVATE_FUNCTIONS Private Functions
- * @{ */
-
-/***************************************************************************//**
- * @brief
- *   Send a EVENT frame to Sensor.
- *
- * @param[in] event
- *   Event Type
- *
- * @param[in] data
- *   Data to be sent
- *
- * @return
- *   True if the data has been sent over the Sigfox Network
- ******************************************************************************/
-static bool TD_SENSOR_SendEvent(SensorEventType event, uint8_t data) {
-	SRV_FRAME_EVENT frame;
-	frame.type = event;
-
-	event_stamp = (event_stamp & 0x07) + 1;
-
-	if (event == EVENT_BATTERY_OK || event == EVENT_CONNECTION_LOST
-			|| event == EVENT_CONNECTION_OK || event == EVENT_RSSI_LOW
-			|| event == EVENT_RSSI_OK || event == EVENT_SWITCH_ON
-			|| event == EVENT_SWITCH_OFF) {
-		frame.data = data;
-		return TD_SENSOR_Send(&event_profile, SRV_FRM_EVENT, event_stamp,
-				(uint8_t *) &frame, 2);
-	} else {
-		return TD_SENSOR_Send(&event_profile, SRV_FRM_EVENT, event_stamp,
-				(uint8_t *) &frame, 1);
-	}
-
-}
+/** Redundancy counter for Sensor events */
+static uint8_t Stamp = -1;
 
 /** @} */
 
@@ -156,78 +127,108 @@ static bool TD_SENSOR_SendEvent(SensorEventType event, uint8_t data) {
  **************************  PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
-/** @addtogroup SENSOR_EVENT_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup SENSOR_EVENT_USER_FUNCTIONS User Functions
  * @{ */
 
 /***************************************************************************//**
  * @brief
- *   Send the Battery event to Sensor
+ *   Send an event frame to Sensor.
  *
- *  @param[in] state
- *  True to send EVENT_BATTERY_OK, false to send EVENT_BATTERY_LOW
+ * @param[in] event
+ *   Event Type.
  *
- *  @param[in] battery_level
- *   If battery event is EVENT_BATTERY_OK, then battery level must also be provided.
+ * @param[in] data
+ *   Pointer to the buffer containing the data to be sent.
+ *
+ * @param[in] length
+ *   Length of the data to be sent in bytes.
  *
  * @return
- *   True if the data has been sent (ie. the gateway has acknowledged the request)
- *   False if the ack from the gateway was never received.
+ *   Returs true if the data has been sent over the SIGFOX network, false otherwise.
  ******************************************************************************/
-bool TD_SENSOR_SendEventBattery(bool state, uint8_t battery_level) {
+bool TD_SENSOR_SendEvent(TD_SENSOR_EVENT_Types_t event, uint8_t *data, uint8_t length)
+{
+	int i;
+	TD_SENSOR_EVENT_Frame_t frame;
+	frame.type = event;
+
+	for (i = 0; i < length; i++) {
+		frame.data[i] = data[i];
+	}
+	Stamp = (Stamp & 0x07) + 1;
+	return TD_SENSOR_Send(&Profile, SRV_FRM_EVENT, Stamp, (uint8_t *) &frame, length + 1);
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Send a battery event to Sensor.
+ *
+ *  @param[in] state
+ *  True to send EVENT_BATTERY_OK, false to send EVENT_BATTERY_LOW.
+ *
+ *  @param[in] battery_level
+ *   If battery event is EVENT_BATTERY_OK, the battery level must also be provided.
+ *
+ * @return
+ *   Returns true if the data has been sent (i.e. the gateway has acknowledged
+ *   the request), false if the acknowledge from the gateway was never received.
+ ******************************************************************************/
+bool TD_SENSOR_SendEventBattery(bool state, uint8_t battery_level)
+{
 	if (state) {
-		return TD_SENSOR_SendEvent(EVENT_BATTERY_OK, battery_level);
+		return TD_SENSOR_SendEvent(EVENT_BATTERY_OK, &battery_level, 1);
 	} else {
-		return TD_SENSOR_SendEvent(EVENT_BATTERY_LOW, 0);
+		return TD_SENSOR_SendEvent(EVENT_BATTERY_LOW, 0, 0);
 	}
 }
 
 /***************************************************************************//**
  * @brief
- *   Send the event RSSI Low to Sensor
+ *   Send an RSSI Low event to Sensor.
  *
  *  @param[in] state
- *   True to send EVENT_RSSI_OK, false to send EVENT_RSSI_LOW
+ *   True to send EVENT_RSSI_OK, false to send EVENT_RSSI_LOW.
  *
  *  @param[in] EntryID
  *   EntryID of which the RSSI is low.
  *
  * @return
- *   always true
+ *   Always true.
  ******************************************************************************/
-bool TD_SENSOR_SendEventRSSI(
-		bool state, uint8_t EntryID) {
+bool TD_SENSOR_SendEventRSSI(bool state, uint8_t EntryID)
+{
 	if (state) {
-		return TD_SENSOR_SendEvent(EVENT_RSSI_OK, EntryID);
+		return TD_SENSOR_SendEvent(EVENT_RSSI_OK, &EntryID, 1);
 	} else {
-		return TD_SENSOR_SendEvent(EVENT_RSSI_LOW, EntryID);
+		return TD_SENSOR_SendEvent(EVENT_RSSI_LOW, &EntryID, 1);
 	}
 }
 
 /***************************************************************************//**
  * @brief
- *   Send the Connection event to Sensor
+ *   Send a Connection event to Sensor.
  *
  *  @param[in] state
- *  True to send EVENT_CONNECTION_OK, false to send EVENT_CONNECTION_LOST
+ *  True to send EVENT_CONNECTION_OK, false to send EVENT_CONNECTION_LOST.
  *
  *  @param[in] EntryID
- *   EntryID of which the connection has been lost
+ *   EntryID of which the connection has been lost.
  *
  * @return
- *   always true
+ *   Always true.
  ******************************************************************************/
 bool TD_SENSOR_SendEventConnection(bool state, uint8_t EntryID)
 {
 	if (state) {
-		return TD_SENSOR_SendEvent(EVENT_CONNECTION_OK, EntryID);
+		return TD_SENSOR_SendEvent(EVENT_CONNECTION_OK, &EntryID, 1);
 	} else {
-		return TD_SENSOR_SendEvent(EVENT_CONNECTION_LOST, EntryID);
+		return TD_SENSOR_SendEvent(EVENT_CONNECTION_LOST, &EntryID, 1);
 	}
 }
 
 /***************************************************************************//**
  * @brief
- *   Send the Temperature event to Sensor
+ *   Send a temperature event to Sensor.
  *
  *  @param[in] state
  *  0 is below min , 1 is ok, 2 is above max
@@ -240,18 +241,31 @@ bool TD_SENSOR_SendEventTemperature(uint8_t state)
 {
 	switch (state) {
 	case 0:
-		return TD_SENSOR_SendEvent(EVENT_TEMP_LOW, 0);
+		return TD_SENSOR_SendEvent(EVENT_TEMP_LOW, 0, 0);
 		break;
 
 	case 1:
-		return TD_SENSOR_SendEvent(EVENT_TEMP_OK, 0);
+		return TD_SENSOR_SendEvent(EVENT_TEMP_OK, 0, 0);
 		break;
 
 	case 2:
-		return TD_SENSOR_SendEvent(EVENT_TEMP_HIGH, 0);
+		return TD_SENSOR_SendEvent(EVENT_TEMP_HIGH, 0, 0);
 		break;
 	}
 	return false;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Send a boot event to Sensor.
+ *
+ * @return
+ *   Returns true if the data has been sent (i.e. the gateway has acknowledged the request)
+ *   False if the ack from the gateway was never received.
+ ******************************************************************************/
+bool TD_SENSOR_SendEventBoot(void)
+{
+	return TD_SENSOR_SendEvent(EVENT_BOOT, 0, 0);
 }
 
 /***************************************************************************//**
@@ -262,14 +276,27 @@ bool TD_SENSOR_SendEventTemperature(uint8_t state)
  *   True if the data has been sent (ie. the gateway has acknowledged the request)
  *   False if the ack from the gateway was never received.
  ******************************************************************************/
-bool TD_SENSOR_SendEventBoot()
+bool TD_SENSOR_SendEventBootExt(uint8_t cause, uint8_t custom_cause, uint8_t *data, uint8_t length)
 {
-	return TD_SENSOR_SendEvent(EVENT_BOOT, 0);
+	uint8_t msg[9];
+	uint8_t total_length = 16;
+	uint8_t length_bytes = 0;
+
+	msg[0] = cause;
+	msg[1] = custom_cause;
+	if (length <= 56) {
+		TD_SENSOR_UTILS_BitConcat(msg, &total_length, data, length);
+	}
+	length_bytes = total_length / 8;
+	if (total_length % 8 > 0) {
+		length_bytes++;
+	}
+	return TD_SENSOR_SendEvent(EVENT_BOOT, msg, length_bytes);
 }
 
 /***************************************************************************//**
  * @brief
- *   Send the Boot event to Sensor
+ *   Send a switch event to Sensor.
  *
  * @param[in] port
  * 	Switch port.
@@ -284,35 +311,33 @@ bool TD_SENSOR_SendEventBoot()
  *   True if the data has been sent (ie. the gateway has acknowledged the request)
  *   False if the ack from the gateway was never received.
  ******************************************************************************/
-bool TD_SENSOR_SendEventSwitch(	uint8_t port, uint8_t bit, bool state)
+bool TD_SENSOR_SendEventSwitch(uint8_t port, uint8_t bit, bool state)
 {
 	uint8_t data = 0;
 	data = ((port & 0xF) << 4) | (bit & 0xF);
-
 	if (!state) {
-		return TD_SENSOR_SendEvent(EVENT_SWITCH_ON, data);
+		return TD_SENSOR_SendEvent(EVENT_SWITCH_ON, &data, 1);
 	} else {
-		return TD_SENSOR_SendEvent(EVENT_SWITCH_OFF, data);
+		return TD_SENSOR_SendEvent(EVENT_SWITCH_OFF, &data, 1);
 	}
 }
 
 /***************************************************************************//**
  * @brief
- *   Set a transmission profile to a given frame type
+ *   Set a transmission profile for an event frame type.
  *
  * @param[in] repetition
- *	Number of repetition
+ *	Number of repetitions.
  *
  * @param[in] interval
  *	Interval between two repetitions in seconds.
- *
  ******************************************************************************/
-void TD_SENSOR_SetEventTransmissionProfile(uint8_t repetition,uint32_t interval)
+void TD_SENSOR_SetEventTransmissionProfile(uint8_t repetition, uint32_t interval)
 {
-	event_profile.repetition = repetition;
-	event_profile.interval = interval;
+	Profile.repetition = repetition;
+	Profile.interval = interval;
 }
 
 /** @} */
 
-/** @} */
+/** @} (end addtogroup SENSOR_EVENT) */

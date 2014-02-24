@@ -2,10 +2,10 @@
  * @file
  * @brief User AT command extension for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -39,6 +39,7 @@
 #include <td_core.h>
 #include <td_printf.h>
 #include <td_measure.h>
+
 
 /*******************************************************************************
  *************************   DEFINES   *****************************************

@@ -2,7 +2,7 @@
  * @file
  * @brief Digital to Analog Coversion (DAC) Peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -31,6 +31,7 @@
  *
  ******************************************************************************/
 #include "em_dac.h"
+#if defined(DAC_COUNT) && (DAC_COUNT > 0)
 #include "em_cmu.h"
 #include "em_assert.h"
 #include "em_bitband.h"
@@ -225,7 +226,11 @@ void DAC_InitChannel(DAC_TypeDef *dac,
  *   Calculate prescaler value used to determine DAC clock.
  *
  * @details
- *   The DAC clock is given by: HFPERCLK / (prescale ^ 2).
+ *   The DAC clock is given by: HFPERCLK / (prescale ^ 2). If the requested
+ *   DAC frequency is low and the max prescaler value can not adjust the
+ *   actual DAC frequency lower than the requested DAC frequency, then the
+ *   max prescaler value is returned, resulting in a higher DAC frequency
+ *   than requested.
  *
  * @param[in] dacFreq DAC frequency wanted. The frequency will automatically
  *   be adjusted to be below max allowed DAC clock.
@@ -262,6 +267,13 @@ uint8_t DAC_PrescaleCalc(uint32_t dacFreq, uint32_t hfperFreq)
       break;
   }
 
+  /* If ret is higher than the max prescaler value, make sure to return
+     the max value. */
+  if (ret > (_DAC_CTRL_PRESC_MASK >> _DAC_CTRL_PRESC_SHIFT))
+  {
+    ret = _DAC_CTRL_PRESC_MASK >> _DAC_CTRL_PRESC_SHIFT;
+  }
+
   return((uint8_t)ret);
 }
 
@@ -289,3 +301,4 @@ void DAC_Reset(DAC_TypeDef *dac)
 
 /** @} (end addtogroup DAC) */
 /** @} (end addtogroup EM_Library) */
+#endif /* defined(DAC_COUNT) && (DAC_COUNT > 0) */

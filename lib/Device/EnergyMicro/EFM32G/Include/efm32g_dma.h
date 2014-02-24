@@ -2,7 +2,7 @@
  * @file
  * @brief efm32g_dma Register and Bit Field definitions
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -55,6 +55,7 @@ typedef struct
   __O uint32_t   CHPRIC;         /**< Channel Priority Clear Register  */
   uint32_t       RESERVED0[3];   /**< Reserved for future use **/
   __IO uint32_t  ERRORC;         /**< Bus Error Clear Register  */
+
   uint32_t       RESERVED1[880]; /**< Reserved for future use **/
   __I uint32_t   CHREQSTATUS;    /**< Channel Request Status  */
   uint32_t       RESERVED2[1];   /**< Reserved for future use **/

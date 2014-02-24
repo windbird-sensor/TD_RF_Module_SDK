@@ -2,10 +2,10 @@
  * @file
  * @brief Utility functions for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 2.0.2
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -42,33 +42,66 @@
 extern "C" {
 #endif
 
-/***************************************************************************//**
- * @addtogroup UTILS Utility Functions
- * @brief Utility functions for the TD1202 module
- * @{
- ******************************************************************************/
+	/***************************************************************************//**
+	 * @addtogroup UTILS Utility Functions
+	 * @brief Utility functions for the TDxxxx RF modules
+	 * @{
+	 ******************************************************************************/
 
-/*******************************************************************************
- *************************   PROTOTYPES   **************************************
- ******************************************************************************/
+	/*******************************************************************************
+	 *************************   DEFINES   **************************************
+	 ******************************************************************************/
 
-/** @addtogroup UTILS_USER_FUNCTIONS User Functions
- * @{ */
-/** @addtogroup UTILS_PROTOTYPES Prototypes
- * @{ */
+	/** @addtogroup UTILS_DEFINES Defines
+	 * @{ */
 
-long long atoll(char *instr);
-int atoi(char *instr);
-#ifndef __ICCARM__
-void *memset(void *s, int c, size_t n);
-void *memcpy(void *d, const void *s, size_t n);
-int memcmp(const void *s1, const void *s2, size_t n);
+	/** Macro to get a bit field */
+#define GET_BITFIELD(b, f)				((b >> f ## _SHIFT) & GET_BITFIELD_MASK(f ## _WIDTH))
+
+	/** Macro to set a bit field */
+#define SET_BITFIELD(b, f, v)			b &= ~(GET_BITFIELD_MASK(f ## _WIDTH) << f ## _SHIFT); \
+			b |= ((v & GET_BITFIELD_MASK(f ## _WIDTH))  << f ## _SHIFT)
+
+	/** Macro to compute bit mask given its width */
+#define GET_BITFIELD_MASK(w)			((1 << w) - 1)
+
+#ifndef NULL
+
+/** Define NULL if not already defined by someone else */
+#define NULL	(void *) 0
 #endif
 
-/** @} */
-/** @} */
+	/** @} */
 
-/** @} (end addtogroup UTILS) */
+	/*******************************************************************************
+	 *************************   PROTOTYPES   **************************************
+	 ******************************************************************************/
+
+	/** @addtogroup UTILS_USER_FUNCTIONS User Functions
+	 * @{ */
+
+	long long atoll(char *instr);
+	long long atolli(char *instr, char ignore);
+	int atoi(char *instr);
+	char a2i(char ch, char **src, int base, int *nump);
+	int a2d(char ch);
+	void i2a(int num, char *bf);
+	void ui2a(unsigned int num, unsigned int base, int uc, char *bf);
+	void li2a(long int num, char *bf);
+	void uli2a(unsigned long int num, unsigned int base, int uc, char *bf);
+
+#ifndef __ICCARM__
+	void *memset(void *s, int c, size_t n);
+	void *memcpy(void *d, const void *s, size_t n);
+	int memcmp(const void *s1, const void *s2, size_t n);
+#endif
+
+	int TD_STACK_Usage(void);
+	void TD_IRQ_Dump(void);
+
+	/** @} */
+
+	/** @} (end addtogroup TD_UTILS) */
 
 #ifdef __cplusplus
 }

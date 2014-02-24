@@ -2,10 +2,10 @@
  * @file
  * @brief CMU (Clock Management Unit) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 2.0.2
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -38,27 +38,24 @@
 extern "C" {
 #endif
 
-/***************************************************************************//**
- * @addtogroup CMU
- * @brief Clock management unit (CMU) Peripheral API for the TD1202 module
- * @{
- ******************************************************************************/
+	/***************************************************************************//**
+	 * @addtogroup CMU
+	 * @brief Clock management unit (CMU) Peripheral API for the TDxxxx RF modules
+	 * @{
+	 ******************************************************************************/
 
-/*******************************************************************************
- *****************************   PROTOTYPES   **********************************
- ******************************************************************************/
+	/*******************************************************************************
+	 *****************************   PROTOTYPES   **********************************
+	 ******************************************************************************/
 
-/** @addtogroup CMU_USER_FUNCTIONS User Functions
- * @{ */
-/** @addtogroup CMU_PROTOTYPES Prototypes
- * @{ */
+	/** @addtogroup CMU_GLOBAL_FUNCTIONS Global Functions
+	 * @{ */
 
-void TD_CMU_Init(bool external);
+	void TD_CMU_Init(bool external);
 
-/** @} */
-/** @} */
+	/** @} */
 
-/** @} (end addtogroup CMU) */
+	/** @} (end addtogroup CMU) */
 
 #ifdef __cplusplus
 }

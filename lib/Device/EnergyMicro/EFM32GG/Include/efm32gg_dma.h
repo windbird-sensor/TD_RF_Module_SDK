@@ -2,7 +2,7 @@
  * @file
  * @brief efm32gg_dma Register and Bit Field definitions
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -55,6 +55,7 @@ typedef struct
   __O uint32_t   CHPRIC;         /**< Channel Priority Clear Register  */
   uint32_t       RESERVED0[3];   /**< Reserved for future use **/
   __IO uint32_t  ERRORC;         /**< Bus Error Clear Register  */
+
   uint32_t       RESERVED1[880]; /**< Reserved for future use **/
   __I uint32_t   CHREQSTATUS;    /**< Channel Request Status  */
   uint32_t       RESERVED2[1];   /**< Reserved for future use **/
@@ -392,11 +393,11 @@ typedef struct
 #define _DMA_CHUSEBURSTC_CH7USEBURSTC_MASK              0x80UL                                         /**< Bit mask for DMA_CH7USEBURSTC */
 #define _DMA_CHUSEBURSTC_CH7USEBURSTC_DEFAULT           0x00000000UL                                   /**< Mode DEFAULT for DMA_CHUSEBURSTC */
 #define DMA_CHUSEBURSTC_CH7USEBURSTC_DEFAULT            (_DMA_CHUSEBURSTC_CH7USEBURSTC_DEFAULT << 7)   /**< Shifted mode DEFAULT for DMA_CHUSEBURSTC */
-#define DMA_CHUSEBURSTC_CH08SEBURSTC                    (0x1UL << 8)                                   /**< Channel 8 Useburst Clear */
-#define _DMA_CHUSEBURSTC_CH08SEBURSTC_SHIFT             8                                              /**< Shift value for DMA_CH08SEBURSTC */
-#define _DMA_CHUSEBURSTC_CH08SEBURSTC_MASK              0x100UL                                        /**< Bit mask for DMA_CH08SEBURSTC */
-#define _DMA_CHUSEBURSTC_CH08SEBURSTC_DEFAULT           0x00000000UL                                   /**< Mode DEFAULT for DMA_CHUSEBURSTC */
-#define DMA_CHUSEBURSTC_CH08SEBURSTC_DEFAULT            (_DMA_CHUSEBURSTC_CH08SEBURSTC_DEFAULT << 8)   /**< Shifted mode DEFAULT for DMA_CHUSEBURSTC */
+#define DMA_CHUSEBURSTC_CH08USEBURSTC                   (0x1UL << 8)                                   /**< Channel 8 Useburst Clear */
+#define _DMA_CHUSEBURSTC_CH08USEBURSTC_SHIFT            8                                              /**< Shift value for DMA_CH08USEBURSTC */
+#define _DMA_CHUSEBURSTC_CH08USEBURSTC_MASK             0x100UL                                        /**< Bit mask for DMA_CH08USEBURSTC */
+#define _DMA_CHUSEBURSTC_CH08USEBURSTC_DEFAULT          0x00000000UL                                   /**< Mode DEFAULT for DMA_CHUSEBURSTC */
+#define DMA_CHUSEBURSTC_CH08USEBURSTC_DEFAULT           (_DMA_CHUSEBURSTC_CH08USEBURSTC_DEFAULT << 8)  /**< Shifted mode DEFAULT for DMA_CHUSEBURSTC */
 #define DMA_CHUSEBURSTC_CH9USEBURSTC                    (0x1UL << 9)                                   /**< Channel 9 Useburst Clear */
 #define _DMA_CHUSEBURSTC_CH9USEBURSTC_SHIFT             9                                              /**< Shift value for DMA_CH9USEBURSTC */
 #define _DMA_CHUSEBURSTC_CH9USEBURSTC_MASK              0x200UL                                        /**< Bit mask for DMA_CH9USEBURSTC */

@@ -2,10 +2,10 @@
  * @file
  * @brief Simple blink application for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -36,12 +36,23 @@
 #include <td_rtc.h>
 #include <td_core.h>
 
+/* This file declare all "dynamic" library data. It should be last included file
+ * Standard size value can be override before including this file
+ */
+#define TD_SENSOR_USE_CODE 0
+#define TD_GEOLOC_USE_CODE 0
+#include <td_config.h>
+
 /*******************************************************************************
  *************************   DEFINES   *****************************************
  ******************************************************************************/
 
 #define LED_PORT	TIM2_PORT			/**< LED port */
 #define LED_BIT		TIM2_BIT			/**< LED bit */
+
+/*******************************************************************************
+ ******************************  CONSTANTS  ************************************
+ ******************************************************************************/
 
 /*******************************************************************************
  **************************   PUBLIC FUNCTIONS   *******************************

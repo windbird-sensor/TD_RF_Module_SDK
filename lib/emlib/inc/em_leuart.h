@@ -3,7 +3,7 @@
  * @brief Low Energy Universal Asynchronous Receiver/Transmitter (LEUART)
  *   peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -34,8 +34,10 @@
 #ifndef __EM_LEUART_H
 #define __EM_LEUART_H
 
-#include <stdbool.h>
 #include "em_device.h"
+#if defined(LEUART_COUNT) && (LEUART_COUNT > 0)
+
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -149,7 +151,8 @@ void LEUART_BaudrateSet(LEUART_TypeDef *leuart,
 void LEUART_Enable(LEUART_TypeDef *leuart, LEUART_Enable_TypeDef enable);
 void LEUART_FreezeEnable(LEUART_TypeDef *leuart, bool enable);
 void LEUART_Init(LEUART_TypeDef *leuart, LEUART_Init_TypeDef const *init);
-
+void LEUART_TxDmaInEM2Enable(LEUART_TypeDef *leuart, bool enable);
+void LEUART_RxDmaInEM2Enable(LEUART_TypeDef *leuart, bool enable);
 
 /***************************************************************************//**
  * @brief
@@ -256,5 +259,7 @@ void LEUART_TxExt(LEUART_TypeDef *leuart, uint16_t data);
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* defined(LEUART_COUNT) && (LEUART_COUNT > 0) */
 
 #endif /* __EM_LEUART_H */

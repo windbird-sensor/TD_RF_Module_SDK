@@ -2,7 +2,7 @@
  * @file
  * @brief Timer/counter (TIMER) peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -33,8 +33,10 @@
 #ifndef __EM_TIMER_H
 #define __EM_TIMER_H
 
-#include <stdbool.h>
 #include "em_device.h"
+#if defined(TIMER_COUNT) && (TIMER_COUNT > 0)
+
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -187,10 +189,13 @@ typedef enum
   timerPRSSELCh1 = _ADC_SINGLECTRL_PRSSEL_PRSCH1, /**< PRS channel 1. */
   timerPRSSELCh2 = _ADC_SINGLECTRL_PRSSEL_PRSCH2, /**< PRS channel 2. */
   timerPRSSELCh3 = _ADC_SINGLECTRL_PRSSEL_PRSCH3, /**< PRS channel 3. */
+
+#if defined( _ADC_SINGLECTRL_PRSSEL_PRSCH7 )
   timerPRSSELCh4 = _ADC_SINGLECTRL_PRSSEL_PRSCH4, /**< PRS channel 4. */
   timerPRSSELCh5 = _ADC_SINGLECTRL_PRSSEL_PRSCH5, /**< PRS channel 5. */
   timerPRSSELCh6 = _ADC_SINGLECTRL_PRSSEL_PRSCH6, /**< PRS channel 6. */
   timerPRSSELCh7 = _ADC_SINGLECTRL_PRSSEL_PRSCH7  /**< PRS channel 7. */
+#endif
 } TIMER_PRSSEL_TypeDef;
 #endif
 
@@ -213,7 +218,7 @@ typedef struct
   /** Clock selection. */
   TIMER_ClkSel_TypeDef      clkSel;
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( TIMER_CTRL_X2CNT ) && defined( TIMER_CTRL_ATI )
   /** 2x Count mode, counter increments/decrements by 2, meant for PWN mode. */
   bool                      count2x;
 
@@ -245,7 +250,7 @@ typedef struct
 } TIMER_Init_TypeDef;
 
 /** Default config for TIMER init structure. */
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( TIMER_CTRL_X2CNT ) && defined( TIMER_CTRL_ATI )
 #define TIMER_INIT_DEFAULT                                                              \
   { true,                   /* Enable timer when init complete. */                      \
     false,                  /* Stop counter during debug halt. */                       \
@@ -286,11 +291,13 @@ typedef struct
   /** Input capture edge select. */
   TIMER_Edge_TypeDef         edge;
 
+#if defined(ADC_PRESENT)
   /**
    * Peripheral reflex system trigger selection. Only applicable if @p prsInput
    * is enabled.
    */
   TIMER_PRSSEL_TypeDef       prsSel;
+#endif
 
   /** Counter underflow output action. */
   TIMER_OutputAction_TypeDef cufoa;
@@ -324,6 +331,7 @@ typedef struct
 } TIMER_InitCC_TypeDef;
 
 /** Default config for TIMER compare/capture init structure. */
+#if defined(ADC_PRESENT)
 #define TIMER_INITCC_DEFAULT                                                   \
   { timerEventEveryEdge,      /* Event on every capture. */                    \
     timerEdgeRising,          /* Input capture edge on rising edge. */         \
@@ -337,7 +345,20 @@ typedef struct
     false,                    /* Clear output when countre disabled. */        \
     false                     /* Do not invert output. */                      \
   }
-
+#else
+#define TIMER_INITCC_DEFAULT                                                   \
+  { timerEventEveryEdge,      /* Event on every capture. */                    \
+    timerEdgeRising,          /* Input capture edge on rising edge. */         \
+    timerOutputActionNone,    /* No action on underflow. */                    \
+    timerOutputActionNone,    /* No action on overflow. */                     \
+    timerOutputActionNone,    /* No action on match. */                        \
+    timerCCModeOff,           /* Disable compare/capture channel. */           \
+    false,                    /* Disable filter. */                            \
+    false,                    /* Select TIMERnCCx input. */                    \
+    false,                    /* Clear output when countre disabled. */        \
+    false                     /* Do not invert output. */                      \
+  }
+#endif
 
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************
@@ -645,4 +666,5 @@ void TIMER_Unlock(TIMER_TypeDef *timer);
 }
 #endif
 
+#endif /* defined(TIMER_COUNT) && (TIMER_COUNT > 0) */
 #endif /* __EM_TIMER_H */

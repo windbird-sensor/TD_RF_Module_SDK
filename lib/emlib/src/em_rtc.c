@@ -2,7 +2,7 @@
  * @file
  * @brief Real Time Counter (RTC) Peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -31,6 +31,8 @@
  *
  ******************************************************************************/
 #include "em_rtc.h"
+#if defined(RTC_COUNT) && (RTC_COUNT > 0)
+
 #include "em_assert.h"
 #include "em_bitband.h"
 
@@ -357,3 +359,4 @@ void RTC_CounterReset(void)
 
 /** @} (end addtogroup RTC) */
 /** @} (end addtogroup EM_Library) */
+#endif /* defined(RTC_COUNT) && (RTC_COUNT > 0) */

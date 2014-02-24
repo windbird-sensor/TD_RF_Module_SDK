@@ -2,7 +2,7 @@
  * @file
  * @brief efm32g_pcnt Register and Bit Field definitions
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -131,25 +131,25 @@ typedef struct
 
 /* Bit fields for PCNT CNT */
 #define _PCNT_CNT_RESETVALUE              0x00000000UL                 /**< Default value for PCNT_CNT */
-#define _PCNT_CNT_MASK                    0x000000FFUL                 /**< Mask for PCNT_CNT */
+#define _PCNT_CNT_MASK                    0x0000FFFFUL                 /**< Mask for PCNT_CNT */
 #define _PCNT_CNT_CNT_SHIFT               0                            /**< Shift value for PCNT_CNT */
-#define _PCNT_CNT_CNT_MASK                0xFFUL                       /**< Bit mask for PCNT_CNT */
+#define _PCNT_CNT_CNT_MASK                0xFFFFUL                     /**< Bit mask for PCNT_CNT */
 #define _PCNT_CNT_CNT_DEFAULT             0x00000000UL                 /**< Mode DEFAULT for PCNT_CNT */
 #define PCNT_CNT_CNT_DEFAULT              (_PCNT_CNT_CNT_DEFAULT << 0) /**< Shifted mode DEFAULT for PCNT_CNT */
 
 /* Bit fields for PCNT TOP */
 #define _PCNT_TOP_RESETVALUE              0x000000FFUL                 /**< Default value for PCNT_TOP */
-#define _PCNT_TOP_MASK                    0x000000FFUL                 /**< Mask for PCNT_TOP */
+#define _PCNT_TOP_MASK                    0x0000FFFFUL                 /**< Mask for PCNT_TOP */
 #define _PCNT_TOP_TOP_SHIFT               0                            /**< Shift value for PCNT_TOP */
-#define _PCNT_TOP_TOP_MASK                0xFFUL                       /**< Bit mask for PCNT_TOP */
+#define _PCNT_TOP_TOP_MASK                0xFFFFUL                     /**< Bit mask for PCNT_TOP */
 #define _PCNT_TOP_TOP_DEFAULT             0x000000FFUL                 /**< Mode DEFAULT for PCNT_TOP */
 #define PCNT_TOP_TOP_DEFAULT              (_PCNT_TOP_TOP_DEFAULT << 0) /**< Shifted mode DEFAULT for PCNT_TOP */
 
 /* Bit fields for PCNT TOPB */
 #define _PCNT_TOPB_RESETVALUE             0x000000FFUL                   /**< Default value for PCNT_TOPB */
-#define _PCNT_TOPB_MASK                   0x000000FFUL                   /**< Mask for PCNT_TOPB */
+#define _PCNT_TOPB_MASK                   0x0000FFFFUL                   /**< Mask for PCNT_TOPB */
 #define _PCNT_TOPB_TOPB_SHIFT             0                              /**< Shift value for PCNT_TOPB */
-#define _PCNT_TOPB_TOPB_MASK              0xFFUL                         /**< Bit mask for PCNT_TOPB */
+#define _PCNT_TOPB_TOPB_MASK              0xFFFFUL                       /**< Bit mask for PCNT_TOPB */
 #define _PCNT_TOPB_TOPB_DEFAULT           0x000000FFUL                   /**< Mode DEFAULT for PCNT_TOPB */
 #define PCNT_TOPB_TOPB_DEFAULT            (_PCNT_TOPB_TOPB_DEFAULT << 0) /**< Shifted mode DEFAULT for PCNT_TOPB */
 
@@ -234,12 +234,12 @@ typedef struct
 #define _PCNT_ROUTE_MASK                  0x00000300UL                        /**< Mask for PCNT_ROUTE */
 #define _PCNT_ROUTE_LOCATION_SHIFT        8                                   /**< Shift value for PCNT_LOCATION */
 #define _PCNT_ROUTE_LOCATION_MASK         0x300UL                             /**< Bit mask for PCNT_LOCATION */
-#define _PCNT_ROUTE_LOCATION_DEFAULT      0x00000000UL                        /**< Mode DEFAULT for PCNT_ROUTE */
 #define _PCNT_ROUTE_LOCATION_LOC0         0x00000000UL                        /**< Mode LOC0 for PCNT_ROUTE */
+#define _PCNT_ROUTE_LOCATION_DEFAULT      0x00000000UL                        /**< Mode DEFAULT for PCNT_ROUTE */
 #define _PCNT_ROUTE_LOCATION_LOC1         0x00000001UL                        /**< Mode LOC1 for PCNT_ROUTE */
 #define _PCNT_ROUTE_LOCATION_LOC2         0x00000002UL                        /**< Mode LOC2 for PCNT_ROUTE */
-#define PCNT_ROUTE_LOCATION_DEFAULT       (_PCNT_ROUTE_LOCATION_DEFAULT << 8) /**< Shifted mode DEFAULT for PCNT_ROUTE */
 #define PCNT_ROUTE_LOCATION_LOC0          (_PCNT_ROUTE_LOCATION_LOC0 << 8)    /**< Shifted mode LOC0 for PCNT_ROUTE */
+#define PCNT_ROUTE_LOCATION_DEFAULT       (_PCNT_ROUTE_LOCATION_DEFAULT << 8) /**< Shifted mode DEFAULT for PCNT_ROUTE */
 #define PCNT_ROUTE_LOCATION_LOC1          (_PCNT_ROUTE_LOCATION_LOC1 << 8)    /**< Shifted mode LOC1 for PCNT_ROUTE */
 #define PCNT_ROUTE_LOCATION_LOC2          (_PCNT_ROUTE_LOCATION_LOC2 << 8)    /**< Shifted mode LOC2 for PCNT_ROUTE */
 
@@ -259,17 +259,17 @@ typedef struct
 /* Bit fields for PCNT SYNCBUSY */
 #define _PCNT_SYNCBUSY_RESETVALUE         0x00000000UL                       /**< Default value for PCNT_SYNCBUSY */
 #define _PCNT_SYNCBUSY_MASK               0x00000007UL                       /**< Mask for PCNT_SYNCBUSY */
-#define PCNT_SYNCBUSY_CTRL                (0x1UL << 0)                       /**< PCNTn_CTRL Register Busy */
+#define PCNT_SYNCBUSY_CTRL                (0x1UL << 0)                       /**< CTRL Register Busy */
 #define _PCNT_SYNCBUSY_CTRL_SHIFT         0                                  /**< Shift value for PCNT_CTRL */
 #define _PCNT_SYNCBUSY_CTRL_MASK          0x1UL                              /**< Bit mask for PCNT_CTRL */
 #define _PCNT_SYNCBUSY_CTRL_DEFAULT       0x00000000UL                       /**< Mode DEFAULT for PCNT_SYNCBUSY */
 #define PCNT_SYNCBUSY_CTRL_DEFAULT        (_PCNT_SYNCBUSY_CTRL_DEFAULT << 0) /**< Shifted mode DEFAULT for PCNT_SYNCBUSY */
-#define PCNT_SYNCBUSY_CMD                 (0x1UL << 1)                       /**< PCNTn_CMD Register Busy */
+#define PCNT_SYNCBUSY_CMD                 (0x1UL << 1)                       /**< CMD Register Busy */
 #define _PCNT_SYNCBUSY_CMD_SHIFT          1                                  /**< Shift value for PCNT_CMD */
 #define _PCNT_SYNCBUSY_CMD_MASK           0x2UL                              /**< Bit mask for PCNT_CMD */
 #define _PCNT_SYNCBUSY_CMD_DEFAULT        0x00000000UL                       /**< Mode DEFAULT for PCNT_SYNCBUSY */
 #define PCNT_SYNCBUSY_CMD_DEFAULT         (_PCNT_SYNCBUSY_CMD_DEFAULT << 1)  /**< Shifted mode DEFAULT for PCNT_SYNCBUSY */
-#define PCNT_SYNCBUSY_TOPB                (0x1UL << 2)                       /**< PCNTn_TOPB Register Busy */
+#define PCNT_SYNCBUSY_TOPB                (0x1UL << 2)                       /**< TOPB Register Busy */
 #define _PCNT_SYNCBUSY_TOPB_SHIFT         2                                  /**< Shift value for PCNT_TOPB */
 #define _PCNT_SYNCBUSY_TOPB_MASK          0x4UL                              /**< Bit mask for PCNT_TOPB */
 #define _PCNT_SYNCBUSY_TOPB_DEFAULT       0x00000000UL                       /**< Mode DEFAULT for PCNT_SYNCBUSY */

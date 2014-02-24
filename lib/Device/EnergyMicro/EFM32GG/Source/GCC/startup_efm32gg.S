@@ -1,7 +1,7 @@
 /* @file
  * @brief startup file for Energy Micro EFM32GG devices.
  *        For use with GCC for ARM Embedded Processors
- * @version 3.0.2
+ * @version 3.20.2
  * Date: 08 Feb 2012
  *
  * Copyright (c) 2012, ARM Limited
@@ -150,29 +150,17 @@ Reset_Handler:
     ldr    r2, =__data_start__
     ldr    r3, =__data_end__
 
-#if 1
-/* Here are two copies of loop implemenations. First one favors code size
- * and the second one favors performance. Default uses the first one.
- * Change to "#if 0" to use the second one */
-.flash_to_ram_loop:
-    cmp     r2, r3
-    ittt    lt
-    ldrlt   r0, [r1], #4
-    strlt   r0, [r2], #4
-    blt    .flash_to_ram_loop
-#else
-    subs    r3, r2
+    subs   r3, r2
     ble    .flash_to_ram_loop_end
 .flash_to_ram_loop:
-    subs    r3, #4
+    subs   r3, #4
     ldr    r0, [r1, r3]
     str    r0, [r2, r3]
     bgt    .flash_to_ram_loop
 .flash_to_ram_loop_end:
-#endif
 
     ldr    r0, =_start
-    bx    r0
+    bx     r0
     .pool
     .size Reset_Handler, . - Reset_Handler
 

@@ -2,7 +2,7 @@
  * @file
  * @brief efm32lg_usart Register and Bit Field definitions
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -1016,42 +1016,44 @@ typedef struct
 #define USART_IRCTRL_IRPRSEN_DEFAULT          (_USART_IRCTRL_IRPRSEN_DEFAULT << 7)  /**< Shifted mode DEFAULT for USART_IRCTRL */
 
 /* Bit fields for USART ROUTE */
-#define _USART_ROUTE_RESETVALUE               0x00000000UL                       /**< Default value for USART_ROUTE */
-#define _USART_ROUTE_MASK                     0x0000070FUL                       /**< Mask for USART_ROUTE */
-#define USART_ROUTE_RXPEN                     (0x1UL << 0)                       /**< RX Pin Enable */
-#define _USART_ROUTE_RXPEN_SHIFT              0                                  /**< Shift value for USART_RXPEN */
-#define _USART_ROUTE_RXPEN_MASK               0x1UL                              /**< Bit mask for USART_RXPEN */
-#define _USART_ROUTE_RXPEN_DEFAULT            0x00000000UL                       /**< Mode DEFAULT for USART_ROUTE */
-#define USART_ROUTE_RXPEN_DEFAULT             (_USART_ROUTE_RXPEN_DEFAULT << 0)  /**< Shifted mode DEFAULT for USART_ROUTE */
-#define USART_ROUTE_TXPEN                     (0x1UL << 1)                       /**< TX Pin Enable */
-#define _USART_ROUTE_TXPEN_SHIFT              1                                  /**< Shift value for USART_TXPEN */
-#define _USART_ROUTE_TXPEN_MASK               0x2UL                              /**< Bit mask for USART_TXPEN */
-#define _USART_ROUTE_TXPEN_DEFAULT            0x00000000UL                       /**< Mode DEFAULT for USART_ROUTE */
-#define USART_ROUTE_TXPEN_DEFAULT             (_USART_ROUTE_TXPEN_DEFAULT << 1)  /**< Shifted mode DEFAULT for USART_ROUTE */
-#define USART_ROUTE_CSPEN                     (0x1UL << 2)                       /**< CS Pin Enable */
-#define _USART_ROUTE_CSPEN_SHIFT              2                                  /**< Shift value for USART_CSPEN */
-#define _USART_ROUTE_CSPEN_MASK               0x4UL                              /**< Bit mask for USART_CSPEN */
-#define _USART_ROUTE_CSPEN_DEFAULT            0x00000000UL                       /**< Mode DEFAULT for USART_ROUTE */
-#define USART_ROUTE_CSPEN_DEFAULT             (_USART_ROUTE_CSPEN_DEFAULT << 2)  /**< Shifted mode DEFAULT for USART_ROUTE */
-#define USART_ROUTE_CLKPEN                    (0x1UL << 3)                       /**< CLK Pin Enable */
-#define _USART_ROUTE_CLKPEN_SHIFT             3                                  /**< Shift value for USART_CLKPEN */
-#define _USART_ROUTE_CLKPEN_MASK              0x8UL                              /**< Bit mask for USART_CLKPEN */
-#define _USART_ROUTE_CLKPEN_DEFAULT           0x00000000UL                       /**< Mode DEFAULT for USART_ROUTE */
-#define USART_ROUTE_CLKPEN_DEFAULT            (_USART_ROUTE_CLKPEN_DEFAULT << 3) /**< Shifted mode DEFAULT for USART_ROUTE */
-#define _USART_ROUTE_LOCATION_SHIFT           8                                  /**< Shift value for USART_LOCATION */
-#define _USART_ROUTE_LOCATION_MASK            0x700UL                            /**< Bit mask for USART_LOCATION */
-#define _USART_ROUTE_LOCATION_LOC0            0x00000000UL                       /**< Mode LOC0 for USART_ROUTE */
-#define _USART_ROUTE_LOCATION_LOC1            0x00000001UL                       /**< Mode LOC1 for USART_ROUTE */
-#define _USART_ROUTE_LOCATION_LOC2            0x00000002UL                       /**< Mode LOC2 for USART_ROUTE */
-#define _USART_ROUTE_LOCATION_LOC3            0x00000003UL                       /**< Mode LOC3 for USART_ROUTE */
-#define _USART_ROUTE_LOCATION_LOC4            0x00000004UL                       /**< Mode LOC4 for USART_ROUTE */
-#define _USART_ROUTE_LOCATION_LOC5            0x00000005UL                       /**< Mode LOC5 for USART_ROUTE */
-#define USART_ROUTE_LOCATION_LOC0             (_USART_ROUTE_LOCATION_LOC0 << 8)  /**< Shifted mode LOC0 for USART_ROUTE */
-#define USART_ROUTE_LOCATION_LOC1             (_USART_ROUTE_LOCATION_LOC1 << 8)  /**< Shifted mode LOC1 for USART_ROUTE */
-#define USART_ROUTE_LOCATION_LOC2             (_USART_ROUTE_LOCATION_LOC2 << 8)  /**< Shifted mode LOC2 for USART_ROUTE */
-#define USART_ROUTE_LOCATION_LOC3             (_USART_ROUTE_LOCATION_LOC3 << 8)  /**< Shifted mode LOC3 for USART_ROUTE */
-#define USART_ROUTE_LOCATION_LOC4             (_USART_ROUTE_LOCATION_LOC4 << 8)  /**< Shifted mode LOC4 for USART_ROUTE */
-#define USART_ROUTE_LOCATION_LOC5             (_USART_ROUTE_LOCATION_LOC5 << 8)  /**< Shifted mode LOC5 for USART_ROUTE */
+#define _USART_ROUTE_RESETVALUE               0x00000000UL                         /**< Default value for USART_ROUTE */
+#define _USART_ROUTE_MASK                     0x0000070FUL                         /**< Mask for USART_ROUTE */
+#define USART_ROUTE_RXPEN                     (0x1UL << 0)                         /**< RX Pin Enable */
+#define _USART_ROUTE_RXPEN_SHIFT              0                                    /**< Shift value for USART_RXPEN */
+#define _USART_ROUTE_RXPEN_MASK               0x1UL                                /**< Bit mask for USART_RXPEN */
+#define _USART_ROUTE_RXPEN_DEFAULT            0x00000000UL                         /**< Mode DEFAULT for USART_ROUTE */
+#define USART_ROUTE_RXPEN_DEFAULT             (_USART_ROUTE_RXPEN_DEFAULT << 0)    /**< Shifted mode DEFAULT for USART_ROUTE */
+#define USART_ROUTE_TXPEN                     (0x1UL << 1)                         /**< TX Pin Enable */
+#define _USART_ROUTE_TXPEN_SHIFT              1                                    /**< Shift value for USART_TXPEN */
+#define _USART_ROUTE_TXPEN_MASK               0x2UL                                /**< Bit mask for USART_TXPEN */
+#define _USART_ROUTE_TXPEN_DEFAULT            0x00000000UL                         /**< Mode DEFAULT for USART_ROUTE */
+#define USART_ROUTE_TXPEN_DEFAULT             (_USART_ROUTE_TXPEN_DEFAULT << 1)    /**< Shifted mode DEFAULT for USART_ROUTE */
+#define USART_ROUTE_CSPEN                     (0x1UL << 2)                         /**< CS Pin Enable */
+#define _USART_ROUTE_CSPEN_SHIFT              2                                    /**< Shift value for USART_CSPEN */
+#define _USART_ROUTE_CSPEN_MASK               0x4UL                                /**< Bit mask for USART_CSPEN */
+#define _USART_ROUTE_CSPEN_DEFAULT            0x00000000UL                         /**< Mode DEFAULT for USART_ROUTE */
+#define USART_ROUTE_CSPEN_DEFAULT             (_USART_ROUTE_CSPEN_DEFAULT << 2)    /**< Shifted mode DEFAULT for USART_ROUTE */
+#define USART_ROUTE_CLKPEN                    (0x1UL << 3)                         /**< CLK Pin Enable */
+#define _USART_ROUTE_CLKPEN_SHIFT             3                                    /**< Shift value for USART_CLKPEN */
+#define _USART_ROUTE_CLKPEN_MASK              0x8UL                                /**< Bit mask for USART_CLKPEN */
+#define _USART_ROUTE_CLKPEN_DEFAULT           0x00000000UL                         /**< Mode DEFAULT for USART_ROUTE */
+#define USART_ROUTE_CLKPEN_DEFAULT            (_USART_ROUTE_CLKPEN_DEFAULT << 3)   /**< Shifted mode DEFAULT for USART_ROUTE */
+#define _USART_ROUTE_LOCATION_SHIFT           8                                    /**< Shift value for USART_LOCATION */
+#define _USART_ROUTE_LOCATION_MASK            0x700UL                              /**< Bit mask for USART_LOCATION */
+#define _USART_ROUTE_LOCATION_LOC0            0x00000000UL                         /**< Mode LOC0 for USART_ROUTE */
+#define _USART_ROUTE_LOCATION_DEFAULT         0x00000000UL                         /**< Mode DEFAULT for USART_ROUTE */
+#define _USART_ROUTE_LOCATION_LOC1            0x00000001UL                         /**< Mode LOC1 for USART_ROUTE */
+#define _USART_ROUTE_LOCATION_LOC2            0x00000002UL                         /**< Mode LOC2 for USART_ROUTE */
+#define _USART_ROUTE_LOCATION_LOC3            0x00000003UL                         /**< Mode LOC3 for USART_ROUTE */
+#define _USART_ROUTE_LOCATION_LOC4            0x00000004UL                         /**< Mode LOC4 for USART_ROUTE */
+#define _USART_ROUTE_LOCATION_LOC5            0x00000005UL                         /**< Mode LOC5 for USART_ROUTE */
+#define USART_ROUTE_LOCATION_LOC0             (_USART_ROUTE_LOCATION_LOC0 << 8)    /**< Shifted mode LOC0 for USART_ROUTE */
+#define USART_ROUTE_LOCATION_DEFAULT          (_USART_ROUTE_LOCATION_DEFAULT << 8) /**< Shifted mode DEFAULT for USART_ROUTE */
+#define USART_ROUTE_LOCATION_LOC1             (_USART_ROUTE_LOCATION_LOC1 << 8)    /**< Shifted mode LOC1 for USART_ROUTE */
+#define USART_ROUTE_LOCATION_LOC2             (_USART_ROUTE_LOCATION_LOC2 << 8)    /**< Shifted mode LOC2 for USART_ROUTE */
+#define USART_ROUTE_LOCATION_LOC3             (_USART_ROUTE_LOCATION_LOC3 << 8)    /**< Shifted mode LOC3 for USART_ROUTE */
+#define USART_ROUTE_LOCATION_LOC4             (_USART_ROUTE_LOCATION_LOC4 << 8)    /**< Shifted mode LOC4 for USART_ROUTE */
+#define USART_ROUTE_LOCATION_LOC5             (_USART_ROUTE_LOCATION_LOC5 << 8)    /**< Shifted mode LOC5 for USART_ROUTE */
 
 /* Bit fields for USART INPUT */
 #define _USART_INPUT_RESETVALUE               0x00000000UL                         /**< Default value for USART_INPUT */

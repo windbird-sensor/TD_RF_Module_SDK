@@ -2,10 +2,10 @@
  * @file
  * @brief Simple button-interrupt application for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -37,6 +37,13 @@
 #include <td_sigfox.h>
 #include <td_gpio.h>
 
+/* This file declare all "dynamic" library data. It should be last included file
+ * Standard size value can be override before including this file
+ */
+#define TD_SENSOR_USE_CODE 0
+#define TD_GEOLOC_USE_CODE 0
+#include <td_config.h>
+
 /*******************************************************************************
  *************************   DEFINES   *****************************************
  ******************************************************************************/
@@ -46,6 +53,10 @@
 #define BUTTON_PORT	RX_PORT				/**< Button port */
 #define BUTTON_BIT	RX_BIT				/**< Button bit */
 #define BUTTON_MASK	RX_MASK				/**< Button mask */
+
+/*******************************************************************************
+ ******************************  CONSTANTS  ************************************
+ ******************************************************************************/
 
 /*******************************************************************************
  *************************   PRIVATE VARIABLES   *******************************
@@ -62,7 +73,7 @@ static bool ButtonPressedEvent = false;
  * @brief
  *   Button interrupt handler.
  ******************************************************************************/
-static void ButtonInterrupt(void)
+static void ButtonInterrupt(uint32_t mask)
 {
 	ButtonPressedEvent = true;
 }
@@ -81,7 +92,7 @@ void TD_USER_Setup(void)
 	IRQn_Type irq_parity;
 
 	// Define the LED pin as an output in push-pull mode
-	GPIO_PinModeSet(LED_PORT, LED_PORT, gpioModePushPull, 0);
+	GPIO_PinModeSet(LED_PORT, LED_BIT, gpioModePushPull, 0);
 
 	// Define the button pin as an input with an internal pull-up resistor
 	GPIO_PinModeSet(BUTTON_PORT, BUTTON_BIT, gpioModeInputPull, 1);
@@ -108,22 +119,21 @@ void TD_USER_Setup(void)
  ******************************************************************************/
 void TD_USER_Loop(void)
 {
-	static uint8_t count = 0;
+	static uint8_t count = 1;
+	uint8_t frame[3] = {0x00, 0x04, 0x00};
 
 	// If RX module pin goes low
-	if (ButtonPressedEvent)
-	{
+	if (ButtonPressedEvent) {
 
 		// Turn on the LED
 		GPIO_PinOutSet(LED_PORT, LED_BIT);
 
 		// Send the single byte counter to the SIGFOX network
-		TD_SIGFOX_Send(&count, 1, 2);
-		count++;
+		frame[2] = count++;
+		TD_SIGFOX_Send(frame, 3, 2);
 
 		// Wait actively while the button pin is still low
-		while (GPIO_PinInGet(BUTTON_PORT, BUTTON_BIT) == 0)
-		{
+		while (GPIO_PinInGet(BUTTON_PORT, BUTTON_BIT) == 0) {
 			;
 		}
 

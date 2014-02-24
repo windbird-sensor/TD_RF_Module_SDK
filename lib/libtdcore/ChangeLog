@@ -29,3 +29,110 @@
   * Added TS_SCHEDULER module
   * Added TD_RTC_Process() function to handle keep-alive
   * Added TD_RTC_SetOverflowHandler()
+
+ = Version 3.0.0 =
+ 
+#### Minor Updates ####
+  * Battery level monitoring (with IRQs) available
+  * Optional printf int64 support
+  * Stdlib atoll support
+  
+#### Additions ####
+  * Added the `WATCHDOG` module
+  * Added the `AT CORE` module which implements basic "system" AT command
+  * Added the `SPI` module to manage sharing of the SPI bus (multiple peripherals on the same SPI bus)
+  * Added a link-time `OPTION` mechanism to customize the behaviour and/or limits of binary-only objects/libraries
+  * Added a fully configurable `TRAP` system to handle System/User code faults
+  * Added system dumps debugging tools
+  * Added a Flash logger machanism to the `FLASH` module  
+  
+#### Changes ####
+
+##### Flash: #####
+
+  * Renamed TD_FLASH_ReadDataBuffer() to TD_FLASH_ReadVariable(), kept old name as macro for compatibility
+  * Renamed TD_FLASH_DeclareFlashVariable() to TD_FLASH_DeclareVariable(), kept old name as macro for compatibility
+  * Renamed TD_FLASH_UpdateFlashVariables() to TD_FLASH_WriteVariables(), kept old name as macro for compatibility
+  * Renamed TD_FLASH_DeleteFlashVariables() to TD_FLASH_DeleteVariables(), kept old name as macro for compatibility
+  * Renamed TD_Flash_Deinit() to TD_FLASH_Deinit()), kept old name as macro for compatibility
+  * Added TD_FLASH_SetVariablesVersion()        
+  * Added TD_FLASH_DumpVariables()
+  * Added TD_FLASH_InitLogger()
+  * Added TD_FLASH_LoggerWrite()
+  * Added TD_FLASH_LoggerResetRead()
+  * Added TD_FLASH_LoggerReadNext()                    
+
+##### GPIO: #####
+
+  * The TD_GPIO_callback_t callback function now receive the IRQ mask as argument
+  * Added TD_GPIO_Dump()  
+
+##### MEASURE: #####
+
+  * Removed the non-API function TD_MEASURE_EnableBatteryLevelMonitoring()
+  * Removed the non-API function TD_MEASURE_DisableBatteryLevelMonitoring()
+
+##### PRINTF: #####
+
+  * Added tfp_printf_dump() to dump a buffer in hexadecimal
+
+##### RTC: #####
+
+  * Added the TD_WakeMainLoop() to wake up the main event loop from IRQ handlers
+  * Added TD_RTC_ClearOverflow()
+    
+##### Scheduler: #####
+
+  * Added TD_SCHEDULER_AppendIrq() to use the scheduler from IRQ handling
+  * Added TD_SCHEDULER_Dump()
+  * Added TD_ElapsedTime()
+  * Added TD_SCHEDULER_GetTime()
+  * Added TD_SCHEDULER_Restart()
+
+###### stdlib: ######
+
+  * Added GET_BITFIELD()
+  * Added SET_BITFIELD()
+  * Added GET_BITFIELD_MASK()    
+  * Added atolli()
+  * Added a2i()
+  * Added a2d()
+  * Added i2a()
+  * Added ui2a()
+  * Added li2a()
+  * Added uli2a()
+  * Added TD_STACK_Usage()
+  * Added TD_IRQ_Dump()
+                            
+#### Bug Fixes ####
+
+##### AT Parser: #####
+
+  * Upon start-up, if a parser extension module has no persistent data stored, its store function will be called immediately to fix it.
+  * Correction on numeric parameter read in AT command (function AT_atoll) on value with leading spaces characters eg. " `123`": the first digit was incorrectly dropped and result set to 23
+
+##### Flash: #####
+
+  * Corrections on "user variables" handling
+
+##### GPIO: #####
+
+  * Modification of behavior in the IRQ handling. List of I/O that actually triggered interrupt (mask) must no longer be read by `GPIO_IntGet()` but is directly passed to the to Hook callback registered for I/O interrupt handling
+
+##### System: #####
+
+  * A fully deterministic, guaranteed main loop processing (including the `TD_USER_Loop` function) can be trigged by calling the `TD_WakeMainLoop()` function, all others systems (while(flags) processing) must be removed. `TD_WakeMainLoop()` must be used in user interrupt handlers
+
+##### RTC: #####
+
+  * Major correction on low level function to allow calls in all possible context (background task, IRQs), with all special RTC cases handled
+  * Know limitation : a call to `TD_RTC_Delay()` while in IRQ handling will result in an active wait (not energy efficient). However, calling a wait function like `TD_RTC_Delay()` in IRQ context is a bad practice
+
+##### Scheduler: #####
+
+  * Adding a Timer is now possible in IRQ context
+  * Major rewrite of the **SCHEDULER** processing to remove some race, full strengthening on `TD_SCHEDULER_AppendIrq()`, `TD_SCHEDULER_Append()`, `TD_SCHEDULER_Remove()` from anywhere in the user code, in any context
+
+###### stdlib: ######
+
+  * atoi now handles correctly signed value

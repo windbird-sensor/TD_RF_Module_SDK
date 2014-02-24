@@ -2,7 +2,7 @@
  * @file
  * @brief Low Energy Timer (LETIMER) peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -35,6 +35,7 @@
 
 #include <stdbool.h>
 #include "em_device.h"
+#if defined(LETIMER_COUNT) && (LETIMER_COUNT > 0)
 
 #ifdef __cplusplus
 extern "C" {
@@ -260,5 +261,7 @@ void LETIMER_Reset(LETIMER_TypeDef *letimer);
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* defined(LETIMER_COUNT) && (LETIMER_COUNT > 0) */
 
 #endif /* __EM_LETIMER_H */

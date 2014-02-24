@@ -2,7 +2,7 @@
  * @file
  * @brief Energy management unit (EMU) peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -33,8 +33,10 @@
 #ifndef __EM_EMU_H
 #define __EM_EMU_H
 
-#include <stdbool.h>
 #include "em_device.h"
+#if defined( EMU_PRESENT )
+
+#include <stdbool.h>
 #include "em_bitband.h"
 
 #ifdef __cplusplus
@@ -55,7 +57,7 @@ extern "C" {
  ********************************   ENUMS   ************************************
  ******************************************************************************/
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( _EMU_EM4CONF_MASK )
 /** EM4 duty oscillator */
 typedef enum
 {
@@ -116,13 +118,11 @@ typedef enum
   /** Configure BOD threshold for inactive mode */
   emuBODMode_Inactive,
 } EMU_BODMode_TypeDef;
-#endif
 
 /*******************************************************************************
  *******************************   STRUCTS   ***********************************
  ******************************************************************************/
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
 /** Energy Mode 4 initialization structure  */
 typedef struct
 {
@@ -211,7 +211,7 @@ void EMU_EnterEM3(bool restore);
 void EMU_EnterEM4(void);
 void EMU_MemPwrDown(uint32_t blocks);
 void EMU_UpdateOscConfig(void);
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( _EMU_EM4CONF_MASK )
 void EMU_EM4Init(EMU_EM4Init_TypeDef *em4init);
 void EMU_BUPDInit(EMU_BUPDInit_TypeDef *bupdInit);
 void EMU_BUThresholdSet(EMU_BODMode_TypeDef mode, uint32_t value);
@@ -301,4 +301,5 @@ __STATIC_INLINE void EMU_EM2UnBlock(void)
 }
 #endif
 
+#endif /* defined( EMU_PRESENT ) */
 #endif /* __EM_EMU_H */

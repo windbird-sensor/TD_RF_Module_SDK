@@ -2,7 +2,7 @@
  * @file
  * @brief Analog to Digital Converter (ADC) peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -33,8 +33,10 @@
 #ifndef __EM_ADC_H
 #define __EM_ADC_H
 
-#include <stdbool.h>
 #include "em_device.h"
+#if defined(ADC_COUNT) && (ADC_COUNT > 0)
+
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -131,10 +133,13 @@ typedef enum
   adcPRSSELCh1 = _ADC_SINGLECTRL_PRSSEL_PRSCH1, /**< PRS channel 1. */
   adcPRSSELCh2 = _ADC_SINGLECTRL_PRSSEL_PRSCH2, /**< PRS channel 2. */
   adcPRSSELCh3 = _ADC_SINGLECTRL_PRSSEL_PRSCH3, /**< PRS channel 3. */
+
+#if defined( _ADC_SINGLECTRL_PRSSEL_PRSCH7 )
   adcPRSSELCh4 = _ADC_SINGLECTRL_PRSSEL_PRSCH4, /**< PRS channel 4. */
   adcPRSSELCh5 = _ADC_SINGLECTRL_PRSSEL_PRSCH5, /**< PRS channel 5. */
   adcPRSSELCh6 = _ADC_SINGLECTRL_PRSSEL_PRSCH6, /**< PRS channel 6. */
   adcPRSSELCh7 = _ADC_SINGLECTRL_PRSSEL_PRSCH7  /**< PRS channel 7. */
+#endif
 } ADC_PRSSEL_TypeDef;
 
 
@@ -206,7 +211,7 @@ typedef enum
 } ADC_SingleInput_TypeDef;
 
 
-/** Acquisition time (in ADC clock cycles). */
+/** ADC Start command. */
 typedef enum
 {
   /** Start single conversion. */
@@ -559,4 +564,5 @@ uint8_t ADC_TimebaseCalc(uint32_t hfperFreq);
 }
 #endif
 
+#endif /* defined(ADC_COUNT) && (ADC_COUNT > 0) */
 #endif /* __EM_ADC_H */

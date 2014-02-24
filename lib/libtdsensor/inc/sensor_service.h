@@ -1,11 +1,11 @@
 /***************************************************************************//**
- * @file sensor_service.h
+ * @file
  * @brief API for sending Service frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.0.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -41,40 +41,40 @@
 extern "C" {
 #endif
 
+	/***************************************************************************//**
+	 * @addtogroup SENSOR_SERVICE Sensor Service
+	 * @{
+	 ******************************************************************************/
 
-/** @defgroup SENSOR_SERVICE_USER_FUNCTIONS User Functions
- *  @ingroup SENSOR_SERVICE
- *  @nosubgrouping
- */
+	/*******************************************************************************
+	 ***********************   ENUMERATIONS   **************************************
+	 ******************************************************************************/
 
-/***************************************************************************//**
- * @addtogroup SENSOR_SERVICE Sensor Service *
- * @{
- ******************************************************************************/
+	/** @addtogroup SENSOR_SERVICE_ENUMERATIONS Enumerations
+	 * @{ */
 
-/*******************************************************************************
- *************************   PROTOTYPES   **************************************
- ******************************************************************************/
+	/** Sensor Service Type  */
+	typedef enum {
+		SERVICE_SMS,
+		SERVICE_TWEET
+	} TD_SENSOR_SERVICE_Types_t;
 
-/** @addtogroup SENSOR_SERVICE_PUBLIC_FUNCTIONS Public Functions
- * @{ */
-/** @addtogroup SENSOR_SERVICE_PROTOTYPES Prototypes
- * @{ */
-/** @ingroup SENSOR_SERVICE_USER_FUNCTIONS
- * @{ */
+	/** @} */
 
-bool TD_SENSOR_SendSMS(uint8_t * SMS);
-bool TD_SENSOR_SendTweet(uint8_t * Tweet);
+	/*******************************************************************************
+	 *************************   PROTOTYPES   **************************************
+	 ******************************************************************************/
 
-void TD_SENSOR_SetServiceTransmissionProfile(uint8_t count, uint32_t interval);
+	/** @addtogroup SENSOR_SERVICE_USER_FUNCTIONS User Functions
+	 * @{ */
 
-/** @} */
+	bool TD_SENSOR_SendSMS(uint8_t *SMS);
+	bool TD_SENSOR_SendTweet(uint8_t *Tweet);
+	void TD_SENSOR_SetServiceTransmissionProfile(uint8_t count, uint32_t interval);
 
-/** @} */
+	/** @} */
 
-/** @} */
-
-/** @} (end addtogroup SENSOR_SERVICE) */
+	/** @} (end addtogroup SENSOR_SERVICE) */
 
 #ifdef __cplusplus
 }

@@ -2,7 +2,7 @@
  * @file
  * @brief efm32tg_rmu Register and Bit Field definitions
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -104,12 +104,12 @@ typedef struct
 #define _RMU_RSTCAUSE_EM4WURST_MASK          0x100UL                                  /**< Bit mask for RMU_EM4WURST */
 #define _RMU_RSTCAUSE_EM4WURST_DEFAULT       0x00000000UL                             /**< Mode DEFAULT for RMU_RSTCAUSE */
 #define RMU_RSTCAUSE_EM4WURST_DEFAULT        (_RMU_RSTCAUSE_EM4WURST_DEFAULT << 8)    /**< Shifted mode DEFAULT for RMU_RSTCAUSE */
-#define RMU_RSTCAUSE_BODAVDD0                (0x1UL << 9)                             /**< AVDD0 Bod Reset. */
+#define RMU_RSTCAUSE_BODAVDD0                (0x1UL << 9)                             /**< AVDD0 Bod Reset */
 #define _RMU_RSTCAUSE_BODAVDD0_SHIFT         9                                        /**< Shift value for RMU_BODAVDD0 */
 #define _RMU_RSTCAUSE_BODAVDD0_MASK          0x200UL                                  /**< Bit mask for RMU_BODAVDD0 */
 #define _RMU_RSTCAUSE_BODAVDD0_DEFAULT       0x00000000UL                             /**< Mode DEFAULT for RMU_RSTCAUSE */
 #define RMU_RSTCAUSE_BODAVDD0_DEFAULT        (_RMU_RSTCAUSE_BODAVDD0_DEFAULT << 9)    /**< Shifted mode DEFAULT for RMU_RSTCAUSE */
-#define RMU_RSTCAUSE_BODAVDD1                (0x1UL << 10)                            /**< AVDD1 Bod Reset. */
+#define RMU_RSTCAUSE_BODAVDD1                (0x1UL << 10)                            /**< AVDD1 Bod Reset */
 #define _RMU_RSTCAUSE_BODAVDD1_SHIFT         10                                       /**< Shift value for RMU_BODAVDD1 */
 #define _RMU_RSTCAUSE_BODAVDD1_MASK          0x400UL                                  /**< Bit mask for RMU_BODAVDD1 */
 #define _RMU_RSTCAUSE_BODAVDD1_DEFAULT       0x00000000UL                             /**< Mode DEFAULT for RMU_RSTCAUSE */

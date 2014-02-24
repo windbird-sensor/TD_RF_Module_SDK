@@ -3,7 +3,7 @@
  * @brief General Purpose IO (GPIO) peripheral API
  *   devices.
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -32,9 +32,8 @@
  *
  ******************************************************************************/
 #include "em_gpio.h"
-#include "em_bitband.h"
-#include "em_assert.h"
 
+#if defined(GPIO_COUNT) && (GPIO_COUNT > 0)
 /***************************************************************************//**
  * @addtogroup EM_Library
  * @{
@@ -74,10 +73,14 @@
  ******************************************************************************/
 void GPIO_DbgLocationSet(unsigned int location)
 {
+#if defined ( _GPIO_ROUTE_SWLOCATION_MASK )
   EFM_ASSERT(location < AFCHANLOC_MAX);
 
   GPIO->ROUTE = (GPIO->ROUTE & ~_GPIO_ROUTE_SWLOCATION_MASK) |
                 (location << _GPIO_ROUTE_SWLOCATION_SHIFT);
+#else
+  (void)location;
+#endif
 }
 
 
@@ -241,3 +244,5 @@ void GPIO_PinModeSet(GPIO_Port_TypeDef port,
 
 /** @} (end addtogroup GPIO) */
 /** @} (end addtogroup EM_Library) */
+
+#endif /* defined(GPIO_COUNT) && (GPIO_COUNT > 0) */

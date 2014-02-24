@@ -144,9 +144,8 @@ SECTIONS
     LONG (__cs3_region_zero_size_ram)
     __cs3_regions_end = .;
     . = ALIGN (8);
-    *(.rom)    
+    *(.rom)
     *(.rom.b .bss.rom)
-     
     _etext = .;
   } >rom
   /* __cs3_region_end_rom is deprecated */

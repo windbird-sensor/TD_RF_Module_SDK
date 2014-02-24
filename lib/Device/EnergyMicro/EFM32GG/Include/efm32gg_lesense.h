@@ -2,7 +2,7 @@
  * @file
  * @brief efm32gg_lesense Register and Bit Field definitions
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -51,7 +51,7 @@ typedef struct
   __I uint32_t        CURCH;          /**< Current channel index  */
   __IO uint32_t       DECSTATE;       /**< Current decoder state  */
   __IO uint32_t       SENSORSTATE;    /**< Decoder input register  */
-  __IO uint32_t       IDLECONF;       /**< GPIO Idlephase configuration  */
+  __IO uint32_t       IDLECONF;       /**< GPIO Idle phase configuration  */
   __IO uint32_t       ALTEXCONF;      /**< Alternative excite pin configuration  */
   __I uint32_t        IF;             /**< Interrupt Flag Register  */
   __IO uint32_t       IFC;            /**< Interrupt Flag Clear Register  */
@@ -59,7 +59,7 @@ typedef struct
   __IO uint32_t       IEN;            /**< Interrupt Enable Register  */
   __I uint32_t        SYNCBUSY;       /**< Synchronization Busy Register  */
   __IO uint32_t       ROUTE;          /**< I/O Routing Register  */
-  __IO uint32_t       POWERDOWN;      /**< LESENSE RAM power-down resgister  */
+  __IO uint32_t       POWERDOWN;      /**< LESENSE RAM power-down register  */
 
   uint32_t            RESERVED0[105]; /**< Reserved registers */
 
@@ -1443,7 +1443,7 @@ typedef struct
 
 /* Bit fields for LESENSE SYNCBUSY */
 #define _LESENSE_SYNCBUSY_RESETVALUE                   0x00000000UL                                  /**< Default value for LESENSE_SYNCBUSY */
-#define _LESENSE_SYNCBUSY_MASK                         0x07FFFFFFUL                                  /**< Mask for LESENSE_SYNCBUSY */
+#define _LESENSE_SYNCBUSY_MASK                         0x07E3FFFFUL                                  /**< Mask for LESENSE_SYNCBUSY */
 #define LESENSE_SYNCBUSY_CTRL                          (0x1UL << 0)                                  /**< LESENSE_CTRL Register Busy */
 #define _LESENSE_SYNCBUSY_CTRL_SHIFT                   0                                             /**< Shift value for LESENSE_CTRL */
 #define _LESENSE_SYNCBUSY_CTRL_MASK                    0x1UL                                         /**< Bit mask for LESENSE_CTRL */
@@ -1534,21 +1534,6 @@ typedef struct
 #define _LESENSE_SYNCBUSY_POWERDOWN_MASK               0x20000UL                                     /**< Bit mask for LESENSE_POWERDOWN */
 #define _LESENSE_SYNCBUSY_POWERDOWN_DEFAULT            0x00000000UL                                  /**< Mode DEFAULT for LESENSE_SYNCBUSY */
 #define LESENSE_SYNCBUSY_POWERDOWN_DEFAULT             (_LESENSE_SYNCBUSY_POWERDOWN_DEFAULT << 17)   /**< Shifted mode DEFAULT for LESENSE_SYNCBUSY */
-#define LESENSE_SYNCBUSY_FEATURECONF                   (0x1UL << 18)                                 /**< LESENSE_FEATURECONF Register Busy */
-#define _LESENSE_SYNCBUSY_FEATURECONF_SHIFT            18                                            /**< Shift value for LESENSE_FEATURECONF */
-#define _LESENSE_SYNCBUSY_FEATURECONF_MASK             0x40000UL                                     /**< Bit mask for LESENSE_FEATURECONF */
-#define _LESENSE_SYNCBUSY_FEATURECONF_DEFAULT          0x00000000UL                                  /**< Mode DEFAULT for LESENSE_SYNCBUSY */
-#define LESENSE_SYNCBUSY_FEATURECONF_DEFAULT           (_LESENSE_SYNCBUSY_FEATURECONF_DEFAULT << 18) /**< Shifted mode DEFAULT for LESENSE_SYNCBUSY */
-#define LESENSE_SYNCBUSY_TESTCTRL                      (0x1UL << 19)                                 /**< LESENSE_TESTCTRL Register Busy */
-#define _LESENSE_SYNCBUSY_TESTCTRL_SHIFT               19                                            /**< Shift value for LESENSE_TESTCTRL */
-#define _LESENSE_SYNCBUSY_TESTCTRL_MASK                0x80000UL                                     /**< Bit mask for LESENSE_TESTCTRL */
-#define _LESENSE_SYNCBUSY_TESTCTRL_DEFAULT             0x00000000UL                                  /**< Mode DEFAULT for LESENSE_SYNCBUSY */
-#define LESENSE_SYNCBUSY_TESTCTRL_DEFAULT              (_LESENSE_SYNCBUSY_TESTCTRL_DEFAULT << 19)    /**< Shifted mode DEFAULT for LESENSE_SYNCBUSY */
-#define LESENSE_SYNCBUSY_RIPCNT                        (0x1UL << 20)                                 /**< LESENSE_RIPCNT Register Busy */
-#define _LESENSE_SYNCBUSY_RIPCNT_SHIFT                 20                                            /**< Shift value for LESENSE_RIPCNT */
-#define _LESENSE_SYNCBUSY_RIPCNT_MASK                  0x100000UL                                    /**< Bit mask for LESENSE_RIPCNT */
-#define _LESENSE_SYNCBUSY_RIPCNT_DEFAULT               0x00000000UL                                  /**< Mode DEFAULT for LESENSE_SYNCBUSY */
-#define LESENSE_SYNCBUSY_RIPCNT_DEFAULT                (_LESENSE_SYNCBUSY_RIPCNT_DEFAULT << 20)      /**< Shifted mode DEFAULT for LESENSE_SYNCBUSY */
 #define LESENSE_SYNCBUSY_TCONFA                        (0x1UL << 21)                                 /**< LESENSE_STx_TCONFA Register Busy */
 #define _LESENSE_SYNCBUSY_TCONFA_SHIFT                 21                                            /**< Shift value for LESENSE_TCONFA */
 #define _LESENSE_SYNCBUSY_TCONFA_MASK                  0x200000UL                                    /**< Bit mask for LESENSE_TCONFA */

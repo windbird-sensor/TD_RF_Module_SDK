@@ -3,7 +3,7 @@
  * @brief Advanced encryption standard (AES) accelerator peripheral API for
  *   EFM32.
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -34,10 +34,10 @@
 #ifndef __EM_AES_H
 #define __EM_AES_H
 
-#include <stdbool.h>
 #include "em_device.h"
-
 #if defined(AES_COUNT) && (AES_COUNT > 0)
+
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -77,12 +77,14 @@ void AES_CBC128(uint8_t *out,
                 const uint8_t *iv,
                 bool encrypt);
 
+#if defined( AES_CTRL_AES256 )
 void AES_CBC256(uint8_t *out,
                 const uint8_t *in,
                 unsigned int len,
                 const uint8_t *key,
                 const uint8_t *iv,
                 bool encrypt);
+#endif
 
 void AES_CFB128(uint8_t *out,
                 const uint8_t *in,
@@ -91,12 +93,14 @@ void AES_CFB128(uint8_t *out,
                 const uint8_t *iv,
                 bool encrypt);
 
+#if defined( AES_CTRL_AES256 )
 void AES_CFB256(uint8_t *out,
                 const uint8_t *in,
                 unsigned int len,
                 const uint8_t *key,
                 const uint8_t *iv,
                 bool encrypt);
+#endif
 
 void AES_CTR128(uint8_t *out,
                 const uint8_t *in,
@@ -105,18 +109,22 @@ void AES_CTR128(uint8_t *out,
                 uint8_t *ctr,
                 AES_CtrFuncPtr_TypeDef ctrFunc);
 
+#if defined( AES_CTRL_AES256 )
 void AES_CTR256(uint8_t *out,
                 const uint8_t *in,
                 unsigned int len,
                 const uint8_t *key,
                 uint8_t *ctr,
                 AES_CtrFuncPtr_TypeDef ctrFunc);
+#endif
 
 void AES_CTRUpdate32Bit(uint8_t *ctr);
 
 void AES_DecryptKey128(uint8_t *out, const uint8_t *in);
 
+#if defined( AES_CTRL_AES256 )
 void AES_DecryptKey256(uint8_t *out, const uint8_t *in);
+#endif
 
 void AES_ECB128(uint8_t *out,
                 const uint8_t *in,
@@ -124,11 +132,13 @@ void AES_ECB128(uint8_t *out,
                 const uint8_t *key,
                 bool encrypt);
 
+#if defined( AES_CTRL_AES256 )
 void AES_ECB256(uint8_t *out,
                 const uint8_t *in,
                 unsigned int len,
                 const uint8_t *key,
                 bool encrypt);
+#endif
 
 /***************************************************************************//**
  * @brief
@@ -214,11 +224,13 @@ void AES_OFB128(uint8_t *out,
                 const uint8_t *key,
                 const uint8_t *iv);
 
+#if defined( AES_CTRL_AES256 )
 void AES_OFB256(uint8_t *out,
                 const uint8_t *in,
                 unsigned int len,
                 const uint8_t *key,
                 const uint8_t *iv);
+#endif
 
 
 /** @} (end addtogroup AES) */

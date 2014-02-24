@@ -1,11 +1,11 @@
 /***************************************************************************//**
- * @file sensor_service.c
+ * @file
  * @brief API for sending Service frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.0.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -33,36 +33,49 @@
 
 #include "sensor_send.h"
 #include "sensor_service.h"
-#include "sensor_service_private.h"
 
 /***************************************************************************//**
  * @addtogroup SENSOR_SERVICE Sensor Service
  * @brief Sensor API for sending a Service Frame
  *
  * @details
- *	There are two service frames :
+ *	There are two service frames:
  *
  *	- SERVICE_SMS:
  *		Allows sending an SMS to a previously registered cell phone number.
+ *
  *	- SERVICE_TWEET
  *		Allows sending a tweet on a previously registered twitter account.
- *
  * @{
  ******************************************************************************/
 
 /*******************************************************************************
- ************************   DEFINES   ********************************
+ *************************   DEFINES   *****************************************
  ******************************************************************************/
 
 /** @addtogroup SENSOR_SERVICE_DEFINES Defines
  * @{ */
 
-#define SERVICE_PAYLOAD_SIZE 10
-#define MAX_SMS_LEN 9
-#define MAX_TWEET_LEN 9
+#define SERVICE_PAYLOAD_SIZE		10		///< Service payload size in bytes
+#define MAX_SMS_LEN					9		///< Maximum SMS message size in bytes
+#define MAX_TWEET_LEN				9		///< Maximum Tweet message size in bytes
+#define SERVICE_DEFAULT_REPETITON	0		///< Default retransmission repetitions
+#define SERVICE_DEFAULT_INTERVAL	0		///< Default retransmission interval in seconds
 
-#define SERVICE_DEFAULT_REPETITON 3		///<Default retransmission repetitions
-#define SERVICE_DEFAULT_INTERVAL 120	///<Default retransmission interval in seconds
+/** @} */
+
+/*******************************************************************************
+****************************   TYPEDEFS   **************************************
+*******************************************************************************/
+
+/** @addtogroup SENSOR_SERVICE_TYPEDEFS Typedefs
+ * @{ */
+
+/** Service Frame Structure */
+typedef struct {
+	TD_SENSOR_SERVICE_Types_t type : 8;		///< The Sensor service type
+	uint8_t data[9];						///< The data payload
+} __PACKED TD_SENSOR_SERVICE_Frame_t;
 
 /** @} */
 
@@ -70,11 +83,14 @@
  *************************   PRIVATE VARIABLES   ****************************************
  ******************************************************************************/
 
-/** @addtogroup SENSOR_SERVICE_PRIVATE_VARIABLES Private Variables
+/** @addtogroup SENSOR_SERVICE_LOCAL_VARIABLES Local Variables
  * @{ */
 
-static TransmitProfile service_profile = { SERVICE_DEFAULT_REPETITON, SERVICE_DEFAULT_INTERVAL };
-static uint8_t service_stamp = -1;
+/** Transmission profile */
+static TD_SENSOR_TransmitProfile_t Profile = {SERVICE_DEFAULT_REPETITON, SERVICE_DEFAULT_INTERVAL};
+
+/** Redundancy counter for Sensor service data */
+static uint8_t Stamp = -1;
 
 /** @} */
 
@@ -82,7 +98,7 @@ static uint8_t service_stamp = -1;
  **************************  PRIVATE FUNCTIONS   *******************************
  ******************************************************************************/
 
-/** @addtogroup SENSOR_SERVICE_PRIVATE_FUNCTIONS Private Functions
+/** @addtogroup SENSOR_SERVICE_LOCAL_FUNCTIONS Local Functions
  * @{ */
 
 /***************************************************************************//**
@@ -102,25 +118,23 @@ static uint8_t service_stamp = -1;
  *   True if the data has been sent (ie. the gateway has acknowledged the request)
  *   False if count>Data size or if the ack from the gateway was never received.
  ******************************************************************************/
-static bool TD_SENSOR_SendService(SensorServiceType service, uint8_t * data, uint8_t count)
+static bool TD_SENSOR_SendService(TD_SENSOR_SERVICE_Types_t service, uint8_t *data, uint8_t count)
 {
 	unsigned int i;
-	SRV_FRAME_SERVICE frame;
+	TD_SENSOR_SERVICE_Frame_t frame;
 
-	//think smaller but not too small!
-	if (count > 10 || count == 0)
+	// Think smaller but not too small!
+	if (count > 10 || count == 0) {
 		return false;
+	}
 
-	//First byte is Service type
+	// First byte is Service type
 	frame.type = service;
-
 	for (i = 0; i < count; i++) {
 		frame.data[i] = data[i];
 	}
-
-	service_stamp = (service_stamp & 0x07) + 1;
-	return TD_SENSOR_Send(&service_profile, SRV_FRM_SERVICE, service_stamp, (uint8_t*) &frame, count + 1);
-
+	Stamp = (Stamp & 0x07) + 1;
+	return TD_SENSOR_Send(&Profile, SRV_FRM_SERVICE, Stamp, (uint8_t *) &frame, count + 1);
 }
 
 /** @} */
@@ -129,23 +143,24 @@ static bool TD_SENSOR_SendService(SensorServiceType service, uint8_t * data, uin
  **************************  PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
-/** @addtogroup SENSOR_SERVICE_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup SENSOR_SERVICE_USER_FUNCTIONS User Functions
  * @{ */
 
 /***************************************************************************//**
  * @brief
- *   Send a SMS
+ *   Send an SMS.
  *
  * @details
  * 	 At most 9 bytes can be sent.
  *
  * @return
- *   True if the data has been sent (ie. the gateway has acknowledged the request)
- *   False if the ack from the gateway was never received.
+ *   Returns true if the data has been sent over the SIGFOX network, false
+ *   otherwise.
  ******************************************************************************/
-bool TD_SENSOR_SendSMS(uint8_t * SMS)
+bool TD_SENSOR_SendSMS(uint8_t *SMS)
 {
 	uint8_t count = 0;
+
 	while (count <= MAX_SMS_LEN) {
 		if (SMS[count] == 0) {
 			return TD_SENSOR_SendService(SERVICE_SMS, SMS, count);
@@ -153,22 +168,21 @@ bool TD_SENSOR_SendSMS(uint8_t * SMS)
 			count++;
 		}
 	}
-
 	return false;
 }
 
 /***************************************************************************//**
  * @brief
- *   Send a tweet
+ *   Send a tweet.
  *
  * @details
  * 	 At most 9 bytes can be sent.
  *
  * @return
- *   True if the data has been sent (ie. the gateway has acknowledged the request)
- *   False if the ack from the gateway was never received.
+ *   Returns true if the data has been sent over the SIGFOX network, false
+ *   otherwise.
  ******************************************************************************/
-bool TD_SENSOR_SendTweet(uint8_t * Tweet)
+bool TD_SENSOR_SendTweet(uint8_t *Tweet)
 {
 	uint8_t count = 0;
 
@@ -179,27 +193,25 @@ bool TD_SENSOR_SendTweet(uint8_t * Tweet)
 			count++;
 		}
 	}
-
 	return false;
 }
 
 /***************************************************************************//**
  * @brief
- *   Set a transmission profile to a given frame type
+ *   Set a transmission profile for a service frame type.
  *
  * @param[in] repetition
- *	Number of repetition.
+ *	Number of repetitions.
  *
  * @param[in] interval
  *	Interval between two repetitions in seconds.
- *
  ******************************************************************************/
 void TD_SENSOR_SetServiceTransmissionProfile(uint8_t repetition, uint32_t interval)
 {
-	service_profile.repetition = repetition;
-	service_profile.interval = interval;
+	Profile.repetition = repetition;
+	Profile.interval = interval;
 }
 
 /** @} */
 
-/** @} */
+/** @} (end addtogroup SENSOR_SERVICE) */

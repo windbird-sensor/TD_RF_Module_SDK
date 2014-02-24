@@ -2,7 +2,7 @@
  * @file
  * @brief Voltage Comparator (VCMP) peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -32,7 +32,9 @@
  ******************************************************************************/
 #ifndef __EM_VCMP_H
 #define __EM_VCMP_H
+
 #include "em_device.h"
+#if defined(VCMP_COUNT) && (VCMP_COUNT > 0)
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -354,4 +356,5 @@ __STATIC_INLINE uint32_t VCMP_IntGetEnabled(void)
 }
 #endif
 
+#endif /* defined(VCMP_COUNT) && (VCMP_COUNT > 0) */
 #endif /* __EM_VCMP_H */

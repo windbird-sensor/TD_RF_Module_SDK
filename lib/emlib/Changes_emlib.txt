@@ -1,4 +1,35 @@
 ================ Revision history ============================================
+3.20.2:
+ - Fixed bug regarding when MEMINFO in DEVINFO was introduced.
+   The correct crossover is production revision 18.
+ - Fixed bug in WDOG_Feed which does not feed the watchdog if the watchdog
+   is disabled. Previously, the watchdog was broken after WDOG_Feed fed it
+   when it was disabled.
+-  Fixed issue in em_i2c.c, which should set the NACK bit in the I2C CMD
+   register for the next to last byte received. The exception is when only
+   one byte is to be received. Then the NACK bit must be set like the
+   previous code was doing.
+-  Added function BURTC_ClockFreqGet in order to determine clock frequency
+   of BURTC.
+-  Fixed bug in BURTC_Reset which made a subsequent call to BURTC_Init hang.
+-  Added support for the IDAC module on the Zero Gecko family, em_idac.c/h.
+-  Fixed bug in DAC_PrescaleCalc() which could return higher values than
+   the maximum prescaler value. The fix makes sure to return the max prescaler
+   value resulting in possible higher DAC frequency than requested.
+-  Fixed I2C_BusFreqSet to use documented values for Nlow and Nhigh values,
+   and do not decrement the div(isor) by one according to the formula because
+   this resulted in higher I2C bus frequencies than desired.
+
+3.20.0:
+ - LEUART: Added LEUART_TxDmaInEM2Enable and LEUART_RxDmaInEM2Enable for
+   enabling and disabling DMA LEUART RX and Tx in EM2 support.
+
+3.0.3:
+ - Internal release for testing Wonder Gecko support.
+ - SYSTEM: Added function to enable/disable FPU access on Wonder parts,
+           SYSTEM_FpuAccessModeSet().
+ - USART: Added USART_SpiTransfer() function.
+
 3.0.2:
  - MSC: In MSC_WriteWord, added support for double word write cycle support
    (WDOUBLE) on devices with more than 512KiBytes of Flash memory. This can
@@ -6,7 +37,7 @@
  - MSC: In MSC_ErasePage, added support for devices with Flash page size
    larger than 512 bytes, like Giant and Leopard Gecko.
  - CMU: Fixed bug in CMU_ClockDivSet. Clear HFLE and HFCORECLKLEDIV flags when
-   the core runs at frequencies up to 32MHz. 
+   the core runs at frequencies up to 32MHz.
  - CMU: Fixed bug in CMU_ClockEnable: Set the HFLE and HFCORECLKLEDIV flags
    when the CORE clock runs at frequencies higher than 32MHz.
  - CMU: Fixed bug in CMU_ClockSelectSet: Set HFLE and DIV4 factor for peripheral

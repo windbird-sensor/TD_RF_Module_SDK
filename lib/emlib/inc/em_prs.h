@@ -2,7 +2,7 @@
  * @file
  * @brief Peripheral Reflex System (PRS) peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -34,6 +34,7 @@
 #define __EM_PRS_H
 
 #include "em_device.h"
+#if defined(PRS_COUNT) && (PRS_COUNT > 0)
 
 #ifdef __cplusplus
 extern "C" {
@@ -112,7 +113,7 @@ void PRS_SourceSignalSet(unsigned int ch,
                          uint32_t signal,
                          PRS_Edge_TypeDef edge);
 
-#if ((defined _EFM32_TINY_FAMILY) || (defined _EFM32_GIANT_FAMILY) || (defined _EFM32_WONDER_FAMILY))
+#if defined( PRS_CH_CTRL_ASYNC )
 void PRS_SourceAsyncSignalSet(unsigned int ch,
                               uint32_t source,
                               uint32_t signal);
@@ -125,4 +126,5 @@ void PRS_SourceAsyncSignalSet(unsigned int ch,
 }
 #endif
 
+#endif /* defined(PRS_COUNT) && (PRS_COUNT > 0) */
 #endif /* __EM_PRS_H */

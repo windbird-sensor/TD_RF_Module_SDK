@@ -2,7 +2,7 @@
  * @file
  * @brief Backup Real Time Counter (BURTC) peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -286,7 +286,7 @@ __STATIC_INLINE void BURTC_Enable(bool enable)
   /* Note! If mode is disabled, BURTC counter will not start */
   EFM_ASSERT(((enable == true) && ((BURTC->CTRL & _BURTC_CTRL_MODE_MASK) != BURTC_CTRL_MODE_DISABLE))
              || (enable == false));
-  if( enable )
+  if (enable)
   {
     BITBAND_Peripheral(&BURTC->CTRL, _BURTC_CTRL_RSTEN_SHIFT, 0);
   }
@@ -402,6 +402,7 @@ void BURTC_Init(const BURTC_Init_TypeDef *burtcInit);
 void BURTC_CounterReset(void);
 void BURTC_CompareSet(unsigned int comp, uint32_t value);
 uint32_t BURTC_CompareGet(unsigned int comp);
+uint32_t BURTC_ClockFreqGet(void);
 
 
 /** @} (end addtogroup BURTC) */

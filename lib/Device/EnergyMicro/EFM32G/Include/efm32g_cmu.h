@@ -2,7 +2,7 @@
  * @file
  * @brief efm32g_cmu Register and Bit Field definitions
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -1010,11 +1010,11 @@ typedef struct
 #define CMU_ROUTE_LOCATION                         (0x1UL << 2)                         /**< I/O Location */
 #define _CMU_ROUTE_LOCATION_SHIFT                  2                                    /**< Shift value for CMU_LOCATION */
 #define _CMU_ROUTE_LOCATION_MASK                   0x4UL                                /**< Bit mask for CMU_LOCATION */
-#define _CMU_ROUTE_LOCATION_DEFAULT                0x00000000UL                         /**< Mode DEFAULT for CMU_ROUTE */
 #define _CMU_ROUTE_LOCATION_LOC0                   0x00000000UL                         /**< Mode LOC0 for CMU_ROUTE */
+#define _CMU_ROUTE_LOCATION_DEFAULT                0x00000000UL                         /**< Mode DEFAULT for CMU_ROUTE */
 #define _CMU_ROUTE_LOCATION_LOC1                   0x00000001UL                         /**< Mode LOC1 for CMU_ROUTE */
-#define CMU_ROUTE_LOCATION_DEFAULT                 (_CMU_ROUTE_LOCATION_DEFAULT << 2)   /**< Shifted mode DEFAULT for CMU_ROUTE */
 #define CMU_ROUTE_LOCATION_LOC0                    (_CMU_ROUTE_LOCATION_LOC0 << 2)      /**< Shifted mode LOC0 for CMU_ROUTE */
+#define CMU_ROUTE_LOCATION_DEFAULT                 (_CMU_ROUTE_LOCATION_DEFAULT << 2)   /**< Shifted mode DEFAULT for CMU_ROUTE */
 #define CMU_ROUTE_LOCATION_LOC1                    (_CMU_ROUTE_LOCATION_LOC1 << 2)      /**< Shifted mode LOC1 for CMU_ROUTE */
 
 /* Bit fields for CMU LOCK */

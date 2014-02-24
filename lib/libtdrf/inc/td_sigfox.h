@@ -2,10 +2,10 @@
  * @file
  * @brief SIGFOX API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 3.0.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.fr</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -41,55 +41,48 @@
 extern "C" {
 #endif
 
-/***************************************************************************//**
- * @addtogroup SIGFOX SIGFOX
- * @brief SIGFOX API for the TD1202 module
- * @{
- ******************************************************************************/
+	/***************************************************************************//**
+	 * @addtogroup SIGFOX SIGFOX
+	 * @brief SIGFOX API for the TDxxxx RF modules
+	 * @{
+	 ******************************************************************************/
 
-/*******************************************************************************
- *************************   PROTOTYPES   **************************************
- ******************************************************************************/
+	/*******************************************************************************
+	 *************************   PROTOTYPES   **************************************
+	 ******************************************************************************/
 
-/** @addtogroup SIGFOX_USER_FUNCTIONS User Functions
- * @{ */
-/** @addtogroup SIGFOX_USER_PROTOTYPES Prototypes
- * @{ */
+	/** @addtogroup SIGFOX_USER_FUNCTIONS User Functions
+	 * @{ */
 
 #ifdef SIGFOX_V1
 #include "td_sigfox_V1.h"
 
 #else
-bool TD_SIGFOX_Init(bool init);
-bool TD_SIGFOX_Send(uint8_t *, uint8_t, uint8_t);
-bool TD_SIGFOX_SendTest(uint16_t count,uint8_t time,uint16_t Slot,uint8_t retry);
-bool TD_SIGFOX_RfPower(uint8_t);
-uint8_t TD_SIGFOX_PowerVoltage(void);
-void TD_SIGFOX_KeepAlive(void);
-char const *TD_SIGFOX_VersionLib(void);
+	bool TD_SIGFOX_Init_(bool init);
+	bool TD_SIGFOX_Send_(uint8_t *message, uint8_t size, uint8_t retry);
+	bool TD_SIGFOX_SendTest(uint16_t count, uint8_t time, uint16_t slot, uint8_t retry);
+	bool TD_SIGFOX_RfPower(uint8_t power);
+	uint8_t TD_SIGFOX_PowerVoltage(void);
+	uint32_t TD_SIGFOX_PowerVoltageExtended(void);
+	void TD_SIGFOX_KeepAlive(void);
+	char const *TD_SIGFOX_VersionLib(void);
 
-/** @} */
-/** @} */
+	/** @} */
 
-/** @addtogroup SIGFOX_PUBLIC_FUNCTIONS Public Functions
- * @{ */
-/** @addtogroup SIGFOX_PUBLIC_PROTOTYPES Prototypes
- * @{ */
+	/** @addtogroup SIGFOX_GLOBAL_FUNCTIONS Global Functions
+	 * @{ */
 
-bool TD_SIGFOX_SendOOB(uint8_t *, uint8_t, uint8_t);
-bool TD_SIGFOX_PinConf(uint8_t config);
-bool TD_SIGFOX_SetKeepAliveRetries(uint8_t count);
-bool TD_SIGFOX_FrequencyConf(uint32_t,uint16_t, uint16_t, uint16_t);
-void TD_SIGFOX_FrequencySet(uint16_t Slot);
-void TD_SIGFOX_SendTestPA(uint16_t Slot,uint8_t mode,uint32_t xx);
-uint8_t TD_SIGFOX_MainRfPower(uint8_t power);
-bool TD_SIGFOX_RelayId(uint8_t *, uint8_t,uint32_t);
+	bool TD_SIGFOX_SendOOB(uint8_t *message, uint8_t size, uint8_t retry);
+	bool TD_SIGFOX_PinConf(uint8_t config);
+	bool TD_SIGFOX_SetKeepAliveRetries(uint8_t count);
+	bool TD_SIGFOX_FrequencyConf(uint32_t frequency, uint16_t allowed, uint16_t no_allowed, uint16_t hop);
+	void TD_SIGFOX_SendTestPA(uint16_t Slot, uint8_t mode, uint32_t xx);
 
 #endif
-/** @} */
-/** @} */
 
-/** @} (end addtogroup SIGFOX) */
+	/** @} */
+
+	/** @} (end addtogroup SIGFOX) */
 
 #ifdef __cplusplus
 }

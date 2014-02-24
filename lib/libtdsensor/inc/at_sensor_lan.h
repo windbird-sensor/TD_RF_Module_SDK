@@ -1,11 +1,11 @@
 /***************************************************************************//**
- * @file at_sensor_lan.h
+ * @file
  * @brief AT Sensor LAN
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.1.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -31,20 +31,52 @@
  *
  ******************************************************************************/
 
-#ifndef AT_SENSOR_LAN_H_
-#define AT_SENSOR_LAN_H_
+#ifndef __AT_SENSOR_LAN_H
+#define __AT_SENSOR_LAN_H
 
 #include <at_parse.h>
 
-// ****************************************************************************
-// DEFINES:
-// ****************************************************************************
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+	/***************************************************************************//**
+	 * @addtogroup AT_SENSOR_LAN Sensor LAN AT Command Extension
+	 * @brief Sensor LAN AT command extension for the TDxxx RF modules
+	 * @{
+	 ******************************************************************************/
+
+	/*******************************************************************************
+	 *************************   DEFINES   *****************************************
+	 ******************************************************************************/
+
+	/** @addtogroup AT_SENSOR_LAN_DEFINES Defines
+	 * @{ */
+
+	/** Alias for the local RF AT Sensor extension */
 #define AT_SENSOR_LAN_EXTENSION sensor_lan_extension,
 
-// ****************************************************************************
-// EXTERNS:
-// ****************************************************************************
+	/** @} */
 
+	/*******************************************************************************
+	 **************************   PUBLIC VARIABLES   *******************************
+	 ******************************************************************************/
+
+	/** @addtogroup AT_SENSOR_LAN_GLOBAL_VARIABLES Global Variables
+	 * @{ */
+	/** @addtogroup AT_SENSOR_LAN_EXTERN External Declarations
+	 * @{ */
+
+	/** The local RF AT Sensor extension structure */
 extern AT_extension_t sensor_lan_extension;
 
-#endif /* AT_SENSOR_LAN_H_ */
+	/** @} */
+	/** @} */
+
+	/** @} (end addtogroup AT_SENSOR_LAN) */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // __AT_SENSOR_LAN_H

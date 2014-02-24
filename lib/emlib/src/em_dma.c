@@ -2,7 +2,7 @@
  * @file
  * @brief Direct memory access (DMA) module peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -31,6 +31,8 @@
  *
  ******************************************************************************/
 #include "em_dma.h"
+#if defined( DMA_PRESENT )
+
 #include "em_cmu.h"
 #include "em_assert.h"
 #include "em_bitband.h"
@@ -276,7 +278,7 @@ static void DMA_Prepare(unsigned int channel,
  *
  *   In order for the user to implement a custom IRQ handler or run without
  *   a DMA IRQ handler, the user can define EXCLUDE_DEFAULT_DMA_IRQ_HANDLER
- *   with a #define statement or with the compiler option -D.
+ *   with a \#define statement or with the compiler option -D.
  *
  ******************************************************************************/
 void DMA_IRQHandler(void)
@@ -314,7 +316,7 @@ void DMA_IRQHandler(void)
     {
       if (pendingPrio & 1)
       {
-        DMA_DESCRIPTOR_TypeDef *descr = (DMA_DESCRIPTOR_TypeDef *)(DMA->CTRLBASE);;
+        DMA_DESCRIPTOR_TypeDef *descr = (DMA_DESCRIPTOR_TypeDef *)(DMA->CTRLBASE);
         uint32_t chmask = 1 << channel;
 
         /* Clear pending interrupt prior to invoking callback, in case it */
@@ -810,7 +812,7 @@ void DMA_CfgDescr(unsigned int channel,
 }
 
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( _DMA_LOOP0_MASK ) && defined( _DMA_LOOP1_MASK )
 /***************************************************************************//**
  * @brief Configure DMA channel for Loop mode or 2D transfer.
  *
@@ -842,8 +844,10 @@ void DMA_CfgLoop(unsigned int channel, DMA_CfgLoop_TypeDef *cfg)
     break;
   }
 }
+#endif
 
 
+#if defined( _DMA_RECT0_MASK )
 /***************************************************************************//**
  * @brief Configure DMA channel 2D transfer properties.
  *
@@ -1185,3 +1189,4 @@ void DMA_Reset(void)
 
 /** @} (end addtogroup DMA) */
 /** @} (end addtogroup EM_Library) */
+#endif /* defined( DMA_PRESENT ) */

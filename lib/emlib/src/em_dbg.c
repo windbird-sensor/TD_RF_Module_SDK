@@ -2,7 +2,7 @@
  * @file
  * @brief Debug (DBG) Peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -30,8 +30,11 @@
  * arising from your use of this Software.
  *
  ******************************************************************************/
-#include "em_assert.h"
 #include "em_dbg.h"
+
+#if defined ( CoreDebug_DHCSR_C_DEBUGEN_Msk )
+
+#include "em_assert.h"
 #include "em_cmu.h"
 #include "em_gpio.h"
 
@@ -111,3 +114,4 @@ void DBG_SWOEnable(unsigned int location)
 
 /** @} (end addtogroup DBG) */
 /** @} (end addtogroup EM_Library) */
+#endif /* defined ( CoreDebug_DHCSR_C_DEBUGEN_Msk ) */

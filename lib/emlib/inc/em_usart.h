@@ -3,7 +3,7 @@
  * @brief Universal synchronous/asynchronous receiver/transmitter (USART/UART)
  *   peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -34,8 +34,10 @@
 #ifndef __EM_USART_H
 #define __EM_USART_H
 
-#include <stdbool.h>
 #include "em_device.h"
+#if defined(USART_COUNT) && (USART_COUNT > 0)
+
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -162,13 +164,15 @@ typedef enum
   usartIrDAPrsCh1 = USART_IRCTRL_IRPRSSEL_PRSCH1, /**< PRS channel 1 */
   usartIrDAPrsCh2 = USART_IRCTRL_IRPRSSEL_PRSCH2, /**< PRS channel 2 */
   usartIrDAPrsCh3 = USART_IRCTRL_IRPRSSEL_PRSCH3, /**< PRS channel 3 */
+#if defined( USART_IRCTRL_IRPRSSEL_PRSCH7 )
   usartIrDAPrsCh4 = USART_IRCTRL_IRPRSSEL_PRSCH4, /**< PRS channel 4 */
   usartIrDAPrsCh5 = USART_IRCTRL_IRPRSSEL_PRSCH5, /**< PRS channel 5 */
   usartIrDAPrsCh6 = USART_IRCTRL_IRPRSSEL_PRSCH6, /**< PRS channel 6 */
   usartIrDAPrsCh7 = USART_IRCTRL_IRPRSSEL_PRSCH7  /**< PRS channel 7 */
+#endif
 } USART_IrDAPrsSel_Typedef;
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( _USART_I2SCTRL_MASK )
 /** I2S format selection. */
 typedef enum
 {
@@ -188,7 +192,9 @@ typedef enum
   usartI2sJustifyLeft  = USART_I2SCTRL_JUSTIFY_LEFT,  /**< Data is left-justified within the frame  */
   usartI2sJustifyRight = USART_I2SCTRL_JUSTIFY_RIGHT  /**< Data is right-justified within the frame */
 } USART_I2sJustify_TypeDef;
+#endif
 
+#if defined( _USART_INPUT_MASK )
 /** USART Rx input PRS selection. */
 typedef enum
 {
@@ -196,26 +202,23 @@ typedef enum
   usartPrsRxCh1  = USART_INPUT_RXPRSSEL_PRSCH1,    /**< PRSCH1  selected as USART_INPUT */
   usartPrsRxCh2  = USART_INPUT_RXPRSSEL_PRSCH2,    /**< PRSCH2  selected as USART_INPUT */
   usartPrsRxCh3  = USART_INPUT_RXPRSSEL_PRSCH3,    /**< PRSCH3  selected as USART_INPUT */
+
+#if defined( USART_INPUT_RXPRSSEL_PRSCH7 )
   usartPrsRxCh4  = USART_INPUT_RXPRSSEL_PRSCH4,    /**< PRSCH4  selected as USART_INPUT */
   usartPrsRxCh5  = USART_INPUT_RXPRSSEL_PRSCH5,    /**< PRSCH5  selected as USART_INPUT */
   usartPrsRxCh6  = USART_INPUT_RXPRSSEL_PRSCH6,    /**< PRSCH6  selected as USART_INPUT */
-
-#if defined(_EFM32_TINY_FAMILY)
-  usartPrsRxCh7  = USART_INPUT_RXPRSSEL_PRSCH7     /**< PRSCH7  selected as USART_INPUT */
-
-#elif defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
   usartPrsRxCh7  = USART_INPUT_RXPRSSEL_PRSCH7,    /**< PRSCH7  selected as USART_INPUT */
+#endif
+
+#if defined( USART_INPUT_RXPRSSEL_PRSCH11 )
   usartPrsRxCh8  = USART_INPUT_RXPRSSEL_PRSCH8,    /**< PRSCH8  selected as USART_INPUT */
   usartPrsRxCh9  = USART_INPUT_RXPRSSEL_PRSCH9,    /**< PRSCH9  selected as USART_INPUT */
   usartPrsRxCh10 = USART_INPUT_RXPRSSEL_PRSCH10,   /**< PRSCH10 selected as USART_INPUT */
   usartPrsRxCh11 = USART_INPUT_RXPRSSEL_PRSCH11    /**< PRSCH11 selected as USART_INPUT */
-#else
-#error Unknown EFM32 family.
 #endif
 } USART_PrsRxCh_TypeDef;
 #endif
 
-#if defined (_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
 /** USART PRS Transmit Trigger Channels */
 typedef enum
 {
@@ -223,12 +226,14 @@ typedef enum
   usartPrsTriggerCh1 = USART_TRIGCTRL_TSEL_PRSCH1, /**< PRSCH0 selected as USART Trigger */
   usartPrsTriggerCh2 = USART_TRIGCTRL_TSEL_PRSCH2, /**< PRSCH0 selected as USART Trigger */
   usartPrsTriggerCh3 = USART_TRIGCTRL_TSEL_PRSCH3, /**< PRSCH0 selected as USART Trigger */
+
+#if defined( USART_TRIGCTRL_TSEL_PRSCH7 )
   usartPrsTriggerCh4 = USART_TRIGCTRL_TSEL_PRSCH4, /**< PRSCH0 selected as USART Trigger */
   usartPrsTriggerCh5 = USART_TRIGCTRL_TSEL_PRSCH5, /**< PRSCH0 selected as USART Trigger */
   usartPrsTriggerCh6 = USART_TRIGCTRL_TSEL_PRSCH6, /**< PRSCH0 selected as USART Trigger */
   usartPrsTriggerCh7 = USART_TRIGCTRL_TSEL_PRSCH7, /**< PRSCH0 selected as USART Trigger */
-} USART_PrsTriggerCh_TypeDef;
 #endif
+} USART_PrsTriggerCh_TypeDef;
 
 /*******************************************************************************
  *******************************   STRUCTS   ***********************************
@@ -262,7 +267,7 @@ typedef struct
   /** Number of stopbits to use. */
   USART_Stopbits_TypeDef stopbits;
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( USART_INPUT_RXPRS ) && defined( USART_CTRL_MVDIS )
   /** Majority Vote Disable for 16x, 8x and 6x oversampling modes. */
   bool                   mvdis;
 
@@ -274,11 +279,10 @@ typedef struct
 #endif
 } USART_InitAsync_TypeDef;
 
-#if defined(_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
 /** USART PRS trigger enable */
 typedef struct
 {
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( USART_TRIGCTRL_AUTOTXTEN )
   /** Enable AUTOTX */
   bool autoTxTriggerEnable;
 #endif
@@ -289,10 +293,9 @@ typedef struct
   /** PRS channel to be used to trigger auto transmission */
   USART_PrsTriggerCh_TypeDef prsTriggerChannel;
 } USART_PrsTriggerInit_TypeDef;
-#endif
 
 /** Default config for USART async init structure. */
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( USART_INPUT_RXPRS ) && defined( USART_CTRL_MVDIS )
 #define USART_INITASYNC_DEFAULT                                                              \
   { usartEnable,      /* Enable RX/TX when init completed. */                                \
     0,                /* Use current configured reference clock for configuring baudrate. */ \
@@ -344,7 +347,7 @@ typedef struct
   /** Clock polarity/phase mode. */
   USART_ClockMode_TypeDef clockMode;
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( USART_INPUT_RXPRS ) && defined( USART_TRIGCTRL_AUTOTXTEN )
   /** Enable USART Rx via PRS. */
   bool                    prsRxEnable;
 
@@ -358,7 +361,7 @@ typedef struct
 } USART_InitSync_TypeDef;
 
 /** Default config for USART sync init structure. */
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( USART_INPUT_RXPRS ) && defined( USART_TRIGCTRL_AUTOTXTEN )
 #define USART_INITSYNC_DEFAULT                                                                \
   { usartEnable,       /* Enable RX/TX when init completed. */                                \
     0,                 /* Use current configured reference clock for configuring baudrate. */ \
@@ -429,7 +432,7 @@ typedef struct
   }
 
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( _USART_I2SCTRL_MASK )
 /** I2S mode init structure. Inherited from synchronous mode init structure */
 typedef struct
 {
@@ -497,12 +500,14 @@ void USART_Enable(USART_TypeDef *usart, USART_Enable_TypeDef enable);
 
 void USART_InitAsync(USART_TypeDef *usart, const USART_InitAsync_TypeDef *init);
 void USART_InitSync(USART_TypeDef *usart, const USART_InitSync_TypeDef *init);
+#if defined(USART0) || ( (USART_COUNT == 1) && defined( USART1 ) )
 void USART_InitIrDA(const USART_InitIrDA_TypeDef *init);
-
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
-void USART_InitI2s(USART_TypeDef *usart, USART_InitI2s_TypeDef *init);
-void USART_InitPrsTrigger(USART_TypeDef *usart, const USART_PrsTriggerInit_TypeDef *init);
 #endif
+
+#if defined( _USART_I2SCTRL_MASK )
+void USART_InitI2s(USART_TypeDef *usart, USART_InitI2s_TypeDef *init);
+#endif
+void USART_InitPrsTrigger(USART_TypeDef *usart, const USART_PrsTriggerInit_TypeDef *init);
 
 
 /***************************************************************************//**
@@ -651,6 +656,7 @@ uint8_t USART_Rx(USART_TypeDef *usart);
 uint16_t USART_RxDouble(USART_TypeDef *usart);
 uint32_t USART_RxDoubleExt(USART_TypeDef *usart);
 uint16_t USART_RxExt(USART_TypeDef *usart);
+uint8_t USART_SpiTransfer(USART_TypeDef *usart, uint8_t data);
 void USART_Tx(USART_TypeDef *usart, uint8_t data);
 void USART_TxDouble(USART_TypeDef *usart, uint16_t data);
 void USART_TxDoubleExt(USART_TypeDef *usart, uint32_t data);
@@ -664,4 +670,5 @@ void USART_TxExt(USART_TypeDef *usart, uint16_t data);
 }
 #endif
 
+#endif /* defined(USART_COUNT) && (USART_COUNT > 0) */
 #endif /* __EM_USART_H */

@@ -3,7 +3,7 @@
  * @brief CMSIS Cortex-M Peripheral Access Layer Header File
  *        for EFM32LG290F256
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -63,7 +63,7 @@ typedef enum IRQn
   PendSV_IRQn           = -2,               /*!< 14 Cortex-M3 Pend SV Interrupt           */
   SysTick_IRQn          = -1,               /*!< 15 Cortex-M3 System Tick Interrupt       */
 
-/******  EFM32G Peripheral Interrupt Numbers **********************************************/
+/******  EFM32LG Peripheral Interrupt Numbers *********************************************/
   DMA_IRQn              = 0,  /*!< 16+0 EFM32 DMA Interrupt */
   GPIO_EVEN_IRQn        = 1,  /*!< 16+1 EFM32 GPIO_EVEN Interrupt */
   TIMER0_IRQn           = 2,  /*!< 16+2 EFM32 TIMER0 Interrupt */
@@ -132,38 +132,38 @@ typedef enum IRQn
 #define PART_NUMBER          "EFM32LG290F256" /**< Part Number */
 
 /** Memory Base addresses and limits */
-#define EBI_MEM_BASE         ((uint32_t) 0x80000000UL)  /**< EBI base address  */
-#define EBI_MEM_SIZE         ((uint32_t) 0x40000000UL)  /**< EBI available address space  */
-#define EBI_MEM_END          ((uint32_t) 0xBFFFFFFFUL)  /**< EBI end address  */
-#define EBI_MEM_BITS         ((uint32_t) 0x30UL)        /**< EBI used bits  */
-#define USBC_MEM_BASE        ((uint32_t) 0x40100000UL)  /**< USBC base address  */
-#define USBC_MEM_SIZE        ((uint32_t) 0x40000UL)     /**< USBC available address space  */
-#define USBC_MEM_END         ((uint32_t) 0x4013FFFFUL)  /**< USBC end address  */
-#define USBC_MEM_BITS        ((uint32_t) 0x18UL)        /**< USBC used bits  */
-#define AES_MEM_BASE         ((uint32_t) 0x400E0000UL)  /**< AES base address  */
-#define AES_MEM_SIZE         ((uint32_t) 0x400UL)       /**< AES available address space  */
-#define AES_MEM_END          ((uint32_t) 0x400E03FFUL)  /**< AES end address  */
-#define AES_MEM_BITS         ((uint32_t) 0x10UL)        /**< AES used bits  */
-#define PER_MEM_BASE         ((uint32_t) 0x40000000UL)  /**< PER base address  */
-#define PER_MEM_SIZE         ((uint32_t) 0xE0000UL)     /**< PER available address space  */
-#define PER_MEM_END          ((uint32_t) 0x400DFFFFUL)  /**< PER end address  */
-#define PER_MEM_BITS         ((uint32_t) 0x20UL)        /**< PER used bits  */
-#define RAM_MEM_BASE         ((uint32_t) 0x20000000UL)  /**< RAM base address  */
-#define RAM_MEM_SIZE         ((uint32_t) 0x40000UL)     /**< RAM available address space  */
-#define RAM_MEM_END          ((uint32_t) 0x2003FFFFUL)  /**< RAM end address  */
-#define RAM_MEM_BITS         ((uint32_t) 0x18UL)        /**< RAM used bits  */
-#define EBI_CODE_MEM_BASE    ((uint32_t) 0x12000000UL)  /**< EBI_CODE base address  */
-#define EBI_CODE_MEM_SIZE    ((uint32_t) 0xE000000UL)   /**< EBI_CODE available address space  */
-#define EBI_CODE_MEM_END     ((uint32_t) 0x1FFFFFFFUL)  /**< EBI_CODE end address  */
-#define EBI_CODE_MEM_BITS    ((uint32_t) 0x28UL)        /**< EBI_CODE used bits  */
-#define RAM_CODE_MEM_BASE    ((uint32_t) 0x10000000UL)  /**< RAM_CODE base address  */
-#define RAM_CODE_MEM_SIZE    ((uint32_t) 0x20000UL)     /**< RAM_CODE available address space  */
-#define RAM_CODE_MEM_END     ((uint32_t) 0x1001FFFFUL)  /**< RAM_CODE end address  */
-#define RAM_CODE_MEM_BITS    ((uint32_t) 0x17UL)        /**< RAM_CODE used bits  */
-#define FLASH_MEM_BASE       ((uint32_t) 0x0UL)         /**< FLASH base address  */
-#define FLASH_MEM_SIZE       ((uint32_t) 0x10000000UL)  /**< FLASH available address space  */
-#define FLASH_MEM_END        ((uint32_t) 0xFFFFFFFUL)   /**< FLASH end address  */
-#define FLASH_MEM_BITS       ((uint32_t) 0x28UL)        /**< FLASH used bits  */
+#define FLASH_MEM_BASE       ((uint32_t) 0x0UL)        /**< FLASH base address  */
+#define FLASH_MEM_SIZE       ((uint32_t) 0x10000000UL) /**< FLASH available address space  */
+#define FLASH_MEM_END        ((uint32_t) 0xFFFFFFFUL)  /**< FLASH end address  */
+#define FLASH_MEM_BITS       ((uint32_t) 0x28UL)       /**< FLASH used bits  */
+#define AES_MEM_BASE         ((uint32_t) 0x400E0000UL) /**< AES base address  */
+#define AES_MEM_SIZE         ((uint32_t) 0x400UL)      /**< AES available address space  */
+#define AES_MEM_END          ((uint32_t) 0x400E03FFUL) /**< AES end address  */
+#define AES_MEM_BITS         ((uint32_t) 0x10UL)       /**< AES used bits  */
+#define USBC_MEM_BASE        ((uint32_t) 0x40100000UL) /**< USBC base address  */
+#define USBC_MEM_SIZE        ((uint32_t) 0x40000UL)    /**< USBC available address space  */
+#define USBC_MEM_END         ((uint32_t) 0x4013FFFFUL) /**< USBC end address  */
+#define USBC_MEM_BITS        ((uint32_t) 0x18UL)       /**< USBC used bits  */
+#define EBI_CODE_MEM_BASE    ((uint32_t) 0x12000000UL) /**< EBI_CODE base address  */
+#define EBI_CODE_MEM_SIZE    ((uint32_t) 0xE000000UL)  /**< EBI_CODE available address space  */
+#define EBI_CODE_MEM_END     ((uint32_t) 0x1FFFFFFFUL) /**< EBI_CODE end address  */
+#define EBI_CODE_MEM_BITS    ((uint32_t) 0x28UL)       /**< EBI_CODE used bits  */
+#define PER_MEM_BASE         ((uint32_t) 0x40000000UL) /**< PER base address  */
+#define PER_MEM_SIZE         ((uint32_t) 0xE0000UL)    /**< PER available address space  */
+#define PER_MEM_END          ((uint32_t) 0x400DFFFFUL) /**< PER end address  */
+#define PER_MEM_BITS         ((uint32_t) 0x20UL)       /**< PER used bits  */
+#define RAM_MEM_BASE         ((uint32_t) 0x20000000UL) /**< RAM base address  */
+#define RAM_MEM_SIZE         ((uint32_t) 0x40000UL)    /**< RAM available address space  */
+#define RAM_MEM_END          ((uint32_t) 0x2003FFFFUL) /**< RAM end address  */
+#define RAM_MEM_BITS         ((uint32_t) 0x18UL)       /**< RAM used bits  */
+#define RAM_CODE_MEM_BASE    ((uint32_t) 0x10000000UL) /**< RAM_CODE base address  */
+#define RAM_CODE_MEM_SIZE    ((uint32_t) 0x20000UL)    /**< RAM_CODE available address space  */
+#define RAM_CODE_MEM_END     ((uint32_t) 0x1001FFFFUL) /**< RAM_CODE end address  */
+#define RAM_CODE_MEM_BITS    ((uint32_t) 0x17UL)       /**< RAM_CODE used bits  */
+#define EBI_MEM_BASE         ((uint32_t) 0x80000000UL) /**< EBI base address  */
+#define EBI_MEM_SIZE         ((uint32_t) 0x40000000UL) /**< EBI available address space  */
+#define EBI_MEM_END          ((uint32_t) 0xBFFFFFFFUL) /**< EBI end address  */
+#define EBI_MEM_BITS         ((uint32_t) 0x30UL)       /**< EBI used bits  */
 
 /** Bit banding area */
 #define BITBAND_PER_BASE     ((uint32_t) 0x42000000UL) /**< Peripheral Address Space bit-band area */
@@ -172,6 +172,7 @@ typedef enum IRQn
 /** Flash and SRAM limits for EFM32LG290F256 */
 #define FLASH_BASE           (0x00000000UL) /**< Flash Base Address */
 #define FLASH_SIZE           (0x00040000UL) /**< Available Flash Memory */
+#define FLASH_PAGE_SIZE      2048           /**< Flash Memory page size */
 #define SRAM_BASE            (0x20000000UL) /**< SRAM Base Address */
 #define SRAM_SIZE            (0x00008000UL) /**< Available SRAM Memory */
 #define __CM3_REV            0x201          /**< Cortex-M3 Core revision r2p1 */
@@ -186,12 +187,14 @@ typedef enum IRQn
 
 /* Part number capabilities */
 
-#define TIMER_PRESENT         /**< TIMER is available in this part */
-#define TIMER_COUNT         4 /**< 4 TIMERs available  */
 #define USART_PRESENT         /**< USART is available in this part */
 #define USART_COUNT         3 /**< 3 USARTs available  */
 #define UART_PRESENT          /**< UART is available in this part */
 #define UART_COUNT          2 /**< 2 UARTs available  */
+#define TIMER_PRESENT         /**< TIMER is available in this part */
+#define TIMER_COUNT         4 /**< 4 TIMERs available  */
+#define ACMP_PRESENT          /**< ACMP is available in this part */
+#define ACMP_COUNT          2 /**< 2 ACMPs available  */
 #define LEUART_PRESENT        /**< LEUART is available in this part */
 #define LEUART_COUNT        2 /**< 2 LEUARTs available  */
 #define LETIMER_PRESENT       /**< LETIMER is available in this part */
@@ -204,8 +207,10 @@ typedef enum IRQn
 #define ADC_COUNT           1 /**< 1 ADCs available  */
 #define DAC_PRESENT           /**< DAC is available in this part */
 #define DAC_COUNT           1 /**< 1 DACs available  */
-#define ACMP_PRESENT          /**< ACMP is available in this part */
-#define ACMP_COUNT          2 /**< 2 ACMPs available  */
+#define DMA_PRESENT
+#define DMA_COUNT           1
+#define AES_PRESENT
+#define AES_COUNT           1
 #define LE_PRESENT
 #define LE_COUNT            1
 #define MSC_PRESENT
@@ -216,26 +221,22 @@ typedef enum IRQn
 #define RMU_COUNT           1
 #define CMU_PRESENT
 #define CMU_COUNT           1
-#define AES_PRESENT
-#define AES_COUNT           1
 #define LESENSE_PRESENT
 #define LESENSE_COUNT       1
 #define EBI_PRESENT
 #define EBI_COUNT           1
+#define RTC_PRESENT
+#define RTC_COUNT           1
 #define GPIO_PRESENT
 #define GPIO_COUNT          1
+#define VCMP_PRESENT
+#define VCMP_COUNT          1
 #define PRS_PRESENT
 #define PRS_COUNT           1
-#define DMA_PRESENT
-#define DMA_COUNT           1
 #define OPAMP_PRESENT
 #define OPAMP_COUNT         1
 #define BU_PRESENT
 #define BU_COUNT            1
-#define VCMP_PRESENT
-#define VCMP_COUNT          1
-#define RTC_PRESENT
-#define RTC_COUNT           1
 #define BURTC_PRESENT
 #define BURTC_COUNT         1
 #define HFXTAL_PRESENT
@@ -250,6 +251,8 @@ typedef enum IRQn
 #define ETM_COUNT           1
 #define BOOTLOADER_PRESENT
 #define BOOTLOADER_COUNT    1
+#define ANALOG_PRESENT
+#define ANALOG_COUNT        1
 
 #include "core_cm3.h"       /* Cortex-M3 processor and core peripherals */
 #include "system_efm32lg.h" /* System Header */
@@ -262,6 +265,9 @@ typedef enum IRQn
  * @brief Device Specific Peripheral Register Structures
  *****************************************************************************/
 
+#include "efm32lg_dma_ch.h"
+#include "efm32lg_dma.h"
+#include "efm32lg_aes.h"
 #include "efm32lg_msc.h"
 #include "efm32lg_emu.h"
 #include "efm32lg_rmu.h"
@@ -309,14 +315,23 @@ typedef struct
   __IO uint32_t LOCK;         /**< Configuration Lock Register  */
 } CMU_TypeDef;                /** @} */
 
-#include "efm32lg_aes.h"
 #include "efm32lg_lesense_st.h"
 #include "efm32lg_lesense_buf.h"
 #include "efm32lg_lesense_ch.h"
 #include "efm32lg_lesense.h"
 #include "efm32lg_ebi.h"
+#include "efm32lg_usart.h"
+#include "efm32lg_timer_cc.h"
+#include "efm32lg_timer.h"
+#include "efm32lg_acmp.h"
+#include "efm32lg_leuart.h"
+#include "efm32lg_rtc.h"
+#include "efm32lg_letimer.h"
+#include "efm32lg_pcnt.h"
+#include "efm32lg_i2c.h"
 #include "efm32lg_gpio_p.h"
 #include "efm32lg_gpio.h"
+#include "efm32lg_vcmp.h"
 #include "efm32lg_prs_ch.h"
 
 /**************************************************************************//**
@@ -335,20 +350,8 @@ typedef struct
   PRS_CH_TypeDef CH[12];       /**< Channel registers */
 } PRS_TypeDef;                 /** @} */
 
-#include "efm32lg_dma_ch.h"
-#include "efm32lg_dma.h"
-#include "efm32lg_timer_cc.h"
-#include "efm32lg_timer.h"
-#include "efm32lg_usart.h"
-#include "efm32lg_leuart.h"
-#include "efm32lg_letimer.h"
-#include "efm32lg_pcnt.h"
-#include "efm32lg_i2c.h"
 #include "efm32lg_adc.h"
 #include "efm32lg_dac.h"
-#include "efm32lg_acmp.h"
-#include "efm32lg_vcmp.h"
-#include "efm32lg_rtc.h"
 #include "efm32lg_burtc_ret.h"
 #include "efm32lg_burtc.h"
 #include "efm32lg_wdog.h"
@@ -365,45 +368,47 @@ typedef struct
  * @{
  *****************************************************************************/
 
+#define DMA_BASE          (0x400C2000UL) /**< DMA base address  */
+#define AES_BASE          (0x400E0000UL) /**< AES base address  */
 #define MSC_BASE          (0x400C0000UL) /**< MSC base address  */
 #define EMU_BASE          (0x400C6000UL) /**< EMU base address  */
 #define RMU_BASE          (0x400CA000UL) /**< RMU base address  */
 #define CMU_BASE          (0x400C8000UL) /**< CMU base address  */
-#define AES_BASE          (0x400E0000UL) /**< AES base address  */
 #define LESENSE_BASE      (0x4008C000UL) /**< LESENSE base address  */
 #define EBI_BASE          (0x40008000UL) /**< EBI base address  */
-#define GPIO_BASE         (0x40006000UL) /**< GPIO base address  */
-#define PRS_BASE          (0x400CC000UL) /**< PRS base address  */
-#define DMA_BASE          (0x400C2000UL) /**< DMA base address  */
-#define TIMER0_BASE       (0x40010000UL) /**< TIMER0 base address  */
-#define TIMER1_BASE       (0x40010400UL) /**< TIMER1 base address  */
-#define TIMER2_BASE       (0x40010800UL) /**< TIMER2 base address  */
-#define TIMER3_BASE       (0x40010C00UL) /**< TIMER3 base address  */
 #define USART0_BASE       (0x4000C000UL) /**< USART0 base address  */
 #define USART1_BASE       (0x4000C400UL) /**< USART1 base address  */
 #define USART2_BASE       (0x4000C800UL) /**< USART2 base address  */
 #define UART0_BASE        (0x4000E000UL) /**< UART0 base address  */
 #define UART1_BASE        (0x4000E400UL) /**< UART1 base address  */
+#define TIMER0_BASE       (0x40010000UL) /**< TIMER0 base address  */
+#define TIMER1_BASE       (0x40010400UL) /**< TIMER1 base address  */
+#define TIMER2_BASE       (0x40010800UL) /**< TIMER2 base address  */
+#define TIMER3_BASE       (0x40010C00UL) /**< TIMER3 base address  */
+#define ACMP0_BASE        (0x40001000UL) /**< ACMP0 base address  */
+#define ACMP1_BASE        (0x40001400UL) /**< ACMP1 base address  */
 #define LEUART0_BASE      (0x40084000UL) /**< LEUART0 base address  */
 #define LEUART1_BASE      (0x40084400UL) /**< LEUART1 base address  */
+#define RTC_BASE          (0x40080000UL) /**< RTC base address  */
 #define LETIMER0_BASE     (0x40082000UL) /**< LETIMER0 base address  */
 #define PCNT0_BASE        (0x40086000UL) /**< PCNT0 base address  */
 #define PCNT1_BASE        (0x40086400UL) /**< PCNT1 base address  */
 #define PCNT2_BASE        (0x40086800UL) /**< PCNT2 base address  */
 #define I2C0_BASE         (0x4000A000UL) /**< I2C0 base address  */
 #define I2C1_BASE         (0x4000A400UL) /**< I2C1 base address  */
+#define GPIO_BASE         (0x40006000UL) /**< GPIO base address  */
+#define VCMP_BASE         (0x40000000UL) /**< VCMP base address  */
+#define PRS_BASE          (0x400CC000UL) /**< PRS base address  */
 #define ADC0_BASE         (0x40002000UL) /**< ADC0 base address  */
 #define DAC0_BASE         (0x40004000UL) /**< DAC0 base address  */
-#define ACMP0_BASE        (0x40001000UL) /**< ACMP0 base address  */
-#define ACMP1_BASE        (0x40001400UL) /**< ACMP1 base address  */
-#define VCMP_BASE         (0x40000000UL) /**< VCMP base address  */
-#define RTC_BASE          (0x40080000UL) /**< RTC base address  */
 #define BURTC_BASE        (0x40081000UL) /**< BURTC base address  */
 #define WDOG_BASE         (0x40088000UL) /**< WDOG base address  */
 #define ETM_BASE          (0xE0041000UL) /**< ETM base address  */
 #define CALIBRATE_BASE    (0x0FE08000UL) /**< CALIBRATE base address */
 #define DEVINFO_BASE      (0x0FE081B0UL) /**< DEVINFO base address */
 #define ROMTABLE_BASE     (0xE00FFFD0UL) /**< ROMTABLE base address */
+#define LOCKBITS_BASE     (0x0FE04000UL) /**< Lock-bits page base address */
+#define USERDATA_BASE     (0x0FE00000UL) /**< User data page base address */
 
 /** @} End of group EFM32LG290F256_Peripheral_Base */
 
@@ -412,39 +417,39 @@ typedef struct
  * @{
  *****************************************************************************/
 
+#define DMA          ((DMA_TypeDef *) DMA_BASE)             /**< DMA base pointer */
+#define AES          ((AES_TypeDef *) AES_BASE)             /**< AES base pointer */
 #define MSC          ((MSC_TypeDef *) MSC_BASE)             /**< MSC base pointer */
 #define EMU          ((EMU_TypeDef *) EMU_BASE)             /**< EMU base pointer */
 #define RMU          ((RMU_TypeDef *) RMU_BASE)             /**< RMU base pointer */
 #define CMU          ((CMU_TypeDef *) CMU_BASE)             /**< CMU base pointer */
-#define AES          ((AES_TypeDef *) AES_BASE)             /**< AES base pointer */
 #define LESENSE      ((LESENSE_TypeDef *) LESENSE_BASE)     /**< LESENSE base pointer */
 #define EBI          ((EBI_TypeDef *) EBI_BASE)             /**< EBI base pointer */
-#define GPIO         ((GPIO_TypeDef *) GPIO_BASE)           /**< GPIO base pointer */
-#define PRS          ((PRS_TypeDef *) PRS_BASE)             /**< PRS base pointer */
-#define DMA          ((DMA_TypeDef *) DMA_BASE)             /**< DMA base pointer */
-#define TIMER0       ((TIMER_TypeDef *) TIMER0_BASE)        /**< TIMER0 base pointer */
-#define TIMER1       ((TIMER_TypeDef *) TIMER1_BASE)        /**< TIMER1 base pointer */
-#define TIMER2       ((TIMER_TypeDef *) TIMER2_BASE)        /**< TIMER2 base pointer */
-#define TIMER3       ((TIMER_TypeDef *) TIMER3_BASE)        /**< TIMER3 base pointer */
 #define USART0       ((USART_TypeDef *) USART0_BASE)        /**< USART0 base pointer */
 #define USART1       ((USART_TypeDef *) USART1_BASE)        /**< USART1 base pointer */
 #define USART2       ((USART_TypeDef *) USART2_BASE)        /**< USART2 base pointer */
 #define UART0        ((USART_TypeDef *) UART0_BASE)         /**< UART0 base pointer */
 #define UART1        ((USART_TypeDef *) UART1_BASE)         /**< UART1 base pointer */
+#define TIMER0       ((TIMER_TypeDef *) TIMER0_BASE)        /**< TIMER0 base pointer */
+#define TIMER1       ((TIMER_TypeDef *) TIMER1_BASE)        /**< TIMER1 base pointer */
+#define TIMER2       ((TIMER_TypeDef *) TIMER2_BASE)        /**< TIMER2 base pointer */
+#define TIMER3       ((TIMER_TypeDef *) TIMER3_BASE)        /**< TIMER3 base pointer */
+#define ACMP0        ((ACMP_TypeDef *) ACMP0_BASE)          /**< ACMP0 base pointer */
+#define ACMP1        ((ACMP_TypeDef *) ACMP1_BASE)          /**< ACMP1 base pointer */
 #define LEUART0      ((LEUART_TypeDef *) LEUART0_BASE)      /**< LEUART0 base pointer */
 #define LEUART1      ((LEUART_TypeDef *) LEUART1_BASE)      /**< LEUART1 base pointer */
+#define RTC          ((RTC_TypeDef *) RTC_BASE)             /**< RTC base pointer */
 #define LETIMER0     ((LETIMER_TypeDef *) LETIMER0_BASE)    /**< LETIMER0 base pointer */
 #define PCNT0        ((PCNT_TypeDef *) PCNT0_BASE)          /**< PCNT0 base pointer */
 #define PCNT1        ((PCNT_TypeDef *) PCNT1_BASE)          /**< PCNT1 base pointer */
 #define PCNT2        ((PCNT_TypeDef *) PCNT2_BASE)          /**< PCNT2 base pointer */
 #define I2C0         ((I2C_TypeDef *) I2C0_BASE)            /**< I2C0 base pointer */
 #define I2C1         ((I2C_TypeDef *) I2C1_BASE)            /**< I2C1 base pointer */
+#define GPIO         ((GPIO_TypeDef *) GPIO_BASE)           /**< GPIO base pointer */
+#define VCMP         ((VCMP_TypeDef *) VCMP_BASE)           /**< VCMP base pointer */
+#define PRS          ((PRS_TypeDef *) PRS_BASE)             /**< PRS base pointer */
 #define ADC0         ((ADC_TypeDef *) ADC0_BASE)            /**< ADC0 base pointer */
 #define DAC0         ((DAC_TypeDef *) DAC0_BASE)            /**< DAC0 base pointer */
-#define ACMP0        ((ACMP_TypeDef *) ACMP0_BASE)          /**< ACMP0 base pointer */
-#define ACMP1        ((ACMP_TypeDef *) ACMP1_BASE)          /**< ACMP1 base pointer */
-#define VCMP         ((VCMP_TypeDef *) VCMP_BASE)           /**< VCMP base pointer */
-#define RTC          ((RTC_TypeDef *) RTC_BASE)             /**< RTC base pointer */
 #define BURTC        ((BURTC_TypeDef *) BURTC_BASE)         /**< BURTC base pointer */
 #define WDOG         ((WDOG_TypeDef *) WDOG_BASE)           /**< WDOG base pointer */
 #define ETM          ((ETM_TypeDef *) ETM_BASE)             /**< ETM base pointer */
@@ -558,7 +563,7 @@ typedef struct
  *****************************************************************************/
 
 /* Bit fields for CMU CTRL */
-#define _CMU_CTRL_RESETVALUE                        0x000C062CUL                                /**< Default value for CMU_CTRL */
+#define _CMU_CTRL_RESETVALUE                        0x000C262CUL                                /**< Default value for CMU_CTRL */
 #define _CMU_CTRL_MASK                              0x53FFFEEFUL                                /**< Mask for CMU_CTRL */
 #define _CMU_CTRL_HFXOMODE_SHIFT                    0                                           /**< Shift value for CMU_HFXOMODE */
 #define _CMU_CTRL_HFXOMODE_MASK                     0x3UL                                       /**< Bit mask for CMU_HFXOMODE */
@@ -620,11 +625,11 @@ typedef struct
 #define CMU_CTRL_LFXOBOOST                          (0x1UL << 13)                               /**< LFXO Start-up Boost Current */
 #define _CMU_CTRL_LFXOBOOST_SHIFT                   13                                          /**< Shift value for CMU_LFXOBOOST */
 #define _CMU_CTRL_LFXOBOOST_MASK                    0x2000UL                                    /**< Bit mask for CMU_LFXOBOOST */
-#define _CMU_CTRL_LFXOBOOST_DEFAULT                 0x00000000UL                                /**< Mode DEFAULT for CMU_CTRL */
 #define _CMU_CTRL_LFXOBOOST_70PCENT                 0x00000000UL                                /**< Mode 70PCENT for CMU_CTRL */
+#define _CMU_CTRL_LFXOBOOST_DEFAULT                 0x00000001UL                                /**< Mode DEFAULT for CMU_CTRL */
 #define _CMU_CTRL_LFXOBOOST_100PCENT                0x00000001UL                                /**< Mode 100PCENT for CMU_CTRL */
-#define CMU_CTRL_LFXOBOOST_DEFAULT                  (_CMU_CTRL_LFXOBOOST_DEFAULT << 13)         /**< Shifted mode DEFAULT for CMU_CTRL */
 #define CMU_CTRL_LFXOBOOST_70PCENT                  (_CMU_CTRL_LFXOBOOST_70PCENT << 13)         /**< Shifted mode 70PCENT for CMU_CTRL */
+#define CMU_CTRL_LFXOBOOST_DEFAULT                  (_CMU_CTRL_LFXOBOOST_DEFAULT << 13)         /**< Shifted mode DEFAULT for CMU_CTRL */
 #define CMU_CTRL_LFXOBOOST_100PCENT                 (_CMU_CTRL_LFXOBOOST_100PCENT << 13)        /**< Shifted mode 100PCENT for CMU_CTRL */
 #define _CMU_CTRL_HFCLKDIV_SHIFT                    14                                          /**< Shift value for CMU_HFCLKDIV */
 #define _CMU_CTRL_HFCLKDIV_MASK                     0x1C000UL                                   /**< Bit mask for CMU_HFCLKDIV */
@@ -729,7 +734,7 @@ typedef struct
 #define CMU_HFCORECLKDIV_HFCORECLKDIV_HFCLK128      (_CMU_HFCORECLKDIV_HFCORECLKDIV_HFCLK128 << 0)  /**< Shifted mode HFCLK128 for CMU_HFCORECLKDIV */
 #define CMU_HFCORECLKDIV_HFCORECLKDIV_HFCLK256      (_CMU_HFCORECLKDIV_HFCORECLKDIV_HFCLK256 << 0)  /**< Shifted mode HFCLK256 for CMU_HFCORECLKDIV */
 #define CMU_HFCORECLKDIV_HFCORECLKDIV_HFCLK512      (_CMU_HFCORECLKDIV_HFCORECLKDIV_HFCLK512 << 0)  /**< Shifted mode HFCLK512 for CMU_HFCORECLKDIV */
-#define CMU_HFCORECLKDIV_HFCORECLKLEDIV             (0x1UL << 8)                                    /**< Additional Division Factor For HFCORECLKLEDIV2 */
+#define CMU_HFCORECLKDIV_HFCORECLKLEDIV             (0x1UL << 8)                                    /**< Additional Division Factor For HFCORECLKLE */
 #define _CMU_HFCORECLKDIV_HFCORECLKLEDIV_SHIFT      8                                               /**< Shift value for CMU_HFCORECLKLEDIV */
 #define _CMU_HFCORECLKDIV_HFCORECLKLEDIV_MASK       0x100UL                                         /**< Bit mask for CMU_HFCORECLKLEDIV */
 #define _CMU_HFCORECLKDIV_HFCORECLKLEDIV_DEFAULT    0x00000000UL                                    /**< Mode DEFAULT for CMU_HFCORECLKDIV */
@@ -1287,7 +1292,7 @@ typedef struct
 #define _CMU_HFPERCLKEN0_UART0_MASK                 0x8UL                                  /**< Bit mask for CMU_UART0 */
 #define _CMU_HFPERCLKEN0_UART0_DEFAULT              0x00000000UL                           /**< Mode DEFAULT for CMU_HFPERCLKEN0 */
 #define CMU_HFPERCLKEN0_UART0_DEFAULT               (_CMU_HFPERCLKEN0_UART0_DEFAULT << 3)  /**< Shifted mode DEFAULT for CMU_HFPERCLKEN0 */
-#define CMU_HFPERCLKEN0_UART1                       (0x1UL << 4)                           /**< Universal Asynchronous Receiver/Transmitter 0 Clock Enable */
+#define CMU_HFPERCLKEN0_UART1                       (0x1UL << 4)                           /**< Universal Asynchronous Receiver/Transmitter 1 Clock Enable */
 #define _CMU_HFPERCLKEN0_UART1_SHIFT                4                                      /**< Shift value for CMU_UART1 */
 #define _CMU_HFPERCLKEN0_UART1_MASK                 0x10UL                                 /**< Bit mask for CMU_UART1 */
 #define _CMU_HFPERCLKEN0_UART1_DEFAULT              0x00000000UL                           /**< Mode DEFAULT for CMU_HFPERCLKEN0 */
@@ -1596,9 +1601,11 @@ typedef struct
 #define _CMU_ROUTE_LOCATION_SHIFT                   2                                    /**< Shift value for CMU_LOCATION */
 #define _CMU_ROUTE_LOCATION_MASK                    0x1CUL                               /**< Bit mask for CMU_LOCATION */
 #define _CMU_ROUTE_LOCATION_LOC0                    0x00000000UL                         /**< Mode LOC0 for CMU_ROUTE */
+#define _CMU_ROUTE_LOCATION_DEFAULT                 0x00000000UL                         /**< Mode DEFAULT for CMU_ROUTE */
 #define _CMU_ROUTE_LOCATION_LOC1                    0x00000001UL                         /**< Mode LOC1 for CMU_ROUTE */
 #define _CMU_ROUTE_LOCATION_LOC2                    0x00000002UL                         /**< Mode LOC2 for CMU_ROUTE */
 #define CMU_ROUTE_LOCATION_LOC0                     (_CMU_ROUTE_LOCATION_LOC0 << 2)      /**< Shifted mode LOC0 for CMU_ROUTE */
+#define CMU_ROUTE_LOCATION_DEFAULT                  (_CMU_ROUTE_LOCATION_DEFAULT << 2)   /**< Shifted mode DEFAULT for CMU_ROUTE */
 #define CMU_ROUTE_LOCATION_LOC1                     (_CMU_ROUTE_LOCATION_LOC1 << 2)      /**< Shifted mode LOC1 for CMU_ROUTE */
 #define CMU_ROUTE_LOCATION_LOC2                     (_CMU_ROUTE_LOCATION_LOC2 << 2)      /**< Shifted mode LOC2 for CMU_ROUTE */
 
@@ -1756,34 +1763,36 @@ typedef struct
 #define PRS_SWLEVEL_CH11LEVEL_DEFAULT           (_PRS_SWLEVEL_CH11LEVEL_DEFAULT << 11) /**< Shifted mode DEFAULT for PRS_SWLEVEL */
 
 /* Bit fields for PRS ROUTE */
-#define _PRS_ROUTE_RESETVALUE                   0x00000000UL                     /**< Default value for PRS_ROUTE */
-#define _PRS_ROUTE_MASK                         0x0000070FUL                     /**< Mask for PRS_ROUTE */
-#define PRS_ROUTE_CH0PEN                        (0x1UL << 0)                     /**< CH0 Pin Enable */
-#define _PRS_ROUTE_CH0PEN_SHIFT                 0                                /**< Shift value for PRS_CH0PEN */
-#define _PRS_ROUTE_CH0PEN_MASK                  0x1UL                            /**< Bit mask for PRS_CH0PEN */
-#define _PRS_ROUTE_CH0PEN_DEFAULT               0x00000000UL                     /**< Mode DEFAULT for PRS_ROUTE */
-#define PRS_ROUTE_CH0PEN_DEFAULT                (_PRS_ROUTE_CH0PEN_DEFAULT << 0) /**< Shifted mode DEFAULT for PRS_ROUTE */
-#define PRS_ROUTE_CH1PEN                        (0x1UL << 1)                     /**< CH1 Pin Enable */
-#define _PRS_ROUTE_CH1PEN_SHIFT                 1                                /**< Shift value for PRS_CH1PEN */
-#define _PRS_ROUTE_CH1PEN_MASK                  0x2UL                            /**< Bit mask for PRS_CH1PEN */
-#define _PRS_ROUTE_CH1PEN_DEFAULT               0x00000000UL                     /**< Mode DEFAULT for PRS_ROUTE */
-#define PRS_ROUTE_CH1PEN_DEFAULT                (_PRS_ROUTE_CH1PEN_DEFAULT << 1) /**< Shifted mode DEFAULT for PRS_ROUTE */
-#define PRS_ROUTE_CH2PEN                        (0x1UL << 2)                     /**< CH2 Pin Enable */
-#define _PRS_ROUTE_CH2PEN_SHIFT                 2                                /**< Shift value for PRS_CH2PEN */
-#define _PRS_ROUTE_CH2PEN_MASK                  0x4UL                            /**< Bit mask for PRS_CH2PEN */
-#define _PRS_ROUTE_CH2PEN_DEFAULT               0x00000000UL                     /**< Mode DEFAULT for PRS_ROUTE */
-#define PRS_ROUTE_CH2PEN_DEFAULT                (_PRS_ROUTE_CH2PEN_DEFAULT << 2) /**< Shifted mode DEFAULT for PRS_ROUTE */
-#define PRS_ROUTE_CH3PEN                        (0x1UL << 3)                     /**< CH3 Pin Enable */
-#define _PRS_ROUTE_CH3PEN_SHIFT                 3                                /**< Shift value for PRS_CH3PEN */
-#define _PRS_ROUTE_CH3PEN_MASK                  0x8UL                            /**< Bit mask for PRS_CH3PEN */
-#define _PRS_ROUTE_CH3PEN_DEFAULT               0x00000000UL                     /**< Mode DEFAULT for PRS_ROUTE */
-#define PRS_ROUTE_CH3PEN_DEFAULT                (_PRS_ROUTE_CH3PEN_DEFAULT << 3) /**< Shifted mode DEFAULT for PRS_ROUTE */
-#define _PRS_ROUTE_LOCATION_SHIFT               8                                /**< Shift value for PRS_LOCATION */
-#define _PRS_ROUTE_LOCATION_MASK                0x700UL                          /**< Bit mask for PRS_LOCATION */
-#define _PRS_ROUTE_LOCATION_LOC0                0x00000000UL                     /**< Mode LOC0 for PRS_ROUTE */
-#define _PRS_ROUTE_LOCATION_LOC1                0x00000001UL                     /**< Mode LOC1 for PRS_ROUTE */
-#define PRS_ROUTE_LOCATION_LOC0                 (_PRS_ROUTE_LOCATION_LOC0 << 8)  /**< Shifted mode LOC0 for PRS_ROUTE */
-#define PRS_ROUTE_LOCATION_LOC1                 (_PRS_ROUTE_LOCATION_LOC1 << 8)  /**< Shifted mode LOC1 for PRS_ROUTE */
+#define _PRS_ROUTE_RESETVALUE                   0x00000000UL                       /**< Default value for PRS_ROUTE */
+#define _PRS_ROUTE_MASK                         0x0000070FUL                       /**< Mask for PRS_ROUTE */
+#define PRS_ROUTE_CH0PEN                        (0x1UL << 0)                       /**< CH0 Pin Enable */
+#define _PRS_ROUTE_CH0PEN_SHIFT                 0                                  /**< Shift value for PRS_CH0PEN */
+#define _PRS_ROUTE_CH0PEN_MASK                  0x1UL                              /**< Bit mask for PRS_CH0PEN */
+#define _PRS_ROUTE_CH0PEN_DEFAULT               0x00000000UL                       /**< Mode DEFAULT for PRS_ROUTE */
+#define PRS_ROUTE_CH0PEN_DEFAULT                (_PRS_ROUTE_CH0PEN_DEFAULT << 0)   /**< Shifted mode DEFAULT for PRS_ROUTE */
+#define PRS_ROUTE_CH1PEN                        (0x1UL << 1)                       /**< CH1 Pin Enable */
+#define _PRS_ROUTE_CH1PEN_SHIFT                 1                                  /**< Shift value for PRS_CH1PEN */
+#define _PRS_ROUTE_CH1PEN_MASK                  0x2UL                              /**< Bit mask for PRS_CH1PEN */
+#define _PRS_ROUTE_CH1PEN_DEFAULT               0x00000000UL                       /**< Mode DEFAULT for PRS_ROUTE */
+#define PRS_ROUTE_CH1PEN_DEFAULT                (_PRS_ROUTE_CH1PEN_DEFAULT << 1)   /**< Shifted mode DEFAULT for PRS_ROUTE */
+#define PRS_ROUTE_CH2PEN                        (0x1UL << 2)                       /**< CH2 Pin Enable */
+#define _PRS_ROUTE_CH2PEN_SHIFT                 2                                  /**< Shift value for PRS_CH2PEN */
+#define _PRS_ROUTE_CH2PEN_MASK                  0x4UL                              /**< Bit mask for PRS_CH2PEN */
+#define _PRS_ROUTE_CH2PEN_DEFAULT               0x00000000UL                       /**< Mode DEFAULT for PRS_ROUTE */
+#define PRS_ROUTE_CH2PEN_DEFAULT                (_PRS_ROUTE_CH2PEN_DEFAULT << 2)   /**< Shifted mode DEFAULT for PRS_ROUTE */
+#define PRS_ROUTE_CH3PEN                        (0x1UL << 3)                       /**< CH3 Pin Enable */
+#define _PRS_ROUTE_CH3PEN_SHIFT                 3                                  /**< Shift value for PRS_CH3PEN */
+#define _PRS_ROUTE_CH3PEN_MASK                  0x8UL                              /**< Bit mask for PRS_CH3PEN */
+#define _PRS_ROUTE_CH3PEN_DEFAULT               0x00000000UL                       /**< Mode DEFAULT for PRS_ROUTE */
+#define PRS_ROUTE_CH3PEN_DEFAULT                (_PRS_ROUTE_CH3PEN_DEFAULT << 3)   /**< Shifted mode DEFAULT for PRS_ROUTE */
+#define _PRS_ROUTE_LOCATION_SHIFT               8                                  /**< Shift value for PRS_LOCATION */
+#define _PRS_ROUTE_LOCATION_MASK                0x700UL                            /**< Bit mask for PRS_LOCATION */
+#define _PRS_ROUTE_LOCATION_LOC0                0x00000000UL                       /**< Mode LOC0 for PRS_ROUTE */
+#define _PRS_ROUTE_LOCATION_DEFAULT             0x00000000UL                       /**< Mode DEFAULT for PRS_ROUTE */
+#define _PRS_ROUTE_LOCATION_LOC1                0x00000001UL                       /**< Mode LOC1 for PRS_ROUTE */
+#define PRS_ROUTE_LOCATION_LOC0                 (_PRS_ROUTE_LOCATION_LOC0 << 8)    /**< Shifted mode LOC0 for PRS_ROUTE */
+#define PRS_ROUTE_LOCATION_DEFAULT              (_PRS_ROUTE_LOCATION_DEFAULT << 8) /**< Shifted mode DEFAULT for PRS_ROUTE */
+#define PRS_ROUTE_LOCATION_LOC1                 (_PRS_ROUTE_LOCATION_LOC1 << 8)    /**< Shifted mode LOC1 for PRS_ROUTE */
 
 /* Bit fields for PRS CH_CTRL */
 #define _PRS_CH_CTRL_RESETVALUE                 0x00000000UL                                /**< Default value for PRS_CH_CTRL */
@@ -2027,8 +2036,8 @@ typedef struct
 #define MSC_UNLOCK_CODE      0x1B71 /**< MSC unlock code */
 #define EMU_UNLOCK_CODE      0xADE8 /**< EMU unlock code */
 #define CMU_UNLOCK_CODE      0x580E /**< CMU unlock code */
-#define GPIO_UNLOCK_CODE     0xA534 /**< GPIO unlock code */
 #define TIMER_UNLOCK_CODE    0xCE80 /**< TIMER unlock code */
+#define GPIO_UNLOCK_CODE     0xA534 /**< GPIO unlock code */
 #define BURTC_UNLOCK_CODE    0xAEE8 /**< BURTC unlock code */
 
 /** @} End of group EFM32LG290F256_UNLOCK */
@@ -2061,12 +2070,11 @@ typedef struct
 #define SET_BIT_FIELD(REG, MASK, VALUE, OFFSET) \
   REG = ((REG) &~(MASK)) | (((VALUE) << (OFFSET)) & (MASK));
 
-/** @} End of group EFM32LG290F256  */
+/** @} End of group EFM32LG290F256 */
 
 /** @} End of group Parts */
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif /* __EFM32LG290F256_H */

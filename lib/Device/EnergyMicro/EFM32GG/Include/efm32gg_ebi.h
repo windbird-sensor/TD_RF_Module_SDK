@@ -2,7 +2,7 @@
  * @file
  * @brief efm32gg_ebi Register and Bit Field definitions
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -512,9 +512,11 @@ typedef struct
 #define _EBI_ROUTE_LOCATION_SHIFT                 28                                   /**< Shift value for EBI_LOCATION */
 #define _EBI_ROUTE_LOCATION_MASK                  0x70000000UL                         /**< Bit mask for EBI_LOCATION */
 #define _EBI_ROUTE_LOCATION_LOC0                  0x00000000UL                         /**< Mode LOC0 for EBI_ROUTE */
+#define _EBI_ROUTE_LOCATION_DEFAULT               0x00000000UL                         /**< Mode DEFAULT for EBI_ROUTE */
 #define _EBI_ROUTE_LOCATION_LOC1                  0x00000001UL                         /**< Mode LOC1 for EBI_ROUTE */
 #define _EBI_ROUTE_LOCATION_LOC2                  0x00000002UL                         /**< Mode LOC2 for EBI_ROUTE */
 #define EBI_ROUTE_LOCATION_LOC0                   (_EBI_ROUTE_LOCATION_LOC0 << 28)     /**< Shifted mode LOC0 for EBI_ROUTE */
+#define EBI_ROUTE_LOCATION_DEFAULT                (_EBI_ROUTE_LOCATION_DEFAULT << 28)  /**< Shifted mode DEFAULT for EBI_ROUTE */
 #define EBI_ROUTE_LOCATION_LOC1                   (_EBI_ROUTE_LOCATION_LOC1 << 28)     /**< Shifted mode LOC1 for EBI_ROUTE */
 #define EBI_ROUTE_LOCATION_LOC2                   (_EBI_ROUTE_LOCATION_LOC2 << 28)     /**< Shifted mode LOC2 for EBI_ROUTE */
 

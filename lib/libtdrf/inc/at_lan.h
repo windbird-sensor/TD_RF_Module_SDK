@@ -2,10 +2,10 @@
 * @file
  * @brief TD LAN RF AT command extension for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -40,40 +40,40 @@
 extern "C" {
 #endif
 
-/***************************************************************************//**
- * @addtogroup AT_LAN_RF Local RF AT Command Extension
- * @brief Local RF AT command extension for the TD1202 module
- * @{
- ******************************************************************************/
+	/***************************************************************************//**
+	 * @addtogroup AT_LAN_RF LAN AT Command Extension
+	 * @brief LAN AT command extension for the TDxxx RF modules
+	 * @{
+	 ******************************************************************************/
 
-/*******************************************************************************
- *************************   DEFINES   *****************************************
- ******************************************************************************/
+	/*******************************************************************************
+	 *************************   DEFINES   *****************************************
+	 ******************************************************************************/
 
-/** @addtogroup AT_LAN_DEFINES Defines
- * @{ */
+	/** @addtogroup AT_LAN_DEFINES Defines
+	 * @{ */
 
-/** Alias for the local RF AT extension */
+	/** Alias for the local RF AT extension */
 #define AT_LAN_EXTENSION local_extension,
 
-/** @} */
+	/** @} */
 
-/*******************************************************************************
- **************************   PUBLIC VARIABLES   *******************************
- ******************************************************************************/
+	/*******************************************************************************
+	 **************************   PUBLIC VARIABLES   *******************************
+	 ******************************************************************************/
 
-/** @addtogroup AT_LAN_PUBLIC_VARIABLES Public Variables
- * @{ */
-/** @addtogroup AT_LAN_EXTERN Extern Declarations
- * @{ */
+	/** @addtogroup AT_LAN_GLOBAL_VARIABLES Global Variables
+	 * @{ */
+	/** @addtogroup AT_LAN_EXTERN Extern Declarations
+	 * @{ */
 
-/** The local RF AT extension structure */
-extern AT_extension_t lan_extension;
+	/** The local RF AT extension structure */
+	extern AT_extension_t lan_extension;
 
-/** @} */
-/** @} */
+	/** @} */
+	/** @} */
 
-/** @} (end addtogroup AT_LAN_RF) */
+	/** @} (end addtogroup AT_LAN_RF) */
 
 #ifdef __cplusplus
 }

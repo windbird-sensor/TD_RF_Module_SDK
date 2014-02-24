@@ -1,11 +1,11 @@
 /***************************************************************************//**
- * @file sensor_keepalive.h
+ * @file
  * @brief API for sending KeepAlive frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.2.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -31,48 +31,37 @@
  *
  ******************************************************************************/
 
-#ifndef SENSOR_KEEPALIVE_H_
-#define SENSOR_KEEPALIVE_H_
+#ifndef __SENSOR_KEEPALIVE_H
+#define __SENSOR_KEEPALIVE_H
+
+#include <stdint.h>
+#include <td_core.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/** @defgroup SENSOR_KEEPALIVE_USER_FUNCTIONS User Functions
- *  @ingroup SENSOR_KEEPALIVE
- *  @nosubgrouping
- */
+	/***************************************************************************//**
+	 * @addtogroup SENSOR_KEEPALIVE Sensor Keep-Alive
+	 * @{
+	 ******************************************************************************/
 
-/***************************************************************************//**
- * @addtogroup SENSOR_KEEPALIVE Sensor Keep-Alive
- * @{
- ******************************************************************************/
+	/*******************************************************************************
+	 *************************   PROTOTYPES   **************************************
+	 ******************************************************************************/
 
-/*******************************************************************************
- *************************   PROTOTYPES   **************************************
- ******************************************************************************/
+	/** @addtogroup SENSOR_KEEPALIVE_USER_FUNCTIONS User Functions
+	 * @{ */
 
-/** @addtogroup SENSOR_KEEPALIVE_PUBLIC_FUNCTIONS Public Functions
- * @{ */
-/** @addtogroup SENSOR_KEEPALIVE_PROTOTYPES Prototypes
- * @{ */
+	bool TD_SENSOR_SendKeepAlive(void);
+	void TD_SENSOR_SetKeepAliveTransmissionProfile(uint8_t repetition, uint32_t interval);
 
-/** @ingroup SENSOR_KEEPALIVE_USER_FUNCTIONS
- * @{ */
+	/** @} */
 
-bool TD_SENSOR_SendKeepAlive();
-
-void TD_SENSOR_SetKeepAliveTransmissionProfile(uint8_t repetition,uint32_t interval);
-
-/** @} */
-
-/** @} */
-
-/** @} */
-/** @} (end addtogroup SENSOR_KEEPALIVE) */
+	/** @} (end addtogroup SENSOR_KEEPALIVE) */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* SENSOR_KEEPALIVE_H_ */
+#endif // __SENSOR_KEEPALIVE_H

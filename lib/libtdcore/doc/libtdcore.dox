@@ -1,0 +1,136 @@
+/**
+\mainpage libtdcore
+
+\section Overview
+
+The libtdcore library provides core functions for low-level hardware configuration and resource sharing.
+
+The libtdcore library is organized as a collection of independent modules, each one addressing a particular software or hardware entity.
+
+\section Detailed Description
+
+\subsection Config
+file: td_config.h
+
+Provides hardware, code and array definitions to allow hardware and array size configuration as well as code removal within
+each application instead of within the library. This header should be included in the main file of your application after all
+other includes.
+
+\subsection Scheduler
+file: td_scheduler.h
+
+Provides a software timer. Timer can be added or removed, and will trigger a specific callback with specific argument
+at a given interval. Triggered callback can either be called in interrupt context or outside interrupt context. In the
+last case timers are being queued until the SchedulerProcess functions is being called thus calling every "waiting" timers.
+Note that the SchedulerProcess function is being called in the main (td_main.c) function before UserLoop.
+
+\subsection AT Parser
+file: at_parse.h
+
+Provides an AT parser which can be extended within the user application.
+
+\subsection Printf
+file: td_printf.h
+
+Provides printf functions to output strings on uart.
+
+\subsection Uart
+file: td_uart.h
+
+Provides functions to drive the UART.
+
+\subsection RTC
+file: td_rtc.h
+
+Provides low-level RTC functions. It is not recommended to use these low level functions as COMP0 is used by the system
+(Sigfox, LAN, Delay) and COMP1 is used by the scheduler. Either use your own function based on COMP1 or use the scheduler.
+The RTC overflows every 512 seconds thus waking up the chip.
+
+\subsection GPIO
+file: td_gpio.h
+
+Provides low-level functions for GPIO interrupt handling.
+
+\subsection Flash
+file: td_flash.h
+
+Provides function to read/write into the internal flash. Also provides functions to emulate an eeprom by saving and writing
+variables into flash. Provide a logger making use of all remaining flash.
+
+\subsection Watchdog
+file: td_watchdog.h
+
+Provides an manual or automatic watchdog. Automatic requires one timer in the scheduler.
+
+\subsection Trap
+file: td_trap.h
+
+Provides trap functions allowing to identify issues within a library or an application. Trap origin can be printed, saved in flash,
+emitted via sigfox or be processed in any other way by the user application.
+
+\subsection TIMER
+file: td_spi.h
+
+Provides a PWM output with a 50% duty cycle on a specific frequency and pin.
+
+\subsection UTILS
+file: td_utils.h
+
+Provide general utility functions.
+
+\subsection SPI
+file: td_spi.h
+
+Provides low level function to read/write to the SPI bus while sharing it. Do not use!
+
+\subsection CMU
+file: td_cmu.h
+
+Provides functions to initialise the clock management unit properly. Do not use!
+
+\section Limitation
+
+\subsection Scheduler
+
+Each timer requires to save a substantial quantity of information thus resulting in allowing a limited number of timer
+when building up a binary. Moreover only a limited number of timer can be queued and in case of queue overflow, timer will
+be lost. Default parameters allow up to 100 timers at a timer and 100 timer in queue.
+
+Default parameters can be overloaded by defining the following symbol in your application before the td_config.h include
+
+TD_SCHEDULER_MAX_TIMER
+TD_SCHEDULER_MAX_QUEUE
+
+When lowering timer count, please keep in mind that some modules require timer to work:
+
+libtdcore:
+
+- automatic watchdog (1 timer)
+
+libtdsensor:
+
+- keepalive monitoring (1 timer)
+- connection monitoring (1 timer/device on the gateway)
+- transmitter (1 timer/frame to be retransmitted)
+
+libtdgeoloc
+
+- geolocation (1 timer)
+
+\subsection Watchdog
+
+The watchdog will always count while in EM2 but will never count while in EM3. The watchdog clock is not accurate at all
+and real watchdog time can vary up to +-50%.
+
+\section Examples
+
+  - td12xx_template: blank project
+  - blink: show how to blink a led
+  - button_poll: poll a button state
+  - button_interrupt: send a sigfox frame including a counter each time a button is pushed via interruption
+  - at_standard: show how to include standard at parser extension
+  - at_extended: show how to extend the at parser to add user commands
+  - watchdog: simulate a crash and watchdog recovery
+  - scheduler_blink: blink a led in interruption using the scheduler
+  - scheduler_multiple: show how to use multiple timers
+*/

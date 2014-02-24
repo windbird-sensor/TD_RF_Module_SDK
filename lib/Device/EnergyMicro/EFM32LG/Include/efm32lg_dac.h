@@ -2,7 +2,7 @@
  * @file
  * @brief efm32lg_dac Register and Bit Field definitions
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -464,28 +464,28 @@ typedef struct
 #define DAC_OPACTRL_OPA2LPFDIS_DEFAULT        (_DAC_OPACTRL_OPA2LPFDIS_DEFAULT << 16) /**< Shifted mode DEFAULT for DAC_OPACTRL */
 #define DAC_OPACTRL_OPA2LPFDIS_PLPFDIS        (_DAC_OPACTRL_OPA2LPFDIS_PLPFDIS << 16) /**< Shifted mode PLPFDIS for DAC_OPACTRL */
 #define DAC_OPACTRL_OPA2LPFDIS_NLPFDIS        (_DAC_OPACTRL_OPA2LPFDIS_NLPFDIS << 16) /**< Shifted mode NLPFDIS for DAC_OPACTRL */
-#define DAC_OPACTRL_OPA0SHORT                 (0x1UL << 22)                           /**< Short the non-inverting and Invering Input. */
+#define DAC_OPACTRL_OPA0SHORT                 (0x1UL << 22)                           /**< Short the non-inverting and inverting input. */
 #define _DAC_OPACTRL_OPA0SHORT_SHIFT          22                                      /**< Shift value for DAC_OPA0SHORT */
 #define _DAC_OPACTRL_OPA0SHORT_MASK           0x400000UL                              /**< Bit mask for DAC_OPA0SHORT */
 #define _DAC_OPACTRL_OPA0SHORT_DEFAULT        0x00000000UL                            /**< Mode DEFAULT for DAC_OPACTRL */
 #define DAC_OPACTRL_OPA0SHORT_DEFAULT         (_DAC_OPACTRL_OPA0SHORT_DEFAULT << 22)  /**< Shifted mode DEFAULT for DAC_OPACTRL */
-#define DAC_OPACTRL_OPA1SHORT                 (0x1UL << 23)                           /**< Short the non-inverting and Invering Input. */
+#define DAC_OPACTRL_OPA1SHORT                 (0x1UL << 23)                           /**< Short the non-inverting and inverting input. */
 #define _DAC_OPACTRL_OPA1SHORT_SHIFT          23                                      /**< Shift value for DAC_OPA1SHORT */
 #define _DAC_OPACTRL_OPA1SHORT_MASK           0x800000UL                              /**< Bit mask for DAC_OPA1SHORT */
 #define _DAC_OPACTRL_OPA1SHORT_DEFAULT        0x00000000UL                            /**< Mode DEFAULT for DAC_OPACTRL */
 #define DAC_OPACTRL_OPA1SHORT_DEFAULT         (_DAC_OPACTRL_OPA1SHORT_DEFAULT << 23)  /**< Shifted mode DEFAULT for DAC_OPACTRL */
-#define DAC_OPACTRL_OPA2SHORT                 (0x1UL << 24)                           /**< Short the non-inverting and Invering Input. */
+#define DAC_OPACTRL_OPA2SHORT                 (0x1UL << 24)                           /**< Short the non-inverting and inverting input. */
 #define _DAC_OPACTRL_OPA2SHORT_SHIFT          24                                      /**< Shift value for DAC_OPA2SHORT */
 #define _DAC_OPACTRL_OPA2SHORT_MASK           0x1000000UL                             /**< Bit mask for DAC_OPA2SHORT */
 #define _DAC_OPACTRL_OPA2SHORT_DEFAULT        0x00000000UL                            /**< Mode DEFAULT for DAC_OPACTRL */
 #define DAC_OPACTRL_OPA2SHORT_DEFAULT         (_DAC_OPACTRL_OPA2SHORT_DEFAULT << 24)  /**< Shifted mode DEFAULT for DAC_OPACTRL */
 
 /* Bit fields for DAC OPAOFFSET */
-#define _DAC_OPAOFFSET_RESETVALUE             0x00000000UL                             /**< Default value for DAC_OPAOFFSET */
+#define _DAC_OPAOFFSET_RESETVALUE             0x00000020UL                             /**< Default value for DAC_OPAOFFSET */
 #define _DAC_OPAOFFSET_MASK                   0x0000003FUL                             /**< Mask for DAC_OPAOFFSET */
 #define _DAC_OPAOFFSET_OPA2OFFSET_SHIFT       0                                        /**< Shift value for DAC_OPA2OFFSET */
 #define _DAC_OPAOFFSET_OPA2OFFSET_MASK        0x3FUL                                   /**< Bit mask for DAC_OPA2OFFSET */
-#define _DAC_OPAOFFSET_OPA2OFFSET_DEFAULT     0x00000000UL                             /**< Mode DEFAULT for DAC_OPAOFFSET */
+#define _DAC_OPAOFFSET_OPA2OFFSET_DEFAULT     0x00000020UL                             /**< Mode DEFAULT for DAC_OPAOFFSET */
 #define DAC_OPAOFFSET_OPA2OFFSET_DEFAULT      (_DAC_OPAOFFSET_OPA2OFFSET_DEFAULT << 0) /**< Shifted mode DEFAULT for DAC_OPAOFFSET */
 
 /* Bit fields for DAC OPA0MUX */

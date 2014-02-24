@@ -2,7 +2,7 @@
  * @file
  * @brief Digital to Analog Converter (DAC) peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -33,12 +33,15 @@
 #ifndef __EM_DAC_H
 #define __EM_DAC_H
 
+#include "em_device.h"
+#if defined(DAC_COUNT) && (DAC_COUNT > 0)
+
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <stdbool.h>
-#include "em_device.h"
 
 /***************************************************************************//**
  * @addtogroup EM_Library
@@ -313,5 +316,7 @@ void DAC_Reset(DAC_TypeDef *dac);
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* defined(DAC_COUNT) && (DAC_COUNT > 0) */
 
 #endif /* __EM_DAC_H */

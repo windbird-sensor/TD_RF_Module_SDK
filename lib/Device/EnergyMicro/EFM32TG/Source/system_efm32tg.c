@@ -2,7 +2,7 @@
  * @file
  * @brief CMSIS Cortex-M3 System Layer for EFM32TG devices.
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -291,37 +291,10 @@ void SystemHFXOClockSet(uint32_t freq)
  *   and any data has been initialized. For this reason, it cannot do any
  *   initialization of variables etc.
  *****************************************************************************/
+void SystemInit(void)
+{
+}
 
-#if defined(__ICCARM__)
-extern unsigned char CSTACK$$Base;
-extern unsigned char CSTACK$$Limit;
-unsigned char * memptr;
-void SystemInit(void)
-{
-	// Initialize Stack
-	memptr = &CSTACK$$Base;
-	while (memptr < &CSTACK$$Limit) {
-		*memptr++ = 0xCD;
-	}
-}
-#elif defined(__GNUC__)
-
-extern unsigned char __end;
-extern unsigned char __cs3_region_end_ram;
-unsigned char * memptr;
-void SystemInit(void)
-{
-	// Initialize Stack
-	memptr = &__end;
-	while (memptr < &__cs3_region_end_ram) {
-		*memptr++ = 0xCD;
-	}
-}
-#else
-void SystemInit(void)
-{
-}
-#endif
 
 /**************************************************************************//**
  * @brief

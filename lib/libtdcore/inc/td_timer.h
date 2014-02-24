@@ -2,10 +2,10 @@
  * @file
  * @brief Timer peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 2.0.2
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -34,50 +34,50 @@
 #ifndef __TD_TIMER_H
 #define __TD_TIMER_H
 
+#include <stdint.h>
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/***************************************************************************//**
- * @addtogroup TIMER
- * @brief Timer peripheral API for the TD1202 module
- * @{
- *
- * @note
- *   Actually, the TIMER is used to implement a 50% duty-cycle output with
- *   adjustable frequency only.
- ******************************************************************************/
+	/***************************************************************************//**
+	 * @addtogroup TIMER
+	 * @brief Timer peripheral API for the TDxxxx RF modules
+	 * @{
+	 *
+	 * @note
+	 *   Actually, the TIMER is used to implement a 50% duty-cycle output with
+	 *   adjustable frequency only.
+	 ******************************************************************************/
 
-/*******************************************************************************
- *************************   PROTOTYPES   **************************************
- ******************************************************************************/
+	/*******************************************************************************
+	 *************************   PROTOTYPES   **************************************
+	 ******************************************************************************/
 
-/** @addtogroup TIMER_USER_FUNCTIONS User Functions
- * @{ */
-/** @addtogroup TIMER_PROTOTYPES Prototypes
- * @{ */
+	/** @addtogroup TIMER_USER_FUNCTIONS User Functions
+	 * @{ */
 
-void TD_TIMER_Start(uint32_t frequency);
-void TD_TIMER_Stop(void);
+	void TD_TIMER_Start(uint32_t frequency);
+	void TD_TIMER_Stop(void);
 
-/** @} */
-/** @} */
+	/** @} */
 
-/*******************************************************************************
- **************************   PUBLIC VARIABLES   *******************************
- ******************************************************************************/
+	/*******************************************************************************
+	 **************************   PUBLIC VARIABLES   *******************************
+	 ******************************************************************************/
 
-/** @addtogroup TIMER_USER_VARIABLES User Variables
- * @{ */
-/** @addtogroup TIMER_EXTERN Extern Declarations
- * @{ */
+	/** @addtogroup TIMER_GLOBAL_VARIABLES Global Variables
+	 * @{ */
+	/** @addtogroup TIMER_EXTERN External Declarations
+	 * @{ */
 
-extern bool TD_TIMER_Enabled;
+	extern bool TD_TIMER_Enabled;
 
-/** @} */
-/** @} */
+	/** @} */
+	/** @} */
 
-/** @} (end addtogroup TIMER) */
+	/** @} (end addtogroup TIMER) */
 
 #ifdef __cplusplus
 }

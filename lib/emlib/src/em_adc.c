@@ -2,7 +2,7 @@
  * @file
  * @brief Analog to Digital Converter (ADC) Peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -31,6 +31,8 @@
  *
  ******************************************************************************/
 #include "em_adc.h"
+#if defined(ADC_COUNT) && (ADC_COUNT > 0)
+
 #include "em_cmu.h"
 #include "em_assert.h"
 
@@ -278,7 +280,7 @@ void ADC_Init(ADC_TypeDef *adc, const ADC_Init_TypeDef *init)
  *   Initialize ADC scan sequence.
  *
  * @details
- *   Please refer to ADC_StartScan() for starting scan sequence.
+ *   Please refer to ADC_Start() for starting scan sequence.
  *
  *   When selecting an external reference, the gain and offset calibration
  *   must be set explicitly (CAL register). For other references, the
@@ -340,7 +342,7 @@ void ADC_InitScan(ADC_TypeDef *adc, const ADC_InitScan_TypeDef *init)
  *   Initialize single ADC sample conversion.
  *
  * @details
- *   Please refer to ADC_StartSingle() for starting single conversion.
+ *   Please refer to ADC_Start() for starting single conversion.
  *
  *   When selecting an external reference, the gain and offset calibration
  *   must be set explicitly (CAL register). For other references, the
@@ -457,8 +459,6 @@ uint8_t ADC_PrescaleCalc(uint32_t adcFreq, uint32_t hfperFreq)
  ******************************************************************************/
 void ADC_Reset(ADC_TypeDef *adc)
 {
-  uint32_t cal;
-
   /* Stop conversions, before resetting other registers. */
   adc->CMD        = ADC_CMD_SINGLESTOP | ADC_CMD_SCANSTOP;
   adc->SINGLECTRL = _ADC_SINGLECTRL_RESETVALUE;
@@ -468,12 +468,9 @@ void ADC_Reset(ADC_TypeDef *adc)
   adc->IFC        = _ADC_IFC_MASK;
   adc->BIASPROG   = _ADC_BIASPROG_RESETVALUE;
 
-  cal  = adc->CAL & ~(_ADC_CAL_SINGLEOFFSET_MASK | _ADC_CAL_SINGLEGAIN_MASK);
-  cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_1V25_GAIN_MASK) >>
-          _DEVINFO_ADC0CAL0_1V25_GAIN_SHIFT) << _ADC_CAL_SINGLEGAIN_SHIFT;
-  cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_1V25_OFFSET_MASK) >>
-          _DEVINFO_ADC0CAL0_1V25_OFFSET_SHIFT) << _ADC_CAL_SINGLEOFFSET_SHIFT;
-  adc->CAL = cal;
+  /* Load calibration values for the 1V25 internal reference. */
+  ADC_CalibrateLoadSingle(adc, adcRef1V25);
+  ADC_CalibrateLoadScan(adc, adcRef1V25);
 
   /* Do not reset route register, setting should be done independently */
 }
@@ -523,3 +520,4 @@ uint8_t ADC_TimebaseCalc(uint32_t hfperFreq)
 
 /** @} (end addtogroup ADC) */
 /** @} (end addtogroup EM_Library) */
+#endif /* defined(ADC_COUNT) && (ADC_COUNT > 0) */

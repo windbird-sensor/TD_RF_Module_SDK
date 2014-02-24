@@ -2,7 +2,7 @@
  * @file
  * @brief efm32g_usart Register and Bit Field definitions
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -1003,13 +1003,13 @@ typedef struct
 #define USART_ROUTE_CLKPEN_DEFAULT            (_USART_ROUTE_CLKPEN_DEFAULT << 3)   /**< Shifted mode DEFAULT for USART_ROUTE */
 #define _USART_ROUTE_LOCATION_SHIFT           8                                    /**< Shift value for USART_LOCATION */
 #define _USART_ROUTE_LOCATION_MASK            0x300UL                              /**< Bit mask for USART_LOCATION */
-#define _USART_ROUTE_LOCATION_DEFAULT         0x00000000UL                         /**< Mode DEFAULT for USART_ROUTE */
 #define _USART_ROUTE_LOCATION_LOC0            0x00000000UL                         /**< Mode LOC0 for USART_ROUTE */
+#define _USART_ROUTE_LOCATION_DEFAULT         0x00000000UL                         /**< Mode DEFAULT for USART_ROUTE */
 #define _USART_ROUTE_LOCATION_LOC1            0x00000001UL                         /**< Mode LOC1 for USART_ROUTE */
 #define _USART_ROUTE_LOCATION_LOC2            0x00000002UL                         /**< Mode LOC2 for USART_ROUTE */
 #define _USART_ROUTE_LOCATION_LOC3            0x00000003UL                         /**< Mode LOC3 for USART_ROUTE */
-#define USART_ROUTE_LOCATION_DEFAULT          (_USART_ROUTE_LOCATION_DEFAULT << 8) /**< Shifted mode DEFAULT for USART_ROUTE */
 #define USART_ROUTE_LOCATION_LOC0             (_USART_ROUTE_LOCATION_LOC0 << 8)    /**< Shifted mode LOC0 for USART_ROUTE */
+#define USART_ROUTE_LOCATION_DEFAULT          (_USART_ROUTE_LOCATION_DEFAULT << 8) /**< Shifted mode DEFAULT for USART_ROUTE */
 #define USART_ROUTE_LOCATION_LOC1             (_USART_ROUTE_LOCATION_LOC1 << 8)    /**< Shifted mode LOC1 for USART_ROUTE */
 #define USART_ROUTE_LOCATION_LOC2             (_USART_ROUTE_LOCATION_LOC2 << 8)    /**< Shifted mode LOC2 for USART_ROUTE */
 #define USART_ROUTE_LOCATION_LOC3             (_USART_ROUTE_LOCATION_LOC3 << 8)    /**< Shifted mode LOC3 for USART_ROUTE */

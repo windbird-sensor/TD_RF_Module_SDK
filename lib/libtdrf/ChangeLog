@@ -23,3 +23,52 @@
   * Added TD_LAN_Restart(), TD_LAN_Process(), TD_LAN_SetFrequencyLevel() and TD_LAN_ReadLatchedRSSI() to public API
   * Added TD_SIGFOX_RelayId()
   * Added AT_LAN AT parser extension
+  * Added AT_LAN AT parser extension
+  
+= Version 3.0.0 =
+  
+#### Major Updates ####
+  
+ * Supports modules with SIGFOX ID >= 0x10000 (still retaining compatibility with smaller 16 bit IDs)
+ * Now supports SIGFOX protocol V1 by default
+ 
+#### Changes ####
+
+##### BOOTLOADER: #####
+
+  * Added TD_BOOT_ConfigureRadio() for performing the intial RF chip configuration
+  * Added TD_BOOT_Exec_InitData() for performing the initial GPIO configuration
+    
+##### LAN: #####
+
+  * Moved GET() macro to libtdcore utils as GET_BITFIELD()
+  * Moved SET() maro to  libtdcore utils as SET_BITFIELD()
+  * Added TD_LAN_GetUserCallback()
+  * Added TD_LAN_ReadLatchedRSSI()
+  * Added TD_LAN_LastError()
+  * Added TD_LAN_GetFrequency()
+  * Added TD_LAN_GetPowerLevel()
+  * Added TD_LAN_isActive()
+                  
+##### SIGFOX: #####
+
+  * Added TD_SIGFOX_PowerVoltageExtended() to get the supply voltage while transmitting with a better accuracy
+  * Removed the non-API function TD_SIGFOX_FrequencySet()
+  * Renamed the non-API function TD_SIGFOX_MainRfPower() to TD_SIGFOX_RfPower()
+  * Removed the non-API function TD_SIGFOX_RelayId() as it is non longer possible to relay SIGFFOX IDs with SIGFOX protocol v1
+        
+#### Bug Fixes ####
+
+##### RF: #####
+
+  * Bulletproof handling of RF chip mode (sleep/Idle/Receive/Transmit) transitions
+
+##### LAN: #####
+
+  * Major rewrite of LAN functions, it is heavily recommended to not mix devices with a `libtdrf` library older than v4.0.0
+  * Better error handling and reporting
+
+##### BOOTLOADER: #####
+
+  * Extension of the bootloader to provide customization parameters: LED status pin location, optional update blink indication, RF channel selection, etc.
+    

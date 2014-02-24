@@ -2,7 +2,7 @@
  * @file
  * @brief efm32lg_prs Register and Bit Field definitions
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -180,34 +180,36 @@ typedef struct
 #define PRS_SWLEVEL_CH11LEVEL_DEFAULT           (_PRS_SWLEVEL_CH11LEVEL_DEFAULT << 11) /**< Shifted mode DEFAULT for PRS_SWLEVEL */
 
 /* Bit fields for PRS ROUTE */
-#define _PRS_ROUTE_RESETVALUE                   0x00000000UL                     /**< Default value for PRS_ROUTE */
-#define _PRS_ROUTE_MASK                         0x0000070FUL                     /**< Mask for PRS_ROUTE */
-#define PRS_ROUTE_CH0PEN                        (0x1UL << 0)                     /**< CH0 Pin Enable */
-#define _PRS_ROUTE_CH0PEN_SHIFT                 0                                /**< Shift value for PRS_CH0PEN */
-#define _PRS_ROUTE_CH0PEN_MASK                  0x1UL                            /**< Bit mask for PRS_CH0PEN */
-#define _PRS_ROUTE_CH0PEN_DEFAULT               0x00000000UL                     /**< Mode DEFAULT for PRS_ROUTE */
-#define PRS_ROUTE_CH0PEN_DEFAULT                (_PRS_ROUTE_CH0PEN_DEFAULT << 0) /**< Shifted mode DEFAULT for PRS_ROUTE */
-#define PRS_ROUTE_CH1PEN                        (0x1UL << 1)                     /**< CH1 Pin Enable */
-#define _PRS_ROUTE_CH1PEN_SHIFT                 1                                /**< Shift value for PRS_CH1PEN */
-#define _PRS_ROUTE_CH1PEN_MASK                  0x2UL                            /**< Bit mask for PRS_CH1PEN */
-#define _PRS_ROUTE_CH1PEN_DEFAULT               0x00000000UL                     /**< Mode DEFAULT for PRS_ROUTE */
-#define PRS_ROUTE_CH1PEN_DEFAULT                (_PRS_ROUTE_CH1PEN_DEFAULT << 1) /**< Shifted mode DEFAULT for PRS_ROUTE */
-#define PRS_ROUTE_CH2PEN                        (0x1UL << 2)                     /**< CH2 Pin Enable */
-#define _PRS_ROUTE_CH2PEN_SHIFT                 2                                /**< Shift value for PRS_CH2PEN */
-#define _PRS_ROUTE_CH2PEN_MASK                  0x4UL                            /**< Bit mask for PRS_CH2PEN */
-#define _PRS_ROUTE_CH2PEN_DEFAULT               0x00000000UL                     /**< Mode DEFAULT for PRS_ROUTE */
-#define PRS_ROUTE_CH2PEN_DEFAULT                (_PRS_ROUTE_CH2PEN_DEFAULT << 2) /**< Shifted mode DEFAULT for PRS_ROUTE */
-#define PRS_ROUTE_CH3PEN                        (0x1UL << 3)                     /**< CH3 Pin Enable */
-#define _PRS_ROUTE_CH3PEN_SHIFT                 3                                /**< Shift value for PRS_CH3PEN */
-#define _PRS_ROUTE_CH3PEN_MASK                  0x8UL                            /**< Bit mask for PRS_CH3PEN */
-#define _PRS_ROUTE_CH3PEN_DEFAULT               0x00000000UL                     /**< Mode DEFAULT for PRS_ROUTE */
-#define PRS_ROUTE_CH3PEN_DEFAULT                (_PRS_ROUTE_CH3PEN_DEFAULT << 3) /**< Shifted mode DEFAULT for PRS_ROUTE */
-#define _PRS_ROUTE_LOCATION_SHIFT               8                                /**< Shift value for PRS_LOCATION */
-#define _PRS_ROUTE_LOCATION_MASK                0x700UL                          /**< Bit mask for PRS_LOCATION */
-#define _PRS_ROUTE_LOCATION_LOC0                0x00000000UL                     /**< Mode LOC0 for PRS_ROUTE */
-#define _PRS_ROUTE_LOCATION_LOC1                0x00000001UL                     /**< Mode LOC1 for PRS_ROUTE */
-#define PRS_ROUTE_LOCATION_LOC0                 (_PRS_ROUTE_LOCATION_LOC0 << 8)  /**< Shifted mode LOC0 for PRS_ROUTE */
-#define PRS_ROUTE_LOCATION_LOC1                 (_PRS_ROUTE_LOCATION_LOC1 << 8)  /**< Shifted mode LOC1 for PRS_ROUTE */
+#define _PRS_ROUTE_RESETVALUE                   0x00000000UL                       /**< Default value for PRS_ROUTE */
+#define _PRS_ROUTE_MASK                         0x0000070FUL                       /**< Mask for PRS_ROUTE */
+#define PRS_ROUTE_CH0PEN                        (0x1UL << 0)                       /**< CH0 Pin Enable */
+#define _PRS_ROUTE_CH0PEN_SHIFT                 0                                  /**< Shift value for PRS_CH0PEN */
+#define _PRS_ROUTE_CH0PEN_MASK                  0x1UL                              /**< Bit mask for PRS_CH0PEN */
+#define _PRS_ROUTE_CH0PEN_DEFAULT               0x00000000UL                       /**< Mode DEFAULT for PRS_ROUTE */
+#define PRS_ROUTE_CH0PEN_DEFAULT                (_PRS_ROUTE_CH0PEN_DEFAULT << 0)   /**< Shifted mode DEFAULT for PRS_ROUTE */
+#define PRS_ROUTE_CH1PEN                        (0x1UL << 1)                       /**< CH1 Pin Enable */
+#define _PRS_ROUTE_CH1PEN_SHIFT                 1                                  /**< Shift value for PRS_CH1PEN */
+#define _PRS_ROUTE_CH1PEN_MASK                  0x2UL                              /**< Bit mask for PRS_CH1PEN */
+#define _PRS_ROUTE_CH1PEN_DEFAULT               0x00000000UL                       /**< Mode DEFAULT for PRS_ROUTE */
+#define PRS_ROUTE_CH1PEN_DEFAULT                (_PRS_ROUTE_CH1PEN_DEFAULT << 1)   /**< Shifted mode DEFAULT for PRS_ROUTE */
+#define PRS_ROUTE_CH2PEN                        (0x1UL << 2)                       /**< CH2 Pin Enable */
+#define _PRS_ROUTE_CH2PEN_SHIFT                 2                                  /**< Shift value for PRS_CH2PEN */
+#define _PRS_ROUTE_CH2PEN_MASK                  0x4UL                              /**< Bit mask for PRS_CH2PEN */
+#define _PRS_ROUTE_CH2PEN_DEFAULT               0x00000000UL                       /**< Mode DEFAULT for PRS_ROUTE */
+#define PRS_ROUTE_CH2PEN_DEFAULT                (_PRS_ROUTE_CH2PEN_DEFAULT << 2)   /**< Shifted mode DEFAULT for PRS_ROUTE */
+#define PRS_ROUTE_CH3PEN                        (0x1UL << 3)                       /**< CH3 Pin Enable */
+#define _PRS_ROUTE_CH3PEN_SHIFT                 3                                  /**< Shift value for PRS_CH3PEN */
+#define _PRS_ROUTE_CH3PEN_MASK                  0x8UL                              /**< Bit mask for PRS_CH3PEN */
+#define _PRS_ROUTE_CH3PEN_DEFAULT               0x00000000UL                       /**< Mode DEFAULT for PRS_ROUTE */
+#define PRS_ROUTE_CH3PEN_DEFAULT                (_PRS_ROUTE_CH3PEN_DEFAULT << 3)   /**< Shifted mode DEFAULT for PRS_ROUTE */
+#define _PRS_ROUTE_LOCATION_SHIFT               8                                  /**< Shift value for PRS_LOCATION */
+#define _PRS_ROUTE_LOCATION_MASK                0x700UL                            /**< Bit mask for PRS_LOCATION */
+#define _PRS_ROUTE_LOCATION_LOC0                0x00000000UL                       /**< Mode LOC0 for PRS_ROUTE */
+#define _PRS_ROUTE_LOCATION_DEFAULT             0x00000000UL                       /**< Mode DEFAULT for PRS_ROUTE */
+#define _PRS_ROUTE_LOCATION_LOC1                0x00000001UL                       /**< Mode LOC1 for PRS_ROUTE */
+#define PRS_ROUTE_LOCATION_LOC0                 (_PRS_ROUTE_LOCATION_LOC0 << 8)    /**< Shifted mode LOC0 for PRS_ROUTE */
+#define PRS_ROUTE_LOCATION_DEFAULT              (_PRS_ROUTE_LOCATION_DEFAULT << 8) /**< Shifted mode DEFAULT for PRS_ROUTE */
+#define PRS_ROUTE_LOCATION_LOC1                 (_PRS_ROUTE_LOCATION_LOC1 << 8)    /**< Shifted mode LOC1 for PRS_ROUTE */
 
 /* Bit fields for PRS CH_CTRL */
 #define _PRS_CH_CTRL_RESETVALUE                 0x00000000UL                                /**< Default value for PRS_CH_CTRL */

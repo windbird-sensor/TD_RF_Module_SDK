@@ -2,7 +2,7 @@
  * @file
  * @brief Analog Comparator (ACMP) Peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -30,8 +30,10 @@
  * arising from your use of this Software.
  *
  ******************************************************************************/
-#include <stdbool.h>
 #include "em_acmp.h"
+#if defined(ACMP_COUNT) && (ACMP_COUNT > 0)
+
+#include <stdbool.h>
 #include "em_bitband.h"
 #include "em_assert.h"
 
@@ -216,10 +218,15 @@ void ACMP_Reset(ACMP_TypeDef *acmp)
 void ACMP_GPIOSetup(ACMP_TypeDef *acmp, uint32_t location, bool enable, bool invert)
 {
   /* Sanity checking of location */
-#if defined(_EFM32_GECKO_FAMILY) || defined(_EFM32_TINY_FAMILY)
+#if defined( _ACMP_ROUTE_LOCATION_LOC3 )
   EFM_ASSERT(location <= _ACMP_ROUTE_LOCATION_LOC3);
-#elif defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+
+#elif defined( _ACMP_ROUTE_LOCATION_LOC2 )
   EFM_ASSERT(location <= _ACMP_ROUTE_LOCATION_LOC2);
+
+#elif defined( _ACMP_ROUTE_LOCATION_LOC1 )
+  EFM_ASSERT(location <= _ACMP_ROUTE_LOCATION_LOC1);
+
 #else
 #error Illegal pin location (ACMP).
 #endif
@@ -252,10 +259,12 @@ void ACMP_ChannelSet(ACMP_TypeDef *acmp, ACMP_Channel_TypeDef negSel,
   /* Sanity checking of ACMP inputs */
   EFM_ASSERT(posSel <= _ACMP_INPUTSEL_POSSEL_CH7);
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
-  EFM_ASSERT(negSel <= _ACMP_INPUTSEL_NEGSEL_DAC0CH1);
-#elif defined(_EFM32_GECKO_FAMILY)
+#if defined(_ACMP_INPUTSEL_NEGSEL_CAPSENSE)
   EFM_ASSERT(negSel <= _ACMP_INPUTSEL_NEGSEL_CAPSENSE);
+
+#elif defined(_ACMP_INPUTSEL_NEGSEL_DAC0CH1)
+  EFM_ASSERT(negSel <= _ACMP_INPUTSEL_NEGSEL_DAC0CH1);
+
 #else
 #error Illegal negative input selection (ACMP).
 #endif
@@ -309,3 +318,4 @@ void ACMP_Init(ACMP_TypeDef *acmp, const ACMP_Init_TypeDef *init)
 
 /** @} (end addtogroup ACMP) */
 /** @} (end addtogroup EM_Library) */
+#endif /* defined(ACMP_COUNT) && (ACMP_COUNT > 0) */

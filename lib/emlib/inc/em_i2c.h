@@ -2,7 +2,7 @@
  * @file
  * @brief Inter-intergrated circuit (I2C) peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -33,8 +33,10 @@
 #ifndef __EM_I2C_H
 #define __EM_I2C_H
 
-#include <stdbool.h>
 #include "em_device.h"
+#if defined(I2C_COUNT) && (I2C_COUNT > 0)
+
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -485,4 +487,5 @@ I2C_TransferReturn_TypeDef I2C_TransferInit(I2C_TypeDef *i2c,
 }
 #endif
 
+#endif /* defined(I2C_COUNT) && (I2C_COUNT > 0) */
 #endif /* __EM_I2C_H */

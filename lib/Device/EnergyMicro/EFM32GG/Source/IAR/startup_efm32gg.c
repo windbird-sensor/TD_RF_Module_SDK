@@ -2,10 +2,10 @@
  * @file
  * @brief CMSIS Compatible EFM32GG startup file in C for IAR EWARM
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+ * <b>(C) Copyright 2013 Energy Micro AS, http://www.energymicro.com</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -41,7 +41,7 @@ extern void __iar_program_start(void);
 extern void SystemInit(void);
 
 /* Auto defined by linker */
-extern unsigned char CSTACK$$Limit; 
+extern unsigned char CSTACK$$Limit;
 
 __weak void Reset_Handler(void)
 {

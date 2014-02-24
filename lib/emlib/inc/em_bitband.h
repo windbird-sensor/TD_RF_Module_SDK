@@ -2,7 +2,7 @@
  * @file
  * @brief Bitband Peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -34,7 +34,6 @@
 #define __EM_BITBAND_H
 
 #include "em_device.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -59,6 +58,9 @@ extern "C" {
  *   modification. Please refer to the reference manual for further details
  *   about bit-banding.
  *
+ * @note
+ *   This function is only atomic on cores which fully support bitbanding.
+ *
  * @param[in] addr Peripheral address location to modify bit in.
  *
  * @param[in] bit Bit position to modify, 0-31.
@@ -69,10 +71,17 @@ __STATIC_INLINE void BITBAND_Peripheral(volatile uint32_t *addr,
                                         uint32_t bit,
                                         uint32_t val)
 {
+#if defined(BITBAND_PER_BASE)
   uint32_t tmp =
     BITBAND_PER_BASE + (((uint32_t)addr - PER_MEM_BASE) * 32) + (bit * 4);
 
   *((volatile uint32_t *)tmp) = (uint32_t)val;
+#else
+  uint32_t tmp = *addr;
+  /* Make sure val is not more than 1, because we only want to set one bit. */
+  val &= 0x1;
+  *addr = (tmp & ~(1 << bit)) | (val << bit);
+#endif /* defined(BITBAND_PER_BASE) */
 }
 
 
@@ -95,10 +104,14 @@ __STATIC_INLINE void BITBAND_Peripheral(volatile uint32_t *addr,
 __STATIC_INLINE uint32_t BITBAND_PeripheralRead(volatile uint32_t *addr,
                                                 uint32_t bit)
 {
+#if defined(BITBAND_PER_BASE)
   uint32_t tmp =
     BITBAND_PER_BASE + (((uint32_t)addr - PER_MEM_BASE) * 32) + (bit * 4);
 
   return *((volatile uint32_t *)tmp);
+#else
+  return ((*addr) >> bit) & 1;
+#endif /* defined(BITBAND_PER_BASE) */
 }
 
 
@@ -111,6 +124,9 @@ __STATIC_INLINE uint32_t BITBAND_PeripheralRead(volatile uint32_t *addr,
  *   modification. Please refer to the reference manual for further details
  *   about bit-banding.
  *
+ * @note
+ *   This function is only atomic on cores which fully support bitbanding.
+ *
  * @param[in] addr SRAM address location to modify bit in.
  *
  * @param[in] bit Bit position to modify, 0-31.
@@ -119,10 +135,17 @@ __STATIC_INLINE uint32_t BITBAND_PeripheralRead(volatile uint32_t *addr,
  ******************************************************************************/
 __STATIC_INLINE void BITBAND_SRAM(uint32_t *addr, uint32_t bit, uint32_t val)
 {
+#if defined(BITBAND_RAM_BASE)
   uint32_t tmp =
     BITBAND_RAM_BASE + (((uint32_t)addr - RAM_MEM_BASE) * 32) + (bit * 4);
 
   *((volatile uint32_t *)tmp) = (uint32_t)val;
+#else
+  uint32_t tmp = *addr;
+  /* Make sure val is not more than 1, because we only want to set one bit. */
+  val &= 0x1;
+  *addr = (tmp & ~(1 << bit)) | (val << bit);
+#endif /* defined(BITBAND_RAM_BASE) */
 }
 
 
@@ -144,12 +167,15 @@ __STATIC_INLINE void BITBAND_SRAM(uint32_t *addr, uint32_t bit, uint32_t val)
  ******************************************************************************/
 __STATIC_INLINE uint32_t BITBAND_SRAMRead(uint32_t *addr, uint32_t bit)
 {
+#if defined(BITBAND_RAM_BASE)
   uint32_t tmp =
     BITBAND_RAM_BASE + (((uint32_t)addr - RAM_MEM_BASE) * 32) + (bit * 4);
 
   return *((volatile uint32_t *)tmp);
+#else
+  return ((*addr) >> bit) & 1;
+#endif /* defined(BITBAND_RAM_BASE) */
 }
-
 
 /** @} (end addtogroup BITBAND) */
 /** @} (end addtogroup EM_Library) */

@@ -1,11 +1,11 @@
 /***************************************************************************//**
- * @file at_sensor.c
+ * @file
  * @brief AT Sensor
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.1.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -30,146 +30,177 @@
  * arising from your use of this Software.
  *
  ******************************************************************************/
+
 #include <stdint.h>
 #include <stdbool.h>
 
 #include <at_parse.h>
 #include <td_flash.h>
-
-#include "sensor_config.h"
+#include <td_utils.h>
+#include <td_trap.h>
 
 #include "td_sensor.h"
 #include "td_sensor_device.h"
 #include "td_measure.h"
-
 #include "at_sensor.h"
 
-static ModuleType type = SENSOR_TRANSMITTER;
+/***************************************************************************//**
+ * @addtogroup AT_SENSOR Sensor AT Command Extension
+ * @brief Sensor AT command extension for the TDxxxx RF modules
+ * @{
+ ******************************************************************************/
 
-// ****************************************************************************
-// TYPES:
-// ****************************************************************************
+/*******************************************************************************
+ *************************   DEFINES   *****************************************
+ ******************************************************************************/
 
-/** Manufacturing test AT command tokens */
+/** @addtogroup AT_SENSOR_DEFINES Defines
+ * @{ */
+
+#define AT_SENSOR_PROFILE_TYPE_COUNT 6
+
+/** @} */
+
+/*******************************************************************************
+ ***********************   ENUMERATIONS   **************************************
+ ******************************************************************************/
+
+/** @addtogroup AT_SENSOR_ENUMERATIONS Enumerations
+ * @{ */
+
+/** Sensor AT command tokens */
 typedef enum sensor_tokens_t {
 	AT_EXTENSION_BASE = AT_BASE_LAST,
-
 	AT_SENSOR_SET_TYPE,
 	AT_SENSOR_QUERY_TYPE,
 	AT_SENSOR_GET_TYPE,
-
 	AT_SENSOR_QUERY_DEVICE_CLASS,
 	AT_SENSOR_SET_DEVICE_CLASS,
 	AT_SENSOR_GET_DEVICE_CLASS,
-
 	AT_SENSOR_QUERY_BATTERY_MONITORING,
 	AT_SENSOR_GET_BATTERY_MONITORING,
 	AT_SENSOR_SET_BATTERY_MONITORING,
-
 	AT_SENSOR_QUERY_BOOT_MONITORING,
 	AT_SENSOR_GET_BOOT_MONITORING,
 	AT_SENSOR_SET_BOOT_MONITORING,
-
 	AT_SENSOR_QUERY_TEMPERATURE_MONITORING,
 	AT_SENSOR_GET_TEMPERATURE_MONITORING,
 	AT_SENSOR_SET_TEMPERATURE_MONITORING,
-
 	AT_SENSOR_QUERY_RSSI_MONITORING,
 	AT_SENSOR_GET_RSSI_MONITORING,
 	AT_SENSOR_SET_RSSI_MONITORING,
-
 	AT_SENSOR_QUERY_CONNECTION_MONITORING,
 	AT_SENSOR_GET_CONNECTION_MONITORING,
 	AT_SENSOR_SET_CONNECTION_MONITORING,
-
 	AT_SENSOR_QUERY_SWITCH_MONITORING,
 	AT_SENSOR_GET_SWITCH_MONITORING,
 	AT_SENSOR_SET_SWITCH_MONITORING,
-
 	AT_SENSOR_QUERY_KEEPALIVE_MONITORING,
 	AT_SENSOR_GET_KEEPALIVE_MONITORING,
 	AT_SENSOR_SET_KEEPALIVE_MONITORING,
-
+	AT_SENSOR_QUERY_RETRANSMISSION_PROFILE,
+	AT_SENSOR_SET_RETRANSMISSION_PROFILE,
+	AT_SENSOR_GET_RETRANSMISSION_PROFILE,
 	AT_SENSOR_SENSOR_RESET,
-
+	AT_SENSOR_SENSOR_DUMP,
 	AT_SENSOR_DELETE_FLASH_VARIABLES,
-
+	AT_CRASH
 } sensor_tokens;
 
-// ****************************************************************************
-// CONSTANTS:
-// ****************************************************************************
+/** @} */
 
-/** AT command set */
+/*******************************************************************************
+ *************************  CONSTANTS   ****************************************
+ ******************************************************************************/
+
+/** @addtogroup AT_SENSOR_CONSTANTS Constants
+ * @{ */
+
+/** Sensor AT command set */
 static AT_command_t const sensor_commands[] = {
-
-	{ "ATS500=?", AT_SENSOR_QUERY_TYPE },
-	{ "ATS500=", AT_SENSOR_SET_TYPE },
-	{ "ATS500?", AT_SENSOR_GET_TYPE },
-
-	{ "ATS501=?", AT_SENSOR_QUERY_DEVICE_CLASS },
-	{ "ATS501=", AT_SENSOR_SET_DEVICE_CLASS },
-	{ "ATS501?", AT_SENSOR_GET_DEVICE_CLASS },
-
-	{ "ATS502=?", AT_SENSOR_QUERY_BATTERY_MONITORING },
-	{ "ATS502=", AT_SENSOR_SET_BATTERY_MONITORING },
-	{ "ATS502?", AT_SENSOR_GET_BATTERY_MONITORING },
-
-	{ "ATS503=?", AT_SENSOR_QUERY_TEMPERATURE_MONITORING },
-	{ "ATS503=", AT_SENSOR_SET_TEMPERATURE_MONITORING },
-	{ "ATS503?", AT_SENSOR_GET_TEMPERATURE_MONITORING },
-
-	{ "ATS504=?", AT_SENSOR_QUERY_RSSI_MONITORING },
-	{ "ATS504=", AT_SENSOR_SET_RSSI_MONITORING },
-	{ "ATS504?", AT_SENSOR_GET_RSSI_MONITORING },
-
-	{ "ATS505=?", AT_SENSOR_QUERY_CONNECTION_MONITORING },
-	{ "ATS505=", AT_SENSOR_SET_CONNECTION_MONITORING },
-	{ "ATS505?", AT_SENSOR_GET_CONNECTION_MONITORING },
-
-	{ "ATS506=?", AT_SENSOR_QUERY_SWITCH_MONITORING },
-	{ "ATS506=", AT_SENSOR_SET_SWITCH_MONITORING },
-	{ "ATS506?", AT_SENSOR_GET_SWITCH_MONITORING },
-
-	{ "ATS507=?", AT_SENSOR_QUERY_BOOT_MONITORING },
-	{ "ATS507=", AT_SENSOR_SET_BOOT_MONITORING },
-	{ "ATS507?", AT_SENSOR_GET_BOOT_MONITORING },
-
-	{ "ATS508=?", AT_SENSOR_QUERY_KEEPALIVE_MONITORING },
-	{ "ATS508=", AT_SENSOR_SET_KEEPALIVE_MONITORING },
-	{ "ATS508?", AT_SENSOR_GET_KEEPALIVE_MONITORING },
-
-	{ "AT$SZ", AT_SENSOR_SENSOR_RESET },
-
-	{ "AT$DF", AT_SENSOR_DELETE_FLASH_VARIABLES },
-
-
-
-
-	{ 0, 0 }
-
+	{"ATS500=?", AT_SENSOR_QUERY_TYPE},
+	{"ATS500=", AT_SENSOR_SET_TYPE},
+	{"ATS500?", AT_SENSOR_GET_TYPE},
+	{"ATS501=?", AT_SENSOR_QUERY_DEVICE_CLASS},
+	{"ATS501=", AT_SENSOR_SET_DEVICE_CLASS},
+	{"ATS501?", AT_SENSOR_GET_DEVICE_CLASS},
+	{"ATS502=?", AT_SENSOR_QUERY_BATTERY_MONITORING},
+	{"ATS502=", AT_SENSOR_SET_BATTERY_MONITORING},
+	{"ATS502?", AT_SENSOR_GET_BATTERY_MONITORING},
+	{"ATS503=?", AT_SENSOR_QUERY_TEMPERATURE_MONITORING},
+	{"ATS503=", AT_SENSOR_SET_TEMPERATURE_MONITORING},
+	{"ATS503?", AT_SENSOR_GET_TEMPERATURE_MONITORING},
+	{"ATS504=?", AT_SENSOR_QUERY_RSSI_MONITORING},
+	{"ATS504=", AT_SENSOR_SET_RSSI_MONITORING},
+	{"ATS504?", AT_SENSOR_GET_RSSI_MONITORING},
+	{"ATS505=?", AT_SENSOR_QUERY_CONNECTION_MONITORING},
+	{"ATS505=", AT_SENSOR_SET_CONNECTION_MONITORING},
+	{"ATS505?", AT_SENSOR_GET_CONNECTION_MONITORING},
+	{"ATS506=?", AT_SENSOR_QUERY_SWITCH_MONITORING},
+	{"ATS506=", AT_SENSOR_SET_SWITCH_MONITORING},
+	{"ATS506?", AT_SENSOR_GET_SWITCH_MONITORING},
+	{"ATS507=?", AT_SENSOR_QUERY_BOOT_MONITORING},
+	{"ATS507=", AT_SENSOR_SET_BOOT_MONITORING},
+	{"ATS507?", AT_SENSOR_GET_BOOT_MONITORING},
+	{"ATS508=?", AT_SENSOR_QUERY_KEEPALIVE_MONITORING},
+	{"ATS508=", AT_SENSOR_SET_KEEPALIVE_MONITORING},
+	{"ATS508?", AT_SENSOR_GET_KEEPALIVE_MONITORING},
+	{"ATS509=?", AT_SENSOR_QUERY_RETRANSMISSION_PROFILE},
+	{"ATS509=", AT_SENSOR_SET_RETRANSMISSION_PROFILE},
+	{"ATS509?", AT_SENSOR_GET_RETRANSMISSION_PROFILE},
+	{"AT$SZ", AT_SENSOR_SENSOR_RESET},
+	{"AT$SD", AT_SENSOR_SENSOR_DUMP},
+	{"AT$DF", AT_SENSOR_DELETE_FLASH_VARIABLES},
+	{"AT$CRASH", AT_CRASH},
+	{0, 0}
 };
 
-// ****************************************************************************
-// LOCALS:
-// ****************************************************************************
+/** @} */
 
-// ****************************************************************************
-// CODE:
-// ****************************************************************************
+/*******************************************************************************
+ ************************   PRIVATE VARIABLES   ********************************
+ ******************************************************************************/
 
-/**
- * @brief Manufacturing test AT command parser init.
- */
-static void sensor_init(void) {
+/** @addtogroup AT_SENSOR_LOCAL_VARIABLES Local Variables
+ * @{ */
+
+/** The Sensor module type */
+static TD_SENSOR_ModuleType_t type;
+
+/** The Sensor transmission profiles */
+static TD_SENSOR_TransmitProfile_t Profiles[AT_SENSOR_PROFILE_TYPE_COUNT];
+
+/** @} */
+
+/*******************************************************************************
+ **************************  PRIVATE FUNCTIONS   *******************************
+ ******************************************************************************/
+
+/** @addtogroup AT_SENSOR_LOCAL_FUNCTIONS Local Functions
+ * @{ */
+
+/***************************************************************************//**
+ * @brief
+ *   Initialization AT extension function for Sensor.
+ ******************************************************************************/
+static void sensor_init(void)
+{
+	int i;
 
 	type = SENSOR_TRANSMITTER;
+	for (i = 0; i < AT_SENSOR_PROFILE_TYPE_COUNT; i++) {
+		Profiles[i].interval = 0;
+		Profiles[i].repetition = 0;
+	}
+	TD_SENSOR_InternalInit();
 }
 
-/**
- * @brief Manufacturing test AT help
- */
-static void sensor_help(void) {
+/***************************************************************************//**
+ * @brief
+ *   Help AT extension function for Sensor.
+ ******************************************************************************/
+static void sensor_help(void)
+{
 	AT_printf(
 		"ATS500 => Module type\r\n"
 		"ATS501 => Device class\r\n"
@@ -182,12 +213,11 @@ static void sensor_help(void) {
 		"ATS508= => Keep-alive monitoring\r\n"
 		"AT$SZ= => Sensor reset\r\n"
 	);
-}
-;
+};
 
 /***************************************************************************//**
  * @brief
- *   Persistence AT extension function for SIGFOX.
+ *   Persistence AT extension function for Sensor.
  *
  * @param[in] write
  *   Flag set to true for writing persistent data, false for reading persistent
@@ -202,22 +232,59 @@ static void sensor_help(void) {
  * @return
  *   The number of bytes read from/written to the persistent data buffer.
  ******************************************************************************/
-static uint8_t sensor_persist(bool write, uint8_t * buffer, uint8_t count) {
+static uint8_t sensor_persist(bool write, uint8_t *buffer, uint8_t count)
+{
+	int i;
+	TD_SENSOR_Configuration_t *temp;
+	TD_SENSOR_Configuration_t config;
 
 	if (buffer != 0 && count != 0) {
 		if (write == true) {
-			*buffer = type;
+			for (i = 0; i < AT_SENSOR_PROFILE_TYPE_COUNT; i++) {
+				*buffer++ = Profiles[i].repetition;
+				*buffer++ = (Profiles[i].interval >> 8) & 0xFF;
+				*buffer++ = Profiles[i].interval & 0xFF;
+			}
+
+			// Get module configuration
+			temp = TD_SENSOR_GetModuleConfiguration();
+
+			// Apply locally saved new AT type
+			((TD_SENSOR_Configuration_t *) temp)->type = type;
+
+			// Copy configuration
+			memcpy(buffer, (uint8_t *) temp, sizeof(TD_SENSOR_Configuration_t));
+			buffer += sizeof(TD_SENSOR_Configuration_t);
+
 		} else {
-			type = (ModuleType) *buffer;
+
+			// Profiles must be set before sensor is initialized as it might trigger sending frames
+			for (i = 0; i < AT_SENSOR_PROFILE_TYPE_COUNT; i++) {
+				Profiles[i].repetition = *buffer++;
+				Profiles[i].interval = (*buffer++) << 8;
+				Profiles[i].interval |= *buffer++;
+				TD_SENSOR_SetTransmissionProfile((TD_SENSOR_FrameType_t) i,
+												 Profiles[i].repetition,
+												 Profiles[i].interval);
+			}
+
+			//cCopy sensor configuration
+			memcpy(&config, buffer, sizeof(TD_SENSOR_Configuration_t));
+
+			// Copy type to local configuration
+			type = config.type;
+
+			// Apply sensor configuration
+			TD_SENSOR_SetModuleConfiguration(&config);
+			buffer += sizeof(TD_SENSOR_Configuration_t);
 		}
 	}
-
-	return 1;
+	return sizeof (TD_SENSOR_Configuration_t) + (3 * AT_SENSOR_PROFILE_TYPE_COUNT);
 }
 
 /***************************************************************************//**
  * @brief
- *   Parser AT extension function for TD Sensor Monitor.
+ *   Parser AT extension function for Sensor.
  *
  * @param[in] token
  *   The token to parse.
@@ -225,12 +292,15 @@ static uint8_t sensor_persist(bool write, uint8_t * buffer, uint8_t count) {
  * @return
  *   The parse result.
  ******************************************************************************/
-static int8_t sensor_parse(uint8_t token) {
+static int8_t sensor_parse(uint8_t token)
+{
+	int i;
 	int8_t result = AT_OK;
-	ModuleConfiguration * config = TD_SENSOR_GetModuleConfiguration();
+	TD_SENSOR_Configuration_t *config = TD_SENSOR_GetModuleConfiguration();
+	uint8_t profile, repetitions;
+	uint16_t interval;
 
 	switch (token) {
-
 	case AT_SENSOR_QUERY_TYPE:
 		if (AT_argc != 0) {
 			result = AT_ERROR;
@@ -250,10 +320,10 @@ static int8_t sensor_parse(uint8_t token) {
 	case AT_SENSOR_SET_TYPE:
 		if (AT_argc == 1) {
 			if (AT_atoll(AT_argv[0]) >= 0 && AT_atoll(AT_argv[0]) <= 2) {
-				type = (ModuleType) AT_atoll(AT_argv[0]);
+				type = (TD_SENSOR_ModuleType_t) AT_atoll(AT_argv[0]);
 
-				//to make sure the gateway address is reseted on reboot.
-				if (AT_atoll(AT_argv[0]) == SENSOR_DEVICE) {
+				// To make sure LAN address is reset on reboot.
+				if (type == SENSOR_DEVICE) {
 					TD_SENSOR_DEVICE_Reset();
 				}
 			} else {
@@ -276,7 +346,7 @@ static int8_t sensor_parse(uint8_t token) {
 		if (AT_argc != 0) {
 			result = AT_ERROR;
 		} else {
-			AT_printf("%02X\r\n", config->class);
+			AT_printf("0x%04X\r\n", config->class);
 		}
 		break;
 
@@ -304,14 +374,12 @@ static int8_t sensor_parse(uint8_t token) {
 		if (AT_argc != 0) {
 			result = AT_ERROR;
 		} else {
-
-			AT_printf("%d,%d,%d\r\n", config->battery.monitor,config->battery.level_low, config->battery.level_ok);
+			AT_printf("%d,%d,%d\r\n", config->battery.monitor, config->battery.level_low, config->battery.level_ok);
 		}
 		break;
 
 	case AT_SENSOR_SET_BATTERY_MONITORING:
 		if (AT_argc == 3) {
-
 			if (AT_atoll(AT_argv[0]) == 1 && AT_atoll(AT_argv[1]) >= 1667
 					&& AT_atoll(AT_argv[1]) <= 3300
 					&& AT_atoll(AT_argv[2]) >= 2100
@@ -320,14 +388,11 @@ static int8_t sensor_parse(uint8_t token) {
 			} else {
 				result = AT_ERROR;
 			}
-
 		} else if (AT_argc == 1) {
 			if (AT_atoll(AT_argv[0]) == 0) {
 				TD_SENSOR_MonitorBattery(false, 0, 0, 0);
 			}
-		}
-
-		else {
+		} else {
 			result = AT_ERROR;
 		}
 		break;
@@ -350,7 +415,6 @@ static int8_t sensor_parse(uint8_t token) {
 
 	case AT_SENSOR_SET_BOOT_MONITORING:
 		if (AT_argc == 1) {
-
 			if (AT_atoll(AT_argv[0]) == 1) {
 				TD_SENSOR_MonitorBoot(true, 0);
 			} else if (AT_atoll(AT_argv[0]) == 0) {
@@ -359,7 +423,6 @@ static int8_t sensor_parse(uint8_t token) {
 		} else {
 			result = AT_ERROR;
 		}
-
 		break;
 
 	case AT_SENSOR_QUERY_TEMPERATURE_MONITORING:
@@ -374,39 +437,35 @@ static int8_t sensor_parse(uint8_t token) {
 		if (AT_argc != 0) {
 			result = AT_ERROR;
 		} else {
-
 			AT_printf("%d,%d,%d,%d\r\n", config->temperature.monitor,
-					config->temperature.interval,
-					config->temperature.level_low / 10,
-					config->temperature.level_high / 10);
+					  config->temperature.interval,
+					  config->temperature.level_low / 10,
+					  config->temperature.level_high / 10);
 		}
 		break;
 
 	case AT_SENSOR_SET_TEMPERATURE_MONITORING:
 		if (AT_argc == 4) {
-
 			if (AT_atoll(AT_argv[0]) == 1 && AT_atoll(AT_argv[1]) >= 1
 					&& AT_atoll(AT_argv[1]) <= 4294967295UL
 					&& AT_atoll(AT_argv[2]) >= -30 && AT_atoll(AT_argv[2]) <= 85
 					&& AT_atoll(AT_argv[3]) >= -30
 					&& AT_atoll(AT_argv[3]) <= 85) {
-
-				TD_SENSOR_MonitorTemperature(true, AT_atoll(AT_argv[1]),
-						AT_atoll(AT_argv[2]) * 10, AT_atoll(AT_argv[3]) * 10,
-						0);
+				TD_SENSOR_MonitorTemperature(true,
+					AT_atoll(AT_argv[1]),
+					AT_atoll(AT_argv[2]) * 10,
+					AT_atoll(AT_argv[3]) * 10,
+					0);
 			} else {
 				result = AT_ERROR;
 			}
-
 		} else if (AT_argc == 1) {
 			if (AT_atoll(AT_argv[0]) == 0) {
 				TD_SENSOR_MonitorTemperature(false, 0, 0, 0, 0);
 			} else {
 				result = AT_ERROR;
 			}
-		}
-
-		else {
+		} else {
 			result = AT_ERROR;
 		}
 		break;
@@ -423,10 +482,9 @@ static int8_t sensor_parse(uint8_t token) {
 		if (AT_argc != 0) {
 			result = AT_ERROR;
 		} else {
-
 			AT_printf("%d,%d,%d\r\n", config->rssi.monitor,
-					config->rssi.level_low, config->rssi.level_ok);
-
+				config->rssi.level_low,
+				config->rssi.level_ok);
 		}
 		break;
 
@@ -436,23 +494,21 @@ static int8_t sensor_parse(uint8_t token) {
 					&& AT_atoll(AT_argv[1]) <= 14
 					&& AT_atoll(AT_argv[2]) >= -122
 					&& AT_atoll(AT_argv[2]) <= 14) {
-				if (!TD_SENSOR_MonitorRSSI(true, AT_atoll(AT_argv[1]),
-						AT_atoll(AT_argv[2]))) {
+				if (!TD_SENSOR_MonitorRSSI(true,
+					AT_atoll(AT_argv[1]),
+					AT_atoll(AT_argv[2]))) {
 					result = AT_ERROR;
 				}
 			} else {
 				result = AT_ERROR;
 			}
-
 		} else if (AT_argc == 1) {
 			if (AT_atoll(AT_argv[0]) == 0) {
 				TD_SENSOR_MonitorRSSI(false, 0, 0);
 			} else {
 				result = AT_ERROR;
 			}
-		}
-
-		else {
+		} else {
 			result = AT_ERROR;
 		}
 		break;
@@ -469,15 +525,14 @@ static int8_t sensor_parse(uint8_t token) {
 		if (AT_argc != 0) {
 			result = AT_ERROR;
 		} else {
-
-			AT_printf("%d,%d\r\n", config->connection.monitor,
-					config->connection.interval);
+			AT_printf("%d,%d\r\n",
+				config->connection.monitor,
+				config->connection.interval);
 		}
 		break;
 
 	case AT_SENSOR_SET_CONNECTION_MONITORING:
 		if (AT_argc == 2) {
-
 			if (AT_atoll(AT_argv[0]) == 1 && AT_atoll(AT_argv[1]) >= 10
 					&& AT_atoll(AT_argv[1]) <= 4294967295UL) {
 				if (!TD_SENSOR_MonitorConnection(true, AT_atoll(AT_argv[1]))) {
@@ -486,7 +541,6 @@ static int8_t sensor_parse(uint8_t token) {
 			} else {
 				result = AT_ERROR;
 			}
-
 		} else if (AT_argc == 1) {
 			if (AT_atoll(AT_argv[0]) == 0) {
 				TD_SENSOR_MonitorConnection(false, 0);
@@ -510,15 +564,14 @@ static int8_t sensor_parse(uint8_t token) {
 		if (AT_argc != 0) {
 			result = AT_ERROR;
 		} else {
-
-			AT_printf("%d,%d\r\n", config->keepalive.monitor,
-					config->keepalive.interval);
+			AT_printf("%d,%d\r\n",
+				config->keepalive.monitor,
+				config->keepalive.interval);
 		}
 		break;
 
 	case AT_SENSOR_SET_KEEPALIVE_MONITORING:
 		if (AT_argc == 2) {
-
 			if (AT_atoll(AT_argv[0]) == 1 && AT_atoll(AT_argv[1]) >= 1
 					&& AT_atoll(AT_argv[1]) <= 255) {
 				if (!TD_SENSOR_MonitorKeepAlive(true, AT_atoll(AT_argv[1]))) {
@@ -527,7 +580,6 @@ static int8_t sensor_parse(uint8_t token) {
 			} else {
 				result = AT_ERROR;
 			}
-
 		} else if (AT_argc == 1) {
 			if (AT_atoll(AT_argv[0]) == 0) {
 				if (!TD_SENSOR_MonitorKeepAlive(false, 0)) {
@@ -553,17 +605,17 @@ static int8_t sensor_parse(uint8_t token) {
 		if (AT_argc != 0) {
 			result = AT_ERROR;
 		} else {
-			int i;
-
-			for (i = 0; i < SENSOR_MAX_SWITCH; i++) {
+			for (i = 0; i < CONFIG_TD_SENSOR_MAX_SWITCH; i++) {
 				if (config->switches[i].monitor == true) {
-					AT_printf("%d,%d", config->switches[i].port,
-							config->switches[i].bit);
-					AT_printf("%d,%d", config->switches[i].falling,
-							config->switches[i].rising);
-					AT_printf("%d,%d \r\n", config->switches[i].pull,
-							config->switches[i].pull_state);
-
+					AT_printf("%d,%d",
+						config->switches[i].port,
+						config->switches[i].bit);
+					AT_printf("%d,%d",
+						config->switches[i].falling,
+						config->switches[i].rising);
+					AT_printf("%d,%d \r\n",
+						config->switches[i].pull,
+						config->switches[i].pull_state);
 				}
 			}
 		}
@@ -571,7 +623,6 @@ static int8_t sensor_parse(uint8_t token) {
 
 	case AT_SENSOR_SET_SWITCH_MONITORING:
 		if (AT_argc == 7) {
-
 			if (AT_atoll(AT_argv[0]) == 1 && AT_atoll(AT_argv[1]) >= 0
 					&& AT_atoll(AT_argv[1]) <= 5 && AT_atoll(AT_argv[2]) >= 0
 					&& AT_atoll(AT_argv[2]) <= 15 && AT_atoll(AT_argv[3]) >= 0
@@ -579,11 +630,15 @@ static int8_t sensor_parse(uint8_t token) {
 					&& AT_atoll(AT_argv[4]) <= 1 && AT_atoll(AT_argv[5]) >= 0
 					&& AT_atoll(AT_argv[5]) <= 1 && AT_atoll(AT_argv[6]) >= 0
 					&& AT_atoll(AT_argv[6]) <= 1) {
-				if (!TD_SENSOR_MonitorSwitch(true,
-						(GPIO_Port_TypeDef) AT_atoll(AT_argv[1]),
-						AT_atoll(AT_argv[2]), AT_atoll(AT_argv[3]),
-						AT_atoll(AT_argv[4]), AT_atoll(AT_argv[5]),
-						AT_atoll(AT_argv[6]), 0)) {
+				if (!TD_SENSOR_MonitorSwitch(
+					true,
+					(GPIO_Port_TypeDef) AT_atoll(AT_argv[1]),
+					AT_atoll(AT_argv[2]),
+					AT_atoll(AT_argv[3]),
+					AT_atoll(AT_argv[4]),
+					AT_atoll(AT_argv[5]),
+					AT_atoll(AT_argv[6]),
+					0)) {
 					result = AT_ERROR;
 				}
 			} else {
@@ -593,16 +648,49 @@ static int8_t sensor_parse(uint8_t token) {
 			if (AT_atoll(AT_argv[0]) == 0 && AT_atoll(AT_argv[1]) >= 0
 					&& AT_atoll(AT_argv[1]) <= 5 && AT_atoll(AT_argv[2]) >= 0
 					&& AT_atoll(AT_argv[2]) <= 15) {
-				TD_SENSOR_MonitorSwitch(false,
-						(GPIO_Port_TypeDef) AT_atoll(AT_argv[1]),
-						AT_atoll(AT_argv[2]), 0, 0, 0, 0, 0);
+				TD_SENSOR_MonitorSwitch(
+					false,
+					(GPIO_Port_TypeDef) AT_atoll(AT_argv[1]),
+					AT_atoll(AT_argv[2]),
+					0,
+					0,
+					0,
+					0,
+					0);
+			} else {
+				result = AT_ERROR;
+			}
+		} else {
+			result = AT_ERROR;
+		}
+		break;
+
+	case AT_SENSOR_SET_RETRANSMISSION_PROFILE:
+		if (AT_argc == 3) {
+			profile = AT_atoll(AT_argv[0]);
+			repetitions = AT_atoll(AT_argv[1]);
+			interval = AT_atoll(AT_argv[2]);
+			if (profile <= 5 && repetitions <= 15 && interval <= 600) {
+				Profiles[profile].interval = interval;
+				Profiles[profile].repetition = repetitions;
+				TD_SENSOR_SetTransmissionProfile((TD_SENSOR_FrameType_t) profile, repetitions, interval);
 			} else {
 				result = AT_ERROR;
 			}
 		}
+		break;
 
-		else {
-			result = AT_ERROR;
+	case AT_SENSOR_QUERY_RETRANSMISSION_PROFILE:
+		if (AT_argc == 0) {
+			AT_printf("0..5, 0..15, 0..600\r\n");
+		}
+		break;
+
+	case AT_SENSOR_GET_RETRANSMISSION_PROFILE:
+		if (AT_argc == 0) {
+			for (i = 0; i < AT_SENSOR_PROFILE_TYPE_COUNT; i++) {
+				AT_printf("%d, %d, %d\r\n", i, Profiles[i].repetition, Profiles[i].interval);
+			}
 		}
 		break;
 
@@ -622,28 +710,43 @@ static int8_t sensor_parse(uint8_t token) {
 		}
 		break;
 
-		default:
-				result = AT_NOTHING;
-				break;
+	case AT_SENSOR_SENSOR_DUMP:
+		if (AT_argc == 0) {
+			TD_SystemDump(DUMP_SENSOR);
+		} else {
+			result = AT_ERROR;
+		}
+		break;
+
+	case AT_CRASH:
+		while (1);
+		break;
+
+	default:
+		result = AT_NOTHING;
+		break;
 	}
 	return result;
 }
 
-/**
- * Manufacturing test AT extension
- */
+/** @} */
+
+/*******************************************************************************
+ *************************   PUBLIC VARIABLES   ********************************
+ ******************************************************************************/
+
+/** @addtogroup AT_SENSOR_GLOBAL_VARIABLES Global Variables
+ * @{ */
+
+/** AT extension structure for Sensor */
 AT_extension_t sensor_extension = {
-		.commands = sensor_commands,
-		.init =	sensor_init,
-		.help = sensor_help,
-		.parse = sensor_parse,
-		.persist = sensor_persist
+	.commands = sensor_commands,
+	.init =	sensor_init,
+	.help = sensor_help,
+	.parse = sensor_parse,
+	.persist = sensor_persist
 };
 
-/**
- * AT Sensor Module type
- */
-ModuleType AT_SENSOR_GetModuleType() {
-	return type;
-}
+/** @} */
 
+/** @} (end addtogroup AT_SENSOR) */

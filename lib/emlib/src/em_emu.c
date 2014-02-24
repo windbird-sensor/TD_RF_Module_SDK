@@ -2,7 +2,7 @@
  * @file
  * @brief Energy Management Unit (EMU) Peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -31,6 +31,8 @@
  *
  ******************************************************************************/
 #include "em_emu.h"
+#if defined( EMU_PRESENT )
+
 #include "em_cmu.h"
 #include "em_assert.h"
 
@@ -384,7 +386,7 @@ void EMU_UpdateOscConfig(void)
 }
 
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( _EMU_EM4CONF_MASK )
 /***************************************************************************//**
  * @brief
  *   Update EMU module with Energy Mode 4 configuration
@@ -402,16 +404,16 @@ void EMU_EM4Init(EMU_EM4Init_TypeDef *em4init)
     _EMU_EM4CONF_OSC_MASK|
     _EMU_EM4CONF_BURTCWU_MASK|
     _EMU_EM4CONF_VREGEN_MASK);
-  
+
   /* Configure new settings */
   em4conf |= (
     (em4init->lockConfig << _EMU_EM4CONF_LOCKCONF_SHIFT)|
     (em4init->osc)|
     (em4init->buRtcWakeup << _EMU_EM4CONF_BURTCWU_SHIFT)|
     (em4init->vreg << _EMU_EM4CONF_VREGEN_SHIFT));
-  
+
   /* Apply configuration. Note that lock can be set after this stage. */
-  EMU->EM4CONF = em4conf;    
+  EMU->EM4CONF = em4conf;
 }
 
 
@@ -432,15 +434,15 @@ void EMU_BUPDInit(EMU_BUPDInit_TypeDef *bupdInit)
     _EMU_PWRCONF_VOUTSTRONG_MASK|
     _EMU_PWRCONF_VOUTMED_MASK|
     _EMU_PWRCONF_VOUTWEAK_MASK);
-  
+
   reg |= (bupdInit->resistor|
          (bupdInit->voutStrong << _EMU_PWRCONF_VOUTSTRONG_SHIFT)|
          (bupdInit->voutMed    << _EMU_PWRCONF_VOUTMED_SHIFT)|
-         (bupdInit->voutWeak   << _EMU_PWRCONF_VOUTWEAK_SHIFT)); 
-  
+         (bupdInit->voutWeak   << _EMU_PWRCONF_VOUTWEAK_SHIFT));
+
   EMU->PWRCONF = reg;
 
-  /* Set backup domain inactive mode configuration */ 
+  /* Set backup domain inactive mode configuration */
   reg = EMU->BUINACT & ~(_EMU_BUINACT_PWRCON_MASK);
   reg |= (bupdInit->inactivePower);
   EMU->BUINACT = reg;
@@ -456,14 +458,14 @@ void EMU_BUPDInit(EMU_BUPDInit_TypeDef *bupdInit)
     _EMU_BUCTRL_BODCAL_MASK|
     _EMU_BUCTRL_STATEN_MASK|
     _EMU_BUCTRL_EN_MASK);
-             
-  /* Note use of ->enable to both enable BUPD, use BU_VIN pin input and 
+
+  /* Note use of ->enable to both enable BUPD, use BU_VIN pin input and
      release reset */
   reg |= (bupdInit->probe|
          (bupdInit->bodCal          << _EMU_BUCTRL_BODCAL_SHIFT)|
          (bupdInit->statusPinEnable << _EMU_BUCTRL_STATEN_SHIFT)|
          (bupdInit->enable          << _EMU_BUCTRL_EN_SHIFT));
-  
+
   /* Enable configuration */
   EMU->BUCTRL = reg;
 
@@ -479,14 +481,14 @@ void EMU_BUPDInit(EMU_BUPDInit_TypeDef *bupdInit)
  * @brief
  *   Configure Backup Power Domain BOD Threshold value
  * @note
- *   These values are precalibrated 
+ *   These values are precalibrated
  * @param[in] mode Active or Inactive mode
  * @param[in] value
  ******************************************************************************/
 void EMU_BUThresholdSet(EMU_BODMode_TypeDef mode, uint32_t value)
 {
-  EFM_ASSERT(value<4);
-  
+  EFM_ASSERT(value<=(_EMU_BUACT_BUEXTHRES_MASK>>_EMU_BUACT_BUEXTHRES_SHIFT));
+
   switch(mode)
   {
   case emuBODMode_Active:
@@ -503,13 +505,13 @@ void EMU_BUThresholdSet(EMU_BODMode_TypeDef mode, uint32_t value)
  * @brief
  *  Configure Backup Power Domain BOD Threshold Range
  * @note
- *  These values are precalibrated 
+ *  These values are precalibrated
  * @param[in] mode Active or Inactive mode
  * @param[in] value
  ******************************************************************************/
 void EMU_BUThresRangeSet(EMU_BODMode_TypeDef mode, uint32_t value)
 {
-  EFM_ASSERT(value<4);
+  EFM_ASSERT(value<=(_EMU_BUACT_BUEXRANGE_MASK>>_EMU_BUACT_BUEXRANGE_SHIFT));
 
   switch(mode)
   {
@@ -527,3 +529,4 @@ void EMU_BUThresRangeSet(EMU_BODMode_TypeDef mode, uint32_t value)
 
 /** @} (end addtogroup EMU) */
 /** @} (end addtogroup EM_Library) */
+#endif /* __EM_EMU_H */

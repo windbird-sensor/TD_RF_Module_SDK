@@ -2,10 +2,10 @@
  * @file
  * @brief Standard AT interpreter-based application for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -49,7 +49,7 @@
 #define MANUFACTURER		"Telecom Design"
 
 /** Product */
-#define PRODUCT				"TD1202"
+#define PRODUCT				"TDxxxx"
 
 /** Hardware revision */
 #define HARDWARE_VERSION	"0F"
@@ -63,24 +63,20 @@
 /** Telecom Design 12-digit serial number */
 #define SERIAL_NUMBER		"123456789012"
 
+
+/* This file declare all "dynamic" library data. It should be last included file
+ * Standard size value can be override before including this file
+ */
+#if MODULE_REVISION == REVISION_TD1202
+#define TD_ALL_DUMP_REMOVE_CODE
+#endif
+#define TD_SENSOR_USE_CODE 0
+#define TD_GEOLOC_USE_CODE 0
+#include <td_config.h>
+
 /*******************************************************************************
  ******************************  CONSTANTS  ************************************
  ******************************************************************************/
-
-/** AT device Manufacturer */
-char const *AT_manufacturer = MANUFACTURER" "PRODUCT;
-
-/** AT hardware revision */
-char const *AT_hardwareRevision = HARDWARE_VERSION;
-
-/** AT software revision */
-char const *AT_softwareRevision = SOFTWARE_VERSION;
-
-/** AT firmware release date */
-char const *AT_releaseDate = RELEASE_DATE;
-
-/** AT device serial number */
-char const *AT_serial = SERIAL_NUMBER;
 
 /*******************************************************************************
  **************************   PUBLIC FUNCTIONS   *******************************

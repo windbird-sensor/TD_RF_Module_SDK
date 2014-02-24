@@ -2,7 +2,7 @@
  * @file
  * @brief Watchdog (WDOG) peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -33,8 +33,10 @@
 #ifndef __EM_WDOG_H
 #define __EM_WDOG_H
 
-#include <stdbool.h>
 #include "em_device.h"
+#if defined(WDOG_COUNT) && (WDOG_COUNT > 0)
+
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -148,4 +150,5 @@ void WDOG_Lock(void);
 }
 #endif
 
+#endif /* defined(WDOG_COUNT) && (WDOG_COUNT > 0) */
 #endif /* __EM_WDOG_H */

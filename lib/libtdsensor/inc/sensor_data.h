@@ -1,11 +1,11 @@
 /***************************************************************************//**
- * @file sensor_data.h
+ * @file
  * @brief API for sending Data frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.2.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -31,8 +31,8 @@
  *
  ******************************************************************************/
 
-#ifndef SENSOR_DATA_H_
-#define SENSOR_DATA_H_
+#ifndef __SENSOR_DATA_H
+#define __SENSOR_DATA_H
 
 #include <stdbool.h>
 
@@ -40,60 +40,57 @@
 extern "C" {
 #endif
 
-/** @defgroup SENSOR_DATA_USER_FUNCTIONS User Functions
- *  @ingroup SENSOR_DATA
- *  @nosubgrouping
- */
+	/***************************************************************************//**
+	 * @addtogroup SENSOR_DATA Sensor Data
+	 * @{
+	 ******************************************************************************/
 
-/***************************************************************************//**
- * @addtogroup SENSOR_DATA Sensor Data
- * @{
- ******************************************************************************/
+	/*******************************************************************************
+	 ***********************   ENUMERATIONS   **************************************
+	 ******************************************************************************/
 
-/*******************************************************************************
- *************************   TYPEDEFS   **************************************
- ******************************************************************************/
+	/** @addtogroup SENSOR_DATA_ENUMERATIONS Enumerations
+	 * @{ */
 
-/** @addtogroup SENSOR_DATA_TYPEDEFS Typedefs
- * @{ */
+	/** Data value index */
+	typedef enum {
+		PHONE_1 = 0,
+		PHONE_2 = 1,
+		PHONE_3 = 2,
+		PHONE_4 = 3
+	}
+	TD_SENSOR_DATA_PhoneIndex_t;
 
-/** Data value index */
-typedef enum {
+	/** Data Types*/
+	typedef enum {
+		DATA_PHONE,
+		DATA_GPS,
+		DATA_CUSTOM
+	} TD_SENSOR_DATA_Types_t;
 
-	PHONE_1 = 0,
-	PHONE_2 = 1,
-	PHONE_3 = 2,
-	PHONE_4 = 3
+	/** @} */
 
-} PhoneIndex;
+	/*******************************************************************************
+	 *************************   PROTOTYPES   **************************************
+	 ******************************************************************************/
 
-/** @} */
+	/** @addtogroup SENSOR_DATA_USER_FUNCTIONS User Functions
+	 * @{ */
 
-/*******************************************************************************
- *************************   PROTOTYPES   **************************************
- ******************************************************************************/
+	bool TD_SENSOR_SendData(TD_SENSOR_DATA_Types_t data_type, uint8_t *data, uint8_t count);
+	void TD_SENSOR_EncodeCellPhoneNumber(TD_SENSOR_DATA_PhoneIndex_t index, uint8_t *phone_number, uint8_t *data, uint8_t *len);
+	bool TD_SENSOR_SendDataCellPhoneNumber(TD_SENSOR_DATA_PhoneIndex_t index, uint8_t *phone_number);
+	bool TD_SENSOR_EncodeLocalVoltage(uint32_t voltage, uint8_t *data, uint8_t *len);
+	bool TD_SENSOR_EncodeLocalTemperature(int32_t temperature, uint8_t *data, uint8_t *len);
+	void TD_SENSOR_SetDataTransmissionProfile(uint8_t repetition, uint32_t interval);
+	bool TD_SENSOR_SetCellPhoneNumber(TD_SENSOR_DATA_PhoneIndex_t index, uint8_t *phone_number);
 
-/** @addtogroup SENSOR_EVENT_PUBLIC_FUNCTIONS Public Functions
- * @{ */
-/** @addtogroup SENSOR_EVENT_PROTOTYPES Prototypes
- * @{ */
+	/** @} */
 
-/** @ingroup SENSOR_DATA_USER_FUNCTIONS
- * @{ */
-
-bool TD_SENSOR_SetCellPhoneNumber(PhoneIndex index, uint8_t * phone_number);
-void TD_SENSOR_SetDataTransmissionProfile(uint8_t repetition, uint32_t interval);
-
-/** @} */
-
-/** @} */
-
-/** @} */
-
-/** @} (end addtogroup SENSOR_DATA) */
+	/** @} (end addtogroup SENSOR_DATA) */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* SENSOR_DATA_H_ */
+#endif // __SENSOR_DATA_H

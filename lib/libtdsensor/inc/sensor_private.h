@@ -1,11 +1,11 @@
 /***************************************************************************//**
- * @file sensor_private.h
+ * @file
  * @brief Service Private
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.1.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -31,12 +31,24 @@
  *
  ******************************************************************************/
 
-#ifndef AT_SENSOR_PRIVATE_H_
-#define AT_SENSOR_PRIVATE_H_
+#ifndef __AT_SENSOR_PRIVATE_H
+#define __AT_SENSOR_PRIVATE_H
 
-// ****************************************************************************
-// DEFINES:
-// ****************************************************************************
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+	/***************************************************************************//**
+	 * @addtogroup SENSOR_PRIVATE Sensor Private
+	 * @{
+	 ******************************************************************************/
+
+	/*******************************************************************************
+	 *************************   DEFINES   **************************************
+	 ******************************************************************************/
+
+	/** @addtogroup SENSOR_PRIVATE_DEFINES Defines
+	 * @{ */
 
 #if defined(__ICCARM__)
 
@@ -49,5 +61,12 @@
 
 #endif
 
-#endif /* AT_SENSOR_PRVIATE_H_ */
+/** @} */
 
+/** @} (end addtogroup SENSOR_PRIVATE) */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // __AT_SENSOR_PRVIATE_H

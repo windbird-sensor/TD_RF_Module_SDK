@@ -1,11 +1,11 @@
 /***************************************************************************//**
- * @file sensor_keepalive.c
+ * @file
  * @brief API for sending KeepAlive frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.2.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -34,38 +34,62 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <td_module.h>
+#include <td_sigfox.h>
 #include <td_measure.h>
+#include <td_utils.h>
 
 #include "td_sensor.h"
 #include "sensor_send.h"
 #include "sensor_keepalive.h"
-#include "sensor_keepalive_private.h"
 
 /***************************************************************************//**
  * @addtogroup SENSOR_KEEPALIVE Sensor Keep-Alive
  * @brief
- *  Sensor API for sending a Keep-Alive Frame. Temperature, battery level information
- *  and next expected keep-alive time are sent alongside with this frame.
+ *  Sensor API for sending a Keep-Alive Frame.
+ *
+ *  Temperature, battery level information and next expected keep-alive time are
+ *  sent alongside with this frame.
  * @{
  ******************************************************************************/
 
 /** @addtogroup SENSOR_KEEPALIVE_DEFINES Defines
  * @{ */
 
-#define KEEPALIVE_DEFAULT_REPETITON 0
-#define KEEPALIVE_DEFAULT_INTERVAL 0
+#define MAX_KEEPALIVE_PAYLOAD_SIZE 10	///< Keep-alive payload size in bytes
+#define KEEPALIVE_DEFAULT_REPETITON 0 	///< Default retransmission repetition
+#define KEEPALIVE_DEFAULT_INTERVAL 0	///< Default retransmission interval in seconds
 
 /** @} */
 
 /*******************************************************************************
- *************************   PRIVATE VARIABLES   ****************************************
+ *************************   TYPEDEFS   ****************************************
  ******************************************************************************/
 
-/** @addtogroup SENSOR_KEEPALIVE_PRIVATE_VARIABLES Private Variables
+/** @addtogroup SENSOR_KEEPALIVE_TYPEDEFS Typedefs
  * @{ */
 
-static TransmitProfile keepalive_profile = { KEEPALIVE_DEFAULT_REPETITON, KEEPALIVE_DEFAULT_INTERVAL };
-static uint8_t keepalive_stamp = -1;
+/** Keep-Alive Frame Structure */
+typedef struct {
+	uint8_t voltage;					///< Voltage value
+	int8_t temperature;					///< Temperature value
+	uint8_t interval;					///< Keep-alive interval in hours
+} __PACKED TD_SENSOR_KEEPALIVE_Frame_t;
+
+/** @} */
+
+/*******************************************************************************
+ *************************   PRIVATE VARIABLES   *******************************
+ ******************************************************************************/
+
+/** @addtogroup SENSOR_KEEPALIVE_LOCAL_VARIABLES Local Variables
+ * @{ */
+
+/** Transmission profile */
+static TD_SENSOR_TransmitProfile_t Profile = {KEEPALIVE_DEFAULT_REPETITON, KEEPALIVE_DEFAULT_INTERVAL};
+
+/** Redundancy counter for Sensor keep-alive */
+static uint8_t Stamp = -1;
 
 /** @} */
 
@@ -73,57 +97,49 @@ static uint8_t keepalive_stamp = -1;
  **************************  PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
-/** @addtogroup SENSOR_KEEPALIVE_PUBLIC_FUNCTIONS Public Functions
+/** @addtogroup SENSOR_KEEPALIVE_USER_FUNCTIONS User Functions
  * @{ */
 
 /***************************************************************************//**
  * @brief
- *   Send a KEEPALIVE frame to Sensor
+ *   Send a keep-alive frame to Sensor.
  *
  * @return
- *   True if the data has been sent over the Sigfox Network
+ *   Returns true if the data has been sent over the SIGFOX network, false
+ *   otherwise.
  ******************************************************************************/
-bool TD_SENSOR_SendKeepAlive()
+bool TD_SENSOR_SendKeepAlive(void)
 {
-	SRV_FRAME_KEEPALIVE frame;
-	ModuleConfiguration * config = TD_SENSOR_GetModuleConfiguration();
+	TD_SENSOR_KEEPALIVE_Frame_t frame;
+	TD_SENSOR_Configuration_t *config = TD_SENSOR_GetModuleConfiguration();
 
-	frame.voltage = TD_MEASURE_Voltage();
-	frame.temperature = TD_MEASURE_TemperatureExtended()/10;
-
-	if(config->keepalive.monitor)
-	{
+	frame.voltage = TD_SIGFOX_PowerVoltage();
+	frame.temperature = TD_MEASURE_TemperatureExtended() / 10;
+	if (config->keepalive.monitor) {
 		frame.interval = config->keepalive.interval;
-	}
-	else
-	{
+	} else {
 		frame.interval = 0;
 	}
-
-	keepalive_stamp = (keepalive_stamp & 0x07) + 1;
-
-	return TD_SENSOR_Send(&keepalive_profile, SRV_FRM_KEEPALIVE, keepalive_stamp, (uint8_t *)&frame, 3);
+	Stamp = (Stamp & 0x07) + 1;
+	return TD_SENSOR_Send(&Profile, SRV_FRM_KEEPALIVE, Stamp, (uint8_t *)&frame, 3);
 }
+
 /***************************************************************************//**
  * @brief
- *   Set a transmission profile to a given frame type
- *
- * Sensor Frame type to which the profile will be changed.
+ *   Set a transmission profile for keep-alive frame type.
  *
  * @param[in] repetition
- *	Number of repetition.
+ *	 Number of repetitions.
  *
  * @param[in] interval
- *	Interval between two repetitions in seconds.
- *
+ *	 Interval between two repetitions in seconds.
  ******************************************************************************/
-
 void TD_SENSOR_SetKeepAliveTransmissionProfile(uint8_t repetition, uint32_t interval)
 {
-	keepalive_profile.repetition = repetition;
-	keepalive_profile.interval = interval;
+	Profile.repetition = repetition;
+	Profile.interval = interval;
 }
 
 /** @} */
 
-/** @} */
+/** @} (end addtogroup SENSOR_KEEPALIVE) */

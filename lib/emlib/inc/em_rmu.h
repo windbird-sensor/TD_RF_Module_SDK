@@ -2,7 +2,7 @@
  * @file
  * @brief Reset Management Unit (RMU) peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -33,8 +33,10 @@
 #ifndef __EM_RMU_H
 #define __EM_RMU_H
 
-#include <stdbool.h>
 #include "em_device.h"
+#if defined(RMU_COUNT) && (RMU_COUNT > 0)
+
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,7 +59,7 @@ extern "C" {
 /** RMU controlled peripheral reset control and reset source control */
 typedef enum
 {
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( RMU_CTRL_BURSTEN )
   /** Reset control over Backup Power Domain */
   rmuResetBU = _RMU_CTRL_BURSTEN_SHIFT,
 #endif
@@ -83,4 +85,5 @@ uint32_t RMU_ResetCauseGet(void);
 }
 #endif
 
+#endif /* defined(RMU_COUNT) && (RMU_COUNT > 0) */
 #endif /* __EM_RMU_H */

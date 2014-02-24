@@ -2,7 +2,7 @@
  * @file
  * @brief Pulse Counter (PCNT) peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -31,6 +31,8 @@
  *
  ******************************************************************************/
 #include "em_pcnt.h"
+#if defined(PCNT_COUNT) && (PCNT_COUNT > 0)
+
 #include "em_cmu.h"
 #include "em_assert.h"
 #include "em_bitband.h"
@@ -178,6 +180,30 @@ void PCNT_CounterTopSet(PCNT_TypeDef *pcnt, uint32_t count, uint32_t top)
 
   EFM_ASSERT(PCNT_REF_VALID(pcnt));
 
+#ifdef PCNT0
+  if (PCNT0 == pcnt)
+  {
+    EFM_ASSERT((1<<PCNT0_CNT_SIZE) > count);
+    EFM_ASSERT((1<<PCNT0_CNT_SIZE) > top);
+  }
+#endif
+
+#ifdef PCNT1
+  if (PCNT1 == pcnt)
+  {
+    EFM_ASSERT((1<<PCNT1_CNT_SIZE) > count);
+    EFM_ASSERT((1<<PCNT1_CNT_SIZE) > top);
+  }
+#endif
+
+#ifdef PCNT2
+  if (PCNT2 == pcnt)
+  {
+    EFM_ASSERT((1<<PCNT2_CNT_SIZE) > count);
+    EFM_ASSERT((1<<PCNT2_CNT_SIZE) > top);
+  }
+#endif
+
   /* Keep current control setting, must be restored */
   ctrl = pcnt->CTRL;
 
@@ -265,7 +291,7 @@ void PCNT_Enable(PCNT_TypeDef *pcnt, PCNT_Mode_TypeDef mode)
   pcnt->CTRL = tmp;
 }
 
-#if (defined (_EFM32_TINY_FAMILY) || defined (_EFM32_GIANT_FAMILY) || defined (_EFM32_WONDER_FAMILY))
+#if defined( _PCNT_INPUT_MASK )
 /***************************************************************************//**
  * @brief
  *   Enable/disable the selected PRS input of PCNT.
@@ -414,10 +440,34 @@ void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init)
 
   EFM_ASSERT(PCNT_REF_VALID(pcnt));
 
+#ifdef PCNT0
+  if (PCNT0 == pcnt)
+  {
+    EFM_ASSERT((1<<PCNT0_CNT_SIZE) > init->counter);
+    EFM_ASSERT((1<<PCNT0_CNT_SIZE) > init->top);
+  }
+#endif
+  
+#ifdef PCNT1
+  if (PCNT1 == pcnt)
+  {
+    EFM_ASSERT((1<<PCNT1_CNT_SIZE) > init->counter);
+    EFM_ASSERT((1<<PCNT1_CNT_SIZE) > init->top);
+  }
+#endif
+  
+#ifdef PCNT2
+  if (PCNT2 == pcnt)
+  {
+    EFM_ASSERT((1<<PCNT2_CNT_SIZE) > init->counter);
+    EFM_ASSERT((1<<PCNT2_CNT_SIZE) > init->top);
+  }
+#endif
+  
   /* Map pointer to instance */
   inst = PCNT_Map(pcnt);
 
-#if (defined (_EFM32_TINY_FAMILY) || defined (_EFM32_GIANT_FAMILY) || defined (_EFM32_WONDER_FAMILY))
+#if defined( _PCNT_INPUT_MASK )
   /* Selecting the PRS channels for the PRS input sources of the PCNT. These are
    * written with a Read-Modify-Write sequence in order to keep the value of the
    * input enable bits which can be modified using PCNT_PRSInputEnable(). */
@@ -444,20 +494,51 @@ void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init)
     tmp |= PCNT_CTRL_FILT;
   }
 
-#if (defined (_EFM32_TINY_FAMILY) || defined (_EFM32_GIANT_FAMILY) || defined (_EFM32_WONDER_FAMILY)) 
+#if defined( PCNT_CTRL_HYST )
   if (init->hyst)
   {
     tmp |= PCNT_CTRL_HYST;
   }
+#endif
 
+#if defined( PCNT_CTRL_S1CDIR )
   if (init->s1CntDir)
   {
     tmp |= PCNT_CTRL_S1CDIR;
   }
+#endif
 
   /* Configure counter events for regular and auxiliary counter. */
+#if defined( _PCNT_CTRL_CNTEV_SHIFT )
   tmp |= init->cntEvent << _PCNT_CTRL_CNTEV_SHIFT;
-  tmp |= init->auxCntEvent << _PCNT_CTRL_AUXCNTEV_SHIFT;
+#endif
+
+#if defined( _PCNT_CTRL_AUXCNTEV_SHIFT )
+  {
+    /* Modify the auxCntEvent value before writing to the AUXCNTEV field in
+       the CTRL register because the AUXCNTEV field values are different from
+       the CNTEV field values, and cntEvent and auxCntEvent are of the same type
+       PCNT_CntEvent_TypeDef.
+    */
+    uint32_t auxCntEventField = 0; /* Get rid of compiler warning. */
+    switch (init->auxCntEvent)
+    {
+    case pcntCntEventBoth:
+      auxCntEventField = pcntCntEventNone;
+      break;
+    case pcntCntEventNone:
+      auxCntEventField = pcntCntEventBoth;
+      break;
+    case pcntCntEventUp:
+    case pcntCntEventDown:
+      auxCntEventField = init->auxCntEvent;
+      break;
+    default:
+      /* Invalid parameter, asserted. */
+      EFM_ASSERT(0);
+    }
+    tmp |= auxCntEventField << _PCNT_CTRL_AUXCNTEV_SHIFT;
+  }
 #endif
 
   /* Reset pulse counter while changing clock source. The reset bit */
@@ -643,6 +724,27 @@ void PCNT_TopSet(PCNT_TypeDef *pcnt, uint32_t val)
 {
   EFM_ASSERT(PCNT_REF_VALID(pcnt));
 
+#ifdef PCNT0
+  if (PCNT0 == pcnt)
+  {
+    EFM_ASSERT((1<<PCNT0_CNT_SIZE) > val);
+  }
+#endif
+
+#ifdef PCNT1
+  if (PCNT1 == pcnt)
+  {
+    EFM_ASSERT((1<<PCNT1_CNT_SIZE) > val);
+  }
+#endif
+
+#ifdef PCNT2
+  if (PCNT2 == pcnt)
+  {
+    EFM_ASSERT((1<<PCNT2_CNT_SIZE) > val);
+  }
+#endif
+
   /* LF register about to be modified require sync. busy check */
 
   /* Load into TOPB */
@@ -657,3 +759,4 @@ void PCNT_TopSet(PCNT_TypeDef *pcnt, uint32_t val)
 
 /** @} (end addtogroup PCNT) */
 /** @} (end addtogroup EM_Library) */
+#endif /* defined(PCNT_COUNT) && (PCNT_COUNT > 0) */

@@ -2,7 +2,7 @@
  * @file
  * @brief Timer/counter (TIMER) Peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -31,7 +31,8 @@
  *
  ******************************************************************************/
 #include "em_timer.h"
-#include "em_cmu.h"
+#if defined(TIMER_COUNT) && (TIMER_COUNT > 0)
+
 #include "em_assert.h"
 
 /***************************************************************************//**
@@ -136,7 +137,7 @@ void TIMER_Init(TIMER_TypeDef *timer, const TIMER_Init_TypeDef *init)
   {
     timer->CMD = TIMER_CMD_STOP;
   }
-  
+
   /* Reset counter */
   timer->CNT = _TIMER_CNT_RESETVALUE;
 
@@ -151,7 +152,7 @@ void TIMER_Init(TIMER_TypeDef *timer, const TIMER_Init_TypeDef *init)
     (init->quadModeX4             ?   TIMER_CTRL_QDM_X4    : 0) |
     (init->oneShot                ?   TIMER_CTRL_OSMEN     : 0) |
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( TIMER_CTRL_X2CNT ) && defined( TIMER_CTRL_ATI )
     (init->count2x                ?   TIMER_CTRL_X2CNT     : 0) |
     (init->ati                    ?   TIMER_CTRL_ATI       : 0) |
 #endif
@@ -192,7 +193,9 @@ void TIMER_InitCC(TIMER_TypeDef *timer,
   timer->CC[ch].CTRL =
     ((uint32_t)(init->eventCtrl) << _TIMER_CC_CTRL_ICEVCTRL_SHIFT) |
     ((uint32_t)(init->edge) << _TIMER_CC_CTRL_ICEDGE_SHIFT) |
+#if defined(ADC_PRESENT)
     ((uint32_t)(init->prsSel) << _TIMER_CC_CTRL_PRSSEL_SHIFT) |
+#endif
     ((uint32_t)(init->cufoa) << _TIMER_CC_CTRL_CUFOA_SHIFT) |
     ((uint32_t)(init->cofoa) << _TIMER_CC_CTRL_COFOA_SHIFT) |
     ((uint32_t)(init->cmoa) << _TIMER_CC_CTRL_CMOA_SHIFT) |
@@ -298,3 +301,4 @@ void TIMER_Unlock(TIMER_TypeDef *timer)
 
 /** @} (end addtogroup TIMER) */
 /** @} (end addtogroup EM_Library) */
+#endif /* defined(TIMER_COUNT) && (TIMER_COUNT > 0) */

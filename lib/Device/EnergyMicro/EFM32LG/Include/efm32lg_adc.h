@@ -2,7 +2,7 @@
  * @file
  * @brief efm32lg_adc Register and Bit Field definitions
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -63,7 +63,7 @@ typedef struct
 
 /* Bit fields for ADC CTRL */
 #define _ADC_CTRL_RESETVALUE                    0x001F0000UL                                /**< Default value for ADC_CTRL */
-#define _ADC_CTRL_MASK                          0x0F1F7F3BUL                                /**< Mask for ADC_CTRL */
+#define _ADC_CTRL_MASK                          0x0F7F7F3BUL                                /**< Mask for ADC_CTRL */
 #define _ADC_CTRL_WARMUPMODE_SHIFT              0                                           /**< Shift value for ADC_WARMUPMODE */
 #define _ADC_CTRL_WARMUPMODE_MASK               0x3UL                                       /**< Bit mask for ADC_WARMUPMODE */
 #define _ADC_CTRL_WARMUPMODE_DEFAULT            0x00000000UL                                /**< Mode DEFAULT for ADC_CTRL */
@@ -98,7 +98,7 @@ typedef struct
 #define ADC_CTRL_PRESC_DEFAULT                  (_ADC_CTRL_PRESC_DEFAULT << 8)              /**< Shifted mode DEFAULT for ADC_CTRL */
 #define ADC_CTRL_PRESC_NODIVISION               (_ADC_CTRL_PRESC_NODIVISION << 8)           /**< Shifted mode NODIVISION for ADC_CTRL */
 #define _ADC_CTRL_TIMEBASE_SHIFT                16                                          /**< Shift value for ADC_TIMEBASE */
-#define _ADC_CTRL_TIMEBASE_MASK                 0x1F0000UL                                  /**< Bit mask for ADC_TIMEBASE */
+#define _ADC_CTRL_TIMEBASE_MASK                 0x7F0000UL                                  /**< Bit mask for ADC_TIMEBASE */
 #define _ADC_CTRL_TIMEBASE_DEFAULT              0x0000001FUL                                /**< Mode DEFAULT for ADC_CTRL */
 #define ADC_CTRL_TIMEBASE_DEFAULT               (_ADC_CTRL_TIMEBASE_DEFAULT << 16)          /**< Shifted mode DEFAULT for ADC_CTRL */
 #define _ADC_CTRL_OVSRSEL_SHIFT                 24                                          /**< Shift value for ADC_OVSRSEL */

@@ -1,11 +1,11 @@
 /***************************************************************************//**
- * @file at_sensor_send.c
+ * @file
  * @brief AT Sensor Send
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.1.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -31,47 +31,45 @@
  *
  ******************************************************************************/
 
-#define USE_PRINTF
 #include <stdint.h>
 #include <stdbool.h>
 
 #include <at_parse.h>
+#include <td_core.h>
 #include <td_printf.h>
 
-#include "sensor_config.h"
 #include "sensor_data.h"
 #include "sensor_service.h"
 #include "sensor_register.h"
 #include "sensor_keepalive.h"
 #include "sensor_event.h"
 #include "sensor_raw.h"
-
 #include "td_sensor.h"
 #include "td_measure.h"
 #include "td_sensor_device.h"
-
 #include "at_sensor_send.h"
 
-/** RAW data buffer */
-uint8_t raw_buffer[12];
+/***************************************************************************//**
+ * @addtogroup AT_SENSOR_SEND Sensor Send AT Command Extension
+ * @brief Sensor Send AT command extension for the TDxxxx RF modules
+ * @{
+ ******************************************************************************/
 
-/** RAW data len */
-uint8_t raw_length;
+/*******************************************************************************
+ ***********************   ENUMERATIONS   **************************************
+ ******************************************************************************/
 
-// ****************************************************************************
-// TYPES:
-// ****************************************************************************
+/** @addtogroup AT_SENSOR_SEND_ENUMERATIONS Enumerations
+ * @{ */
 
-/** Manufacturing test AT command tokens */
+/** Sensor Send AT command tokens */
 typedef enum sensor_send_tokens_t {
 	AT_EXTENSION_BASE = AT_BASE_LAST,
 
-	// Below here, please try to keep the enum in alphabetical order!!!
-
-	//DATA
+	// Data
 	AT_SENSOR_SETPHONE,
 
-	//EVENT
+	// Events
 	AT_SENSOR_BATTERY,
 	AT_SENSOR_CONNECTION,
 	AT_SENSOR_RSSI,
@@ -79,78 +77,99 @@ typedef enum sensor_send_tokens_t {
 	AT_SENSOR_BOOT,
 	AT_SENSOR_SWITCH,
 
-	//GEOLOC
+	// Geolocalization
 	AT_SENSOR_GETGEOLOC,
 
-	//SERVICE
+	// Service
 	AT_SENSOR_SENDSMS,
 	AT_SENSOR_SENDTWEET,
 
-	//RAW
+	// Raw
 	AT_SENSOR_RAW,
 
-	//KEEP-ALIVE
+	// Keep-alive
 	AT_SENSOR_KEEPALIVE,
 
-	//REGISTER
+	// Register
 	AT_SENSOR_REGISTER,
-
 } sensor_send_tokens;
 
-// ****************************************************************************
-// CONSTANTS:
-// ****************************************************************************
+/** @} */
 
-/** AT command set */
+/*******************************************************************************
+ *************************  CONSTANTS   ****************************************
+ ******************************************************************************/
+
+/** @addtogroup AT_SENSOR_SEND_CONSTANTS Constants
+ * @{ */
+
+/** Sensor Send AT command set */
 static AT_command_t const sensor_send_commands[] = {
 
-//DATA
-		{ "AT$DP=", AT_SENSOR_SETPHONE },
+	// Data
+	{ "AT$DP=", AT_SENSOR_SETPHONE },
 
-		//EVENT
-		{ "AT$EB", AT_SENSOR_BOOT },
-		{ "AT$EC=", AT_SENSOR_CONNECTION },
-		{ "AT$ER=", AT_SENSOR_RSSI },
-		{ "AT$ES=", AT_SENSOR_SWITCH },
-		{ "AT$ET=", AT_SENSOR_TEMP },
-		{ "AT$EV=", AT_SENSOR_BATTERY },
+	// Events
+	{ "AT$EB", AT_SENSOR_BOOT },
+	{ "AT$EC=", AT_SENSOR_CONNECTION },
+	{ "AT$ER=", AT_SENSOR_RSSI },
+	{ "AT$ES=", AT_SENSOR_SWITCH },
+	{ "AT$ET=", AT_SENSOR_TEMP },
+	{ "AT$EV=", AT_SENSOR_BATTERY },
 
-		//KEEPALIVE
-		{ "AT$KA", AT_SENSOR_KEEPALIVE },
+	// Keep-alive
+	{ "AT$KA", AT_SENSOR_KEEPALIVE },
 
-		//SERVICE
-		{ "AT$SSMS=", AT_SENSOR_SENDSMS },
-		{ "AT$STWT=", AT_SENSOR_SENDTWEET },
+	// Service
+	{ "AT$SSMS=", AT_SENSOR_SENDSMS },
+	{ "AT$STWT=", AT_SENSOR_SENDTWEET },
 
-		//RAW
-		{ "AT$RAW=", AT_SENSOR_RAW },
+	// Raw
+	{ "AT$RAW=", AT_SENSOR_RAW },
 
-		//REGISTER
-		{ "AT$REG", AT_SENSOR_REGISTER },
-
-		{ 0, 0 }
-
+	// Register
+	{ "AT$REG", AT_SENSOR_REGISTER },
+	{ 0, 0 }
 };
 
-// ****************************************************************************
-// LOCALS:
-// ****************************************************************************
+/** @} */
 
-// ****************************************************************************
-// CODE:
-// ****************************************************************************
+/*******************************************************************************
+ ************************   PRIVATE VARIABLES   ********************************
+ ******************************************************************************/
 
-/**
- * @brief Manufacturing test AT command parser init.
- */
-static void sensor_send_init(void) {
+/** @addtogroup AT_SENSOR_SEND_LOCAL_VARIABLES Local Variables
+ * @{ */
 
+/** RAW data buffer */
+static uint8_t raw_buffer[12];
+
+/** RAW data len */
+static uint8_t raw_length;
+
+/** @} */
+
+/*******************************************************************************
+ **************************  PRIVATE FUNCTIONS   *******************************
+ ******************************************************************************/
+
+/** @addtogroup AT_SENSOR_SEND_LOCAL_FUNCTIONS Local Functions
+ * @{ */
+
+/***************************************************************************//**
+ * @brief
+ *   Initialization AT extension function for TD Sensor Send.
+ ******************************************************************************/
+static void sensor_send_init(void)
+{
 }
 
-/**
- * @brief Manufacturing test AT help
- */
-static void sensor_send_help(void) {
+/***************************************************************************//**
+ * @brief
+ *   Help AT extension function for TD Sensor Send.
+ ******************************************************************************/
+static void sensor_send_help(void)
+{
 	AT_printf(
 		"AT$DP= => Data phone\r\n"
 		"AT$EB => Boot event\r\n"
@@ -160,17 +179,16 @@ static void sensor_send_help(void) {
 		"AT$ET= => Temperature event\r\n"
 		"AT$EV= => Battery event\r\n"
 		"AT$KA => Keep-Alive\r\n"
+		"AT$RAW= => Raw frame\r\n"
+		"AT$REG => Register frame\r\n"
 		"AT$SSMS= => Service SMS\r\n"
 		"AT$STWT= => Service Tweet\r\n"
-		"AT$STWT= => Raw frame\r\n"
-		"AT$REG => Register frame\r\n"
 	);
 }
-;
 
 /***************************************************************************//**
  * @brief
- *   Parser AT extension function for Sensor.
+ *   Parser AT extension function for Sensor Send.
  *
  * @param[in] token
  *   The token to parse.
@@ -178,29 +196,26 @@ static void sensor_send_help(void) {
  * @return
  *   The parse result.
  ******************************************************************************/
-
-static int8_t sensor_send_parse(uint8_t token) {
+static int8_t sensor_send_parse(uint8_t token)
+{
 	int i, j;
 	char *message = "";
 	char hex[] = "0x00", c;
-
 	int8_t result = AT_OK;
 
 	switch (token) {
 
-	/*****************************DATA****************************/
+		/*****************************DATA****************************/
 	case AT_SENSOR_SETPHONE:
 		if (AT_argc == 2) {
-
 			uint8_t index = AT_atoll(AT_argv[0]) - 1;
 			if (index <= 3) {
-				if (!TD_SENSOR_SetCellPhoneNumber((PhoneIndex) index, (uint8_t *) AT_argv[1])) {
+				if (!TD_SENSOR_SetCellPhoneNumber((TD_SENSOR_DATA_PhoneIndex_t) index, (uint8_t *) AT_argv[1])) {
 					result = AT_ERROR;
 				}
 			} else {
 				result = AT_ERROR;
 			}
-
 		} else {
 			result = AT_ERROR;
 		}
@@ -223,12 +238,10 @@ static int8_t sensor_send_parse(uint8_t token) {
 		} else {
 			result = AT_ERROR;
 		}
-
 		break;
 
 	case AT_SENSOR_CONNECTION:
 		if (AT_argc == 2) {
-
 			if (AT_atoll(AT_argv[1]) >= 1 && AT_atoll(AT_argv[1]) <= 15
 					&& (AT_argv[0][0] == '0' || AT_argv[0][0] == '1')) {
 				if (AT_argv[0][0] == '0') {
@@ -243,7 +256,6 @@ static int8_t sensor_send_parse(uint8_t token) {
 			} else {
 				result = AT_ERROR;
 			}
-
 		} else {
 			result = AT_ERROR;
 		}
@@ -251,7 +263,6 @@ static int8_t sensor_send_parse(uint8_t token) {
 
 	case AT_SENSOR_RSSI:
 		if (AT_argc == 2) {
-
 			if (AT_atoll(AT_argv[0]) >= 1 && AT_atoll(AT_argv[0]) <= 15
 					&& (AT_argv[1][0] == '0' || AT_argv[1][0] == '1')) {
 				if (AT_argv[1][0] == '0') {
@@ -266,7 +277,6 @@ static int8_t sensor_send_parse(uint8_t token) {
 			} else {
 				result = AT_ERROR;
 			}
-
 		} else {
 			result = AT_ERROR;
 		}
@@ -274,7 +284,6 @@ static int8_t sensor_send_parse(uint8_t token) {
 
 	case AT_SENSOR_TEMP:
 		if (AT_argc == 1) {
-
 			if (AT_argv[0][0] == '0') {
 				if (!TD_SENSOR_SendEventTemperature(0)) {
 					result = AT_ERROR;
@@ -290,7 +299,6 @@ static int8_t sensor_send_parse(uint8_t token) {
 			} else {
 				result = AT_ERROR;
 			}
-
 		} else {
 			result = AT_ERROR;
 		}
@@ -298,7 +306,6 @@ static int8_t sensor_send_parse(uint8_t token) {
 
 	case AT_SENSOR_BOOT:
 		if (AT_argc == 0) {
-
 			if (!TD_SENSOR_SendEventBoot()) {
 				result = AT_ERROR;
 			}
@@ -310,7 +317,6 @@ static int8_t sensor_send_parse(uint8_t token) {
 
 	case AT_SENSOR_SWITCH:
 		if (AT_argc == 3) {
-
 			if (AT_atoll(AT_argv[0]) >= 0 && AT_atoll(AT_argv[0]) <= 5
 					&& AT_atoll(AT_argv[1]) >= 0 && AT_atoll(AT_argv[1]) <= 15
 					&& AT_atoll(AT_argv[2]) >= 0 && AT_atoll(AT_argv[2]) <= 1) {
@@ -320,7 +326,6 @@ static int8_t sensor_send_parse(uint8_t token) {
 			} else {
 				result = AT_ERROR;
 			}
-
 		} else {
 			result = AT_ERROR;
 		}
@@ -329,32 +334,25 @@ static int8_t sensor_send_parse(uint8_t token) {
 		/*****************************KEEPALIVE****************************/
 	case AT_SENSOR_KEEPALIVE:
 		if (AT_argc == 0) {
-
 			if (!TD_SENSOR_SendKeepAlive()) {
 				result = AT_ERROR;
 			}
-
 		} else {
 			result = AT_ERROR;
 		}
 		break;
 
 		/*****************************RAW****************************/
-
 		/*case AT_SENSOR_RAW:
 		 if (AT_argc == 2) {
-
-		 TD_SENSOR_SendRaw((uint8_t *) AT_argv[0],AT_atoll(AT_argv[1]));
-
+		 	 TD_SENSOR_SendRaw((uint8_t *) AT_argv[0],AT_atoll(AT_argv[1]));
 		 } else {
-		 result = AT_ERROR;
+		 	 result = AT_ERROR;
 		 }
 		 break;*/
 
 	case AT_SENSOR_RAW:
-
 		if (AT_argc == 1) {
-
 			message = AT_argv[0];
 			for (i = 0; message[i]; i++) {
 				if (message[i] == ' ' || message[i] == '\t') {
@@ -366,7 +364,6 @@ static int8_t sensor_send_parse(uint8_t token) {
 					}
 				}
 			}
-
 			for (i = 0; i < 24 && message[i]; i++) {
 				c = message[i];
 				if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')
@@ -385,7 +382,6 @@ static int8_t sensor_send_parse(uint8_t token) {
 				result = AT_ERROR;
 			} else {
 				raw_length = i >> 1;
-
 				if (!TD_SENSOR_SendRaw(raw_buffer, raw_length)) {
 					result = AT_ERROR;
 				}
@@ -397,18 +393,15 @@ static int8_t sensor_send_parse(uint8_t token) {
 		} else {
 			result = AT_ERROR;
 		}
-
 		break;
 
 		/*****************************REGISTER SENSOR****************************/
-
 	case AT_SENSOR_REGISTER:
 		if (AT_argc == 0) {
 
 			if (!TD_SENSOR_SendRegister()) {
 				result = AT_ERROR;
 			}
-
 		} else {
 			result = AT_ERROR;
 		}
@@ -417,11 +410,9 @@ static int8_t sensor_send_parse(uint8_t token) {
 		/*****************************SERVICE****************************/
 	case AT_SENSOR_SENDSMS:
 		if (AT_argc == 1) {
-
 			if (!TD_SENSOR_SendSMS((uint8_t *) AT_argv[0])) {
 				result = AT_ERROR;
 			}
-
 		} else {
 			result = AT_ERROR;
 		}
@@ -429,11 +420,9 @@ static int8_t sensor_send_parse(uint8_t token) {
 
 	case AT_SENSOR_SENDTWEET:
 		if (AT_argc == 1) {
-
 			if (!TD_SENSOR_SendTweet((uint8_t *) AT_argv[0])) {
 				result = AT_ERROR;
 			}
-
 		} else {
 			result = AT_ERROR;
 		}
@@ -443,17 +432,26 @@ static int8_t sensor_send_parse(uint8_t token) {
 		result = AT_NOTHING;
 		break;
 	}
-
 	return result;
 }
 
-/**
- * Manufacturing test AT extension
- */
+/** @} */
+
+/*******************************************************************************
+ *************************   PUBLIC VARIABLES   ********************************
+ ******************************************************************************/
+
+/** @addtogroup AT_SENSOR_LAN_GLOBAL_VARIABLES Global Variables
+ * @{ */
+
+/** AT extension structure for TD Sensor Send */
 AT_extension_t sensor_send_extension = {
-		.commands = sensor_send_commands,
-		.init = sensor_send_init,
-		.help = sensor_send_help,
-		.parse = sensor_send_parse
+	.commands = sensor_send_commands,
+	.init = sensor_send_init,
+	.help = sensor_send_help,
+	.parse = sensor_send_parse
 };
 
+/** @} */
+
+/** @} (end addtogroup AT_SENSOR_SEND) */

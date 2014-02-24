@@ -2,7 +2,7 @@
  * @file
  * @brief Advanced Encryption Standard (AES) accelerator peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -31,9 +31,9 @@
  *
  ******************************************************************************/
 #include "em_aes.h"
-#include "em_assert.h"
-
 #if defined(AES_COUNT) && (AES_COUNT > 0)
+
+#include "em_assert.h"
 /***************************************************************************//**
  * @addtogroup EM_Library
  * @{
@@ -145,8 +145,9 @@
  *   When doing encryption, this is the 128 bit encryption key. When doing
  *   decryption, this is the 128 bit decryption key. The decryption key may
  *   be generated from the encryption key with AES_DecryptKey128().
- *   If this argument is null, the key will not be loaded, as it is assumed
- *   the key has been loaded into KEYHA previously.
+ *   On devices supporting key buffering this argument can be null, if so, the
+ *   key will not be loaded, as it is assumed the key has been loaded
+ *   into KEYHA previously.
  *
  * @param[in] iv
  *   128 bit initalization vector to use.
@@ -164,6 +165,7 @@ void AES_CBC128(uint8_t *out,
   int            i;
   uint32_t       *_out = (uint32_t *)out;
   const uint32_t *_in  = (const uint32_t *)in;
+  const uint32_t *_key = (const uint32_t *)key;
   const uint32_t *_iv  = (const uint32_t *)iv;
   /* Need to buffer one block when decrypting in case 'out' replaces 'in' */
   uint32_t       prev[4];
@@ -173,20 +175,25 @@ void AES_CBC128(uint8_t *out,
   /* Number of blocks to process */
   len /= AES_BLOCKSIZE;
 
+  #if defined( AES_CTRL_KEYBUFEN )
   if (key)
   {
-    const uint32_t *_key = (const uint32_t *)key;
     /* Load key into high key for key buffer usage */
     for (i = 3; i >= 0; i--)
     {
       AES->KEYHA = __REV(_key[i]);
     }
   }
+  #endif
 
   if (encrypt)
   {
     /* Enable encryption with auto start using XOR */
+    #if defined( AES_CTRL_KEYBUFEN )
     AES->CTRL = AES_CTRL_KEYBUFEN | AES_CTRL_XORSTART;
+    #else
+    AES->CTRL = AES_CTRL_XORSTART;
+    #endif
 
     /* Load initialization vector, since writing to DATA, it will */
     /* not trigger encryption. */
@@ -198,6 +205,14 @@ void AES_CBC128(uint8_t *out,
     /* Encrypt data */
     while (len--)
     {
+      #if !defined( AES_CTRL_KEYBUFEN )
+      /* Load key */
+      for (i = 3; i >= 0; i--)
+      {
+        AES->KEYLA = __REV(_key[i]);
+      }
+      #endif
+
       /* Load data and trigger encryption */
       for (i = 3; i >= 0; i--)
       {
@@ -220,7 +235,11 @@ void AES_CBC128(uint8_t *out,
   else
   {
     /* Select decryption mode */
+    #if defined( AES_CTRL_KEYBUFEN )
     AES->CTRL = AES_CTRL_DECRYPT | AES_CTRL_KEYBUFEN | AES_CTRL_DATASTART;
+    #else
+    AES->CTRL = AES_CTRL_DECRYPT | AES_CTRL_DATASTART;
+    #endif
 
     /* Copy init vector to previous buffer to avoid special handling */
     for (i = 0; i < 4; i++)
@@ -231,6 +250,14 @@ void AES_CBC128(uint8_t *out,
     /* Decrypt data */
     while (len--)
     {
+      #if !defined( AES_CTRL_KEYBUFEN )
+      /* Load key */
+      for (i = 3; i >= 0; i--)
+      {
+        AES->KEYLA = __REV(_key[i]);
+      }
+      #endif
+
       /* Load data and trigger decryption */
       for (i = 3; i >= 0; i--)
       {
@@ -262,6 +289,7 @@ void AES_CBC128(uint8_t *out,
 }
 
 
+#if defined( AES_CTRL_AES256 )
 /***************************************************************************//**
  * @brief
  *   Cipher-block chaining (CBC) cipher mode encryption/decryption, 256 bit key.
@@ -395,6 +423,7 @@ void AES_CBC256(uint8_t *out,
     }
   }
 }
+#endif
 
 
 /***************************************************************************//**
@@ -472,20 +501,33 @@ void AES_CFB128(uint8_t *out,
 
   EFM_ASSERT(!(len % AES_BLOCKSIZE));
 
-  /* Select encryption mode */
+  #if defined( AES_CTRL_KEYBUFEN )
   AES->CTRL = AES_CTRL_KEYBUFEN | AES_CTRL_DATASTART;
+  #else
+  AES->CTRL = AES_CTRL_DATASTART;
+  #endif
 
+  #if defined( AES_CTRL_KEYBUFEN )
   /* Load key into high key for key buffer usage */
   for (i = 3; i >= 0; i--)
   {
     AES->KEYHA = __REV(_key[i]);
   }
+  #endif
 
   /* Encrypt/decrypt data */
   data = _iv;
   len /= AES_BLOCKSIZE;
   while (len--)
   {
+    #if !defined( AES_CTRL_KEYBUFEN )
+    /* Load key */
+    for (i = 3; i >= 0; i--)
+    {
+      AES->KEYLA = __REV(_key[i]);
+    }
+    #endif
+
     /* Load data and trigger encryption */
     for (i = 3; i >= 0; i--)
     {
@@ -522,6 +564,7 @@ void AES_CFB128(uint8_t *out,
 }
 
 
+#if defined( AES_CTRL_AES256 )
 /***************************************************************************//**
  * @brief
  *   Cipher feedback (CFB) cipher mode encryption/decryption, 256 bit key.
@@ -612,6 +655,7 @@ void AES_CFB256(uint8_t *out,
     _in  += 4;
   }
 }
+#endif
 
 
 /***************************************************************************//**
@@ -663,8 +707,9 @@ void AES_CFB256(uint8_t *out,
  *
  * @param[in] key
  *   128 bit encryption key.
- *   If this argument is null, the key will not be loaded, as it is assumed
- *   the key has been loaded into KEYHA previously.
+ *   On devices supporting key buffering this argument can be null, if so, the
+ *   key will not be loaded, as it is assumed the key has been loaded
+ *   into KEYHA previously.
  *
  * @param[in,out] ctr
  *   128 bit initial counter value. The counter is updated after each AES
@@ -683,28 +728,41 @@ void AES_CTR128(uint8_t *out,
   int            i;
   uint32_t       *_out = (uint32_t *)out;
   const uint32_t *_in  = (const uint32_t *)in;
+  const uint32_t *_key = (const uint32_t *)key;
   uint32_t       *_ctr = (uint32_t *)ctr;
 
   EFM_ASSERT(!(len % AES_BLOCKSIZE));
   EFM_ASSERT(ctrFunc);
 
-  /* Select encryption mode, with auto trigger */
+  #if defined( AES_CTRL_KEYBUFEN )
   AES->CTRL = AES_CTRL_KEYBUFEN | AES_CTRL_DATASTART;
+  #else
+  AES->CTRL = AES_CTRL_DATASTART;
+  #endif
 
+  #if defined( AES_CTRL_KEYBUFEN )
   if (key)
   {
-    const uint32_t *_key = (const uint32_t *)key;
     /* Load key into high key for key buffer usage */
     for (i = 3; i >= 0; i--)
     {
       AES->KEYHA = __REV(_key[i]);
     }
   }
+  #endif
 
   /* Encrypt/decrypt data */
   len /= AES_BLOCKSIZE;
   while (len--)
   {
+    #if !defined( AES_CTRL_KEYBUFEN )
+    /* Load key */
+    for (i = 3; i >= 0; i--)
+    {
+      AES->KEYLA = __REV(_key[i]);
+    }
+    #endif
+
     /* Load ctr to be encrypted/decrypted */
     for (i = 3; i >= 0; i--)
     {
@@ -728,6 +786,7 @@ void AES_CTR128(uint8_t *out,
 }
 
 
+#if defined( AES_CTRL_AES256 )
 /***************************************************************************//**
  * @brief
  *   Counter (CTR) cipher mode encryption/decryption, 256 bit key.
@@ -805,6 +864,7 @@ void AES_CTR256(uint8_t *out,
     _in  += 4;
   }
 }
+#endif
 
 
 /***************************************************************************//**
@@ -873,6 +933,7 @@ void AES_DecryptKey128(uint8_t *out, const uint8_t *in)
 }
 
 
+#if defined( AES_CTRL_AES256 )
 /***************************************************************************//**
  * @brief
  *   Generate 256 bit decryption key from 256 bit encryption key. The decryption
@@ -917,6 +978,7 @@ void AES_DecryptKey256(uint8_t *out, const uint8_t *in)
     _out[i] = __REV(AES->KEYHA);
   }
 }
+#endif
 
 
 /***************************************************************************//**
@@ -983,27 +1045,45 @@ void AES_ECB128(uint8_t *out,
 
   EFM_ASSERT(!(len % AES_BLOCKSIZE));
 
+  #if defined( AES_CTRL_KEYBUFEN )
   /* Load key into high key for key buffer usage */
   for (i = 3; i >= 0; i--)
   {
     AES->KEYHA = __REV(_key[i]);
   }
+  #endif
 
   if (encrypt)
   {
     /* Select encryption mode */
+    #if defined( AES_CTRL_KEYBUFEN )
     AES->CTRL = AES_CTRL_KEYBUFEN | AES_CTRL_DATASTART;
+    #else
+    AES->CTRL = AES_CTRL_DATASTART;
+    #endif
   }
   else
   {
     /* Select decryption mode */
+    #if defined( AES_CTRL_KEYBUFEN )
     AES->CTRL = AES_CTRL_DECRYPT | AES_CTRL_KEYBUFEN | AES_CTRL_DATASTART;
+    #else
+    AES->CTRL = AES_CTRL_DECRYPT | AES_CTRL_DATASTART;
+    #endif
   }
 
   /* Encrypt/decrypt data */
   len /= AES_BLOCKSIZE;
   while (len--)
   {
+    #if !defined( AES_CTRL_KEYBUFEN )
+    /* Load key */
+    for (i = 3; i >= 0; i--)
+    {
+      AES->KEYLA = __REV(_key[i]);
+    }
+    #endif
+
     /* Load block to be encrypted/decrypted */
     for (i = 3; i >= 0; i--)
     {
@@ -1025,6 +1105,7 @@ void AES_ECB128(uint8_t *out,
 }
 
 
+#if defined( AES_CTRL_AES256 )
 /***************************************************************************//**
  * @brief
  *   Electronic Codebook (ECB) cipher mode encryption/decryption, 256 bit key.
@@ -1103,6 +1184,7 @@ void AES_ECB256(uint8_t *out,
     _out += 4;
   }
 }
+#endif
 
 
 /***************************************************************************//**
@@ -1177,13 +1259,17 @@ void AES_OFB128(uint8_t *out,
   EFM_ASSERT(!(len % AES_BLOCKSIZE));
 
   /* Select encryption mode, trigger explicitly by command */
+  #if defined( AES_CTRL_KEYBUFEN )
   AES->CTRL = AES_CTRL_KEYBUFEN;
+  #endif
 
   /* Load key into high key for key buffer usage */
   /* Load initialization vector */
   for (i = 3; i >= 0; i--)
   {
+    #if defined( AES_CTRL_KEYBUFEN )
     AES->KEYHA = __REV(_key[i]);
+    #endif
     AES->DATA  = __REV(_iv[i]);
   }
 
@@ -1191,6 +1277,14 @@ void AES_OFB128(uint8_t *out,
   len /= AES_BLOCKSIZE;
   while (len--)
   {
+    #if !defined( AES_CTRL_KEYBUFEN )
+    /* Load key */
+    for (i = 3; i >= 0; i--)
+    {
+      AES->KEYLA = __REV(_key[i]);
+    }
+    #endif
+
     AES->CMD = AES_CMD_START;
 
     /* Wait for completion */
@@ -1208,6 +1302,7 @@ void AES_OFB128(uint8_t *out,
 }
 
 
+#if defined( AES_CTRL_AES256 )
 /***************************************************************************//**
  * @brief
  *   Output feedback (OFB) cipher mode encryption/decryption, 256 bit key.
@@ -1283,9 +1378,9 @@ void AES_OFB256(uint8_t *out,
     _in  += 4;
   }
 }
+#endif
 
 
 /** @} (end addtogroup AES) */
 /** @} (end addtogroup EM_Library) */
-
 #endif /* defined(AES_COUNT) && (AES_COUNT > 0) */

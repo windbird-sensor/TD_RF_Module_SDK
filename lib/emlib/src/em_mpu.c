@@ -2,7 +2,7 @@
  * @file
  * @brief Memory Protection Unit (MPU) Peripheral API
  * @author Energy Micro AS
- * @version 3.0.2
+ * @version 3.20.2
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
@@ -31,11 +31,9 @@
  *
  ******************************************************************************/
 #include "em_mpu.h"
+#if defined(__MPU_PRESENT) && (__MPU_PRESENT == 1)
 #include "em_assert.h"
 
-#include "em_device.h"
-
-#if defined(__MPU_PRESENT) && (__MPU_PRESENT == 1)
 
 /***************************************************************************//**
  * @addtogroup EM_Library
@@ -123,4 +121,4 @@ void MPU_ConfigureRegion(const MPU_RegionInit_TypeDef *init)
 
 /** @} (end addtogroup CMU) */
 /** @} (end addtogroup EM_Library) */
-#endif
+#endif /* defined(__MPU_PRESENT) && (__MPU_PRESENT == 1) */
