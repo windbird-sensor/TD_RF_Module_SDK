@@ -3,7 +3,7 @@ Welcome to TD RF Module SDK (powered by Telecom Design)
 
 The TD RF Module SDK provides a complete Rapid Embedded Development Environment for the TD RF modules.
 
-The TD RF Module SDK contains all the Eclipse projects, static libraries, exampels with soruce codes
+The TD RF Module SDK contains all the Eclipse projects, static libraries, examples with source codes
 and auto-generated API documentation to develop for the TD RF modules.
 
 Further details on the TD RF Module SDK can be found at <https://developers.insgroup.fr/>
@@ -19,6 +19,9 @@ The SDK source code and examples are no longer distributed with the TD RF Module
 are available through the <https://github.com/Telecom-Design/TD_RF_Module_SDK> Github repository
 once you register your Telecom Design Evaluation Board (EVB) by following the steps described on
 <https://developers.insgroup.fr/>.
+
+The stand-alone Eclipse Package which should be used to compile the source can be found here:
+<https://developers.insgroup.fr/releases/2014/02/25/sdk-400-version-available/index.html>
 
 The following steps detail how to download the source code and import all projects into the Eclipse
 environment.
@@ -259,6 +262,6 @@ v3.0.0 (May 2013)
 
 New functionality contained in the TD RF Module SDK 3.0.0 include:
 
-  - The IDE is now based on the Eclipse “Juno” SR2 release.
+  - The IDE is now based on the Eclipse ï¿½Junoï¿½ SR2 release.
   - The compilation tools are now based on GCC 4.5.1.
   - Support for CMSIS v2.0 (Cortex Microcontroller Software Interface Standard), including DSPLib
