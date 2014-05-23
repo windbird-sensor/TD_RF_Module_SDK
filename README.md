@@ -74,9 +74,15 @@ Compiling the Sources
 
 With the exception of the binary-only static libraries in the `"libtddrivers"` and `"libtdrf"`
 projects, all deliverables are presented in source form only, and must be compiled to obtain an
-executable firmware.
+executable firmware. To compile properly you must add the gcc path into your environment variables
+by opening: Configuration Panel -> Sytem -> Advanced System Parameters -> System Variables -> Path
 
-If we take the `"blink"` project as an example, here are the steps required to compile it:
+Please add the following line:
+
+C:\TD\TD_RF_Module_SDK-v4.0.0\gnu\bin;
+
+
+Then if we take the `"blink"` project as an example, here are the steps required to compile it:
 
   1. In order to avoid unnecessary rebuilds of the common libraries, it is best to set the right
      build configuration for all these libraries: unfold the `"Common_Libraries"` working set in the
