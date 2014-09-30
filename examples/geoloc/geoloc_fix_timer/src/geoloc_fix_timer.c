@@ -111,18 +111,24 @@ static void GPSFix(TD_GEOLOC_Fix_t * fix, bool timeout)
 		}
 		longitude_int = longitude / 100000;
 		longitude_fract = longitude % 100000;
-		tfp_printf("Fix OK: %4d.%03d°%c %5d.%03d°%c\r\n",
+		tfp_printf("Fix OK: %4d.%03dÂ°%c %5d.%03dÂ°%c\r\n",
 			latitude_int,
 			latitude_fract,
 			latitude_direction,
 			longitude_int,
 			longitude_fract,
 			longitude_direction);
+
+		TD_GEOLOC_StopFix(TD_GEOLOC_HW_BCKP);
+		TD_SENSOR_SendDataPosition(GPS_DATA_XYZ_SV_HDOP, fix, 0, 0);
+
 	} else if (timeout) {
 		tfp_printf("Fix Timeout\r\n");
+
+		TD_GEOLOC_StopFix(TD_GEOLOC_HW_BCKP);
+		TD_SENSOR_SendDataPosition(GPS_DATA_XYZ_SV_HDOP, fix, 0, 0);
 	}
-	TD_GEOLOC_StopFix(TD_GEOLOC_HW_BCKP);
-	TD_SENSOR_SendDataPosition(GPS_DATA_XYZ_SV_HDOP, fix, 0, 0);
+
 }
 
 /***************************************************************************//**
