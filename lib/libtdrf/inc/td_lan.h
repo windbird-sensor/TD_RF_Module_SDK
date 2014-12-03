@@ -56,12 +56,13 @@ extern "C" {
 	/** @addtogroup LAN_DEFINES Defines
 	 * @{ */
 
-#define ACK_WIDTH				1				/**< Ack flag field width */
-#define ACK_SHIFT				31				/**< Ack flag field shift */
-#define FRAME_NUMBER_WIDTH		7				/**< Frame number field width */
-#define FRAME_NUMBER_SHIFT		24				/**< Frame number field shift */
-#define ADDRESS_WIDTH			24				/**< Address field width */
-#define ADDRESS_SHIFT			0				/**< Address field shift */
+
+#define ACK_WIDTH				1									/**< Ack flag field width */
+#define ACK_SHIFT				31									/**< Ack flag field shift */
+#define FRAME_NUMBER_WIDTH		(ACK_SHIFT-CONFIG_LAN_ADDRESS_SIZE)	/**< Frame number field width */
+#define FRAME_NUMBER_SHIFT		CONFIG_LAN_ADDRESS_SIZE				/**< Frame number field shift */
+#define ADDRESS_WIDTH			CONFIG_LAN_ADDRESS_SIZE				/**< Address field width */
+#define ADDRESS_SHIFT			0									/**< Address field shift */
 
 	/** Macro to compute bit mask given its width */
 #define MASK(w)					((1 << w) - 1)

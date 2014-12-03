@@ -956,6 +956,23 @@ uint32_t TD_RTC_TimeDiff(uint32_t reference)
 }
 
 /***************************************************************************//**
+ * @brief
+ *   Returns the difference between current time and a reference time.
+ *
+ * @param[in] reference
+ *   The reference time to compare to.
+ *
+ * @return
+ *   Returns the absolute difference with the reference time.
+ ******************************************************************************/
+int32_t TD_RTC_SignedTimeDiff(uint32_t reference)
+{
+uint32_t t;
+	t=(RTC_CounterGet() - reference) & 0xFFFFFF;
+	return (t>0x7FFFFF) ? (((int32_t)t)|0xFF000000) : t;
+}
+
+/***************************************************************************//**
  * @brief Set a time offset to clock timer.
  *
  * @param[in] delta

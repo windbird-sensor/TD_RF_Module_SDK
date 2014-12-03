@@ -1,9 +1,9 @@
-﻿<style type="text/css">html,body {font-family: Helvetica, Arial, Verdana, sans-serif;}</style>
+<style type="text/css">html,body {font-family: Helvetica, Arial, Verdana, sans-serif;}</style>
 <h1>Welcome to TD RF Module SDK (powered by Telecom Design)</h1>
 
 <p>The TD RF Module SDK provides a complete Rapid Embedded Development Environment for the TD RF modules.</p>
 
-<p>The TD RF Module SDK contains all the Eclipse projects, static libraries, exampels with soruce codes
+<p>The TD RF Module SDK contains all the Eclipse projects, static libraries, examples with source codes
 and auto-generated API documentation to develop for the TD RF modules.</p>
 
 <p>Further details on the TD RF Module SDK can be found at <a href="https://developers.insgroup.fr/">https://developers.insgroup.fr/</a></p>
@@ -12,12 +12,19 @@ and auto-generated API documentation to develop for the TD RF modules.</p>
 
 <p><em>The Telecom Design Team</em></p>
 
+<h1>UPDATE:</h1>
+
+<p>We strongly recommend to update the SDK from previous 4.0.0 version to the newest 4.1.0 version as soon as possible and regenerate the firmwares for all devices produced, as this version contains a modification that will ensure the best performance with the latest SIGFOX network updates.</p>
+
 <h1>Getting the Sources</h1>
 
 <p>The SDK source code and examples are no longer distributed with the TD RF Module SDK Tools zip file but
 are available through the <a href="https://github.com/Telecom-Design/TD_RF_Module_SDK">https://github.com/Telecom-Design/TD_RF_Module_SDK</a> Github repository
 once you register your Telecom Design Evaluation Board (EVB) by following the steps described on
 <a href="https://developers.insgroup.fr/">https://developers.insgroup.fr/</a>.</p>
+
+<p>The stand-alone Eclipse Package which should be used to compile the source can be found here:
+<a href="https://developers.insgroup.fr/releases/2014/02/25/sdk-400-version-available/index.html">https://developers.insgroup.fr/releases/2014/02/25/sdk-400-version-available/index.html</a></p>
 
 <p>The following steps detail how to download the source code and import all projects into the Eclipse
 environment.</p>
@@ -72,9 +79,14 @@ double-click on the <code>"eclipse.exe"</code> icon (if not already done) and:</
 
 <p>With the exception of the binary-only static libraries in the <code>"libtddrivers"</code> and <code>"libtdrf"</code>
 projects, all deliverables are presented in source form only, and must be compiled to obtain an
-executable firmware.</p>
+executable firmware. To compile properly you must add the gcc path into your environment variables
+by opening: Configuration Panel -> Sytem -> Advanced System Parameters -> System Variables -> Path</p>
 
-<p>If we take the <code>"blink"</code> project as an example, here are the steps required to compile it:</p>
+<p>Please add the following line:</p>
+
+<p>C:\TD\TD<em>RF</em>Module_SDK-v4.0.0\gnu\bin;</p>
+
+<p>Then if we take the <code>"blink"</code> project as an example, here are the steps required to compile it:</p>
 
 <ol>
 <li>In order to avoid unnecessary rebuilds of the common libraries, it is best to set the right
@@ -157,6 +169,48 @@ fixed Flash/Debug commands or menu buttons: they need to be added explicitly on 
 </ol>
 
 <h1>Release Notes</h1>
+
+<h2>v4.1.0 (December 2014)</h2>
+
+<ul>
+<li>This release is a hotfix of the TD RF Module SDK. <strong>Please upgrade all firmwares generated with the SDK 4.0.0 to SDK 4.1.0 as it contains an important fix for compatibility with the SIGFOX network</strong></li>
+</ul>
+
+<h3>Release Notes</h3>
+
+<h4>Minor Updates</h4>
+
+<h5><strong>libtdcore</strong></h5>
+
+<ul>
+<li>Changed the definition of <code>T1S</code></li>
+</ul>
+
+<h4>Additions</h4>
+
+<h5><strong>libtdcore</strong></h5>
+
+<ul>
+<li>Added the function <code>TD_RTC_SignedTimeDiff()</code></li>
+</ul>
+
+<h5><strong>libtdrf</strong></h5>
+
+<h6>LAN:</h6>
+
+<ul>
+<li>Changed the TD LAN windowed listen period to variable up to 6.7 s instead of fixed 1 s, using the <code>LAN_PERIOD</code> and <code>LAN_ADDRESS_SIZE</code> configuration parameters</li>
+</ul>
+
+<h4>Bug Fixes</h4>
+
+<h5><strong>libtdrf</strong></h5>
+
+<h6>SIGFOX:</h6>
+
+<ul>
+<li>Corrected a timing problem on first frame detected with new base station software upgrade</li>
+</ul>
 
 <h2>v4.0.0 (February 2014)</h2>
 
@@ -301,7 +355,7 @@ fixed Flash/Debug commands or menu buttons: they need to be added explicitly on 
 <p>New functionality contained in the TD RF Module SDK 3.0.0 include:</p>
 
 <ul>
-<li>The IDE is now based on the Eclipse “Juno” SR2 release.</li>
+<li>The IDE is now based on the Eclipse ?Juno? SR2 release.</li>
 <li>The compilation tools are now based on GCC 4.5.1.</li>
 <li>Support for CMSIS v2.0 (Cortex Microcontroller Software Interface Standard), including DSPLib</li>
 </ul>

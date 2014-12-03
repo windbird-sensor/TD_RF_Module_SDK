@@ -160,8 +160,9 @@ extern uint8_t const CONFIG_TD_SENSOR_MAX_SWITCH;
 extern uint8_t const CONFIG_TD_SENSOR_MAX_SWITCH_EVENT;
 extern uint8_t const CONFIG_TD_SCHEDULER_MAX_TIMER;
 extern uint8_t const CONFIG_TD_SCHEDULER_MAX_QUEUE;
-extern unsigned short const CONFIG_LAN_PERIOD;
 extern unsigned char CONFIG_LAN_THRESHOLD;
+extern unsigned long const CONFIG_LAN_PERIOD;
+extern unsigned char const CONFIG_LAN_ADDRESS_SIZE;
 /***************************
  *  TD12xxx Module definition
  ****************************/

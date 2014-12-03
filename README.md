@@ -12,6 +12,11 @@ We hope you enjoy using the TD RF Module SDK!
 
 _The Telecom Design Team_
 
+UPDATE:
+=======
+
+We strongly recommend to update the SDK from previous 4.0.0 version to the newest 4.1.0 version as soon as possible and regenerate the firmwares for all devices produced, as this version contains a modification that will ensure the best performance with the latest SIGFOX network updates.
+
 Getting the Sources
 ===================
 
@@ -160,6 +165,39 @@ Similarly, to debug a firmware on the TD12xx board:
 Release Notes
 =============
 
+v4.1.0 (December 2014)
+-----------------
+
+  - This release is a hotfix of the TD RF Module SDK. __Please upgrade all firmwares generated with the SDK 4.0.0 to SDK 4.1.0 as it contains an important fix for compatibility with the SIGFOX network__
+
+### Release Notes ###
+
+#### Minor Updates ####
+
+##### **libtdcore** #####
+
+  - Changed the definition of `T1S`
+
+#### Additions ####
+
+##### **libtdcore** #####
+
+  - Added the function `TD_RTC_SignedTimeDiff()`
+
+##### **libtdrf** #####
+
+###### LAN: ######
+
+  - Changed the TD LAN windowed listen period to variable up to 6.7 s instead of fixed 1 s, using the `LAN_PERIOD` and `LAN_ADDRESS_SIZE` configuration parameters
+
+#### Bug Fixes ####
+
+##### **libtdrf** #####
+
+###### SIGFOX: ######
+
+  - Corrected a timing problem on first frame detected with new base station software upgrade
+
 v4.0.0 (February 2014)
 -----------------
 
@@ -268,6 +306,6 @@ v3.0.0 (May 2013)
 
 New functionality contained in the TD RF Module SDK 3.0.0 include:
 
-  - The IDE is now based on the Eclipse �Juno� SR2 release.
+  - The IDE is now based on the Eclipse ?Juno? SR2 release.
   - The compilation tools are now based on GCC 4.5.1.
   - Support for CMSIS v2.0 (Cortex Microcontroller Software Interface Standard), including DSPLib

@@ -61,17 +61,17 @@
 #if MODULE_REVISION == REVISION_TD1202
 
 /** TD1202 Software release and version */
-#define SOFTWARE_RELEASE		1290
+#define SOFTWARE_RELEASE		1350
 
 #elif MODULE_REVISION == REVISION_TD1208
 
 /** TD1208 Software release and version */
-#define SOFTWARE_RELEASE		1291
+#define SOFTWARE_RELEASE		1351
 
 #elif MODULE_REVISION == REVISION_TD1204
 
 /** TD1204 Software release and version */
-#define SOFTWARE_RELEASE		1292
+#define SOFTWARE_RELEASE		1352
 
 #endif
 
@@ -82,7 +82,7 @@
 #define SOFTWARE_VERSION		STRING2(CONCAT2(SOFT,SOFTWARE_RELEASE))
 
 /** Release data */
-#define RELEASE_DATE			"M02+2014"
+#define RELEASE_DATE			"M07+2014"
 
 /** Telecom Design 12-digit serial number */
 #define SERIAL_NUMBER			"123456789012"

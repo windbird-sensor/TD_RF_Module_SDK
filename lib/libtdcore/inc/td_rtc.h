@@ -119,7 +119,7 @@ extern "C" {
 #define  T800MS            ((32768 * 8000) / 10000)		/**< 800 ms */
 #define  T900MS            ((32768 * 9000) / 10000)		/**< 900 ms */
 #define  T950MS            ((32768 * 9500) / 10000)		/**< 950 ms */
-#define  T1S               ((32768 * 10000) / 10000)	/**< 1 s */
+#define  T1S               32768						/**< 1 s */
 #define  T1060MS           ((32768 * 10600) / 10000)	/**< 1.06 s */
 #define  T1100MS           ((32768 * 11000) / 10000)	/**< 1.1 s */
 #define  T1200MS           ((32768 * 12000) / 10000)	/**< 1.2 s */
@@ -299,6 +299,7 @@ extern "C" {
 	void TD_RTC_SetOffsetTime(int delta);
 	void TD_RTC_AlarmAfter(int32_t delay);
 	void TD_RTC_UserAlarmAfter(int32_t delay);
+	int32_t TD_RTC_SignedTimeDiff(uint32_t reference);
 	time_t __time32(time_t *timer);
 
 	/** @} */

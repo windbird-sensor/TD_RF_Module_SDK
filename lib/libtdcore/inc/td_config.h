@@ -212,9 +212,10 @@ extern "C" {
 	 *   RADIO_INIT_DATA					     | Chip         | array     |  Bootloader         | Initial configuration of RF PIN
 	 *   RADIO_INFO_PIN					         | Chip         | integer   |  td_rf              | RF PIN number connected to EFM32
 	 *   FORCE_RADIO_RESET					     | Chip         | integer   |  td_rf              | Force RF reset at each reset
-	 *   RADIO_PA_POWER					         | Chip         | integer   |  td_sigfox          | Default RF power (dBm)
-	 *   LAN_PERIOD						         | Chip         | integer   |  td_sensor_gateway  | Receive sampling period (timer unit)
-	 *   LAN_THRESHOLD						     | Chip         | integer   |  td_rf  			  | RSSI Threshold in LAN reception mode in 0.5dB step from -126dB max sensitivity (default : 32 aka -110dB)
+	 *   RADIO_PA_POWER					         | Applicative  | integer   |  td_sigfox          | Default RF power (dBm)
+	 *   LAN_PERIOD						         | Applicative  | integer   |  td_lan             | Receive sampling period (timer unit)
+	 *   LAN_THRESHOLD						     | Applicative  | integer   |  td_lan  			  | RSSI Threshold in LAN reception mode in 0.5dB step from -126dB max sensitivity (default : 32 aka -110dB)
+	 *   LAN_ADDRESS_SIZE					     | Applicative  | integer   |  td_lan  			  | LAN address size (in bits default 24)
 	 *
 	 *   These parameters are GPS SYSTEM parameters do not MESS with them!
 	 *
@@ -811,6 +812,18 @@ extern "C" {
 #define LAN_THRESHOLD 32
 #endif
 
+#ifndef LAN_ADDRESS_SIZE
+#define LAN_ADDRESS_SIZE 24
+#endif
+
+#if ((LAN_PERIOD/T26_6MS)>=(1<<(31-LAN_ADDRESS_SIZE)))
+#error("LAN_PERIOD/LAN_ADDRESS_SIZE error. LAN_PERIOD or LAN_ADDRESS_SIZE is too large ")
+#endif
+
+#if ((LAN_PERIOD/T26_6MS)>=253)
+#error("LAN_PERIOD too high. For the time no more than 253 packets can be send. This limitation is to be removed")
+#endif
+
 #define TD_STDLIB_SCHEDULER\
   /** Timer list */\
   uint8_t const CONFIG_TD_SCHEDULER_MAX_TIMER = TD_SCHEDULER_MAX_TIMER;\
@@ -869,7 +882,10 @@ extern "C" {
 	unsigned char const CONFIG_RADIO_INIT_DATA[] = RADIO_INIT_DATA;
 
 	/** LAN sampling period */
-	unsigned short const CONFIG_LAN_PERIOD = LAN_PERIOD;
+	unsigned long const CONFIG_LAN_PERIOD = LAN_PERIOD;
+
+	/** LAN address size */
+	unsigned char const CONFIG_LAN_ADDRESS_SIZE = LAN_ADDRESS_SIZE;
 
 	/** LAN threshold level */
 	unsigned char CONFIG_LAN_THRESHOLD = LAN_THRESHOLD;
@@ -1061,5 +1077,7 @@ uint8_t const TD_TRAP_MaxSystemDump = sizeof (TD_TRAP_SystemDumpFunc) / sizeof (
 }
 #endif
 
+#else
+#error("td_config.h MUST NOT be included multiple time")
 #endif // __TD_CONFIG_H
 /** @endcond */
