@@ -2,7 +2,7 @@
 * @file
  * @brief Accelerometer AT command extension for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -105,8 +105,11 @@ static AT_command_t const accelero_commands[] = {
 /** @addtogroup AT_ACCELERO_LOCAL_VARIABLES Local Variables
  * @{ */
 
-/* Active accelerometer events to filter low events*/
+/** Active accelerometer events to filter low events */
 uint8_t AT_AcceleroEvents = 0;
+
+/** Current Configuration */
+TD_ACCELERO_Config_t Config;
 
 /** @} */
 
@@ -134,12 +137,9 @@ static void data_callback(TD_ACCELERO_Data_t *data, uint8_t count, bool overrun)
 {
 	int i;
 
-	for (i = 0; i < count; i++) {
+	for (i = 1; i < count; i++) {
 		tfp_printf("%d \t %d \t %d\r\n", data[i].x, data[i].y, data[i].z);
 	}
-	/*if (overrun) {
-		tfp_printf("overrun\r\n");
-	}*/
 }
 
 /***************************************************************************//**
@@ -179,9 +179,8 @@ static void event_callback(uint8_t source)
 static void accelero_init(void)
 {
 	AT_AcceleroEvents = 0;
-	TD_ACCELERO_Config_t config;
-	config.monitoring = TD_ACCELERO_NO_MONITORING;
-	TD_ACCELERO_SetConfig(&config);
+	Config.monitoring = TD_ACCELERO_NO_MONITORING;
+	TD_ACCELERO_SetConfig(&Config);
 }
 
 /***************************************************************************//**
@@ -203,18 +202,17 @@ static void accelero_init(void)
  ******************************************************************************/
 static uint8_t accelero_persist(bool write, uint8_t *buffer, uint8_t count)
 {
-	TD_ACCELERO_Config_t config;
-
 	if (buffer != 0 && count != 0) {
 		if (write == true) {
 			*buffer++ = AT_AcceleroEvents;
-			memcpy(buffer, TD_ACCELERO_GetConfig(), sizeof (TD_ACCELERO_Config_t));
+			memcpy(buffer, TD_ACCELERO_GetConfig(),
+				sizeof (TD_ACCELERO_Config_t));
 			buffer += sizeof (TD_ACCELERO_Config_t);
 		} else {
-			AT_AcceleroEvents = (uint8_t) * buffer++;
-			memcpy(&config, buffer, sizeof (TD_ACCELERO_Config_t));
+			AT_AcceleroEvents = (uint8_t) *buffer++;
+			memcpy(&Config, buffer, sizeof (TD_ACCELERO_Config_t));
 			buffer += sizeof (TD_ACCELERO_Config_t);
-			TD_ACCELERO_SetConfig(&config);
+			TD_ACCELERO_SetConfig(&Config);
 		}
 	}
 	return 1 + sizeof (TD_ACCELERO_Config_t);
@@ -234,7 +232,7 @@ static int8_t accelero_parse(uint8_t token)
 {
 	int8_t result = AT_OK;
 	TD_ACCELERO_Config_t *accelero = 0;
-	int enable, low_power, rate, scale, filter, threshold, duration;
+	int enable, low_power, rate, scale, filter, threshold, duration, reg;
 
 	accelero = TD_ACCELERO_GetConfig();
 	switch (token) {
@@ -252,10 +250,10 @@ static int8_t accelero_parse(uint8_t token)
 		} else {
 			if (accelero->monitoring == TD_ACCELERO_MONITOR_DATA) {
 				AT_printf("1,%d,%d,%d,%d\r\n",
-						  accelero->config.low_power,
-						  accelero->config.rate,
-						  accelero->config.scale,
-						  accelero->config.filter);
+					accelero->config.low_power,
+					accelero->config.rate,
+					accelero->config.scale,
+					accelero->config.filter);
 			} else {
 				AT_printf("0\r\n");
 			}
@@ -268,13 +266,13 @@ static int8_t accelero_parse(uint8_t token)
 		} else {
 			if (accelero->monitoring == TD_ACCELERO_MONITOR_EVENT) {
 				AT_printf("1,%d,%d,%d,",
-						  accelero->config.scale,
-						  accelero->config.rate,
-						  accelero->event_config.threshold);
+					accelero->config.scale,
+					accelero->config.rate,
+					accelero->event_config.threshold);
 				tfp_printf("%d,%d,%d\r\n",
-						   accelero->event_config.duration,
-						   accelero->event_config.event,
-						   accelero->config.filter);
+					accelero->event_config.duration,
+					accelero->event_config.event,
+					accelero->config.filter);
 			} else {
 				AT_printf("0\r\n");
 			}
@@ -299,9 +297,10 @@ static int8_t accelero_parse(uint8_t token)
 
 	case AT_ACCELERO_READ:
 		if (AT_argc == 1) {
+			reg = AT_atoll(AT_argv[0]);
 			tfp_printf("Reg %x = %x\r\n",
-				AT_atoll(AT_argv[0]),
-				TD_ACCELERO_ReadRegister(AT_atoll(AT_argv[0])));
+				reg,
+				TD_ACCELERO_ReadRegister(reg));
 		} else {
 			result = AT_ERROR;
 		}
@@ -311,7 +310,14 @@ static int8_t accelero_parse(uint8_t token)
 		if (AT_argc >= 1) {
 			enable = AT_atoll(AT_argv[0]);
 			if (enable == 0 && AT_argc == 1) {
-				TD_ACCELERO_MonitorData(false, 0, (TD_ACCELERO_Rates_t) 0, 0, (TD_ACCELERO_Scales_t) 0, 0,(TD_ACCELERO_FifoModes_t) 0, 0, 0);
+				TD_ACCELERO_MonitorData(false,
+					0,
+					(TD_ACCELERO_Rates_t) 0,
+					0,
+					(TD_ACCELERO_Scales_t) 0,
+					0,(TD_ACCELERO_FifoModes_t) 0,
+					0,
+					0);
 			} else if (enable == 1 && AT_argc == 5) {
 				low_power = AT_atoll(AT_argv[1]);
 				rate = AT_atoll(AT_argv[2]);
@@ -321,16 +327,24 @@ static int8_t accelero_parse(uint8_t token)
 					rate >= 1 && rate <= 4 &&
 					(scale == 2 || scale == 4 || scale == 8 || scale == 16) &&
 					(filter == 0 || filter == 1)) {
-					TD_ACCELERO_MonitorEvent(false, (TD_ACCELERO_Rates_t) 0, 0, (TD_ACCELERO_Scales_t) 0, 0, 0, 0, 0, 0);
+					TD_ACCELERO_MonitorEvent(false,
+						(TD_ACCELERO_Rates_t) 0,
+						0, (TD_ACCELERO_Scales_t) 0,
+						0,
+						0,
+						0,
+						0,
+						0);
 					TD_ACCELERO_MonitorData(true,
-											low_power,
-											(TD_ACCELERO_Rates_t) rate,
-											TD_ACCELERO_AXIS_X | TD_ACCELERO_AXIS_Y | TD_ACCELERO_AXIS_Z,
-											(TD_ACCELERO_Scales_t) scale,
-											filter,
-											(TD_ACCELERO_FifoModes_t) 2,
-											0,
-											data_callback);
+						low_power,
+						(TD_ACCELERO_Rates_t) rate,
+						TD_ACCELERO_AXIS_X | TD_ACCELERO_AXIS_Y |
+						TD_ACCELERO_AXIS_Z,
+						(TD_ACCELERO_Scales_t) scale,
+						filter,
+						(TD_ACCELERO_FifoModes_t) 2,
+						1,
+						data_callback);
 				} else {
 					result = AT_ERROR;
 				}
@@ -347,7 +361,15 @@ static int8_t accelero_parse(uint8_t token)
 			enable = AT_atoll(AT_argv[0]);
 
 			if (enable == 0 && AT_argc == 1) {
-				TD_ACCELERO_MonitorEvent(false, (TD_ACCELERO_Rates_t) 0, 0, (TD_ACCELERO_Scales_t) 0, 0, 0, 0, 0, 0);
+				TD_ACCELERO_MonitorEvent(false,
+					(TD_ACCELERO_Rates_t) 0,
+					0,
+					(TD_ACCELERO_Scales_t) 0,
+					0,
+					0,
+					0,
+					0,
+					0);
 			} else if (enable == 1 && AT_argc == 7) {
 				rate = AT_atoll(AT_argv[1]);
 				scale = AT_atoll(AT_argv[2]);
@@ -360,10 +382,10 @@ static int8_t accelero_parse(uint8_t token)
 					threshold >= 0 && threshold < 128 &&
 					duration >= 0 && duration < 128 &&
 					(filter == 0 || filter == 1)) {
-					TD_ACCELERO_MonitorData(false, 0, (TD_ACCELERO_Rates_t) 0, 0, (TD_ACCELERO_Scales_t) 0, 0,(TD_ACCELERO_FifoModes_t) 0, 0, 0);
 					TD_ACCELERO_MonitorEvent(true,
 						(TD_ACCELERO_Rates_t) rate,
-						TD_ACCELERO_AXIS_X | TD_ACCELERO_AXIS_Y | TD_ACCELERO_AXIS_Z,
+						TD_ACCELERO_AXIS_X | TD_ACCELERO_AXIS_Y |
+						TD_ACCELERO_AXIS_Z,
 						(TD_ACCELERO_Scales_t) scale,
 						AT_AcceleroEvents,
 						threshold,

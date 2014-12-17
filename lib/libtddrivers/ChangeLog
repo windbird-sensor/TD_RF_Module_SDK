@@ -1,2 +1,7 @@
-= Version 1.0.0 =
+# Version 1.0.0 #
+
   * Initial revision
+
+# Version 2.0.0 #
+
+  * Added the UBlox 7 raw format parser

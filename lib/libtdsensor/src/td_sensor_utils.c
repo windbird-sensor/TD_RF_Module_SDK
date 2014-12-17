@@ -2,7 +2,7 @@
  * @file
  * @brief TD Sensor utils
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -74,7 +74,8 @@
  * @param[in] len_append
  *  Len in bits of data to be concatenated
  ******************************************************************************/
-void TD_SENSOR_UTILS_BitConcat(uint8_t *data,  uint8_t *len, uint8_t *data_append, uint8_t len_append)
+void TD_SENSOR_UTILS_BitConcat(uint8_t *data,  uint8_t *len,
+	uint8_t *data_append, uint8_t len_append)
 {
 	//[xxxxxxxx][xxxxx...] append [(aaa)(aaaaa)][aaaaaaaa][(aaaaa)xxx]
 	//*****************************left***right************remain
@@ -103,7 +104,8 @@ void TD_SENSOR_UTILS_BitConcat(uint8_t *data,  uint8_t *len, uint8_t *data_appen
 			//tfp_printf("%x %x %x\r\n", data[index_data + index], (data[index_data + index] & right_mask), data_append[index] >> right);
 
 			// Clean up remaining bits and add left bits
-			data[index_data + index] = (data[index_data + index] & right_mask) | data_append[index] >> right;
+			data[index_data + index] = (data[index_data + index] & right_mask) |
+				data_append[index] >> right;
 			if (temp_len_append >= left) {
 				temp_len_append -= left;
 			} else {
@@ -113,7 +115,8 @@ void TD_SENSOR_UTILS_BitConcat(uint8_t *data,  uint8_t *len, uint8_t *data_appen
 			// Append right bits in brand new byte's MSB
 			if (temp_len_append > 0) {
 				//tfp_printf("r %x %x %x %x\r\n",temp_len_append, data_append[index], data_append[index] << left,(data_append[index] << left)&right_mask);
-				data[index_data + index + 1] = (data_append[index] << left) & right_mask;
+				data[index_data + index + 1] = (data_append[index] << left) &
+					right_mask;
 				if (temp_len_append >= right) {
 					temp_len_append -= right;
 				} else {

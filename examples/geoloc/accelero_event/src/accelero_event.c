@@ -2,7 +2,7 @@
  * @file
  * @brief Simple accelerometer event monitor application for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -62,7 +62,8 @@
  ******************************************************************************/
 static void EventCallback(uint8_t source)
 {
-	// Filter out low IRQs, as low these are always set in accelerometer registers
+	// Filter out low IRQs, as low these are always set in accelerometer
+	// registers
 	source &= TD_ACCELERO_ALL_HIGH_IRQ;
 	tfp_printf("Accelerometer event:\r\n");
 	if (source & TD_ACCELERO_IRQ_XL) {

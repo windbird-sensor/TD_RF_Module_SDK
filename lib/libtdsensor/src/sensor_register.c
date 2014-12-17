@@ -2,7 +2,7 @@
  * @file
  * @brief API for sending Register frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.2.0
+ * @version 1.3.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -33,10 +33,15 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
+
+#include <td_sigfox.h>
 
 #include "td_sensor.h"
 #include "sensor_send.h"
 #include "sensor_register.h"
+#include "td_sensor_utils.h"
+#include "td_sensor_gateway.h"
 
 /***************************************************************************//**
  * @addtogroup SENSOR_REGISTER Sensor Register
@@ -53,45 +58,8 @@
 /** @addtogroup SENSOR_REGISTER_DEFINES Defines
  * @{ */
 
-#define REGISTER_PAYLOAD_SIZE		7	///< Register payload size in bytes
-#define REGISTER_DEFAULT_REPETITON	0	///< Default retransmission repetitions
-#define REGISTER_DEFAULT_INTERVAL	0	///< Default retransmission interval in seconds
-
-/** @} */
-
-/*******************************************************************************
- ************************   TYPEDEFS   *****************************************
- ******************************************************************************/
-
-/** @addtogroup SENSOR_REGISTER_TYPEDEFS Typedefs
- * @{ */
-
-/** Register Frame Structure */
-typedef struct {
-	uint8_t sub_release : 4;			///< UDM sub-release number
-	uint8_t release : 4;				///< UDM release number
-	uint8_t device_class_byte1 : 8;		///< Device class MSB
-	uint8_t device_class_byte2 : 8;		///< Device class LSB
-	uint8_t sigfox_id_byte1 : 8;		///< SIGFOX ID MSB
-	uint8_t sigfox_id_byte2 : 8;		///< SIGFOX ID lower MSB
-	uint8_t sigfox_id_byte3 : 8;		///< SIGFOX ID upper LSB
-	uint8_t sigfox_id_byte4 : 8;		///< SIGFOX ID LSB
-} __PACKED TD_SENSOR_REGISTER_Frame_t;
-
-/** @} */
-
-/*******************************************************************************
- ************************   PRIVATE VARIABLES   ********************************
- ******************************************************************************/
-
-/** @addtogroup SENSOR_REGISTER_LOCAL_VARIABLES Local Variables
- * @{ */
-
-/** Register Transmit Profile */
-static TD_SENSOR_TransmitProfile_t Profile = {REGISTER_DEFAULT_REPETITON, REGISTER_DEFAULT_INTERVAL};
-
-/** Register Stamp */
-static uint8_t Stamp = -1;
+/** Register payload size in bytes */
+#define REGISTER_PAYLOAD_SIZE		9
 
 /** @} */
 
@@ -107,8 +75,8 @@ static uint8_t Stamp = -1;
  *   Send a Register frame to Sensor.
  *
  * @details
- * 	 Only a registered device can be seen on Sensor. This frame must be sent before
- * 	 any other.
+ * 	 Only a registered device can be seen on Sensor. This frame must be sent
+ * 	 before any other.
  *
  * @return
  *   Returns true if the data has been sent over the SIGFOX network, false
@@ -116,38 +84,119 @@ static uint8_t Stamp = -1;
  ******************************************************************************/
 bool TD_SENSOR_SendRegister(void)
 {
-	TD_SENSOR_REGISTER_Frame_t frame;
 	TD_SENSOR_Configuration_t *config;
-	uint32_t sigfox_id;
 
-	Stamp = (Stamp & 0x07) + 1;
-	sigfox_id = TD_SENSOR_GetSigfoxID();
 	config = TD_SENSOR_GetModuleConfiguration();
-	frame.release = RELEASE & 0x07;
-	frame.sub_release = SUB_RELEASE & 0x07;
-	frame.device_class_byte1 = config->class >> 8;
-	frame.device_class_byte2 = config->class & 0xFF;
-	frame.sigfox_id_byte1 = sigfox_id >> 24;
-	frame.sigfox_id_byte2 = (sigfox_id >> 16) & 0xFF;
-	frame.sigfox_id_byte3 = (sigfox_id >> 8) & 0xFF;
-	frame.sigfox_id_byte4 = sigfox_id & 0xFF;
-	return TD_SENSOR_Send(&Profile, SRV_FRM_REGISTER, Stamp, (uint8_t *) &frame, REGISTER_PAYLOAD_SIZE);
+	return TD_SENSOR_SendRegisterExtended(0, TD_SENSOR_GetSigfoxID(),
+		((RELEASE & 0x0f) << 4) | (SUB_RELEASE & 0x0f),
+		config->soft_release,
+		config->class,
+		false, 0);
 }
 
 /***************************************************************************//**
  * @brief
- *   Set a transmission profile for a register frame type.
+ *   Send a Register frame to Sensor with extended parameters.
  *
- * @param[in] repetition
- *	Number of repetitions.
+ * @param[in] id
+ *   Device ID to use.
  *
- * @param[in] interval
- *	Interval between two repetitions in seconds.
+ * @param[in] sigfox_id
+ *   SIGFOX ID.
+ *
+ * @param[in] release
+ *   UDM release number.
+ *
+ * @param[in] soft
+ *   Software release number.
+ *
+ * @param[in] class
+ *   Device class.
+ *
+ * @param custom
+ *   True to send additional user value
+ *
+ * @param custom_value
+ *   User custom parameter in register frame
+ *
+ * @details
+ * 	 Only a registered device can be seen on Sensor. This frame must be sent
+ * 	 before any other.
+ *
+ * @return
+ *   Returns true if the data has been sent over the SIGFOX network, false
+ *   otherwise.
  ******************************************************************************/
-void TD_SENSOR_SetRegisterTransmissionProfile(uint8_t repetition, uint32_t interval)
+bool TD_SENSOR_SendRegisterExtended(uint8_t id, uint32_t sigfox_id,
+	uint8_t release, uint16_t soft, uint16_t class, bool custom,
+	uint8_t custom_value)
 {
-	Profile.repetition = repetition;
-	Profile.interval = interval;
+	TD_SENSOR_Frame_t frame;
+
+	frame.payload[0] = release;
+	frame.payload[1] = soft >> 8;
+	frame.payload[2] = soft & 0xFF;
+	frame.payload[3] = class >> 8;
+	frame.payload[4] = class & 0xFF;
+	frame.payload[5] = sigfox_id >> 24;
+	frame.payload[6] = (sigfox_id >> 16) & 0xFF;
+	frame.payload[7] = (sigfox_id >> 8) & 0xFF;
+	frame.payload[8] = sigfox_id & 0xFF;
+	if(custom) {
+		frame.payload[9] = custom_value;
+	}
+
+	return TD_SENSOR_SendUDM(id, SRV_FRM_REGISTER, &frame,
+		custom ? REGISTER_PAYLOAD_SIZE+1 : REGISTER_PAYLOAD_SIZE);
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Send a Register frame to Sensor for a paired and available booster.
+ *   This register shall not be sent first to permit update proxy "available"
+ *   parameter
+ *
+ * @details
+ * 	 Only a registered device can be seen on Sensor. This frame must be sent
+ * 	 before any other.
+ *
+ * @return
+ *   Returns true if the data has been sent over the SIGFOX network, false
+ *   otherwise.
+ ******************************************************************************/
+bool TD_SENSOR_SendRegisterForBooster(void)
+{
+	bool ret = false;
+	uint8_t entry_id = 0, device_nb = 0;
+	uint8_t IndexList[5] = {0};
+	const TD_SIGFOX_Proxy_t *pProxy;
+	const TD_SIGFOX_ProxyStatus_t *pProxyStatus;
+	const TD_SIGFOX_ProxyConfig_t *pProxyConfig;
+
+	pProxy = TD_SIGFOX_PROXY_Get();
+	pProxyStatus = &pProxy->status;
+	pProxyConfig= &pProxy->config;
+
+	// Check if a Booster is paired and is available at start up
+	if ((pProxyStatus->paired == true)
+			&& (pProxyStatus->available == true)) {
+
+		// Look for booster entry_id
+		device_nb = TD_SENSOR_GATEWAY_GetDeviceIndex(pProxyConfig->class,
+			IndexList);
+		entry_id = IndexList[device_nb - 1];
+
+		// Send Booster register frame
+		ret = TD_SENSOR_SendRegisterExtended(entry_id,
+			pProxyStatus->id,
+			((pProxyStatus->udm_release & 0x0f) << 4) |
+				(pProxyStatus->udm_subrelease & 0x0f),
+			pProxyStatus->soft_version,
+			pProxyConfig->class,
+			true,
+			0xFF);	// TODO : get booster boot cause and send it
+	}
+	return ret;
 }
 
 /** @} */

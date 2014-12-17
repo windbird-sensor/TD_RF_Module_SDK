@@ -15,7 +15,7 @@ _The Telecom Design Team_
 UPDATE:
 =======
 
-We strongly recommend to update the SDK from previous 4.0.0 version to the newest 4.1.0 version as soon as possible and regenerate the firmwares for all devices produced, as this version contains a modification that will ensure the best performance with the latest SIGFOX network updates.
+We strongly recommend to update the SDK from previous 4.0.0 version to the newest 4.1.0 version for TD1202 RF modules and to 5.0.0 version for TD1204 and TD1208 modules as soon as possible and regenerate the firmwares for all devices produced, as this version contains a modification that will ensure the best performance with the latest SIGFOX network updates.
 
 Getting the Sources
 ===================
@@ -164,6 +164,77 @@ Similarly, to debug a firmware on the TD12xx board:
 
 Release Notes
 =============
+
+v5.0.0 (December 2014)
+-----------------
+
+  - This release is a major update of TD RF Module SDK.
+
+### Release Notes ###
+
+#### Major Updates ####
+
+#### **libtdcore** ####
+
+  * Added the CAPSENSE module for capacitive touch buttons
+  * UART module now handles both LEUART and standard UART
+
+##### **libtdrf** #####
+
+  * Bidirectional (down-link) communication
+  * Transparent (use sender's SIGFOX ID) or non-transparent (use proxy's SIGFOX ID) SIGFOX proxy
+  * Fast LAN mode: once synchronized, transmitter and receiver can exchange data at maximum speed
+
+##### **libtdtools** #####
+
+  * New library for managing switches and LEDs
+
+#### Minor Updates ####
+
+#### **libtdcore** ####
+
+  * Increased maximum number of AT extensions to 16
+  * Now handling the different EFM32 power modes
+  * Unified the RF and standard GPIO management
+
+##### **libtdrf** #####
+
+  * Custom transmit (user callback function to write into FIFO) and receive (user callback function to read from FIFO and stop RX)
+  * Changed the TD LAN windowed listen period to variable up to 6.7 s instead of fixed 1 s, using the `LAN_PERIOD` and `LAN_ADDRESS_SIZE` configuration parameters
+
+##### **libtdsensor** #####
+
+  * Corresponds to UDM v2.3
+
+##### **libtdgeoloc** #####
+
+  * Now uses the UBlox 7 raw format instead of NMEA by default
+  * No longer use Sensor switch monitoring for accelerometer interrupts, have the driver handle it directly for efficiency's sake
+  * Added click monitoring
+  * Added power mode usage
+  * Added GPS autonomous computation handling
+  * Added ephemeris management
+
+#### Bug Fixes ####
+
+#### **libtdcore** ####
+
+  * Handles UART overflow gracefully
+
+##### **libtdrf** #####
+
+  - Corrected a timing problem on first frame detected with new base station software upgrade (already corrected in v4.1.0)
+
+##### **libtdsensor** #####
+
+  * Do not set encoded voltage length if no length pointer provided to `TD_SENSOR_EncodeLocalVoltage()` or `TD_SENSOR_EncodeLocalTemperature()`
+
+##### **libtdgeoloc** #####
+
+  * Skipped first meaningless accelerometer data values in callback
+  * Fixed a bug in AT$AR= (read accelerometer register)
+  * Initialized the first byte in Sensor position data frame
+  * Fixed non-volatile accelerometer IRQ flag
 
 v4.1.0 (December 2014)
 -----------------

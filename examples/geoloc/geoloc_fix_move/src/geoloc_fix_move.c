@@ -2,7 +2,7 @@
  * @file
  * @brief Simple GPS fix upon movement detection application for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -118,11 +118,12 @@ static void GPSFix(TD_GEOLOC_Fix_t *fix, bool timeout)
  *  Restart fixing on movement detection.
  *
  * @param[in] arg
- *  Generic argument set by the user that is passed along to the callback function.
+ *  Generic argument set by the user that is passed along to the callback
+ *  function.
  *
  * @param[in] repeat_count
- *  Updated repeat count, decremented at each timer trigger, unless it is an infinite
- *  timer.
+ *  Updated repeat count, decremented at each timer trigger, unless it is an
+ *  infinite timer.
  ******************************************************************************/
 static void RestartMoveDetection(uint32_t arg, uint8_t repeat_count)
 {

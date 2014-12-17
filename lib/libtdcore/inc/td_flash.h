@@ -2,7 +2,7 @@
  * @file
  * @brief Flash controller (MSC) peripheral API for the TDxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.1.0
+ * @version 2.1.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -38,20 +38,21 @@
 #include <stdbool.h>
 
 #include "td_module.h"
+#include "td_config_ext.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup FLASH
 	 * @brief Flash controller (MSC) Peripheral API for the TDxxxx RF modules
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
-	/*******************************************************************************
-	 *******************************   DEFINES   ***********************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *******************************   DEFINES   *******************************
+	 **************************************************************************/
 
 	/** @addtogroup FLASH_DEFINES Defines
 	 * @{ */
@@ -59,23 +60,27 @@ extern "C" {
 	/** Number of words in a flash page */
 #define FLASH_E2P_SIZE_WORD        	(FLASH_PAGE_SIZE / sizeof (uint32_t))
 
-	/** Deprecated names, please use TD_FLASH_ReadVariable() instead, compatibility only */
+	/** Depreciated names, please use TD_FLASH_ReadVariable() instead,
+	 * compatibility only */
 #define TD_FLASH_ReadDataBuffer TD_FLASH_ReadVariable
 
-	/** Deprecated names, please use TD_FLASH_DeclareVariable() instead, compatibility only */
+	/** Depreciated names, please use TD_FLASH_DeclareVariable() instead,
+	 * compatibility only */
 #define TD_FLASH_DeclareFlashVariable TD_FLASH_DeclareVariable
 
-	/** Deprecated names, please use TD_FLASH_WriteVariables() instead, compatibility only */
+	/** Depreciated names, please use TD_FLASH_WriteVariables() instead,
+	 * compatibility only */
 #define TD_FLASH_UpdateFlashVariables TD_FLASH_WriteVariables
 
-	/** Deprecated names, please use TD_FLASH_DeleteVariables() instead, compatibility only */
+	/** Depreciated names, please use TD_FLASH_DeleteVariables() instead,
+	 * compatibility only */
 #define TD_FLASH_DeleteFlashVariables TD_FLASH_DeleteVariables
 
 	/** @} */
 
-	/*******************************************************************************
-	 *************************   TYPEDEFS   ****************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   TYPEDEFS   ************************************
+	 **************************************************************************/
 
 	/** @addtogroup FLASH_TYPEDEFS Typedefs
 	 * @{ */
@@ -101,19 +106,12 @@ extern "C" {
 		uint8_t     ProdResult;			/**< Descriptor version 2 final product manufacturing test result. */
 	} TD_DEVICE_EXT;
 
-	/** Flash Logger function typedef to permit "dynamic linking" */
-	typedef void (*TD_FLASH_InitLogger_t)(bool reset,
-										  uint8_t id,
-										  uint8_t data_size,
-										  uint32_t first_page_adress,
-										  uint32_t last_page_adress);
-
 	/**
 	 * Flash variable structure
 	 *
 	 * @note
-	 *  Each variable is assigned a unique virtual address automatically when first
-	 *  written to, or when using the declare function.
+	 *  Each variable is assigned a unique virtual address automatically when
+	 *  first written to, or when using the declare function.
 	 */
 	typedef struct {
 		uint8_t *data_pointer;			/**< Variable data pointer. */
@@ -122,9 +120,9 @@ extern "C" {
 
 	/** @} */
 
-	/*******************************************************************************
-	 *************************   PROTOTYPES   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   PROTOTYPES   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup FLASH_USER_FUNCTIONS User Functions
 	 * @{ */
@@ -132,9 +130,11 @@ extern "C" {
 	void TD_FLASH_Write(void *buffer, uint32_t count);
 	bool TD_FLASH_Read(void *buffer, uint32_t count);
 	bool TD_FLASH_DeviceRead(TD_DEVICE *device);
-	bool TD_FLASH_DeviceReadExtended(TD_DEVICE *device, TD_DEVICE_EXT *device_ext);
+	bool TD_FLASH_DeviceReadExtended(TD_DEVICE *device,
+		TD_DEVICE_EXT *device_ext);
 	uint16_t TD_FLASH_ReadVariable(uint8_t index, uint8_t *buffer);
-	bool TD_FLASH_DeclareVariable(uint8_t *variable, uint16_t size, uint8_t *index);
+	bool TD_FLASH_DeclareVariable(uint8_t *variable, uint16_t size,
+		uint8_t *index);
 	void TD_FLASH_WriteVariables(void);
 	void TD_FLASH_DeleteVariables(void);
 	void TD_FLASH_SetVariablesVersion(uint32_t version);
@@ -143,11 +143,9 @@ extern "C" {
 	__RAMFUNCTION void TD_FLASH_WriteWord(uint32_t *address, uint32_t data);
 	void TD_FLASH_Init(void);
 	void TD_FLASH_Deinit(void);
-	void TD_FLASH_InitLogger(bool reset,
-							 uint8_t id,
-							 uint8_t data_size,
-							 uint32_t first_page_adress,
-							 uint32_t last_page_adress);
+	DECLARE_DYNAMIC(void, TD_FLASH_InitLogger, bool reset, uint8_t id,
+		uint8_t data_size, uint32_t first_page_adress,
+		uint32_t last_page_adress);
 	void TD_FLASH_LoggerWrite(uint8_t id, uint32_t *data);
 	void TD_FLASH_LoggerResetRead(uint8_t id);
 	bool TD_FLASH_LoggerReadNext(uint8_t id, uint32_t *data);

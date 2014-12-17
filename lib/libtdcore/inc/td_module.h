@@ -2,7 +2,7 @@
  * @file
  * @brief Public definitions for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 2.0.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -40,11 +40,11 @@
 extern "C" {
 #endif
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup Compiler Compiler-specific Definitions
 	 * @brief Compiler Compiler-specific Definitions
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
 #if defined(__ICCARM__)
 
@@ -56,6 +56,9 @@ extern "C" {
 
 	/** Macro for RAM function declaration depending on the used compiler */
 #define __RAMFUNCTION           __ramfunc
+
+#define __BOOTFUNCTION          __RAMFUNCTION
+#define __BOOTVARIABLE
 
 	/** __WEAK is already defined in compiler include */
 
@@ -71,18 +74,25 @@ extern "C" {
 	/** Macro for RAM function declaration depending on the used compiler */
 #define __RAMFUNCTION           __attribute__((section(".data.ram @ ")))
 
+#define __BOOTFUNCTION          __RAMFUNCTION
+#define __BOOTVARIABLE          __attribute__((section(".bootvar @ ")))
+
 	/** __WEAK for defining link symbols only if they are not already defined */
 #define __WEAK					__attribute__((weak))
+
+#else
+
+#error Your compiler is unsupported !
 
 #endif
 
 	/** @} (end addtogroup Compiler) */
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup Revision
 	 * @brief TDxxxx RF module revision
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
 	/** Module P/N in decimal format */
 #define IN1201                  1201
@@ -99,7 +109,7 @@ extern "C" {
 #define REVISION_TD1205         9	///< Module TD1205, all revisions
 #define REVISION_TD1202			10	///< Module TD1202, all revisions
 #define REVISION_TD1208			11	///< Module TD1208, all revisions
-#define REVISION_CUSTOM         0xFF///< All other implementation that must define all their config before including td_config.h. See td_config.h doc
+#define REVISION_CUSTOM         0xFF///< All other implementation that must define all their configuration before including td_config.h. See td_config.h doc
 
 	/* This define enables to build a very small subset of the TD_CORE library
 	 * and externally controlled system timer
@@ -108,17 +118,17 @@ extern "C" {
 
 	/** @} (end addtogroup Revision) */
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup Pinout TDxxxx RF Module Pinout
 	 * @brief TDxxxx RF module pinout
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup Port_A Port A
 	 * @brief TDxxxx RF module port A
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
 	/**I/O definitions */
 #define	SDA_PORT                gpioPortA           /**< I2C Data port */
@@ -138,11 +148,11 @@ extern "C" {
 
 	/** @} (end addtogroup Port_A) */
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup Port_B Port B
 	 * @brief TDxxxx RF module port B
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
 #define	LFXTAL_P_PORT           gpioPortB           /**< Positive 32768 Hz Crystal port */
 #define	LFXTAL_P_BIT            7					/**< Positive 32768 Hz Crystal bit */
@@ -171,11 +181,11 @@ extern "C" {
 
 	/** @} (end addtogroup Port_B) */
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup Port_C Port C
 	 * @brief TDxxxx RF module port C
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
 #define	USR2_PORT               gpioPortC           /**< User GPIO 2 port */
 #define	USR2_BIT                0					/**< User GPIO 2 bit */
@@ -199,11 +209,11 @@ extern "C" {
 
 	/** @} (end addtogroup Port_C) */
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup Port_D Port D
 	 * @brief TDxxxx RF module port D
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
 #define TX_PORT                 gpioPortD           /**< RS232 TX (Out) port */
 #define TX_BIT                  4					/**< RS232 TX (Out) bit */
@@ -227,11 +237,11 @@ extern "C" {
 
 	/** @} (end addtogroup Port_D) */
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup Port_E Port E
 	 * @brief TDxxxx RF module port E
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
 #define SDI_RF_PORT             gpioPortE           /**< RF SPI MOSI (Out) port */
 #define SDI_RF_BIT              10					/**< RF SPI MOSI (Out) bit */
@@ -255,11 +265,11 @@ extern "C" {
 
 	/** @} (end addtogroup Port_E) */
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup Port_F Port F
 	 * @brief TDxxxx RF module port_F
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
 #define DB3_PORT                gpioPortF           /**< JTAG SWDCLK Clock (In) port */
 #define DB3_BIT                 0					/**< JTAG SWDCLK Clock (In) bit */
@@ -273,11 +283,11 @@ extern "C" {
 
 	/** @} (end addtogroup Port_F) */
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup RF_Interface RF Interface
 	 * @brief TDxxxx RF module RF chip interface
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
 	/** RF Chip interface */
 #define DATA_RF_PORT            GP1_PORT			/**< RF Data port */

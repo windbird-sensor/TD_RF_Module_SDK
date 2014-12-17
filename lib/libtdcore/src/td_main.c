@@ -2,7 +2,7 @@
  * @file
  * @brief Main program for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.1.0
+ * @version 2.2.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -35,35 +35,10 @@
 #include <stdbool.h>
 
 #include <em_chip.h>
-#include <em_gpio.h>
 
-#include "td_boot.h"
-#include "td_sigfox.h"
-#include "td_gpio.h"
 #include "td_rtc.h"
-#include "td_cmu.h"
-#include "td_uart.h"
-#include "td_flash.h"
-#include "td_timer.h"
-#include "td_printf.h"
 #include "td_scheduler.h"
-
-/* This define permit to use tfp_printf even at early boot stage
- * UART_LOADER in bootloader is compliant with this flag, as long as 115200 baudrate is kept
- * */
-//#define EARLY_SERIAL_DEBUG
-#ifdef EARLY_SERIAL_DEBUG
-#include <em_gpio.h>
-#include <em_cmu.h>
-#include <em_leuart.h>
-
-/** printf function used for early debug purposes */
-#define EARLY_DEBUG_PRINTF(...) tfp_printf(__VA_ARGS__)
-#else
-
-/** printf function used for early debug purposes */
-#define EARLY_DEBUG_PRINTF(...)
-#endif
+#include "td_config_ext.h"
 
 /***************************************************************************//**
  * @addtogroup MAIN Main
@@ -89,14 +64,8 @@
 /** @addtogroup MAIN_PROTOTYPES External Declarations
  * @{ */
 
-/** User setup function called once */
-extern void TD_USER_Setup(void);
-
 /** User function called at each wake-up event */
 extern void TD_USER_Loop(void);
-
-/** Boot handler */
-extern TD_BOOT_Handler_t const TD_BOOT_Handler;
 
 /** @} */
 /** @} */
@@ -135,53 +104,10 @@ int main(void)
 	// Workarounds for chip errata
 	CHIP_Init();
 
-#ifdef EARLY_SERIAL_DEBUG
-	BITBAND_Peripheral(&(CMU ->HFPERCLKDIV), (cmuClock_HFPER >> CMU_EN_BIT_POS) & CMU_EN_BIT_MASK, 1);
-	BITBAND_Peripheral(&(CMU ->HFPERCLKEN0), ((cmuClock_GPIO) >> CMU_EN_BIT_POS) & CMU_EN_BIT_MASK, 1);
-	CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_CORELEDIV2);
-	CMU_ClockDivSet(cmuClock_LEUART0, cmuClkDiv_4);
-
-	// Enable the LEUART0 clock
-	CMU_ClockEnable(cmuClock_LEUART0, true);
-	init_printf(TD_UART_Init(115200, true, false),
-				TD_UART_Putc,
-				TD_UART_Start,
-				TD_UART_Stop);
-	tfp_printf("--BOOT %s--\r\n", __TIME__);
-#endif
-
-	EARLY_DEBUG_PRINTF("TD_BOOT_Init(0x%08X)\r\n", TD_BOOT_Handler);
-	if (TD_BOOT_Handler) {
-		TD_BOOT_Handler(CONFIG_PRODUCT_LED_POLARITY, CONFIG_PRODUCT_TYPE);
-	}
-
-	// Initialize the clock Management Unit
-	EARLY_DEBUG_PRINTF("TD_CMU_Init\r\n");
-	TD_CMU_Init(true);
-
-	// Initialize the RTC clock
-	EARLY_DEBUG_PRINTF("TD_RTC_Init\r\n");
-	TD_RTC_Init(0);
-
-	// Initialize GPIOs
-	EARLY_DEBUG_PRINTF("TD_GPIO_Init\r\n");
-	TD_GPIO_Init();
-
-	// Initialize SigFox (can be bypassed by : TD_SIGFOX_REMOVE_CODE)
-	EARLY_DEBUG_PRINTF("TD_SIGFOX_Init\r\n");
-	if (TD_SIGFOX_Init) {
-		TD_SIGFOX_Init(true);
-	}
-
-	// Initialize Scheduler
-	EARLY_DEBUG_PRINTF("TD_SCHEDULER_Init\r\n");
-	TD_SCHEDULER_Init();
-
-	// Call user setup function
-	EARLY_DEBUG_PRINTF("TD_USER_Setup\r\n");
-	TD_USER_Setup();
-
-	EARLY_DEBUG_PRINTF("Entering Main Loop ...\r\n");
+	// All initialization are done in MAIN_INIT macro above
+	// Don't worry, it is the same as before, just with '\' decoration
+	// [Needed for runtime early debug]
+	CONFIG_EARLY_DEBUG();
 
 	// Main idle loop
 	while (true) {
@@ -191,14 +117,16 @@ int main(void)
 
 		// Here:
 		//  with "while" : while no background task should be called
-		//                 all IRQs (or main loop) function that wanted main loop process MUST call TD_WakeMainLoop();
+		//                 all IRQs (or main loop) function that wanted main
+		//				   loop process MUST call TD_WakeMainLoop();
 		//  with "if"    : if no background task should be called
-		//                 all IRQs taken when in sleep mode, do a background loop
-		//				   all function that wanted accurate main loop process MUST call TD_WakeMainLoop();
-
+		//                 all IRQs taken when in sleep mode, do a background
+		//				   loop, all function that want accurate main loop
+		//				   processing MUST call TD_WakeMainLoop();
 		if (!BackgroundRoundWanted) {
 
-			// Go into EM2 sleep mode until an event occurs, exception/interrupt are masked
+			// Go into EM2 sleep mode until an event occurs, exception/interrupt
+			// are masked
 			TD_RTC_Sleep();
 
 			// Allow exception/interrupts to call their handlers
@@ -217,7 +145,9 @@ int main(void)
 		__set_PRIMASK(0);
 
 		// Scheduler process
-		TD_SCHEDULER_Process();
+		if (TD_SCHEDULER_Process) {
+			TD_SCHEDULER_Process();
+		}
 
 		// Call user loop function
 		TD_USER_Loop();

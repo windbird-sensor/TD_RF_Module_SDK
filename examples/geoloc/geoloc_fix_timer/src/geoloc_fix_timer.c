@@ -2,7 +2,7 @@
  * @file
  * @brief Simple GPS periodic fix application for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -59,19 +59,19 @@
 #define VARIABLES_VERSION 0
 
 /** Stop trying to fix after timeout (in seconds) */
-#define FIX_TIMEOUT 180
+#define FIX_TIMEOUT 120
 
 // Interval at which position is reported (in seconds)
-#define FIX_INTERVAL 600
+#define FIX_INTERVAL 300
 
 /** Acceptable minimum horizontal accuracy, 800 to be very accurate */
 #define FIX_HDOP 800
 
 /** Boot monitoring, 1 to enable */
-#define BOOT_MONITORING 1
+#define BOOT_MONITORING 0
 
 /** Keepalive monitoring interval in hours, 0 to disable */
-#define KEEPALIVE_INTERVAL 24
+#define KEEPALIVE_INTERVAL 0
 
 /*******************************************************************************
  ******************************  GLOBAL FUNCTIONS  ****************************
@@ -89,10 +89,11 @@
  ******************************************************************************/
 static void GPSFix(TD_GEOLOC_Fix_t * fix, bool timeout)
 {
-	int latitude, longitude, latitude_int, latitude_fract, longitude_int, longitude_fract;
+	int latitude, longitude, latitude_int, latitude_fract, longitude_int,
+		longitude_fract;
 	char latitude_direction, longitude_direction;
 
-	if (fix->type >= TD_GEOLOC_2D_FIX && fix->quality.hdop < FIX_HDOP) {
+	if (fix->type >= TD_GEOLOC_2D_FIX && fix->hard.rtc_calibrated) {
 		latitude = fix->position.latitude;
 		if (latitude < 0) {
 			latitude_direction = 'S';
@@ -111,24 +112,22 @@ static void GPSFix(TD_GEOLOC_Fix_t * fix, bool timeout)
 		}
 		longitude_int = longitude / 100000;
 		longitude_fract = longitude % 100000;
-		tfp_printf("Fix OK: %4d.%03dÂ°%c %5d.%03dÂ°%c\r\n",
+		tfp_printf("Fix OK: %4d.%03d°%c %5d.%03d°%c\r\n",
 			latitude_int,
 			latitude_fract,
 			latitude_direction,
 			longitude_int,
 			longitude_fract,
 			longitude_direction);
-
 		TD_GEOLOC_StopFix(TD_GEOLOC_HW_BCKP);
 		TD_SENSOR_SendDataPosition(GPS_DATA_XYZ_SV_HDOP, fix, 0, 0);
+		tfp_printf("done");
 
 	} else if (timeout) {
 		tfp_printf("Fix Timeout\r\n");
-
 		TD_GEOLOC_StopFix(TD_GEOLOC_HW_BCKP);
 		TD_SENSOR_SendDataPosition(GPS_DATA_XYZ_SV_HDOP, fix, 0, 0);
 	}
-
 }
 
 /***************************************************************************//**
@@ -136,11 +135,12 @@ static void GPSFix(TD_GEOLOC_Fix_t * fix, bool timeout)
  *  Start fixing periodically.
  *
  * @param[in] arg
- *  Generic argument set by the user that is passed along to the callback function.
+ *  Generic argument set by the user that is passed along to the callback
+ *  function.
  *
  * @param[in] repeat_count
- *  Updated repeat count, decremented at each timer trigger, unless it is an infinite
- *  timer.
+ *  Updated repeat count, decremented at each timer trigger, unless it is an
+ *  infinite timer.
  ******************************************************************************/
 static void StartFixing(uint32_t arg, uint8_t repeat_count)
 {
@@ -154,21 +154,15 @@ static void StartFixing(uint32_t arg, uint8_t repeat_count)
  ******************************************************************************/
 void TD_USER_Setup(void)
 {
-
 	// Initialize the LEUART
 	init_printf(TD_UART_Init(9600, true, false),
 				TD_UART_Putc,
 				TD_UART_Start,
 				TD_UART_Stop);
 
-	// Set flash variables version
-	TD_FLASH_SetVariablesVersion(VARIABLES_VERSION);
-
 	// Use a 64 s automatic watchdog
 	TD_WATCHDOG_Init(64);
 	TD_WATCHDOG_Enable(true, true);
-
-	// Sensor as transmitter
 	TD_SENSOR_Init(SENSOR_TRANSMITTER, 0, 0);
 
 	// Geoloc and accelerometer initialization
@@ -191,7 +185,8 @@ void TD_USER_Setup(void)
 	StartFixing(0, 0);
 
 	// Start the fix infinite timer
-	TD_SCHEDULER_Append(FIX_INTERVAL, 0, 0, TD_SCHEDULER_INFINITE, StartFixing, 0);
+	TD_SCHEDULER_Append(FIX_INTERVAL, 0, 0, TD_SCHEDULER_INFINITE, StartFixing,
+		0);
 }
 
 /***************************************************************************//**
@@ -200,7 +195,6 @@ void TD_USER_Setup(void)
  ******************************************************************************/
 void TD_USER_Loop(void)
 {
-	// Process Sensor events
 	TD_SENSOR_Process();
 
 	// Process geoloc events

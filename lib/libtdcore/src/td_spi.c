@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Serial Peripheral Interface (SPI) peripheral API for the TDxxxx RF modules.
+ * @brief Serial Peripheral Interface (SPI) peripheral API for the TDxxxx RF
+ * modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
- * @section License
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -48,23 +48,25 @@
 
 /***************************************************************************//**
  * @addtogroup SPI SPI
- * @brief Serial Peripheral Interface (SPI) peripheral API for the TDxxxx RF modules
+ * @brief Serial Peripheral Interface (SPI) peripheral API for the TDxxxx RF
+ * modules
  * @{
  ******************************************************************************/
 
 /* @details
  *
- * The TD_SPI module uses a locking mechanism in order to share an SPI bus access.
+ * The TD_SPI module uses a locking mechanism in order to share an SPI bus
+ * access.
  * For this to work, there should be only one peripheral which uses the SPI bus
- * in IRQ at a given time. All peripherals that are not using IRQs can lock the SPI
- * bus outside IRQ handling routines. If the one which needs IRQ can't
+ * in IRQ at a given time. All peripherals that are not using IRQs can lock the
+ * SPI bus outside IRQ handling routines. If the one which needs IRQ can't
  * lock SPI within the IRQ, the corresponding callback will be called as soon as
  * the SPI is released.
  *
  * Therefore, only IRQ callbacks should be saved into the queue. They will be
- * called as soon as the SPI is released as SPI should always be available outside
- * the IRQ handling routines. As the callback will be call outside IRQ handling,
- * it must be protected against it.
+ * called as soon as the SPI is released as SPI should always be available
+ * outside the IRQ handling routines. As the callback will be call outside IRQ
+ * handling, it must be protected against it.
  */
 
 /*******************************************************************************
@@ -74,14 +76,14 @@
 /** @addtogroup SPI_DEFINES Defines
  * @{ */
 
-/** High clock frequency to use when communicating with the SPI bus (1 MHz). */
+/** Low clock frequency to use when communicating with the SPI bus (1 MHz). */
 #define LOW_SPEED_CLOCK             1000000
 
-/** Low clock frequency to use when communicating with the SPI bus (7 MHz). */
+/** High clock frequency to use when communicating with the SPI bus (7 MHz). */
 #define HIGH_SPEED_CLOCK            7000000
 
 /** Maximum number of SPI busses */
-#define MAX_SPI_BUS		2
+#define MAX_SPI_BUS					2
 
 //#define SPI_DEBUG
 //#define SPI_DEBUG_INFO
@@ -107,37 +109,49 @@
 #define DEBUG_PRINTF_INFO(...)
 #endif
 
+#ifdef SIMPLE_SPI_BUS
+
+/** USART used for RF access in SPI */
+#define USART USART0
+
+#else
+
 /** USART used for RF access in SPI */
 #define USART TD_SPI_Conf[id].usart
 
-/** Maximum number of SPI lock call-back functions. Note : queue mode, need always one empty slot, so real queue length callback is one less*/
+/** Maximum number of SPI lock call-back functions. Note: queue mode always
+ *  needs at least one empty slot, so real queue length callback is one less
+ */
 #define MAX_LOCKED_CALLBACK 3
 
 /** Callback SPI */
 typedef struct {
-	uint8_t 				top;           				///< Top of queue
-	uint8_t 				bottom;        				///< Bottom of queue
-	uint8_t 				lock;						///< Lock counter
-	uint8_t 				lock_id;					///< Id that locked bus
-	bool 					inited;						///< Bus has been initialized
-	uint32_t 				freq;						///< Current frequency
-	USART_ClockMode_TypeDef	mode;						///< Current mode
-	TD_SPI_LockedCallback 	cb[MAX_LOCKED_CALLBACK]; 	///< Callback queue
-	uint8_t					flush_in_progress;			///< Currently flushing callback queue
+	uint8_t top;           				///< Top of queue
+	uint8_t bottom;        				///< Bottom of queue
+	uint8_t lock;						///< Lock counter
+	uint8_t lock_id;					///< Id that locked bus
+	uint8_t lock_context;				///< Background or IRQ task?
+	bool inited;						///< Bus has been initialized
+	uint32_t freq;						///< Current frequency
+	USART_ClockMode_TypeDef	mode;		///< Current mode
+	TD_SPI_LockedCallback cb[MAX_LOCKED_CALLBACK]; 	///< Callback queue
+	uint8_t flush_in_progress;			///< Currently flushing callback queue
 
 #ifdef SPI_DEBUG_STAMP
-	uint32_t				lock_stamp[MAX_LOCKED_CALLBACK]; 	///< Timestamp of lock
+	uint32_t lock_stamp[MAX_LOCKED_CALLBACK]; 	///< Lock timestamp
 #endif
 
 } TD_SPI_t;
 
 /** Array of all SPI buses */
-static TD_SPI_t SPI[MAX_SPI_BUS] = {{0}, {0}};
+static TD_SPI_t __BOOTVARIABLE SPI[MAX_SPI_BUS] = {{0}, {0}};
 
 /** Array of all peripherals IDs using buses */
 extern TD_SPI_Conf_t *TD_SPI_Conf;
 
-static uint32_t 			ref_freq;					///< System reference frequency
+/** System reference frequency */
+static __BOOTVARIABLE uint32_t ReferenceFrequency;
+#endif
 
 /** @} */
 
@@ -148,9 +162,60 @@ static uint32_t 			ref_freq;					///< System reference frequency
 /** @addtogroup SPI_GLOBAL_FUNCTIONS Global Functions
  * @{ */
 
+#ifdef SIMPLE_SPI_BUS
 /***************************************************************************//**
  * @brief
- *   Get USART struct from bus number
+ *   Simple SPI bus initialization
+ *
+ * @param[in] freq
+ * 	 Speed of bus for this use
+ *
+ * @param[in] mode
+ * 	 SPI mode for this use
+ ******************************************************************************/
+void TD_SPI_SimpleInit(uint32_t freq, USART_ClockMode_TypeDef mode)
+{
+	DEBUG_PRINTF("SPI simple init\r\n");
+	CMU_ClockEnable(cmuClock_USART0, true);
+
+	// Enabling clock to USART
+	CMU_ClockEnable(cmuClock_HFPER, true);
+	USART->IRCTRL |= USART_CTRL_TXBIL;
+
+	// Enabling pins and setting location, SPI CS not enable
+	USART->ROUTE = USART_ROUTE_TXPEN |
+		USART_ROUTE_RXPEN |
+		USART_ROUTE_CLKPEN |
+		USART_ROUTE_LOCATION_LOC0;
+
+	// Set required GPIOs to SPI mode
+	GPIO_PinModeSet(SDI_RF_PORT, SDI_RF_BIT, gpioModePushPull, 0);
+	GPIO_PinModeSet(SDO_RF_PORT, SDO_RF_BIT, gpioModeInput, 0);
+	GPIO_PinModeSet(SCLK_RF_PORT, SCLK_RF_BIT, gpioModePushPull, 0);
+
+	// Further initialize the USART in master SPI mode (MSB first)
+	USART->CTRL = (USART_CTRL_SYNC | USART_CTRL_MSBF) ;
+	USART->CLKDIV = 0;
+	USART->CMD = USART_CMD_MASTEREN | (USART_CMD_RXEN | USART_CMD_TXEN);
+	USART_BaudrateSyncSet(USART, CMU_ClockFreqGet(cmuClock_HFPER), freq);
+	USART->CMD = USART_CMD_RXDIS | USART_CMD_TXDIS | USART_CMD_MASTERDIS |
+		USART_CMD_RXBLOCKDIS | USART_CMD_TXTRIDIS | USART_CMD_CLEARTX |
+		USART_CMD_CLEARRX;
+	USART->CTRL = (USART->CTRL & (~0x300)) | ((uint32_t) mode);
+	USART->CMD = USART_CMD_MASTEREN | (USART_CMD_RXEN | USART_CMD_TXEN);
+	DEBUG_PRINTF("SPI:M=%d\r\n", mode);
+}
+#else
+
+/***************************************************************************//**
+ * @brief
+ *   Get USART structure from bus number.
+ *
+ * @param[in] bus
+ *   The bus number to search for.
+ *
+ * @return
+ *   Returns a pointer to the USART structure corresponding to the bus number.
  ******************************************************************************/
 USART_TypeDef *TD_SPI_GetUsart(uint8_t bus)
 {
@@ -158,11 +223,14 @@ USART_TypeDef *TD_SPI_GetUsart(uint8_t bus)
 	case 0:
 		return USART0;
 		break;
+
 	case 1:
 		return USART1;
 		break;
+
 	default:
 		TD_Trap(TRAP_SPI_INVALID_BUS, bus);
+		break;
 	}
 	return NULL;
 }
@@ -170,12 +238,16 @@ USART_TypeDef *TD_SPI_GetUsart(uint8_t bus)
 /***************************************************************************//**
  * @brief
  *   Initialize the SPI module.
+ *
+ * @param[in] bus
+ *   The bus number to search for.
  ******************************************************************************/
 void TD_SPI_InitBus(uint8_t bus)
 {
-	uint32_t loc;
-	GPIO_Port_TypeDef sdi_port, sdo_port, sclk_port;
-	uint8_t sdo_bit, sdi_bit, sclk_bit;
+	uint32_t loc = 0;
+	GPIO_Port_TypeDef sdi_port = gpioPortA, sdo_port = gpioPortA,
+		sclk_port = gpioPortA;
+	uint8_t sdo_bit = 0, sdi_bit = 0, sclk_bit = 0;
 	USART_TypeDef *usart;
 
 	DEBUG_PRINTF("SPI init bus:%d\r\n", bus);
@@ -197,19 +269,33 @@ void TD_SPI_InitBus(uint8_t bus)
 			sclk_port = SCLK_RF_PORT;
 			sclk_bit = SCLK_RF_BIT;
 			break;
+
 		default:
 			TD_Trap(TRAP_SPI_NI, loc);
 			break;
 		}
 		break;
+
 	case 1:
 		CMU_ClockEnable(cmuClock_USART1, true);
-		loc = USART_ROUTE_LOCATION_LOC0;
+		loc = USART_ROUTE_LOCATION_LOC2;
 		switch (loc) {
+		case USART_ROUTE_LOCATION_LOC2:
+			sdi_port = gpioPortD;
+			sdi_bit = 7;
+			sdo_port = gpioPortD;
+			sdo_bit = 6;
+			sclk_port = gpioPortF;
+			sclk_bit = 0;
+			break;
+
 		default:
 			TD_Trap(TRAP_SPI_NI, loc);
 			break;
 		}
+		break;
+	default:
+		TD_Trap(TRAP_SPI_NI, bus);
 		break;
 	}
 
@@ -219,9 +305,9 @@ void TD_SPI_InitBus(uint8_t bus)
 
 	// Enabling pins and setting location, SPI CS not enable
 	usart->ROUTE = USART_ROUTE_TXPEN |
-				   USART_ROUTE_RXPEN |
-				   USART_ROUTE_CLKPEN |
-				   loc;
+		USART_ROUTE_RXPEN |
+		USART_ROUTE_CLKPEN |
+		loc;
 
 	// Set required GPIOs to SPI mode
 	GPIO_PinModeSet(sdi_port, sdi_bit, gpioModePushPull, 0);
@@ -238,9 +324,12 @@ void TD_SPI_InitBus(uint8_t bus)
 }
 
 /***************************************************************************//**
-
  * @brief
- *   Update the SPI peripheral with given baudrate and mode
+ *   Update the SPI peripheral with baudrate and mode from global TD_SPI_Conf
+ *   structure.
+ *
+ * param[in] id
+ *   The bus ID to update
  ******************************************************************************/
 void TD_SPI_UpdateConf(uint8_t id)
 {
@@ -252,13 +341,14 @@ void TD_SPI_UpdateConf(uint8_t id)
 	if (SPI[bus].freq != TD_SPI_Conf[id].freq) {
 		SPI[bus].freq = TD_SPI_Conf[id].freq;
 		DEBUG_PRINTF("SPI:%dF=%d\r\n", bus, SPI[bus].freq);
-		USART_BaudrateSyncSet(USART, ref_freq, SPI[bus].freq);
+		USART_BaudrateSyncSet(USART, ReferenceFrequency, SPI[bus].freq);
 	}
 	if (SPI[bus].mode != TD_SPI_Conf[id].mode) {
 		SPI[bus].mode = TD_SPI_Conf[id].mode;
 		USART->CMD = USART_CMD_RXDIS | USART_CMD_TXDIS | USART_CMD_MASTERDIS |
-					 USART_CMD_RXBLOCKDIS | USART_CMD_TXTRIDIS | USART_CMD_CLEARTX | USART_CMD_CLEARRX;
-		USART->CTRL = (USART->CTRL & (~0x300)) | ((uint32_t) SPI[bus].mode);
+			USART_CMD_RXBLOCKDIS | USART_CMD_TXTRIDIS | USART_CMD_CLEARTX |
+			USART_CMD_CLEARRX;
+		USART->CTRL = (USART->CTRL & (~0x302)) | ((uint32_t) SPI[bus].mode);
 		USART->CMD = USART_CMD_MASTEREN | (USART_CMD_RXEN | USART_CMD_TXEN);
 		DEBUG_PRINTF("SPI:%dM=%d\r\n", bus, SPI[bus].mode);
 	}
@@ -270,15 +360,18 @@ void TD_SPI_UpdateConf(uint8_t id)
  ******************************************************************************/
 void TD_SPI_LockDump(void)
 {
-	uint8_t i,bus;
+	uint8_t i, bus;
 
 	for (bus = 0; bus < MAX_SPI_BUS; bus++) {
-		tfp_printf("Locked byid:%d cnt:%d\r\n", SPI[bus].lock_id, SPI[bus].lock);
-		tfp_printf("SPI Lock Dump, bus:%d bottom:%d top:%d\r\n", bus, SPI[bus].bottom, SPI[bus].top);
+		tfp_printf("Locked byid:%d cnt:%d ctx:%d\r\n",
+			SPI[bus].lock_id, SPI[bus].lock, SPI[bus].lock_context);
+		tfp_printf("SPI Lock Dump, bus:%d bottom:%d top:%d\r\n",
+			bus, SPI[bus].bottom, SPI[bus].top);
 		for (i = 0; i < MAX_LOCKED_CALLBACK; i++) {
 
 #ifdef SPI_DEBUG_STAMP
-			tfp_printf("Bus CB %d:0x%08X Lock stamp:%d\r\n", i, SPI[bus].cb[i], SPI[bus].lock_stamp[i]);
+			tfp_printf("Bus CB %d:0x%08X Lock stamp:%d\r\n", i,
+			SPI[bus].cb[i], SPI[bus].lock_stamp[i]);
 #else
 			tfp_printf("Bus CB %d:0x%08X \r\n", i, SPI[bus].cb[i]);
 #endif
@@ -289,38 +382,134 @@ void TD_SPI_LockDump(void)
 
 /***************************************************************************//**
  * @brief
+ *   Convert an SPI bus ID to string.
+ *
+ * param[in] id
+ *   The bus ID to convert.
+ *
+ * @return
+ *   Returns a string corresponding to the us ID.
+ ******************************************************************************/
+char *TD_SPI_IdToStr(uint8_t id)
+{
+	if (id <= MAX_SYSTEM_SPI_ID) {
+		switch (id){
+		case RF_SPI_ID:
+			return "SYS:RF";
+
+		case ACCELERO_SPI_ID:
+			return "SYS:Accelero";
+
+		case GPS_SPI_ID:
+			return "SYS:GPS";
+
+		case RFIO_SPI_ID:
+			return "SYS:RFIO";
+
+		case PRESSURE_SPI_ID:
+			return "SYS:Pressure";
+
+		case MAGNETO_SPI_ID:
+			return "SYS:Magneto";
+
+		default:
+			return "SYS:???";
+		}
+	}
+	return "USER";
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Convert an SPI bus mode to string.
+ *
+ * @param[in] mode
+ *   The bus ID to convert.
+ *
+ * @param[out] string
+ *   A pointer to the buffer tht will receive the converted mode.
+ *
+ * @return
+ *   Returns a string corresponding to the us ID.
+ ******************************************************************************/
+char *TD_SPI_ModeToStr(uint32_t mode, char *string)
+{
+	string[0] = 0;
+	strcat(string, mode & _USART_CTRL_CLKPOL_MASK ? "IDLE_HIGH" : "IDLE_LOW");
+	strcat(string, "|");
+	strcat(string, mode & _USART_CTRL_CLKPHA_MASK ? "RISING" : "FALLING");
+	if (mode & USART_CTRL_LOOPBK){
+		strcat(string, "|3 wire");
+	}
+	return string;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Dump SPI configuration
+ ******************************************************************************/
+void TD_SPI_ConfDump(void)
+{
+	uint8_t i;
+	char mode[32];
+	tfp_printf("%d sys conf, %d user conf\r\n",
+		MAX_SYSTEM_SPI_ID, CONFIG_MAX_SPI_ID - MAX_SYSTEM_SPI_ID);
+	for (i = 0; i < CONFIG_MAX_SPI_ID + 1; i++) {
+		if (!TD_SPI_Conf[i].freq) {
+			continue;
+		}
+		tfp_printf("ID:%d:%-20s bus:%d freq:%2d MHz mode:%-32s CS Port:%c%d\r\n",
+			i, TD_SPI_IdToStr(i), TD_SPI_Conf[i].bus,
+			TD_SPI_Conf[i].freq / 1000000,
+			TD_SPI_ModeToStr(TD_SPI_Conf[i].mode,mode),
+			'A' + TD_SPI_Conf[i].csPort,
+			TD_SPI_Conf[i].csBit);
+		}
+}
+
+/***************************************************************************//**
+ * @brief
  *   Try to lock the given SPI bus.
  *
  * @param[in] id
  *   The unique ID used for SPI bus locking.
  *
  * @param[in] callback
- *   Pointer to the call-back function that will be called when the bus is unlocked.
+ *   Pointer to the call-back function that will be called when the bus is
+ *   unlocked.
+ *
+ * @param[in] line
+ *   The source line number at which the lock occurs.
  *
  * @return
  * 	 true if bus was successfully locked, false otherwise
  ******************************************************************************/
-bool TD_SPI_Lock(uint8_t id, TD_SPI_LockedCallback callback)
+bool TD_SPI_Lock_(uint8_t id, TD_SPI_LockedCallback callback, uint16_t line)
 {
 	uint8_t msk, ret, top, bus;
 
-	DEBUG_PRINTF("Lck%d\r\n", id);
+	DEBUG_PRINTF("Lck%d : line%d\r\n", id, line);
 	EFM_ASSERT(id <= CONFIG_MAX_SPI_ID);
+
+	// We can always lock an unconfigured SPI ...
+	if (!TD_SPI_Conf[id].freq){
+		return true;
+	}
 	bus = TD_SPI_Conf[id].bus;
 	EFM_ASSERT(bus < MAX_SPI_BUS);
 	EFM_ASSERT(SPI[bus].lock != 0xFF);
 	msk = __get_PRIMASK();
-	if (!msk) {
-		__set_PRIMASK(1);
-	}
+	__set_PRIMASK(1);
 
 	// We have already locked this bus for this usage, just increment lock count
-	if (SPI[bus].lock && (SPI[bus].lock_id == id || SPI[bus].lock_id == TD_SPI_Conf[id].friend_id)) {
+	if (SPI[bus].lock && (SPI[bus].lock_id == id) &&
+		(SPI[bus].lock_context == __get_IPSR())) {
 		SPI[bus].lock++;
 		ret = true;
 
 		// Bus is not actually locked, lock it
-	} else if (!SPI[bus].lock) {
+	} else if (!SPI[bus].lock){
+		SPI[bus].lock_context = __get_IPSR();
 		SPI[bus].lock_id = id;
 		SPI[bus].lock = 1;
 		TD_SPI_UpdateConf(id);
@@ -348,14 +537,13 @@ bool TD_SPI_Lock(uint8_t id, TD_SPI_LockedCallback callback)
 			} else {
 				TD_Trap(TRAP_SPI_MAX_LOCK, (bus << 8) | id);
 			}
-			DEBUG_PRINTF("Lock add 0x%08X, lbyid:%d cnt:%d\r\n", callback, SPI[bus].lock_id, SPI[bus].lock);
+			DEBUG_PRINTF("Lock add 0x%08X, lbyid:%d cnt:%d\r\n",
+				callback, SPI[bus].lock_id, SPI[bus].lock);
 		}
 		ret = false;
 	}
 	DEBUG_PRINTF_INFO("Cnt%d\r\n", SPI[bus].lock);
-	if (!msk) {
-		__set_PRIMASK(0);
-	}
+	__set_PRIMASK(msk);
 	return ret;
 }
 
@@ -366,21 +554,27 @@ bool TD_SPI_Lock(uint8_t id, TD_SPI_LockedCallback callback)
  * @param[in] id
  *   The unique ID used for SPI bus locking.
  ******************************************************************************/
-void TD_SPI_UnLock(uint8_t id)
+void TD_SPI_UnLock_(uint8_t id)
 {
 	TD_SPI_LockedCallback temp;
 	uint32_t msk;
 	uint8_t bus;
 
 	EFM_ASSERT(id <= CONFIG_MAX_SPI_ID);
+
+	// We can always unlock an unconfigured SPI ...
+	if (!TD_SPI_Conf[id].freq){
+		return;
+	}
 	bus = TD_SPI_Conf[id].bus;
 	EFM_ASSERT(bus < MAX_SPI_BUS);
 	EFM_ASSERT(SPI[bus].lock && SPI[bus].lock_id == id);
-	DEBUG_PRINTF("UnL%d\r\n", id);
+	DEBUG_PRINTF("%s%d\r\n", __get_IPSR() ? "UNL" : "UnL", id);
 	DEBUG_PRINTF_INFO("Cnt%d\r\n", SPI[bus].lock);
 	msk = __get_PRIMASK();
 	__set_PRIMASK(1);
-	if (SPI[bus].lock && (SPI[bus].lock_id == id || SPI[bus].lock_id == TD_SPI_Conf[id].friend_id)) {
+	if (SPI[bus].lock && (SPI[bus].lock_id == id) &&
+		(SPI[bus].lock_context == __get_IPSR())) {
 
 		// Bus not locked, and no flushing of queue in callstack
 		if ((--SPI[bus].lock) == 0 && !SPI[bus].flush_in_progress) {
@@ -417,24 +611,42 @@ void TD_SPI_UnLock(uint8_t id)
 
 /***************************************************************************//**
  * @brief
- *   Register a SPI register with given parameters
+ *   Force Unlock the given SPI bus. For emergency purpose (TRAP with no return)
  *
  * @param[in] id
- *   ID usage to initialize
+ *   The unique ID used for SPI bus locking.
+ ******************************************************************************/
+void TD_SPI_UnLockForce(uint8_t id)
+{
+	uint8_t bus;
+
+	EFM_ASSERT(id <= CONFIG_MAX_SPI_ID);
+	bus = TD_SPI_Conf[id].bus;
+	SPI[bus].lock = 0;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Register a SPI device with given parameters.
+ *
+ * @param[in] id
+ *   ID usage to initialize.
  *
  * @param[in] friend_id
- *   Other ID on which we can take gracefully take ownership. Set to 0xFF is no friend id
+ *   Other ID on which we can take gracefully take ownership. Set to 0xFF if no
+ *   friend id.
  *
  * @param[in] bus
- * 	 Bus to speak on
+ * 	 Bus to speak on.
  *
  * @param[in] freq
- * 	 Speed of bus for this use
+ * 	 Speed of bus for this use.
  *
  * @param[in] mode
- * 	 SPI mode for this use
+ * 	 SPI mode for this use.
  ******************************************************************************/
-void TD_SPI_Register(uint8_t id, uint8_t friend_id, uint8_t bus, uint32_t freq, USART_ClockMode_TypeDef mode)
+void TD_SPI_Register_(uint8_t id, uint8_t friend_id, uint8_t bus, uint32_t freq,
+	USART_ClockMode_TypeDef mode)
 {
 	EFM_ASSERT(id <= CONFIG_MAX_SPI_ID);
 	EFM_ASSERT(bus < MAX_SPI_BUS);
@@ -444,12 +656,124 @@ void TD_SPI_Register(uint8_t id, uint8_t friend_id, uint8_t bus, uint32_t freq, 
 	if (bus >= MAX_SPI_BUS) {
 		TD_Trap(TRAP_SPI_INVALID_BUS, id);
 	}
-	TD_SPI_Conf[id].friend_id = friend_id;
 	TD_SPI_Conf[id].bus = bus;
 	TD_SPI_Conf[id].freq = freq;
-	ref_freq = CMU_ClockFreqGet(cmuClock_HFPER);
+	ReferenceFrequency = CMU_ClockFreqGet(cmuClock_HFPER);
 	TD_SPI_Conf[id].mode = mode;
 	TD_SPI_Conf[id].usart = TD_SPI_GetUsart(bus);
+}
+#endif
+
+/***************************************************************************//**
+ * @brief
+ *   Register a SPI device with given Chip Select parameters.
+ *
+ * @param[in] id
+ *   ID usage to initialize.
+ *
+ * @param[in] port
+ * 	 Chip Select pin port.
+ *
+ * @param[in] bit
+ * 	 Chip Select pin bit.
+ ******************************************************************************/
+void TD_SPI_RegisterCS(uint8_t id, TD_GPIO_Port_TypeDef port, unsigned int bit)
+{
+	TD_SPI_Conf[id].csPort = port;
+	TD_SPI_Conf[id].csBit = bit;
+	TD_GPIO_PinModeSet(port, bit, gpioModePushPull, 1);
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Setup a Chip Select signal
+ *
+ * @param[in] id
+ *   The peripheral id to write to.
+ *
+ * @param[in] on
+ *   Activation flag set to true to active signal (usually reset CS).
+ ******************************************************************************/
+void TD_SPI_CS(uint8_t id, bool on)
+{
+	TD_GPIO_PinModeSet(TD_SPI_Conf[id].csPort, TD_SPI_Conf[id].csBit,
+		gpioModePushPull, on ? 0 : 1);
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Write a register value to an 8 bits register like SPI peripheral, including
+ *   Chip select handling.
+ *
+ * @param[in] id
+ *   The peripheral id to write to.
+ *
+ * @param[in] register_address
+ *   The register address to write to.
+ *
+ * @param[in] value
+ *   The value to write.
+ ******************************************************************************/
+void TD_SPI_FullWriteRegister(uint8_t id, uint8_t register_address,
+	uint8_t value)
+{
+	TD_GPIO_PinModeSet(TD_SPI_Conf[id].csPort, TD_SPI_Conf[id].csBit,
+		gpioModePushPull, 0);
+	TD_SPI_WriteByte(id, register_address);
+	TD_SPI_WriteByte(id, value);
+	TD_GPIO_PinModeSet(TD_SPI_Conf[id].csPort, TD_SPI_Conf[id].csBit,
+		gpioModePushPull, 1);
+	//TODO: disable CS to improve current conso?
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Read a value from an 8 bits register like an SPI peripheral, including
+ *   Chip Select handling.
+ *
+ * @param[in] id
+ *   The peripheral id to read to.
+ *
+ * @param[in] register_address
+ *   The register address to read from.
+ *
+ * @result
+ *   Returns the read value.
+ ******************************************************************************/
+uint8_t TD_SPI_FullReadRegister(uint8_t id, uint8_t register_address)
+{
+	uint8_t ret;
+
+	TD_SPI_FullReadBuffer(id, register_address, &ret, 1);
+	return ret;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Read multiple values int oa buffer from an 8 bits register like an SPI
+ *   peripheral, including Chip Select handling.
+ *
+ * @param[in] id
+ *   The peripheral id to read to.
+ *
+ * @param[in] register_address
+ *   The register address to read from.
+ *
+ * @param[out] buffer
+ *   Pointer to the buffer that will receive the read values.
+ *
+ * @param[in] count
+ *   The count of bytes to read.
+ ******************************************************************************/
+void TD_SPI_FullReadBuffer(uint8_t id, uint8_t register_address,
+	uint8_t *buffer, uint8_t count)
+{
+	TD_GPIO_PinModeSet(TD_SPI_Conf[id].csPort, TD_SPI_Conf[id].csBit,
+		gpioModePushPull, 0);
+	TD_SPI_WriteReadByte(id, register_address | 0x80, true);
+	TD_SPI_ReadBuffer(id, count, buffer);
+	TD_GPIO_PinModeSet(TD_SPI_Conf[id].csPort, TD_SPI_Conf[id].csBit,
+		gpioModePushPull, 1);
 }
 
 /***************************************************************************//**
@@ -537,7 +861,8 @@ static uint16_t TD_SPI_PN9_Next(uint16_t pn9, uint8_t *br)
  * @param[in] reset
  *   Reset seed generator
  ******************************************************************************/
-void TD_SPI_WriteBuffer_PN9(uint8_t id, uint8_t count, uint8_t *buffer, bool reset)
+void TD_SPI_WriteBuffer_PN9(uint8_t id, uint8_t count, uint8_t *buffer,
+	bool reset)
 {
 	static uint16_t PN9;
 	uint8_t br;
@@ -606,14 +931,52 @@ void TD_SPI_ReadBuffer(uint8_t id, uint8_t count, uint8_t *buffer)
  *
  * @param[in] c
  *   The byte to write.
+ *
  ******************************************************************************/
 void TD_SPI_WriteByte(uint8_t id, uint8_t c)
 {
-	USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
+	USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX | USART_CMD_TXTRIDIS;
 	USART->TXDATA = c;
 	while (!(USART->STATUS & USART_STATUS_TXC)) {
 		;
 	}
+	if (TD_SPI_Conf[id].mode & USART_CTRL_LOOPBK) {
+		USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX | USART_CMD_TXTRIEN;
+	}
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Write a single byte to the SPI device.
+ *
+ * @note
+ *   This function is waiting actively for the bytes to be transfered.
+ *
+ * @param[in] id
+ *   The unique ID used for SPI bus locking.
+ *
+ * @param[in] c
+ *   The byte to write.
+ *
+ * @param[in] write
+ *   true to write, false to read
+ *
+ * @return
+ *   Byte read during write
+ *
+ ******************************************************************************/
+uint8_t TD_SPI_WriteReadByte(uint8_t id, uint8_t c, bool write)
+{
+	USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX |
+		(write ? USART_CMD_TXTRIDIS : 0);
+	USART->TXDATA = c;
+	while (!(USART->STATUS & USART_STATUS_TXC)) {
+		;
+	}
+	if (TD_SPI_Conf[id].mode & USART_CTRL_LOOPBK) {
+		USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX | USART_CMD_TXTRIEN;
+	}
+	return USART->RXDATA;
 }
 
 /***************************************************************************//**
@@ -679,15 +1042,17 @@ void TD_SPI_WriteDouble(uint8_t id, uint32_t value)
  *  Pointer to the buffer to write to the device. If buffer is NULL, will send 0
  *
  * @param[out] read
- *   Pointer to the buffer to read from the device, buffer updated only if data different from 0xFF
+ *   Pointer to the buffer to read from the device, buffer updated only if data
+ *   different from 0xFF.
  *
  * @param[in] count
  *   The count of bytes to write/read.
  *
  * @return
- *   Count of byte read
+ *   Count of byte read.
  ******************************************************************************/
-uint16_t TD_SPI_BackToBack(uint8_t id, uint8_t *write, uint8_t *read, uint16_t count)
+uint16_t TD_SPI_BackToBack(uint8_t id, uint8_t *write, uint8_t *read,
+	uint16_t count)
 {
 	volatile uint8_t dummy;
 	uint8_t *rd_base = read;
@@ -717,6 +1082,9 @@ uint16_t TD_SPI_BackToBack(uint8_t id, uint8_t *write, uint8_t *read, uint16_t c
  ******************************************************************************/
 void TD_SPI_StartBackToBack(uint8_t id)
 {
+	if (!TD_SPI_Conf[id].freq) {
+		return;
+	}
 	USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
 }
 

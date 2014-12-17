@@ -2,7 +2,7 @@
  * @file
  * @brief API for sending frames to Sensor
  * @author Telecom Design S.A.
- * @version 1.2.0
+ * @version 1.3.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -33,9 +33,12 @@
 
 #include <stdbool.h>
 
+#include <em_assert.h>
+
 #include "td_sensor.h"
 #include "td_sensor_device.h"
 #include "td_sensor_transmitter.h"
+#include "td_sensor_utils.h"
 #include "sensor_send.h"
 #include "sensor_raw.h"
 #include "sensor_event.h"
@@ -87,11 +90,113 @@
  ******************************************************************************/
 
 /*******************************************************************************
+ **************************  PRIVATE VARIABLES   *******************************
+ ******************************************************************************/
+
+/** @addtogroup SENSOR_SEND_PRIVATE_VARIABLES Private Variables
+ * @{ */
+
+
+/** User callback to execute before and after lan transmission */
+static bool (*UserCallback)(uint8_t *payload, uint8_t count, uint8_t repetition, uint32_t interval) = 0;
+
+/** @} */
+
+/*******************************************************************************
+ *************************   PUBLIC VARIABLES   ********************************
+ ******************************************************************************/
+
+/** @addtogroup SENSOR_SEND_GLOBAL_VARIABLES Global Variables
+ * @{ */
+
+/** Transmit configurations */
+TD_SENSOR_TransmitConfig_t TD_SENSOR_TransmitConfig[SRV_FRM_MAX] = {
+	{{0, 0}, 0},
+	{{0, 0}, 0},
+	{{0, 0}, 0},
+	{{0, 0}, 0},
+	{{0, 0}, 0},
+	{{0, 0}, 0},
+	{{0, 0}, 0}
+};
+
+/** @} */
+
+/*******************************************************************************
  **************************  PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
+
 /** @addtogroup SENSOR_SEND_GLOBAL_FUNCTIONS Global Functions
  * @{ */
+
+/***************************************************************************//**
+ * @brief
+ *   Send a Sensor Frame according to UDM protocol. Depending on module type,
+ *   the frame can be forwarded or not to a gateway.
+ *
+ * @param[in] id
+ *   The ID to use for transmission.
+ *
+ * @param[in] frame_type
+ * 	Sensor frame type.
+ *
+ * @param[in] frame
+ * 	Pointer to the buffer containing the UDM TD_SENSOR_Frame_t frame.
+ *
+ * @param[in] count
+ * 	Number of bytes of frame payload data.
+ *
+ * @return
+ *   Returns true if the data has been sent over the SIGFOX network, false
+ *   otherwise.
+ ******************************************************************************/
+bool TD_SENSOR_SendUDM(uint8_t id, TD_SENSOR_FrameType_t frame_type,
+	TD_SENSOR_Frame_t *frame, uint8_t count)
+{
+	TD_SENSOR_LAN_AckCode_t code;
+	bool ok;
+
+	if (count > TD_SENSOR_PAYLOAD_SIZE) {
+		return false;
+	}
+	EFM_ASSERT(frame_type < SRV_FRM_MAX);
+	frame->header[0] = ((TD_SENSOR_TransmitConfig[frame_type].stamp & 0x07)
+		<< 4);
+	frame->header[1] = ((id & 0x0f) << 4) | (frame_type & 0x0f);
+	if (TD_SENSOR_GetModuleType() != SENSOR_DEVICE ||
+		TD_SENSOR_DEVICE_GetTxSkipLan()) {
+		ok = TD_SENSOR_TRANSMITTER_SendSigfox((uint8_t *) frame,
+			2 + count,
+        	id,
+			&TD_SENSOR_TransmitConfig[frame_type].profile);
+
+		// Check battery status
+		TD_SENSOR_BatteryCallBack(false);
+	} else {
+
+		// Let us use our own lan management
+		if (UserCallback != 0) {
+			ok = (*UserCallback)((uint8_t *) frame,
+				2 + count,
+				TD_SENSOR_TransmitConfig[frame_type].profile.repetition,
+				TD_SENSOR_TransmitConfig[frame_type].profile.interval);
+		} else {
+
+		// Try to send via LAN in synchronous or asynchronous mode
+		code = TD_SENSOR_DEVICE_Forward((uint8_t *) frame,
+			2 + count,
+			TD_SENSOR_TransmitConfig[frame_type].profile.repetition,
+			TD_SENSOR_TransmitConfig[frame_type].profile.interval);
+		if (code == ACK_OK || code == SENSOR_LAN_QUEUED) {
+			ok = true;
+		} else {
+			ok = false;
+		}
+	}
+	}
+	return ok;
+}
 
 /***************************************************************************//**
  * @brief
@@ -117,7 +222,9 @@
  *   Returns true if the data has been sent over the SIGFOX network, false
  *   otherwise.
  ******************************************************************************/
-bool TD_SENSOR_Send(TD_SENSOR_TransmitProfile_t *profile, TD_SENSOR_FrameType_t frame_type, uint8_t stamp, uint8_t *payload, uint8_t count)
+bool TD_SENSOR_Send(TD_SENSOR_TransmitProfile_t *profile,
+	TD_SENSOR_FrameType_t frame_type, uint8_t stamp, uint8_t *payload,
+	uint8_t count)
 {
 	TD_SENSOR_Frame_t frame;
 	TD_SENSOR_LAN_AckCode_t code;
@@ -127,87 +234,40 @@ bool TD_SENSOR_Send(TD_SENSOR_TransmitProfile_t *profile, TD_SENSOR_FrameType_t 
 	if (count > 10) {
 		return false;
 	}
-	frame.header.retry = 0;
-	frame.header.stamp = stamp & 0x7;
-	frame.header.cpt = 0;
-	frame.header.entry_id = 0;
-	frame.header.type = frame_type;
+    frame.header[0] = frame_type & 0x0f;
+    frame.header[1] = (stamp & 0x07) << 4;
 	for (i = 0; i < count; i++) {
 		frame.payload[i] = payload[i];
 	}
 	if (TD_SENSOR_GetModuleType() != SENSOR_DEVICE ||
-		(TD_SENSOR_GetModuleType() == SENSOR_DEVICE && TD_SENSOR_DEVICE_GetTxSkipLan())) {
-		return TD_SENSOR_TRANSMITTER_SendSigfox(&frame, count + sizeof (TD_SENSOR_FrameHeader_t), 0, profile);
+		TD_SENSOR_DEVICE_GetTxSkipLan()) {
+		return TD_SENSOR_TRANSMITTER_SendSigfox((uint8_t *) &frame,
+			2 + count,
+			0,
+			profile);
 	} else {
 
 		// Try to send via LAN in synchronous or asynchronous mode
-		if (TD_SENSOR_DEVICE_IsAsynchronousForward()) {
-			code = TD_SENSOR_DEVICE_ForwardAsynch((uint8_t *) &frame,
-				count + sizeof (TD_SENSOR_FrameHeader_t),
-				profile->repetition,
-				profile->interval);
-			if (code == ACK_OK || code == SENSOR_LAN_QUEUED) {
-				return true;
-			} else {
-				return false;
-			}
+		code = TD_SENSOR_DEVICE_Forward((uint8_t *) &frame,
+			2 + count,
+			profile->repetition,
+			profile->interval);
+		if (code == ACK_OK || code == SENSOR_LAN_QUEUED) {
+			return true;
 		} else {
-			code = TD_SENSOR_DEVICE_Forward((uint8_t *) &frame,
-				count + sizeof (TD_SENSOR_FrameHeader_t),
-				profile->repetition,
-				profile->interval);
-			if (code == ACK_OK) {
-				return true;
-			} else {
-				return false;
-			}
+			return false;
 		}
 	}
 }
 
 /***************************************************************************//**
  * @brief
- *   Set retransmission profile for each frame type.
- *
- * @param[in] type
- * 	The Sensor frame type.
- *
- * @param[in] repetition
- * 	Number of times the frame should be retransmitted.
- *
- * @param[in] interval
- * 	Interval in seconds at which the retransmission should occur. Maximum 600 s.
+ *   Callback to call before and after lan transmission
  ******************************************************************************/
-void TD_SENSOR_SetTransmissionProfile(TD_SENSOR_FrameType_t type, uint8_t repetition, uint16_t interval)
+void TD_SENSOR_SEND_SetUserCallback(bool (*user_callback)(uint8_t *payload,
+	uint8_t count, uint8_t repetition, uint32_t interval))
 {
-	switch (type) {
-	case SRV_FRM_EVENT:
-		TD_SENSOR_SetEventTransmissionProfile(repetition, interval);
-		break;
-
-	case SRV_FRM_DATA:
-		TD_SENSOR_SetDataTransmissionProfile(repetition, interval);
-		break;
-
-	case SRV_FRM_REGISTER:
-		TD_SENSOR_SetRegisterTransmissionProfile(repetition, interval);
-		break;
-
-	case SRV_FRM_KEEPALIVE:
-		TD_SENSOR_SetKeepAliveTransmissionProfile(repetition, interval);
-		break;
-
-	case SRV_FRM_RAW:
-		TD_SENSOR_SetRawTransmissionProfile(repetition, interval);
-		break;
-
-	case SRV_FRM_SERVICE:
-		TD_SENSOR_SetServiceTransmissionProfile(repetition, interval);
-		break;
-
-	default:
-		break;
-	}
+	UserCallback = user_callback;
 }
 
 /** @} */

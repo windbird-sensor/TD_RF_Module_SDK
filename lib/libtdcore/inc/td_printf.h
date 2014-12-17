@@ -2,7 +2,7 @@
  * @file
  * @brief printf utility  for the TDxxxx RF modules.
  * @author Kustaa Nyholm
- * @version 2.0.2
+ * @version 2.0.3
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2004  Kustaa Nyholm</b>
@@ -119,15 +119,15 @@
 extern "C" {
 #endif
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup PRINTF
 	 * @brief printf utility  for the TDxxxx RF modules
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
-	/*******************************************************************************
-	 *************************   DEFINES   *****************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   DEFINES   *************************************
+	 **************************************************************************/
 
 	/** @addtogroup PRINTF_DEFINES Defines
 	 * @{ */
@@ -147,22 +147,43 @@ extern "C" {
 	/** Conditional alias for tfp_dump() */
 #define DUMP(p, b, l)	tfp_dump(p, b, l)
 
+	/** For API compatibility */
+#define tfp_printf_dump(b, l)	tfp_print_buf(b (int) l)
+
 	/** @} */
 
-	/*******************************************************************************
-	  *************************   PROTOTYPES   **************************************
-	  ******************************************************************************/
+	/***************************************************************************
+	 *************************   TYPEDEFS   ************************************
+	 **************************************************************************/
+
+	/** @addtogroup PRINTF_TYPEDEFS Typedefs
+	 * @{ */
+
+	/** Type definition for character output function */
+	typedef void (*tfp_putf_t)(void *, char);
+
+	/** Type definition for UART TX start/stop handling function */
+	typedef void (*tfp_start_stop_t)(void *);
+
+	/** @} */
+
+ /***************************************************************************
+	  *************************   PROTOTYPES   *********************************
+	  *************************************************************************/
 
 	/** @addtogroup PRINTF_USER_FUNCTIONS User Functions
 	 * @{ */
 
-	void init_printf(void *putp, void (*putf)(void *, char), void (*start)(void *), void (*stop)(void *));
+	void init_printf(void *putp, void (*putf)(void *, char),
+		void (*start)(void *), void (*stop)(void *));
 	void tfp_printf(char *fmt, ...);
 	void tfp_vprintf(char *fmt, va_list va);
 	void tfp_sprintf(char *s, char *fmt, ...);
 	void tfp_dump(char *text, unsigned char *s, unsigned char sz);
-	void tfp_format(void *putp, void (*putf)(void *, char), char *fmt, va_list va);
-	void tfp_printf_dump(char *text, unsigned char sz);
+	void tfp_format(void *putp, void (*putf)(void *, char), char *fmt,
+		va_list va);
+	void tfp_print_buf(char *buf, int len);
+	void get_printf(void **lst);
 
 	/** @} */
 

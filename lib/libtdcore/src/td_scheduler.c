@@ -2,7 +2,7 @@
  * @file
  * @brief Scheduler API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.1.0
+ * @version 2.1.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -47,7 +47,6 @@
  * @brief Scheduler API for the TDxxxx RF modules
  * @{
  ******************************************************************************/
-// TODO : add possibility to schedule a timer at delay|interval|interval|interval ...
 
 /*******************************************************************************
  *************************   DEFINES   *****************************************
@@ -165,6 +164,9 @@ static void TD_SCHEDULER_Manager(TD_SCHEDULER_MANAGER_SOURCE);
  *
  * @param[in] id
  *  Timer id.
+ *
+ * @param[in] purge
+ *  Flag set to true to purge the timer, false otherwise.
  ******************************************************************************/
 static void TD_SCHEDULER_RemovePrivate(uint8_t id, bool purge)
 {
@@ -182,8 +184,11 @@ static void TD_SCHEDULER_RemovePrivate(uint8_t id, bool purge)
 		// Note : if there is no purge, ignore this test (remove in execute)
 		// Possible case:
 		//  repetition != 0 => timer is running
-		//  repetition = 0 && TD_SCHEDULER_Timer[id].irq == SCHEDULER_RESERVED_STATE => timer is just added or timer is mark to be removed
-		if (purge && !TD_SCHEDULER_Timer[id].repetition && TD_SCHEDULER_Timer[id].irq != SCHEDULER_RESERVED_STATE) {
+		//  repetition = 0 && TD_SCHEDULER_Timer[id].irq ==
+		//  SCHEDULER_RESERVED_STATE => timer is just added or timer is mark to
+		//  be removed
+		if (purge && !TD_SCHEDULER_Timer[id].repetition &&
+			TD_SCHEDULER_Timer[id].irq != SCHEDULER_RESERVED_STATE) {
 			__set_PRIMASK(msk);
 			return;
 		}
@@ -194,6 +199,12 @@ static void TD_SCHEDULER_RemovePrivate(uint8_t id, bool purge)
 
 			// We must reschedule
 			dirty = true;
+		}
+		if (TD_SCHEDULER_Timer[id].repetition == 0 &&
+			TD_SCHEDULER_Timer[id].irq != SCHEDULER_RESERVED_STATE) {
+			//TD_SCHEDULER_Dump();
+			TD_Trap(TRAP_TIMER_INVALID, id);
+			return;
 		}
 
 		// Remove timer
@@ -226,15 +237,21 @@ static void TD_SCHEDULER_RemovePrivate(uint8_t id, bool purge)
 					msk = __get_PRIMASK();
 					__set_PRIMASK(1);
 
-					// We must be sure that memcpy is a direct copy (not forward) to use this
-					// As long as td_utils.c version is used, there is no problem
-					//memcpy(&TD_SCHEDULER_CallbackQueue[TD_SCHEDULER_CallbackQueueIndex + i], &TD_SCHEDULER_CallbackQueue[TD_SCHEDULER_CallbackQueueIndex + i + 1],
-					//	   (TD_SCHEDULER_CallbackQueueCount - 1 - i) * sizeof (TD_SCHEDULER_callback_t));
-
+					// We must be sure that memcpy is a direct copy (not
+					// forward) to use this.
+					// As long as td_utils.c version is used, there is no
+					// problem.
+					//memcpy(&TD_SCHEDULER_CallbackQueue[
+					//	TD_SCHEDULER_CallbackQueueIndex + i],
+					//	&TD_SCHEDULER_CallbackQueue[
+					//		TD_SCHEDULER_CallbackQueueIndex + i + 1],
+					//	(TD_SCHEDULER_CallbackQueueCount - 1 - i) *
+					//  	sizeof (TD_SCHEDULER_callback_t));
 					//TD_SCHEDULER_CallbackQueueCount--;
 
 					// Flag this entry as invalid
-					TD_SCHEDULER_CallbackQueue[index].flags |= SCHEDULER_FLAG_INVALIDATED_ITEM;
+					TD_SCHEDULER_CallbackQueue[index].flags |=
+						SCHEDULER_FLAG_INVALIDATED_ITEM;
 					__set_PRIMASK(msk);
 				}
 				index++;
@@ -262,6 +279,8 @@ static void TD_SCHEDULER_ExecuteTimer(uint8_t id)
 	uint32_t arg, msk;
 	uint8_t repetition, index;
 	uint64_t time;
+	TD_SCHEDULER_timer_t *tim = &TD_SCHEDULER_Timer[id];
+	TD_SCHEDULER_callback_t *cb;
 
 	// Grab current time, as soon as possible
 	time = TD_SCHEDULER_GetTime();
@@ -271,46 +290,51 @@ static void TD_SCHEDULER_ExecuteTimer(uint8_t id)
 	__set_PRIMASK(1);
 
 	// Grab data from timer
-	repetition = TD_SCHEDULER_Timer[id].repetition;
+	repetition = tim->repetition;
 
-	// Someone else already execute this timer... (reentrency) => exit
+	// Someone else already execute this timer... (re-entrance) => exit
 	if (!repetition) {
 		__set_PRIMASK(msk);
 		return;
 	}
-	callback = TD_SCHEDULER_Timer[id].callback;
-	arg = TD_SCHEDULER_Timer[id].arg;
+	callback = tim->callback;
+	arg = tim->arg;
 
 	// Set data
-	TD_SCHEDULER_Timer[id].last_time = time;
+	tim->last_time = time;
 
 	// If called from outside of an IRQ, queue callback
-	if (!TD_SCHEDULER_Timer[id].irq) {
-		index = TD_SCHEDULER_CallbackQueueIndex + TD_SCHEDULER_CallbackQueueCount;
+	if (!tim->irq) {
+		index = TD_SCHEDULER_CallbackQueueIndex +
+			TD_SCHEDULER_CallbackQueueCount;
 		if (index >= CONFIG_TD_SCHEDULER_MAX_QUEUE) {
 			index -= CONFIG_TD_SCHEDULER_MAX_QUEUE;
 		}
+		cb = &TD_SCHEDULER_CallbackQueue[index];
 		if (TD_SCHEDULER_CallbackQueueCount < CONFIG_TD_SCHEDULER_MAX_QUEUE) {
 			TD_SCHEDULER_CallbackQueueCount++;
 			TD_WakeMainLoop();
 		} else {
-			TD_Trap(TRAP_SCHEDULER_QUEUE_OVF, (uint32_t) callback);
+			if (!CONFIG_TD_SCHEDULER_DONT_OVF_QUEUE) {
+				TD_Trap(TRAP_SCHEDULER_QUEUE_OVF, (uint32_t) callback);
+			}
 			__set_PRIMASK(msk);
 			return;
 		}
-		TD_SCHEDULER_CallbackQueue[index].index = id;
-		TD_SCHEDULER_CallbackQueue[index].flags = 0;
-		if (TD_SCHEDULER_Timer[id].repetition == 1) {
+		cb->index = id;
+		cb->flags = 0;
+		if (tim->repetition == 1) {
 
 			// We should:
-			// - put this timer in a pending state (not used, but not allocatable too)
+			// - put this timer in a pending state (not used, but not
+			//   allocatable too)
 			// - remove it when we will process callback
-			TD_SCHEDULER_CallbackQueue[index].flags = SCHEDULER_FLAG_REMOVE_TIMER_AT_END;
-			TD_SCHEDULER_Timer[id].repetition = 0;
-			TD_SCHEDULER_Timer[id].irq = SCHEDULER_RESERVED_STATE;
+			cb->flags = SCHEDULER_FLAG_REMOVE_TIMER_AT_END;
+			tim->repetition = 0;
+			tim->irq = SCHEDULER_RESERVED_STATE;
 		} else {
-			if (TD_SCHEDULER_Timer[id].repetition != 0xFF) {
-				TD_SCHEDULER_Timer[id].repetition--;
+			if (tim->repetition != 0xFF) {
+				tim->repetition--;
 			}
 		}
 		__set_PRIMASK(msk);
@@ -318,16 +342,18 @@ static void TD_SCHEDULER_ExecuteTimer(uint8_t id)
 		// Now that the index is reserved for us, and source data are grabbed
 		// Note: in case of a queue overrun, we will override the oldest event.
 		// this event will be at each turn overrun
-		TD_SCHEDULER_CallbackQueue[index].arg = arg;
-		TD_SCHEDULER_CallbackQueue[index].callback = callback;
-		TD_SCHEDULER_CallbackQueue[index].repetition = repetition;
+		cb->arg = arg;
+		cb->callback = callback;
+		cb->repetition = repetition;
 		TD_SCHEDULER_Manager(TD_SCHEDULER_TR);
 	} else {
 		if (repetition != 0xFF) {
-			TD_SCHEDULER_Timer[id].repetition--;
-			if (TD_SCHEDULER_Timer[id].repetition == 0) {
-				/* We must set RESERVED state to not have a false invalid timer trap */
-				TD_SCHEDULER_Timer[id].irq = SCHEDULER_RESERVED_STATE;
+			tim->repetition--;
+			if (tim->repetition == 0) {
+
+				//We must set RESERVED state to not have a false invalid timer
+				// trap
+				tim->irq = SCHEDULER_RESERVED_STATE;
 				TD_SCHEDULER_RemovePrivate(id, false);
 			}
 		}
@@ -352,11 +378,13 @@ static void TD_SCHEDULER_Manager(TD_SCHEDULER_MANAGER_SOURCE)
 	bool bias;
 	uint32_t msk;
 	static TD_SCHEDULER_state_t in_progress = SCHEDULER_IDLE;
+	TD_SCHEDULER_timer_t *tim;
 
 	// Atomic operation. If we 'reenter' remember dirty state at end
 	msk = __get_PRIMASK();
 	__set_PRIMASK(1);
-	if ((in_progress == SCHEDULER_IN_PROGRESS) || (in_progress == SCHEDULER_RELAUNCH)) {
+	if ((in_progress == SCHEDULER_IN_PROGRESS) ||
+		(in_progress == SCHEDULER_RELAUNCH)) {
 		in_progress = SCHEDULER_RELAUNCH;
 		__set_PRIMASK(msk);
 		return;
@@ -375,8 +403,9 @@ static void TD_SCHEDULER_Manager(TD_SCHEDULER_MANAGER_SOURCE)
 		tim_count = TD_SCHEDULER_TimerCount;
 		delta = 0xFFFFFFFFFFFFFFFF;
 		set_alarm = false;
+		tim = &TD_SCHEDULER_Timer[0];
 		j = 0;
-		for (i = 0; i < CONFIG_TD_SCHEDULER_MAX_TIMER; i++) {
+		for (i = 0; i < CONFIG_TD_SCHEDULER_MAX_TIMER; i++, tim++) {
 
 			// We should re-launch as soon as possible
 			if (in_progress == SCHEDULER_RELAUNCH) {
@@ -388,7 +417,7 @@ static void TD_SCHEDULER_Manager(TD_SCHEDULER_MANAGER_SOURCE)
 			if (j >= tim_count) {
 				break;
 			}
-			if (TD_SCHEDULER_Timer[i].repetition == 0) {
+			if (tim->repetition == 0) {
 				continue;
 			}
 
@@ -397,33 +426,34 @@ static void TD_SCHEDULER_Manager(TD_SCHEDULER_MANAGER_SOURCE)
 			bias = false;
 
 			// In case of a bias
-			if (TD_SCHEDULER_Timer[i].last_time > time_now) {
-				diff = TD_SCHEDULER_Timer[i].last_time - time_now
-					   + TD_SCHEDULER_Timer[i].interval;
+			if (tim->last_time > time_now) {
+				diff = tim->last_time - time_now
+					   + tim->interval;
 				bias = true;
 			} else {
-				diff = time_now - TD_SCHEDULER_Timer[i].last_time;
+				diff = time_now - tim->last_time;
 			}
 
 			// If we are late, go for it right now
-			if (diff >= TD_SCHEDULER_Timer[i].interval && !bias) {
+			if (diff >= tim->interval && !bias) {
 
 				// Does not keep order, latest should be started first!
 				TD_SCHEDULER_ExecuteTimer(i);
 
-				// After execution, we could have deleted timer, added timer, etc.
+				// After execution, we could have deleted timer, added timer,
+				// etc.
 				if (in_progress == SCHEDULER_RELAUNCH) {
 					break;
 				}
 
 				// Recompute new delta
-				diff = time_now - TD_SCHEDULER_Timer[i].last_time;
+				diff = time_now - tim->last_time;
 				bias = false;
 			}
 
 			// Otherwise compute delta
 			if (!bias) {
-				temp_delta = TD_SCHEDULER_Timer[i].interval - diff;
+				temp_delta = tim->interval - diff;
 			} else {
 				temp_delta = diff;
 			}
@@ -498,18 +528,22 @@ static void TD_SCHEDULER_TimerIRQHandler(void)
  * @brief
  *   Append a timer to schedule. See TD_SchedulerAppend
  ******************************************************************************/
-uint8_t TD_SCHEDULER_AppendPrivate(uint32_t interval, uint16_t tick, uint32_t delay, uint8_t repetition, bool irq, void (*callback)(uint32_t, uint8_t), uint32_t arg)
+uint8_t TD_SCHEDULER_AppendPrivate(uint32_t interval, uint16_t tick,
+	uint32_t delay, uint8_t repetition, bool irq,
+	void (*callback)(uint32_t, uint8_t), uint32_t arg)
 {
 	uint8_t index;
 	uint32_t msk;
+	TD_SCHEDULER_timer_t *tim = &TD_SCHEDULER_Timer[0];
 
 	// Look for an available slot if at least one delay is specified
-	if (repetition > 0 && TD_SCHEDULER_TimerCount < CONFIG_TD_SCHEDULER_MAX_TIMER
-			&& (interval != 0 || tick != 0 || (delay != 0 && repetition == 1))) {
-		for (index = 0; index < CONFIG_TD_SCHEDULER_MAX_TIMER; index++) {
+	if (repetition > 0 &&
+		TD_SCHEDULER_TimerCount < CONFIG_TD_SCHEDULER_MAX_TIMER
+		&& (interval != 0 || tick != 0 || (delay != 0 && repetition == 1))) {
+		for (index = 0; index < CONFIG_TD_SCHEDULER_MAX_TIMER; index++, tim++) {
 
 			// Try to find a candidate (not atomic operation)
-			if (TD_SCHEDULER_Timer[index].repetition || (TD_SCHEDULER_Timer[index].irq == SCHEDULER_RESERVED_STATE)) {
+			if (tim->repetition || (tim->irq == SCHEDULER_RESERVED_STATE)) {
 
 				// Lost, check next
 				continue;
@@ -518,29 +552,30 @@ uint8_t TD_SCHEDULER_AppendPrivate(uint32_t interval, uint16_t tick, uint32_t de
 			// Won, now go atomic
 			msk = __get_PRIMASK();
 			__set_PRIMASK(1);
-			if (!TD_SCHEDULER_Timer[index].repetition && (TD_SCHEDULER_Timer[index].irq != SCHEDULER_RESERVED_STATE)) {
+			if (!tim->repetition && (tim->irq != SCHEDULER_RESERVED_STATE)) {
 
 				// We won, reserve it with special value
-				TD_SCHEDULER_Timer[index].irq = SCHEDULER_RESERVED_STATE;
+				tim->irq = SCHEDULER_RESERVED_STATE;
 			} else {
 
-				// Slot not empty, argg someone stole us!!! Check next - not atomic
+				// Slot not empty, argg someone stole us!!! Check next - not
+				// atomic
 				__set_PRIMASK(msk);
 				continue;
 			}
 			__set_PRIMASK(msk);
 
 			// Now, index is reserved for us
-			TD_SCHEDULER_Timer[index].interval = (((uint64_t) interval) << 15) | ((uint64_t) tick);
-			TD_SCHEDULER_Timer[index].callback = callback;
-			TD_SCHEDULER_Timer[index].last_time = TD_SCHEDULER_GetTime() + (delay << 15);
-			TD_SCHEDULER_Timer[index].arg = arg;
+			tim->interval = (((uint64_t) interval) << 15) | ((uint64_t) tick);
+			tim->callback = callback;
+			tim->last_time = TD_SCHEDULER_GetTime() + (delay << 15);
+			tim->arg = arg;
 
 			// Must be the last one, we validate timer with this
 			msk = __get_PRIMASK();
 			__set_PRIMASK(1);
-			TD_SCHEDULER_Timer[index].irq = irq;
-			TD_SCHEDULER_Timer[index].repetition = repetition;
+			tim->irq = irq;
+			tim->repetition = repetition;
 
 			// We must update timer count, atomic too...
 			if (TD_SCHEDULER_TimerCount == 0) {
@@ -576,7 +611,8 @@ void TD_SCHEDULER_Dump(void)
 	__set_PRIMASK(1);
 	tfp_printf("\r\n");
 	for (index = 0; index < CONFIG_TD_SCHEDULER_MAX_TIMER; index++) {
-		if (!TD_SCHEDULER_Timer[index].repetition && TD_SCHEDULER_Timer[index].irq != SCHEDULER_RESERVED_STATE) {
+		if (!TD_SCHEDULER_Timer[index].repetition &&
+			TD_SCHEDULER_Timer[index].irq != SCHEDULER_RESERVED_STATE) {
 			continue;
 		}
 		if (first) {
@@ -589,18 +625,19 @@ void TD_SCHEDULER_Dump(void)
 			irq_s="RSV";
 		}
 		tfp_printf("id:%d per:%02d:%02d:%02d.(%04d) rep:%3d irq:%d%s",
-				   index,
-				   t / 3600,
-				   (t / 60) % 60,
-				   t % 60,
-				   (uint16_t) (TD_SCHEDULER_Timer[index].interval & 0x7FFF),
-				   TD_SCHEDULER_Timer[index].repetition,
-				   TD_SCHEDULER_Timer[index].irq,irq_s);
+			index,
+			t / 3600,
+			(t / 60) % 60,
+			t % 60,
+			(uint16_t) (TD_SCHEDULER_Timer[index].interval & 0x7FFF),
+			TD_SCHEDULER_Timer[index].repetition,
+			TD_SCHEDULER_Timer[index].irq,
+			irq_s);
 		tfp_printf(" cb:0x%08X arg:0x%08X last_time:0x%08X%08X\r\n",
-				   TD_SCHEDULER_Timer[index].callback,
-				   TD_SCHEDULER_Timer[index].arg,
-				   (uint32_t) (TD_SCHEDULER_Timer[index].last_time >> 32),
-				   (uint32_t) (TD_SCHEDULER_Timer[index].last_time & 0xFFFFFFFF));
+			TD_SCHEDULER_Timer[index].callback,
+			TD_SCHEDULER_Timer[index].arg,
+			(uint32_t) (TD_SCHEDULER_Timer[index].last_time >> 32),
+			(uint32_t) (TD_SCHEDULER_Timer[index].last_time & 0xFFFFFFFF));
 		n++;
 	}
 	if (TD_SCHEDULER_CallbackQueueCount) {
@@ -613,8 +650,10 @@ void TD_SCHEDULER_Dump(void)
 		}
 		tfp_printf("flags:%d%s%s id:%d cb:0x%08X arg:0x%08X repet:%d\r\n",
 			TD_SCHEDULER_CallbackQueue[t].flags,
-			TD_SCHEDULER_CallbackQueue[t].flags & SCHEDULER_FLAG_REMOVE_TIMER_AT_END ? "REM" : "",
-			TD_SCHEDULER_CallbackQueue[t].flags & SCHEDULER_FLAG_INVALIDATED_ITEM ? "INV" : "",
+			TD_SCHEDULER_CallbackQueue[t].flags &
+				SCHEDULER_FLAG_REMOVE_TIMER_AT_END ? "REM" : "",
+			TD_SCHEDULER_CallbackQueue[t].flags &
+				SCHEDULER_FLAG_INVALIDATED_ITEM ? "INV" : "",
 			TD_SCHEDULER_CallbackQueue[t].index,
 			TD_SCHEDULER_CallbackQueue[t].callback,
 			TD_SCHEDULER_CallbackQueue[t].arg,
@@ -633,7 +672,8 @@ void TD_SCHEDULER_Dump(void)
 		(uint32_t) (cur_time >> 32),
 		(uint32_t) (cur_time & 0xFFFFFFFF), comp1, _if, ien);
 #ifdef SCHEDULER_DEBUG
-	tfp_printf("==IT:%08X Set:%08X\r\n", TD_SCHEDULER_LastIRQ, TD_SHEDULER_LastSet);
+	tfp_printf("==IT:%08X Set:%08X\r\n",
+		TD_SCHEDULER_LastIRQ, TD_SHEDULER_LastSet);
 #endif
 	__set_PRIMASK(msk);
 }
@@ -651,14 +691,15 @@ void TD_SCHEDULER_Dump(void)
  * @brief
  *   Safely process all callbacks in queue.
  ******************************************************************************/
-void TD_SCHEDULER_Process(void)
+void DYNAMIC(TD_SCHEDULER_Process)(void)
 {
 	uint32_t  msk;
 	TD_SCHEDULER_callback_t tmp;
 
 	// While in case a timer irq happens in between
 	while (TD_SCHEDULER_CallbackQueueCount > 0) {
-		memcpy(&tmp, &TD_SCHEDULER_CallbackQueue[TD_SCHEDULER_CallbackQueueIndex], sizeof (TD_SCHEDULER_callback_t));
+		memcpy(&tmp, &TD_SCHEDULER_CallbackQueue[TD_SCHEDULER_CallbackQueueIndex],
+			sizeof (TD_SCHEDULER_callback_t));
 
 		// Atomic operation (no interrupt during queue remove)
 		msk = __get_PRIMASK();
@@ -670,12 +711,14 @@ void TD_SCHEDULER_Process(void)
 		}
 		__set_PRIMASK(msk);
 
-		// This item was flagged as invalidated (timer was removed, so callback must not be called
+		// This item was flagged as invalidated (timer was removed, so callback
+		// must not be called.
 		if (tmp.flags&SCHEDULER_FLAG_INVALIDATED_ITEM) {
 			continue;
 		}
 
-		// This item was flagged as last event of this timer and must be removed at end
+		// This item was flagged as last event of this timer and must be removed
+		// at end.
 		if (tmp.flags&SCHEDULER_FLAG_REMOVE_TIMER_AT_END) {
 			TD_SCHEDULER_RemovePrivate(tmp.index, false);
 		}
@@ -693,9 +736,10 @@ void TD_SCHEDULER_Process(void)
  * @brief
  *   Initialize the scheduler.
  ******************************************************************************/
-void TD_SCHEDULER_Init(void)
+void DYNAMIC(TD_SCHEDULER_Init)(void)
 {
-	memset(TD_SCHEDULER_Timer, 0, sizeof (TD_SCHEDULER_timer_t) * CONFIG_TD_SCHEDULER_MAX_TIMER);
+	memset(TD_SCHEDULER_Timer, 0, sizeof (TD_SCHEDULER_timer_t) *
+		CONFIG_TD_SCHEDULER_MAX_TIMER);
 }
 
 /***************************************************************************//**
@@ -706,10 +750,12 @@ void TD_SCHEDULER_Init(void)
  *  Interval integer part in seconds at which the callback is called.
  *
  * @param[in] tick
- * Interval fractional part in ticks (1/32768 second) at which the callback is called
+ * Interval fractional part in ticks (1/32768 second) at which the callback is
+ * called.
  *
  * @param[in] delay
- *  Time to wait in seconds before actually scheduling the timer. This time can be 0.
+ *  Time to wait in seconds before actually scheduling the timer. This time can
+ *  be 0.
  *
  * @param[in] repetition
  * Exact number of timer callback count, 0xFF for infinite. Should be 1 or more.
@@ -725,21 +771,24 @@ void TD_SCHEDULER_Init(void)
  * 	Returns a timer id if successful or 0xFF if no more timer can be added in
  * 	the list.
  *
- * @note Timer appended will be called for first time at delay + interval time. Next
- *  (if repetition > 1) will be called with interval delay
+ * @note Timer appended will be called for first time at delay + interval time.
+ * Next time (if repetition > 1) will be called with interval delay.
 
  ******************************************************************************/
-uint8_t TD_SCHEDULER_Append(uint32_t interval, uint16_t tick, uint32_t delay, uint8_t repetition, void (*callback)(uint32_t, uint8_t), uint32_t arg)
+uint8_t TD_SCHEDULER_Append(uint32_t interval, uint16_t tick, uint32_t delay,
+		uint8_t repetition, void (*callback)(uint32_t, uint8_t), uint32_t arg)
 {
-	return TD_SCHEDULER_AppendPrivate(interval, tick, delay, repetition, false, callback, arg);
+	return TD_SCHEDULER_AppendPrivate(interval, tick, delay, repetition, false,
+		callback, arg);
 }
 
 /***************************************************************************//**
  * @brief
  *   Append a timer to schedule. Call within irq.
  *
- * @note : in most case timer callback will be called in IRQ context <b><i>but</i></b> it could be called
- * outside IRQ context too. If you absolutely need IRQ context, mask IRQ in callback
+ * @note : in most case timer callback will be called in IRQ context
+ * <b><i>but</i></b> it could be called outside IRQ context too. If you
+ * absolutely need IRQ context, mask IRQ in callback
  *
  * @param[in] interval
  *  Interval integer part in seconds at which the callback is called.
@@ -763,9 +812,11 @@ uint8_t TD_SCHEDULER_Append(uint32_t interval, uint16_t tick, uint32_t delay, ui
  * 	Returns a timer id if successful or 0xFF if no more timer can be added in
  * 	the list.
  ******************************************************************************/
-uint8_t TD_SCHEDULER_AppendIrq(uint32_t interval, uint16_t tick, uint32_t delay, uint8_t repetition, void (*callback)(uint32_t, uint8_t), uint32_t arg)
+uint8_t TD_SCHEDULER_AppendIrq(uint32_t interval, uint16_t tick, uint32_t delay,
+	uint8_t repetition, void (*callback)(uint32_t, uint8_t), uint32_t arg)
 {
-	return TD_SCHEDULER_AppendPrivate(interval, tick, delay, repetition, true, callback, arg);
+	return TD_SCHEDULER_AppendPrivate(interval, tick, delay, repetition, true,
+		callback, arg);
 }
 
 /***************************************************************************//**
@@ -784,13 +835,15 @@ uint8_t TD_SCHEDULER_AppendIrq(uint32_t interval, uint16_t tick, uint32_t delay,
  * @param[in] delay
  *  Time to wait in seconds before actually scheduling the timer.
  ******************************************************************************/
-void TD_SCHEDULER_SetInterval(uint8_t id, uint32_t interval, uint16_t tick, uint32_t delay)
+void TD_SCHEDULER_SetInterval(uint8_t id, uint32_t interval, uint16_t tick,
+	uint32_t delay)
 {
 	uint32_t msk;
 
 	msk = __get_PRIMASK();
 	__set_PRIMASK(1);
-	TD_SCHEDULER_Timer[id].interval = (((uint64_t) interval) << 15) | ((uint64_t) tick);
+	TD_SCHEDULER_Timer[id].interval = (((uint64_t) interval) << 15) |
+		((uint64_t) tick);
 	TD_SCHEDULER_Timer[id].last_time = TD_SCHEDULER_GetTime() + (delay << 15);
 	__set_PRIMASK(msk);
 	TD_SCHEDULER_Manager(TD_SCHEDULER_TR);
@@ -856,7 +909,7 @@ void TD_SCHEDULER_Remove(uint8_t id)
  * @brief
  *
  * @return
- *   Returns the current time in 1/32768 s ticks.
+ *   Returns the current absolute time in 1/32768 s ticks. 49.15 result format.
  ******************************************************************************/
 uint64_t TD_SCHEDULER_GetTime(void)
 {
@@ -870,7 +923,8 @@ uint64_t TD_SCHEDULER_GetTime(void)
 	//time_tick = RTC_CounterGet();
 
 	// This function can be called inside or outside IRQ context
-	// We need to get TD_RTC_GetOverflowCounter and RTC_CounterGet() synchronously
+	// We need to get TD_RTC_GetOverflowCounter and RTC_CounterGet()
+	// synchronously.
 	// Note : we state that RTC_OF is activated
 	retry = true;
 	while (retry) {
@@ -878,7 +932,8 @@ uint64_t TD_SCHEDULER_GetTime(void)
 		msk = __get_PRIMASK();
 		__set_PRIMASK(1);
 
-		// At this stage, IRQ will not trigger but RTC->IFC will be set if an RTC overflow occur
+		// At this stage, IRQ will not trigger but RTC->IFC will be set if an
+		// RTC overflow occur.
 
 		// Is there an overflow pending before?
 		pend = RTC->IF & RTC_IF_OF;
@@ -887,8 +942,9 @@ uint64_t TD_SCHEDULER_GetTime(void)
 		overflow_counter = TD_RTC_GetOverflowCounter();
 		time_tick = RTC_CounterGet();
 
-		// If an overflow is pending "locally", apply it. We can't rely on IRQ processing, as we may
-		// already be in IRQ. To not duplicate IRQ processing, we only 'spoof' increase in overflow counter
+		// If an overflow is pending "locally", apply it. We can't rely on IRQ
+		// processing, as we may already be in IRQ. To not duplicate IRQ
+		// processing, we only 'spoof' increase in overflow counter.
 		if (RTC->IF & RTC_IF_OF) {
 			overflow_counter++;
 		}
@@ -921,6 +977,25 @@ uint32_t TD_ElapsedTime(void)
 	last = time_now - LastTime;
 	LastTime = time_now;
 	return last;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Returns the difference between current time and a reference time.
+ *
+ * @param[in] reference
+ *   The reference time to compare to.
+ *
+ * @return
+ *   Returns the absolute difference with the reference time.
+ ******************************************************************************/
+uint64_t TD_TimeDiff(uint64_t reference)
+{
+	uint64_t time_now, time_diff;
+
+	time_now = TD_SCHEDULER_GetTime();
+	time_diff = time_now - reference;
+	return time_diff;
 }
 
 /** @} */

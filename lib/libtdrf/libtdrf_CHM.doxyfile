@@ -32,7 +32,7 @@ PROJECT_NAME = "libtdrf"
 # This could be handy for archiving the generated documentation or
 # if some version control system is used.
 
-PROJECT_NUMBER = 3.0.0
+PROJECT_NUMBER = 4.0.0
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer
@@ -661,7 +661,7 @@ WARN_LOGFILE =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT = src inc doc 
+INPUT = src inc doc
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is
@@ -1017,7 +1017,7 @@ CHM_FILE = "libtdrf.chm"
 # the HTML help compiler (hhc.exe). If non-empty doxygen will try to run
 # the HTML help compiler on the generated index.hhp.
 
-HHC_LOCATION = "C:\Program Files\HTML Help Workshop"
+HHC_LOCATION = "C:\Program Files\HTML Help Workshop\hhc.exe"
 
 # If the GENERATE_HTMLHELP tag is set to YES, the GENERATE_CHI flag
 # controls if a separate .chi index file is generated (YES) or that
@@ -1483,13 +1483,13 @@ ENABLE_PREPROCESSING = YES
 # compilation will be performed. Macro expansion can be done in a controlled
 # way by setting EXPAND_ONLY_PREDEF to YES.
 
-MACRO_EXPANSION = NO
+MACRO_EXPANSION = YES
 
 # If the EXPAND_ONLY_PREDEF and MACRO_EXPANSION tags are both set to YES
 # then the macro expansion is limited to the macros specified with the
 # PREDEFINED and EXPAND_AS_DEFINED tags.
 
-EXPAND_ONLY_PREDEF = NO
+EXPAND_ONLY_PREDEF = YES
 
 # If the SEARCH_INCLUDES tag is set to YES (the default) the includes files
 # pointed to by INCLUDE_PATH will be searched when a #include is found.
@@ -1517,7 +1517,7 @@ INCLUDE_FILE_PATTERNS =
 # undefined via #undef or recursively expanded use the := operator
 # instead of the = operator.
 
-PREDEFINED = SIGFOX_V1=1
+PREDEFINED = SIGFOX_V1=1 DYNAMIC(x)=x __PACKED= 
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then
 # this tag can be used to specify a list of macro names that should be expanded.

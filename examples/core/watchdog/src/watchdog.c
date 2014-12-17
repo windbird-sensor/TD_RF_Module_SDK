@@ -2,7 +2,7 @@
  * @file
  * @brief Watchdog demonstration application for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -68,7 +68,7 @@ void TD_USER_Setup(void)
 	tfp_printf("Boot\r\n");
 
 	// Initialize a 16s watchdog
-	if(TD_WATCHDOG_Init(16)) {
+	if (TD_WATCHDOG_Init(16)) {
 		tfp_printf("Watchdog started\r\n");
 	} else {
 		tfp_printf("Watchdog failed\r\n");
@@ -78,7 +78,9 @@ void TD_USER_Setup(void)
 	TD_WATCHDOG_Enable(true, true);
 
 	// Crash Simulation
-	while(1);
+	while(1) {
+		;
+	}
 }
 
 /***************************************************************************//**

@@ -2,7 +2,7 @@
  * @file
  * @brief Core AT command extension for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -122,7 +122,7 @@ static uint16_t WatchdogInterval = 0;
  *   Flag set to true for writing persistent data, false for reading persistent
  *   data.
  *
- * @param[in/out] buffer
+ * @param[out] buffer
  *   Pointer to the persistent data buffer to read/write.
  *
  * @param[in] count
@@ -180,8 +180,7 @@ static int8_t core_parse(uint8_t token)
 		if (AT_argc == 2) {
 			port = AT_atoll(AT_argv[0]);
 			pin = AT_atoll(AT_argv[1]);
-			AT_printf("%d",
-					  GPIO_PinInGet((GPIO_Port_TypeDef) port, pin));
+			AT_printf("%d", GPIO_PinInGet((GPIO_Port_TypeDef) port, pin));
 		} else {
 			result = AT_ERROR;
 		}
@@ -197,10 +196,8 @@ static int8_t core_parse(uint8_t token)
 				pin >= 0 && pin <= 15 &&
 				mode >= 0 && mode <= 15
 				&& out >= 0 && out <= 1) {
-				GPIO_PinModeSet((GPIO_Port_TypeDef) port,
-								pin,
-								(GPIO_Mode_TypeDef) mode,
-								out);
+				GPIO_PinModeSet((GPIO_Port_TypeDef) port, pin,
+					(GPIO_Mode_TypeDef) mode, out);
 			} else {
 				result = AT_ERROR;
 			}
@@ -215,7 +212,7 @@ static int8_t core_parse(uint8_t token)
 			mode = AT_atoll(AT_argv[1]);
 			if (port >= 0 && port <= 5 && mode >= 0 && mode <= 3) {
 				GPIO_DriveModeSet((GPIO_Port_TypeDef) port,
-								  (GPIO_DriveMode_TypeDef) mode);
+					(GPIO_DriveMode_TypeDef) mode);
 			} else {
 				result = AT_ERROR;
 			}
@@ -246,7 +243,7 @@ static int8_t core_parse(uint8_t token)
 			if (AT_atoll(AT_argv[0]) == 1 &&
 					!WatchdogEnabled) {
 				if ((TD_WATCHDOG_Init(watchdog_interval) == false) ||
-						(TD_WATCHDOG_Enable(true, true) == false)) {
+					(TD_WATCHDOG_Enable(true, true) == false)) {
 					result = AT_ERROR;
 				} else {
 					WatchdogEnabled = true;

@@ -2,7 +2,7 @@
  * @file
  * @brief Simple GPS periodic NMEA output application for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -60,7 +60,7 @@
  * @param[in] timeout
  *   Flag that indicates whether a timeout occurred if set to true.
  ******************************************************************************/
-static void GPSFix(TD_GEOLOC_Fix_t * fix, bool timeout)
+static void GPSFix(TD_GEOLOC_Fix_t *fix, bool timeout)
 {
 }
 

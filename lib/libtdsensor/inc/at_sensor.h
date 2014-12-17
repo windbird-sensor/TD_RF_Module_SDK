@@ -2,7 +2,7 @@
  * @file
  * @brief AT Sensor
  * @author Telecom Design S.A.
- * @version 1.1.1
+ * @version 1.1.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -41,15 +41,15 @@
 extern "C" {
 #endif
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup AT_SENSOR Sensor AT Command Extension
 	 * @brief Sensor AT command extension for the TDxxx RF modules
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
-	/*******************************************************************************
-	 *************************   DEFINES   *****************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   DEFINES   *************************************
+	 **************************************************************************/
 
 	/** @addtogroup AT_SENSOR_DEFINES Defines
 	 * @{ */
@@ -57,24 +57,24 @@ extern "C" {
 	/** Alias for the Sensor AT extension */
 #define AT_SENSOR_EXTENSION sensor_extension,
 
-/** @} */
+	/** @} */
 
-/*******************************************************************************
- **************************   PUBLIC VARIABLES   *******************************
- ******************************************************************************/
+	/***************************************************************************
+	 **************************   PUBLIC VARIABLES   ***************************
+	 **************************************************************************/
 
-/** @addtogroup AT_SENSOR_GLOBAL_VARIABLES Global Variables
- * @{ */
-/** @addtogroup AT_SENSOR_EXTERN External Declarations
- * @{ */
+	/** @addtogroup AT_SENSOR_GLOBAL_VARIABLES Global Variables
+	 * @{ */
+	/** @addtogroup AT_SENSOR_EXTERN External Declarations
+	 * @{ */
 
-/** The Sensor AT extension structure */
-extern AT_extension_t sensor_extension;
+	/** The Sensor AT extension structure */
+	extern AT_extension_t sensor_extension;
 
-/** @} */
-/** @} */
+	/** @} */
+	/** @} */
 
-/** @} (end addtogroup AT_SENSOR) */
+	/** @} (end addtogroup AT_SENSOR) */
 
 #ifdef __cplusplus
 }

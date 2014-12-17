@@ -2,7 +2,7 @@
  * @file
  * @brief TD LAN/SGIFOX gateway example for TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 2.0.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -83,9 +83,9 @@ void TD_USER_Setup(void)
 
     // Initialize the LEUART
     init_printf(TD_UART_Init(9600, true, false),
-    		TD_UART_Putc,
-    		TD_UART_Start,
-    		TD_UART_Stop);
+		TD_UART_Putc,
+		TD_UART_Start,
+		TD_UART_Stop);
 
     // Initialize the LAN
     if (TD_LAN_Init(true, (NODE_ADDRESS | NODE_NETWORK), NODE_MASK) == false) {
@@ -112,12 +112,14 @@ void TD_USER_Setup(void)
     		TD_LAN_Release();
 
     		// Send the received payload to the SIGFOX network
-			if (TD_SIGFOX_Send(&RX.payload[0], SIGFOX_PAYLOAD_SIZE, SIGFOX_RETRIES) == false) {
+			if (TD_SIGFOX_Send(&RX.payload[0], SIGFOX_PAYLOAD_SIZE,
+				SIGFOX_RETRIES) == false) {
     			printf("Problem sending to SIGFOX\r\n");
 			}
 
 			// Switch back RF to LAN network
-		    if (TD_LAN_Init(false, (NODE_ADDRESS | NODE_NETWORK), NODE_MASK) == false) {
+		    if (TD_LAN_Init(false, (NODE_ADDRESS | NODE_NETWORK), NODE_MASK) ==
+		    	false) {
 		    	printf("Problem switching back to LAN\r\n");
 			}
     	}

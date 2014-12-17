@@ -23,8 +23,8 @@ ENTRY(__cs3_reset)
 MEMORY
 {
   rom (rx) : ORIGIN = 0x00000000, LENGTH = 131072-1024
-  eeprom (rw) : ORIGIN = 131072-512, LENGTH = 512
-  sequence (rw) : ORIGIN = 131072-1024, LENGTH = 512
+  eeprom (rw) : ORIGIN = 131072-1024, LENGTH = 512
+  sequence (rw) : ORIGIN = 131072-512, LENGTH = 512
   ram (rwx) : ORIGIN = 0x20000040, LENGTH = 16384-64
 }
 
@@ -151,6 +151,12 @@ SECTIONS
   /* __cs3_region_end_rom is deprecated */
   __cs3_region_end_rom = __cs3_region_start_rom + LENGTH(rom);
   __cs3_region_size_rom = LENGTH(rom);
+  .boot : ALIGN (4)
+  {
+	 __cs3_start_boot = .;
+    *(.boot .boot.*)
+  	__cs3_end_boot = .;
+  } >rom
 
   .data : ALIGN (8)
   {
@@ -167,11 +173,23 @@ SECTIONS
   } >ram AT>rom
   .bss : ALIGN (8)
   {
+    *(.bootvar .bootvar.*)
+	__cs3_start_bss = .;
     *(.shbss)
     *(.bss .bss.* .gnu.linkonce.b.*)
     *(COMMON)
     . = ALIGN (8);
     *(.ram.b .bss.ram)
+    . = ALIGN (8);
+    _end = .;
+    __end = .;
+  } >ram
+  .stack : ALIGN (8)
+  {
+	__cs3_end_bss = .;
+    *(.stack .stack.*)
+    . = ALIGN (8);
+    *(.stack.ram)
     . = ALIGN (8);
     _end = .;
     __end = .;

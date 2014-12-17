@@ -2,7 +2,7 @@
  * @file
  * @brief Sensor LAN
  * @author Telecom Design S.A.
- * @version 1.1.1
+ * @version 1.2.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -37,8 +37,8 @@
 #include <td_lan.h>
 #include <td_flash.h>
 #include <td_trap.h>
+#include <td_config_ext.h>
 
-#include "sensor_private.h"
 #include "td_sensor.h"
 #include "td_sensor_gateway.h"
 #include "td_sensor_device.h"
@@ -86,6 +86,9 @@ static TD_SENSOR_LAN_Address_t LanConfig;
 /** Retries on LAN */
 static uint8_t FrameRetry = 0;
 
+/** Tx period */
+static uint32_t TxPeriod = 0;
+
 /** @} */
 
 /*******************************************************************************
@@ -111,15 +114,20 @@ static uint8_t FrameRetry = 0;
  * @return
  *   Returns the acknowledge result.
  ******************************************************************************/
-static TD_SENSOR_LAN_AckCode_t TD_SENSOR_LAN_SendFramePrivate(uint8_t *data, uint8_t *data_rx, uint32_t address)
+static TD_SENSOR_LAN_AckCode_t TD_SENSOR_LAN_SendFramePrivate(uint8_t *data,
+	uint8_t *data_rx, uint32_t address)
 {
 	TD_LAN_frame_t TX, RX;
 	TD_SENSOR_ModuleType_t type;
 	bool rx_enabled = false;
 	bool rx_broad_enabled = false;
+	bool rx_network_enabled = false;
+	bool tx_broad_enabled = false;
 	uint32_t broad_mask = 0;
 	int i;
 	TD_SENSOR_LAN_AckCode_t ret;
+	uint32_t GatewayAddress = 0;
+	bool ret_lan = false;
 
 	TX.header = 0;
 	SET_ADDRESS(TX.header, address);
@@ -131,11 +139,20 @@ static TD_SENSOR_LAN_AckCode_t TD_SENSOR_LAN_SendFramePrivate(uint8_t *data, uin
 			DEBUG_PRINTF("I'm a GATEWAY and I stop reception\r\n");
 			TD_SENSOR_GATEWAY_StopReception();
 		}
+
+		// If Ack frame is not expected it is a broadcast frame
+		if (TD_SENSOR_GATEWAY_GetAckExpectedState() == false) {
+			tx_broad_enabled = true;
+		}
 	} else if (type == SENSOR_DEVICE) {
 		if (TD_SENSOR_DEVICE_isReceptionEnabled()) {
 			rx_enabled = true;
 			if (TD_SENSOR_DEVICE_isBroadcastReceptionEnabled()) {
 				rx_broad_enabled = true;
+				broad_mask = TD_SENSOR_DEVICE_GetBroadcastMask();
+			}
+			if (TD_SENSOR_DEVICE_isNetworkReceptionEnabled()) {
+				rx_network_enabled = true;
 				broad_mask = TD_SENSOR_DEVICE_GetBroadcastMask();
 			}
 			DEBUG_PRINTF("I'm a DEVICE and I stop reception\r\n");
@@ -145,8 +162,35 @@ static TD_SENSOR_LAN_AckCode_t TD_SENSOR_LAN_SendFramePrivate(uint8_t *data, uin
 			TD_SENSOR_LAN_setLanAddress(address, 0xFFFFFF);
 		}
 	}
-	DEBUG_PRINTF("do SendReceive\r\n");
-	if (!TD_LAN_SendReceive(-1, 1 + FrameRetry, &TX, &RX)) {
+	if (TxPeriod == 0) {
+		TxPeriod = CONFIG_LAN_PERIOD;
+	}
+	TD_LAN_SetPeriod(TxPeriod);
+
+	// If it's a broadcast frame
+	if (tx_broad_enabled == true) {
+		DEBUG_PRINTF("do SendFrame in broadcast without waiting Ack frame\r\n");
+		ret_lan = TD_LAN_SendFrame(0xFF, &TX, &RX);
+		if (ret_lan == true) {
+			ret = BROADCAST_OK;
+		}
+	} else {
+		DEBUG_PRINTF("do SendReceive\r\n");
+		ret_lan = TD_LAN_SendReceive(-1, 1 + FrameRetry, &TX, &RX);
+		if (ret_lan == true) {
+			if (data_rx != 0) {
+
+				// Don't copy acknowledgment code
+				for (i = 0; i < TD_SENSOR_LAN_PAYLOAD_SIZE - 1; i++) {
+					data_rx[i] = RX.payload[i + 1];
+				}
+			}
+			ret = (TD_SENSOR_LAN_AckCode_t) RX.payload[0];
+		}
+	}
+
+	// If lan fails, retrieve last error
+	if (ret_lan == false) {
 		switch (TD_LAN_LastError()) {
 		case ERROR_NONE:
 
@@ -161,6 +205,7 @@ static TD_SENSOR_LAN_AckCode_t TD_SENSOR_LAN_SendFramePrivate(uint8_t *data, uin
 			break;
 
 		case ERROR_LAN_BUSY:
+		case ERROR_LAN_BUSY_ACK:
 
 			// LAN is busy (RSSI detected over timeout period)
 			ret = LAN_CHANNEL_BUSY;
@@ -188,22 +233,23 @@ static TD_SENSOR_LAN_AckCode_t TD_SENSOR_LAN_SendFramePrivate(uint8_t *data, uin
 			//TODO: restart radio?
 			break;
 		}
-	} else {
-		if (data_rx != 0) {
-			// Don't copy acknowledgment code
-			for (i = 0; i < TD_SENSOR_LAN_PAYLOAD_SIZE - 1; i++) {
-				data_rx[i] = RX.payload[i + 1];
-			}
-		}
-		ret = (TD_SENSOR_LAN_AckCode_t) RX.payload[0];
 	}
 	if (type == SENSOR_GATEWAY && rx_enabled) {
-		DEBUG_PRINTF("I'm a GATEWAY and I start reception\r\n");
+
+		// Restart gateway reception
+		GatewayAddress = (TD_SENSOR_LAN_ComputeAddressTo16bits(SigfoxID)) << 8;
+		TD_SENSOR_LAN_setLanAddress(GatewayAddress, NETWORK_MASK);
+		DEBUG_PRINTF("I'm a GATEWAY and I start reception, GatewayAddres = %08X, Mask = %08X\r\n", GatewayAddress, NETWORK_MASK);
 		TD_SENSOR_GATEWAY_StartReception();
 	} else if (type == SENSOR_DEVICE) {
+
+		// Restart device reception
 		if (rx_broad_enabled) {
 			DEBUG_PRINTF("I'm a DEVICE and I start BROADCAST reception\r\n");
 			TD_SENSOR_DEVICE_StartBroadcastReception(broad_mask);
+		} else if (rx_network_enabled) {
+			DEBUG_PRINTF("I'm a DEVICE and I start NETWORK reception\r\n");
+			TD_SENSOR_DEVICE_StartNetworkReception(broad_mask);
 		} else if (rx_enabled) {
 			DEBUG_PRINTF("I'm a DEVICE and I start reception\r\n");
 			TD_SENSOR_DEVICE_StartReception();
@@ -247,7 +293,49 @@ static bool TD_SENSOR_LAN_DefineAsDevice(void)
 
 /***************************************************************************//**
  * @brief
- *  Set the LAN ddress.
+ *  Compute a 2 bytes address out of 4 bytes
+ *
+ * @param[in] address
+ *  32 bits address
+ *
+ * @return
+ *  16 bit address
+ *
+ ******************************************************************************/
+uint16_t TD_SENSOR_LAN_ComputeAddressTo16bits(uint32_t address)
+{
+	uint8_t xor_even = 0, xor_odd = 0;
+
+	xor_even = ((address >> 24) & 0xFF) ^ ((address >> 8) & 0xFF);
+	xor_odd = ((address >> 16) & 0xFF) ^ ((address >> 0) & 0xFF);
+	return (xor_even << 8) | xor_odd;
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Compute a 1 bytes address out of 4 bytes
+ *
+ * @param[in] address
+ *  32 bits address
+ *
+ * @return
+ *  8 bit address
+ *
+ ******************************************************************************/
+uint8_t TD_SENSOR_LAN_ComputeAddressTo8bits(uint32_t address)
+{
+	int i;
+	uint8_t xor = 0;
+
+	for (i = 0; i < 4; i++) {
+		xor ^= (address >> (8 * i));
+	}
+	return xor;
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Set the LAN Address.
  *
  * @param[in] address
  *   THeLAN address to set.
@@ -262,7 +350,6 @@ bool TD_SENSOR_LAN_setLanAddress(uint32_t address, uint32_t mask)
 {
 	LanConfig.address = address;
 	LanConfig.mask = mask;
-
 	return TD_LAN_Init(false, LanConfig.address, LanConfig.mask);
 }
 
@@ -304,7 +391,8 @@ uint8_t TD_SENSOR_LAN_GetFrameRetry(void)
  * @return
  *   Returns the acknowledge result.
  ******************************************************************************/
-TD_SENSOR_LAN_AckCode_t TD_SENSOR_LAN_SendFrame(TD_SENSOR_LAN_Frame_t *frame, uint8_t *data_rx)
+TD_SENSOR_LAN_AckCode_t TD_SENSOR_LAN_SendFrame(TD_SENSOR_LAN_Frame_t *frame,
+	uint8_t *data_rx)
 {
 	TD_SENSOR_ModuleType_t module_type;
 	uint32_t address;
@@ -345,7 +433,9 @@ TD_SENSOR_LAN_AckCode_t TD_SENSOR_LAN_SendFrame(TD_SENSOR_LAN_Frame_t *frame, ui
  * @return
  *   Returns the acknowledge result.
  ******************************************************************************/
-TD_SENSOR_LAN_AckCode_t TD_SENSOR_LAN_SendFrameTo(uint32_t address, TD_SENSOR_LAN_FrameType_t type, uint8_t *payload, uint8_t count, uint8_t *data_rx)
+TD_SENSOR_LAN_AckCode_t TD_SENSOR_LAN_SendFrameTo(uint32_t address,
+	TD_SENSOR_LAN_FrameType_t type, uint8_t *payload, uint8_t count,
+	uint8_t *data_rx)
 {
 	TD_SENSOR_LAN_Frame_t frame;
 
@@ -362,7 +452,7 @@ TD_SENSOR_LAN_AckCode_t TD_SENSOR_LAN_SendFrameTo(uint32_t address, TD_SENSOR_LA
 /***************************************************************************//**
  * @brief
  *   Stop the Sensor LAN.
- *******************************************************************************/
+ ******************************************************************************/
 void TD_SENSOR_LAN_Stop(void)
 {
 	TD_LAN_Release();
@@ -386,15 +476,9 @@ void TD_SENSOR_LAN_Stop(void)
  * @return
  *  Returns true if the operation was successful, false otherwise.
  ******************************************************************************/
-bool TD_SENSOR_LAN_Init(bool gateway, uint32_t lan_frequency, int16_t lan_power_level)
+bool DYNAMIC(TD_SENSOR_LAN_Init)(bool gateway, uint32_t lan_frequency,
+	int16_t lan_power_level)
 {
-	if (!TD_FLASH_DeclareVariable((uint8_t *) &LanConfig, sizeof (TD_SENSOR_LAN_Address_t), 0)) {
-
-		// Cannot find our LAN configuration from Flash memory, use broadcast
-		LanConfig.address = BROADCAST_ADDRESS;
-		LanConfig.mask = BROADCAST_MASK;
-	}
-
 	// Apply frequency and power configuration
 	if (TD_LAN_SetFrequencyLevel(lan_frequency, lan_power_level) == false) {
 		TD_Trap(TRAP_ILLEGAL_FREQ, lan_frequency);
@@ -414,6 +498,21 @@ bool TD_SENSOR_LAN_Init(bool gateway, uint32_t lan_frequency, int16_t lan_power_
 	}
 }
 
+/***************************************************************************//**
+ * @brief
+ *  Declare flash variables.
+ ******************************************************************************/
+void TD_SENSOR_LAN_DeclareFlashVariable(void)
+{
+	if (!TD_FLASH_DeclareVariable((uint8_t *) &LanConfig,
+		sizeof (TD_SENSOR_LAN_Address_t), 0)) {
+
+		// Cannot find our LAN configuration from Flash memory, use broadcast
+		LanConfig.address = BROADCAST_ADDRESS;
+		LanConfig.mask = BROADCAST_MASK;
+	}
+}
+
 /** @} */
 
 /** @addtogroup TD_SENSOR_LAN_USER_FUNCTIONS User Functions
@@ -429,6 +528,15 @@ bool TD_SENSOR_LAN_Init(bool gateway, uint32_t lan_frequency, int16_t lan_power_
 const TD_SENSOR_LAN_Address_t *TD_SENSOR_LAN_GetAddress(void)
 {
 	return &LanConfig;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Callback to set tx period
+ ******************************************************************************/
+void TD_SENSOR_LAN_SetTxPeriod(uint32_t tx_period)
+{
+	TxPeriod = tx_period;
 }
 
 /** @} */

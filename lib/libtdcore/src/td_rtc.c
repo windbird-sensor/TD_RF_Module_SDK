@@ -2,7 +2,7 @@
  * @file
  * @brief Real-Time Clock (RTC) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.1.0
+ * @version 2.2.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -160,22 +160,19 @@ static uint32_t TD_RTC_KeepAliveLimit = 0;
 
 #endif
 
+/** RTC powerdown mode */
+static TD_RTC_PowerMode_t TD_RTC_PowerMode = TD_RTC_EM2;
+
+/** RTC EM1 powerdown mode request */
+static uint8_t TD_RTC_EM1_Request = 0;
+
 /** @} */
-
-/*******************************************************************************
- **************************  PRIVATE FUNCTIONS   *******************************
- ******************************************************************************/
-
-/** @addtogroup RTC_LOCAL_FUNCTIONS Local Functions
- * @{ */
 
 #ifdef __ICCARM__
 // #pragma optimize = speed
 #else
 #pragma GCC optimize ("O3")
 #endif
-
-/** @} */
 
 /*******************************************************************************
  **************************   PUBLIC FUNCTIONS   *******************************
@@ -228,16 +225,18 @@ void SysTick_Handler(void)
  *   The interrupt table is located in the assembly startup file startup_efm32.s.
  *
  * @details
- *   The purpose of the RTC interrupt is to wake the CPU from deep sleep mode EM2
- *   at given intervals. This is a way to save energy, while ensuring that the
- *   CPU often enough checks if there are any other instructions ready to executed.
+ *   The purpose of the RTC interrupt is to wake the CPU from deep sleep mode
+ *   EM2 at given intervals. This is a way to save energy, while ensuring that
+ *   the CPU often enough checks if there are any other instructions ready to
+ *   be executed.
  ******************************************************************************/
 #ifndef LIB_TDCORE_TINY
 void RTC_IRQHandler(void)
 {
 	if (RTC->IF & RTC_IF_COMP0) {
 
-		// Clear interrupt source, first, to catch another interrupt ASAP if needed
+		// Clear interrupt source, first, to catch another interrupt ASAP if
+		// needed
 		RTC_IntClear(RTC_IFC_COMP0);
 
 		// System RTC interrupt
@@ -249,7 +248,8 @@ void RTC_IRQHandler(void)
 	}
 	if (RTC->IF & RTC_IF_COMP1) {
 
-		// Clear interrupt source, first, to catch another interrupt ASAP if needed
+		// Clear interrupt source, first, to catch another interrupt ASAP if
+		// needed
 		RTC_IntClear(RTC_IFC_COMP1);
 
 		// User RTC interrupt
@@ -341,8 +341,8 @@ void TD_RTC_Init(TD_RTC_handler_t function)
  *   Wait for a delay period.
  *
  * @param[in] duration
- *   The delay duration in 32768 Hz units. Max delay : 0xFFFFF0 ticks
- *   Priority of RTC interrupt should be 0
+ *   The delay duration in 32768 Hz units. Max delay : 0xFFFFF0 ticks (512
+ *   seconds), priority of RTC interrupt should be 0.
  *
  * @return
  *   Returns true if the false completed, true if it was aborted.
@@ -382,13 +382,14 @@ bool TD_RTC_Delay(uint32_t duration)
 	rtc_base = rtc_now;
 #endif
 
-	// We must adjust duration by 1 to obtain accurate delay, as there is sync in place
+	// We must adjust duration by 1 to obtain accurate delay, as there is sync
+	// in place
 	last_delta_delay = duration - 1;
 	cmp_delay = (rtc_now + last_delta_delay) & 0xFFFFFF;
 
 	// Particular use case:
-	// if another interrupt (system alarm, scheduler) happened before delay, we do a new cycle
-	// where COMP0 is grabbed another time if changed
+	// If another interrupt (system alarm, scheduler) happened before delay, we
+	// do a new cycle where COMP0 is grabbed another time if changed
 
 	while (!end_delay && !TD_RTC_AbortDelay) {
 
@@ -401,14 +402,16 @@ bool TD_RTC_Delay(uint32_t duration)
 		// At this point, if system handler is triggered, it has been called.
 		// Prevent Exception and Interrupt from calling handler
 		// -- After this point, code is time critical ! --
-		// FIXME: get and set is required so that an IRQ can't change primask value
-		// in between. It can be assumed that an IRQ would set primask's value back though.
+		// FIXME: get and set is required so that an IRQ can't change primask
+		// value in between. It can be assumed that an IRQ would set primask's
+		// value back though.
 		msk = __get_PRIMASK();
 		__set_PRIMASK(1);
 
-		// Now we are almost time critical. No IRQ can interrupt us, but timer continue to run
-		// so it can't be stopped. Order of instructions is important!
-		// First do all initializations not depending on current timer
+		// Now we are almost time critical. No IRQ can interrupt us, but timer
+		// continue to run so it can't be stopped. Order of instructions is
+		// important!
+		// First do all initializations not depending on current timer.
 		wait_delay = false;
 		extra_check = false;
 		it_status = RTC->IEN & RTC_IF_COMP0;
@@ -418,13 +421,15 @@ bool TD_RTC_Delay(uint32_t duration)
 		RTC_WAIT_BUSY(RTC_SYNCBUSY_COMP0);
 
 		// Now we are ready to process, time critical
-		// Get current timer value. Beginning with this we must not spend more than 1 timer tick (30µs or 427 '14Mhz clock ticks')
+		// Get current timer value. Beginning with this we must not spend more
+		// than 1 timer tick (30µs or 427 '14Mhz clock ticks')
 		rtc_now = RTC_CounterGet();
 		delta_delay = (cmp_delay - rtc_now) & 0xFFFFFF;
 		delta_alarm = (cmp_alarm - rtc_now) & 0xFFFFFF;
 
-		/* If COMP0 has triggered, we have delta_alarm at 0xFFFFFF and alarm just triggered during WAIT_BUSY
-		 * Alarm is just NOW*/
+		/* If COMP0 has triggered, we have delta_alarm at 0xFFFFFF and alarm
+		 * just triggered during WAIT_BUSY
+		 * Alarm is just NOW */
 		if (RTC->IF & RTC_IF_COMP0){
 			delta_alarm = 0;
 		}
@@ -444,11 +449,13 @@ bool TD_RTC_Delay(uint32_t duration)
 
 			__set_PRIMASK(msk);
 
-			// We will not have any sync update, so recover tick removed for sync ...
+			// We will not have any sync update, so recover tick removed for
+			// sync...
 			delta_delay++;
 
 #ifdef DEBUG_RTC_DELAY_INFO
-			tfp_printf("AW:%d,%d,%d,%d\r\n",delta_delay,cd,RTC->CNT,RTC->COMP0);
+			tfp_printf("AW:%d,%d,%d,%d\r\n", delta_delay, cd, RTC->CNT,
+				RTC->COMP0);
 #endif
 
 			// Actively wait remaining steps
@@ -464,7 +471,8 @@ bool TD_RTC_Delay(uint32_t duration)
 
 #ifdef DEBUG_RTC_DELAY
 			if (((RTC->CNT - rtc_base) & 0xFFFFFF) < duration) {
-				tfp_printf("RTC_Delay errorA : get:%d wanted:%d\r\n", ((RTC->CNT - rtc_base) & 0xFFFFFF), duration);
+				tfp_printf("RTC_Delay errorA : get:%d wanted:%d\r\n",
+					((RTC->CNT - rtc_base) & 0xFFFFFF), duration);
 				TD_Trap(TRAP_RTC_DELAY, duration);
 			}
 #endif
@@ -477,7 +485,8 @@ bool TD_RTC_Delay(uint32_t duration)
 #endif
 
 		// Delay will end first, go. Else wait for system timer
-		// Note : delta_alarm can't be < 4, so alarm will not happen during update
+		// Note : delta_alarm can't be < 4, so alarm will not happen during
+		// update.
 		// If we have delta_delay == delta alarm, alarm will trigger first
 		// at next step we will throw away delay
 		// If we have no AlarmHandler or IRQs are disabled, don't wait for it...
@@ -503,8 +512,10 @@ bool TD_RTC_Delay(uint32_t duration)
 		// We are already in an interrupt. Bad.
 		if (__get_IPSR()) {
 
-			// Allow events on pending IRQ. This doesn't work and should be fixed if possible
-			// Playing with IRQ priority could be a solution, but simple try failed ...
+			// Allow events on pending IRQ. This doesn't work and should be
+			// fixed if possible.
+			// Playing with IRQ priority could be a solution, but simple try
+			// failed...
 
 #if 0
 			// Allow all IRQs (even disabled) to trigger an event
@@ -538,10 +549,15 @@ bool TD_RTC_Delay(uint32_t duration)
 
 #ifdef DEBUG_RTC_TRAP
 			if (((RTC->CNT - rtc_now) & 0xFFFFFF) > 4) {
-				tfp_printf("****RTC_DELAY late init : %d !!\r\n", (RTC->CNT - rtc_now) & 0xFFFFFF);
+				tfp_printf("****RTC_DELAY late init : %d !!\r\n",
+					(RTC->CNT - rtc_now) & 0xFFFFFF);
 
 #ifdef DEBUG_RTC_DELAY_INFO
-				tfp_printf("%d,%d,%d,%d\r\n", rtc_now, rtc_now3, rtc_now4, rtc_now2);
+				tfp_printf("%d,%d,%d,%d\r\n",
+					rtc_now,
+					rtc_now3,
+					rtc_now4,
+					rtc_now2);
 #endif
 
 			}
@@ -552,19 +568,25 @@ bool TD_RTC_Delay(uint32_t duration)
 				while (!(RTC->IF & RTC_IF_COMP0));
 			} else {
 
-				// Enter EM2. At this time RTC->CNT could be between rtc_now and rtc_now + 4
-				EMU_EnterEM2(false);
+				// Enter EM2. At this time RTC->CNT could be between rtc_now and
+				// rtc_now + 4
+				//EMU_EnterEM2(false);
+				TD_RTC_Sleep();
 
 #ifdef DEBUG_RTC_DELAY_INFO
 				if ((RTC->CNT > cmp_alarm) && (!(RTC->IF & RTC_IF_COMP0))) {
-					tfp_printf("AL %d %d %d %d \r\n", rtc_now2, RTC->CNT, cmp_alarm, delta_alarm);
-					tfp_printf("AL IF:%02X IEN:%02X COMP0:0x%08X COMP1:0x%08X\r\n", RTC->IF, RTC->IEN, RTC->COMP0, RTC->COMP1);
+					tfp_printf("AL %d %d %d %d \r\n", rtc_now2, RTC->CNT,
+						cmp_alarm, delta_alarm);
+					tfp_printf("AL IF:%02X IEN:%02X COMP0:0x%08X COMP1:0x%08X\r\n",
+						RTC->IF, RTC->IEN, RTC->COMP0, RTC->COMP1);
 				}
 				if (((cmp_alarm-RTC->CNT) & 0xFFFFFF) > delta_alarm) {
-					tfp_printf("ALARM missed ! %d %d %d\r\n", RTC->CNT, cmp_alarm, delta_alarm);
+					tfp_printf("ALARM missed ! %d %d %d\r\n",
+						RTC->CNT, cmp_alarm, delta_alarm);
 				}
-				if (((cmp_delay-RTC->CNT) & 0xFFFFFF) > delta_delay){
-					tfp_printf("DELAY missed ! %d %d %d\r\n", RTC->CNT, cmp_delay, delta_delay);
+				if (((cmp_delay-RTC->CNT) & 0xFFFFFF) > delta_delay) {
+					tfp_printf("DELAY missed ! %d %d %d\r\n",
+						RTC->CNT, cmp_delay, delta_delay);
 				}
 #endif
 
@@ -576,7 +598,8 @@ bool TD_RTC_Delay(uint32_t duration)
 		// Handle actual IRQ, we have a RTC IRQ, one we are waiting for
 		if (RTC->IF & RTC_IF_COMP0) {
 
-			// Clear IRQ source, first, to be able to catch another IRQ (set by SystemHandler for example)
+			// Clear IRQ source, first, to be able to catch another IRQ (set by
+			// SystemHandler for example)
 			RTC_IntClear(RTC_IFC_COMP0);
 
 			// We are waiting our delay, finished.
@@ -599,11 +622,13 @@ bool TD_RTC_Delay(uint32_t duration)
 						RTC_IntDisable(RTC_IF_COMP0);
 					} else {
 
-						// Here we just restore system compare for not disturbing System Handler
+						// Here we just restore system compare for not
+						// disturbing System Handler.
 						// We do not have to synchronize it, because:
 						// - it is already past
 						// - it will not trigger another time
-						// - it is just in case System Handler would read back it
+						// - it is just in case System Handler would read it
+						//   back
 						RTC_CompareSet(TD_RTC_SYSTEM, cmp_alarm);
 						RTC_WAIT_BUSY(RTC_SYNCBUSY_COMP0);
 
@@ -616,7 +641,8 @@ bool TD_RTC_Delay(uint32_t duration)
 				TD_RTC_SystemHandler();
 
 #ifdef DEBUG_RTC_EXT_CALL
-				tfp_printf("CSHNE%d,%d\r\n", RTC->COMP0, RTC->IEN & RTC_IF_COMP0);
+				tfp_printf("CSHNE%d,%d\r\n",
+					RTC->COMP0, RTC->IEN & RTC_IF_COMP0);
 #endif
 
 					}
@@ -628,10 +654,12 @@ bool TD_RTC_Delay(uint32_t duration)
 			extra_check = true;
 		}
 
-		// If we are waiting for an alarm, no problem, alarm will occur and standard handler will be called,
-		// no special processing required.
-		// If we are waiting for a delay and wait is finished, check if we have not lost an alarm
-		// If we are waiting for a delay and other IRQs happened, we should cancel the IRQ, or system handler will be called
+		// If we are waiting for an alarm, no problem, alarm will occur and
+		// standard handler will be called, no special processing required.
+		// If we are waiting for a delay and wait is finished, check if we have
+		// not lost an alarm.
+		// If we are waiting for a delay and other IRQs happened, we should
+		// cancel the IRQ, or system handler will be called.
 		if (wait_delay && extra_check) {
 
 			// Restore system compare
@@ -656,9 +684,10 @@ bool TD_RTC_Delay(uint32_t duration)
 #endif
 
 			// If alarm is late, or alarm is now (now at clock domain diff)
-			if (TD_RTC_SystemHandler && it_status && ((delta_alarm > last_delta_alarm) || (delta_alarm < 4))) {
+			if (TD_RTC_SystemHandler && it_status &&
+				((delta_alarm > last_delta_alarm) || (delta_alarm < 4))) {
 
-				#ifdef DEBUG_RTC_DELAY
+#ifdef DEBUG_RTC_DELAY
 				tfp_printf("R*%d,%d,%d,%d,%d,%d\r\n",
 					delta_delay,
 					last_delta_alarm,
@@ -675,13 +704,15 @@ bool TD_RTC_Delay(uint32_t duration)
 				// Call system handler
 
 #ifdef DEBUG_RTC_EXT_CALL
-				tfp_printf("CSH s:%d dal:%d ldal:%d\r\n", it_status, delta_alarm, last_delta_alarm);
+				tfp_printf("CSH s:%d dal:%d ldal:%d\r\n",
+					it_status, delta_alarm, last_delta_alarm);
 #endif
 
 				TD_RTC_SystemHandler();
 
-				// Alarm can't cleanly start, and flag can be lost. So set a new alarm as soon as possible
-				// with clean process and synchronization
+				// Alarm can't cleanly start, and flag can be lost. So set a new
+				// alarm as soon as possible with clean process and
+				// synchronization
 				//TD_RTC_AlarmAfter(0);
 
 				// Call handler
@@ -709,8 +740,10 @@ bool TD_RTC_Delay(uint32_t duration)
 			((RTC->CNT - rtc_base) & 0xFFFFFF),
 			duration,
 			RTC->CNT);
-		tfp_printf("TD_RTC_AbortDelay:%d end_delay:%d \r\n", TD_RTC_AbortDelay, end_delay);
-		tfp_printf("cmp_delay:%d base:%d wait_delay:%d\r\n", cmp_delay, rtc_base, wait_delay);
+		tfp_printf("TD_RTC_AbortDelay:%d end_delay:%d \r\n",
+			TD_RTC_AbortDelay, end_delay);
+		tfp_printf("cmp_delay:%d base:%d wait_delay:%d\r\n",
+			cmp_delay, rtc_base, wait_delay);
 		tfp_printf("cmp_alarm:%d\r\n", cmp_alarm);
 		TD_Trap(TRAP_RTC_DELAY, duration);
 	}
@@ -739,7 +772,8 @@ void TD_RTC_AlarmAfter(int32_t delay)
 {
 	uint32_t msk;
 	// delay is a signed value to correctly handle 'negatives' delays
-	// An access to low frequency domain need at least 4 low freq clock to ensure IT
+	// An access to low frequency domain need at least 4 low freq clock to
+	// ensure IRQ
 	// Synchronize read/set -> 1 clock
 	// Update write -> 1 clock
 	// Note at same clock edge COMP flag will be clear to avoid previous COMP
@@ -769,12 +803,14 @@ void TD_RTC_AlarmAfter(int32_t delay)
 	// Now we can safely clear RTC->IF flag.
 	RTC_IntClear(RTC_IFC_COMP0);
 
-	// This flag seems to be in sync with IRQ triggers. So we do not need to busy-wait
-	// for it (it does not trigger an IRQ even if we enable IRQs at next instruction)
+	// This flag seems to be in sync with IRQ triggers. So we do not need to
+	// busy-wait for it (it does not trigger an IRQ even if we enable IRQs at
+	// next instruction).
 
 #ifdef DEBUG_RTC_TRAP
 	if (((RTC->CNT - rtc_now) & 0xFFFFFF) > 4) {
-		tfp_printf("****RTC_AlarmAfter late init : %d !!\r\n", (RTC->CNT - rtc_now) & 0xFFFFFF);
+		tfp_printf("****RTC_AlarmAfter late init : %d !!\r\n",
+			(RTC->CNT - rtc_now) & 0xFFFFFF);
 	}
 #endif
 
@@ -796,8 +832,9 @@ void TD_RTC_UserAlarmAfter(int32_t delay)
 {
 	uint32_t msk;
 
-	// delay is a signed value to correctly handle 'negatives' delays
-	// An access to low frequency domain need at least 4 low frequency clock to ensure IRQ
+	// Delay is a signed value to correctly handle 'negative' delays.
+	// An access to low frequency domain need at least 4 low frequency clock to
+	// ensure IRQ
 	// Synchronize read/set -> 1 clock
 	// Update write -> 1 clock
 	// Note at same clock edge COMP flag will be clear to avoid previous COMP
@@ -828,12 +865,14 @@ void TD_RTC_UserAlarmAfter(int32_t delay)
 	// Now we can safely clear RTC->IF flag.
 	RTC_IntClear(RTC_IFC_COMP1);
 
-	// This flag seems to be in sync with IRQ triggers. So we do not need to busy-wait
-	// for it (it does not trigger IRQs even if we enable IRQs at next instruction)
+	// This flag seems to be in sync with IRQ triggers. So we do not need to
+	// busy-wait for it (it does not trigger IRQs even if we enable IRQs at next
+	// instruction)
 
 #ifdef DEBUG_RTC_TRAP
 	if (((RTC->CNT - rtc_now) & 0xFFFFFF) > 4) {
-		tfp_printf("****RTC_AlarmAfter late init : %d !!\r\n", (RTC->CNT - rtc_now) & 0xFFFFFF);
+		tfp_printf("****RTC_AlarmAfter late init : %d !!\r\n",
+			(RTC->CNT - rtc_now) & 0xFFFFFF);
 	}
 #endif
 
@@ -842,13 +881,75 @@ void TD_RTC_UserAlarmAfter(int32_t delay)
 
 /***************************************************************************//**
  * @brief
- *   Enter into sleep mode (EM2).
+ *   Enter low power mode.
+ ******************************************************************************/
+void TD_RTC_EnterPowerMode(void)
+{
+
+	switch(TD_RTC_PowerMode) {
+	case TD_RTC_EM0:
+		break;
+
+	case TD_RTC_EM1:
+		EMU_EnterEM1();
+		break;
+
+	case TD_RTC_EM2:
+		EMU_EnterEM2(false);
+		break;
+
+	case TD_RTC_EM3:
+		EMU_EnterEM3(false);
+		break;
+
+	case TD_RTC_EM4:
+		EMU_EnterEM4();
+		break;
+
+	default:
+		break;
+	}
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Set low power mode which will be entered on next call to
+ *   TD_RTC_EnterPowerMode()
+ *
+ * @param[in] mode
+ *   The TD_RTC_PowerMode_t power mode that wil be entered on next call to
+ *   TD_RTC_EnterPowerMode().
+ ******************************************************************************/
+void TD_RTC_SetPowerMode(TD_RTC_PowerMode_t mode)
+{
+	if (mode == TD_RTC_EM1) {
+		TD_RTC_EM1_Request++;
+	}
+	if (mode == TD_RTC_EM2 && TD_RTC_EM1_Request) {
+		TD_RTC_EM1_Request--;
+	}
+	TD_RTC_PowerMode = TD_RTC_EM1_Request ? TD_RTC_EM1 : mode;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Get low power mode which will be entered on next call to
+ *   TD_RTC_EnterPowerMode
+ ******************************************************************************/
+TD_RTC_PowerMode_t TD_RTC_GetPowerMode(void)
+{
+	return TD_RTC_PowerMode;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Enter into sleep mode (default is EM2).
  ******************************************************************************/
 void TD_RTC_Sleep(void)
 {
 	RTC_IntClear(RTC_IFC_COMP0);
 	RTC_IntEnable(RTC_IF_COMP0);
-	EMU_EnterEM2(false);
+	TD_RTC_EnterPowerMode();
 }
 
 /***************************************************************************//**
@@ -943,6 +1044,7 @@ void TD_RTC_CalibratedDelay(uint32_t udelay)
 /***************************************************************************//**
  * @brief
  *   Returns the difference between current time and a reference time.
+ *   Maximum difference handled 0xFFFFFF ticks (about 511 s)
  *
  * @param[in] reference
  *   The reference time to compare to.
@@ -958,18 +1060,20 @@ uint32_t TD_RTC_TimeDiff(uint32_t reference)
 /***************************************************************************//**
  * @brief
  *   Returns the difference between current time and a reference time.
+ *   Maximum difference handled 0xFFFFFF ticks (about 511 s)
  *
  * @param[in] reference
  *   The reference time to compare to.
  *
  * @return
- *   Returns the absolute difference with the reference time.
+ *   Returns the signed difference with the reference time.
  ******************************************************************************/
 int32_t TD_RTC_SignedTimeDiff(uint32_t reference)
 {
-uint32_t t;
-	t=(RTC_CounterGet() - reference) & 0xFFFFFF;
-	return (t>0x7FFFFF) ? (((int32_t)t)|0xFF000000) : t;
+	uint32_t t;
+
+	t = (RTC_CounterGet() - reference) & 0xFFFFFF;
+	return (t > 0x7FFFFF) ? (((int32_t) t) | 0xFF000000) : t;
 }
 
 /***************************************************************************//**
@@ -1042,8 +1146,8 @@ void TD_RTC_Process(void)
  *   Returns the current system time in seconds.
  *
  * @note
- *   it should return -1 if system time is not available, but it currently doesn't.
- *
+ *   it should return -1 if system time is not available, but it currently
+ *   doesn't.
  *****************************************************************************/
 time_t __time32(time_t *timer)
 {
@@ -1054,7 +1158,8 @@ time_t __time32(time_t *timer)
 
 	// Correct if overflow interval is not an integer
 	if (TD_RTC_OVERFLOWED != 0) {
-		t += TD_RTC_OverflowCounter * TD_RTC_OVERFLOWED / TD_RTC_TICKS_PER_SECOND;
+		t += TD_RTC_OverflowCounter * TD_RTC_OVERFLOWED /
+			TD_RTC_TICKS_PER_SECOND;
 	}
 
 	// Add the number of seconds for RTC

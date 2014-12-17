@@ -2,7 +2,7 @@
  * @file
  * @brief API for sending Register frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.2.0
+ * @version 1.3.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -34,24 +34,49 @@
 #ifndef __SENSOR_REGISTER_H
 #define __SENSOR_REGISTER_H
 
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "sensor_send.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup SENSOR_REGISTER Sensor Register
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
-	/*******************************************************************************
-	 *************************   PROTOTYPES   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   PROTOTYPES   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup SENSOR_REGISTER_USER_FUNCTIONS User Functions
 	 * @{ */
 
+	/***********************************************************************//**
+	 * @brief
+	 *   Set a transmission profile for a register frame type.
+	 *
+	 * @param[in] repetition
+	 *	Number of repetitions.
+	 *
+	 * @param[in] interval
+	 *	Interval between two repetitions in seconds.
+	 **************************************************************************/
+	static void __INLINE TD_SENSOR_SetRegisterTransmissionProfile(
+		uint8_t repetition,
+		uint32_t interval)
+	{
+		TD_SENSOR_SetTransmissionProfile(SRV_FRM_REGISTER, repetition, interval);
+	}
+
 	bool TD_SENSOR_SendRegister(void);
-	void TD_SENSOR_SetRegisterTransmissionProfile(uint8_t repetition, uint32_t interval);
+	bool TD_SENSOR_SendRegisterExtended(uint8_t id, uint32_t sid,
+		uint8_t release, uint16_t soft, uint16_t class, bool custom,
+		uint8_t custom_value);
+	bool TD_SENSOR_SendRegisterForBooster(void);
 
 	/** @} */
 

@@ -2,7 +2,7 @@
  * @file
  * @brief TD LAN TX example for TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 2.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -33,18 +33,19 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
 #include <efm32.h>
 #include <em_gpio.h>
+
 #include <td_core.h>
-#include <td_sigfox.h>
 #include <td_rtc.h>
 #include <td_gpio.h>
-
+#include <td_sigfox.h>
 
 /* This file declare all "dynamic" library data. It should be last included file
  * Standard size value can be override before including this file
  */
-
+#define RADIO_USE_TCXO 1
 #define TD_SENSOR_USE_CODE 0
 #define TD_GEOLOC_USE_CODE 0
 #include <td_config.h>
@@ -76,23 +77,23 @@ void TD_USER_Setup(void)
 	// Define the LED pin as an output in push-pull mode
 	GPIO_PinModeSet(LED_PORT, LED_BIT, gpioModePushPull, 0);
 
-   //Build hex message
-   for(i=0;i<12;i++) {
+   // Build hex message
+   for (i = 0; i < 12; i++) {
 	   message[i] = i;
    }
 
-   //Send hex message with 2 repetitions (recommended by Sigfox)
-   GPIO_PinOutSet(LED_PORT,LED_BIT);
-   TD_SIGFOX_Send(message,12,2);
-   GPIO_PinOutClear(LED_PORT,LED_BIT);
+   // Send hex message with 2 repetitions
+   GPIO_PinOutSet(LED_PORT, LED_BIT);
+   TD_SIGFOX_Send(message, 12, 2);
+   GPIO_PinOutClear(LED_PORT, LED_BIT);
 
-   //Wait a bit
-   TD_RTC_Delay(32768*2);
+   // Wait a bit
+   TD_RTC_Delay(T2S);
 
-   //Send string message without repetitions (not recommended)
-   GPIO_PinOutSet(LED_PORT,LED_BIT);
-   TD_SIGFOX_Send((uint8_t *)"abcdefghijkl",12,0);
-   GPIO_PinOutClear(LED_PORT,LED_BIT);
+   // Send string message with 2 repetitions
+   GPIO_PinOutSet(LED_PORT, LED_BIT);
+   TD_SIGFOX_Send((uint8_t *) "abcdefghijkl", 12, 2);
+   GPIO_PinOutClear(LED_PORT, LED_BIT);
 }
 
 /***************************************************************************//**

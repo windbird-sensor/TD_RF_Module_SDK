@@ -2,7 +2,7 @@
  * @file
  * @brief API for sending Data frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.0.1
+ * @version 1.0.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -70,33 +70,13 @@
  *  Pointer to the array to be filled.
  *
  ******************************************************************************/
-static void TD_SENSOR_ltoba(uint32_t value, uint8_t *data)
+static void ltoba(uint32_t value, uint8_t *data)
 {
 	int i;
 
 	for (i = 3; i >= 0; i--) {
 		data[i] = value & 0xFF;
 		value >>= 8;
-	}
-}
-
-/***************************************************************************//**
- * @brief
- *   Convert uint64_t to char
- *
- * @param[in] data
- *   Pointer to the frame data buffer to fill in.
- *
- * @param[in] position
- *   Value to be converted
- ******************************************************************************/
-static void TD_SENSOR_store_pos(uint8_t *data, uint64_t position)
-{
-	int8_t i;
-
-	for (i = 5; i >= 0; i--) {
-		data[i] = position & 0xFF;
-		position >>= 8;
 	}
 }
 
@@ -113,7 +93,8 @@ static void TD_SENSOR_store_pos(uint8_t *data, uint64_t position)
  * @param[in] len
  *   Pointer the the frame length in bits that will be filled in.
  ******************************************************************************/
-static void TD_SENSOR_EncodePositionQuality(TD_GEOLOC_Fix_t *fix, uint8_t *data, uint8_t *len)
+static void TD_SENSOR_EncodePositionQuality(const TD_GEOLOC_Fix_t *fix,
+	uint8_t *data, uint8_t *len)
 {
 	uint64_t position;
 	uint16_t altitude;
@@ -123,6 +104,7 @@ static void TD_SENSOR_EncodePositionQuality(TD_GEOLOC_Fix_t *fix, uint8_t *data,
 	bool sign_latitude = false;
 	bool sign_longitude = false;
 	bool sign_altitude = false;
+	int i;
 
 	if (fix->position.longitude < 0) {
 		sign_longitude = true;
@@ -176,18 +158,23 @@ static void TD_SENSOR_EncodePositionQuality(TD_GEOLOC_Fix_t *fix, uint8_t *data,
 	uint8_t hdop		: 2;
 #endif
 
-	if (fix->position.longitude == 0x7FFFFFFF || fix->position.latitude == 0x7FFFFFFF) {
+	if (fix->position.longitude == 0x7FFFFFFF ||
+		fix->position.latitude == 0x7FFFFFFF) {
 		memset(&data[0], 0xFF, 7);
 		data[7] = 0xFE;
 		data[7] |= sv >> 2;
 		data[8] = (sv & 0x03) << 6;
 		data[8] |= (hdop & 0x03) << 4;
 	} else {
-		TD_SENSOR_store_pos(data, position);
+		for (i = 5; i >= 0; i--) {
+			data[i] = position & 0xFF;
+			position >>= 8;
+		}
 		data[6] = altitude >> 4;
 		data[7] = (altitude & 0x0F) << 4;
-		data[7] |= (sign_longitude << 3) | (sign_latitude << 2) | (sign_altitude << 1);
-		data[7] |= sv >> 2;
+		data[7] |= (sign_longitude << 3) | (sign_latitude << 2) |
+			(sign_altitude << 1);
+		data[7] |= (sv >> 2) & 0x1;
 		data[8] = (sv & 0x03) << 6;
 		data[8] |= (hdop & 0x03) << 4;
 	}
@@ -220,8 +207,8 @@ static void TD_SENSOR_EncodePositionQuality(TD_GEOLOC_Fix_t *fix, uint8_t *data,
  *   Pointer to the frame data buffer to fill in.
  *
  * @param[in] length
- *   Number of bits on which the position should be encoded. Len is related to accuracy according to the
- *   following table (in meters):
+ *   Number of bits on which the position should be encoded. Len is related to
+ *   accuracy according to the following table (in meters):
  *
  * 32 (4 bytes): latitude -> 152.59 longitude -> 305.48
  * 33: latitude -> 152.59 longitude -> 152.59
@@ -248,23 +235,26 @@ static void TD_SENSOR_EncodePositionQuality(TD_GEOLOC_Fix_t *fix, uint8_t *data,
  * @return
  *   Number of bits on which data is encoded. Should be = length or -1 if failed.
  ******************************************************************************/
-int8_t TD_SENSOR_EncodePositionXY(TD_GEOLOC_Fix_t *fix, uint8_t *data, uint8_t length, uint16_t nofix)
+int8_t TD_SENSOR_EncodePositionXY(const TD_GEOLOC_Fix_t *fix, uint8_t *data,
+	uint8_t length, uint16_t nofix)
 {
 	uint8_t lat_bits, long_bits;
 	uint8_t tmp[4];
 
 	// First is 14 bits
-	static uint16_t TD_SENSOR_DATA_GEOLOC_BitsToDiv[] = { 55043, 27494, 13740, 6869, 3434, 1717, 859, 430, 215, 108, 54 };
+	static uint16_t TD_SENSOR_DATA_GEOLOC_BitsToDiv[] = {
+		55043, 27494, 13740, 6869, 3434, 1717, 859, 430, 215, 108, 54
+	};
 
 	// Converted latitude and longitude
-	uint32_t clat,clong;
+	uint32_t clat, clong;
 
 	// Decimal lat and long
 	uint32_t latitude, longitude;
 	uint8_t lat_deg, long_deg;
 
 	// Make sure param are allowed
-	if ( (length < 32 && length > 48) || (fix == 0) || (data == 0)) {
+	if ((length < 32) || (length > 48) || (fix == 0) || (data == 0)) {
 		return -1;
 	}
 
@@ -272,7 +262,7 @@ int8_t TD_SENSOR_EncodePositionXY(TD_GEOLOC_Fix_t *fix, uint8_t *data, uint8_t l
 	// Don't take signs into account
 	length -= 2;
 
-	// if odd
+	// If odd
 	if (length & 1) {
 		lat_bits =  (length - 1) / 2;
 		long_bits = (length + 1) / 2;
@@ -281,7 +271,8 @@ int8_t TD_SENSOR_EncodePositionXY(TD_GEOLOC_Fix_t *fix, uint8_t *data, uint8_t l
 	}
 
 	// Use remaining values for no fix indicator
-	if (fix->position.longitude == 0x7FFFFFFF || fix->position.latitude == 0x7FFFFFFF) {
+	if (fix->position.longitude == 0x7FFFFFFF ||
+		fix->position.latitude == 0x7FFFFFFF) {
 
 		// No sign, can be used for carry value as well
 		data[0] = 0;
@@ -318,6 +309,7 @@ int8_t TD_SENSOR_EncodePositionXY(TD_GEOLOC_Fix_t *fix, uint8_t *data, uint8_t l
 			data[0] |= 1 << 6;
 			latitude = -fix->position.latitude;
 		} else {
+			data[0] |= 0 << 6;
 			latitude = fix->position.latitude;
 		}
 
@@ -326,10 +318,12 @@ int8_t TD_SENSOR_EncodePositionXY(TD_GEOLOC_Fix_t *fix, uint8_t *data, uint8_t l
 		long_deg = longitude / 10000000;
 
 		// Convert to decimal degrees
-		latitude = lat_deg * 10000000 + (((latitude - (lat_deg * 10000000)) * 100) / 60);
-		longitude = long_deg * 10000000 + (((longitude - (long_deg * 10000000)) * 100) / 60);
+		latitude = lat_deg * 10000000 +
+			(((latitude - (lat_deg * 10000000)) * 100) / 60);
+		longitude = long_deg * 10000000 +
+			(((longitude - (long_deg * 10000000)) * 100) / 60);
 		clat = latitude / TD_SENSOR_DATA_GEOLOC_BitsToDiv[lat_bits - 14];
-		clong = longitude / TD_SENSOR_DATA_GEOLOC_BitsToDiv[long_bits- 14 - 1];
+		clong = longitude / TD_SENSOR_DATA_GEOLOC_BitsToDiv[long_bits - 14 - 1];
 	}
 	length = 2;
 
@@ -340,9 +334,9 @@ int8_t TD_SENSOR_EncodePositionXY(TD_GEOLOC_Fix_t *fix, uint8_t *data, uint8_t l
 	 * longitude : length / 2 (+1 if length is odd)
 	 */
 	// Append latitude
-	TD_SENSOR_ltoba(BITS_TO_LEFT(clat, lat_bits), tmp);
+	ltoba(BITS_TO_LEFT(clat, lat_bits), tmp);
 	TD_SENSOR_UTILS_BitConcat(data, &length, tmp, lat_bits);
-	TD_SENSOR_ltoba(BITS_TO_LEFT(clong, long_bits), tmp);
+	ltoba(BITS_TO_LEFT(clong, long_bits), tmp);
 	TD_SENSOR_UTILS_BitConcat(data, &length, tmp, long_bits);
 	return (int8_t) length;
 }
@@ -360,7 +354,8 @@ int8_t TD_SENSOR_EncodePositionXY(TD_GEOLOC_Fix_t *fix, uint8_t *data, uint8_t l
  * @return
  *   Number of bits on which data is encoded (20) or -1 if failed
  ******************************************************************************/
-int8_t TD_SENSOR_EncodeDateTime(TD_GEOLOC_DateTime_t *datetime, uint8_t *data)
+int8_t TD_SENSOR_EncodeDateTime(const TD_GEOLOC_DateTime_t *datetime,
+	uint8_t *data)
 {
 	uint8_t length;
 	uint8_t month;
@@ -406,19 +401,24 @@ int8_t TD_SENSOR_EncodeDateTime(TD_GEOLOC_DateTime_t *datetime, uint8_t *data)
  * @param[in] length
  *   Pointer the the frame length in bits that will be filled in.
  ******************************************************************************/
-void TD_SENSOR_EncodePosition(SensorDataGPSTypes type, TD_GEOLOC_Fix_t *fix, uint8_t *data, uint8_t *length)
+void TD_SENSOR_EncodePosition(SensorDataGPSTypes type,
+	const TD_GEOLOC_Fix_t *fix, uint8_t *data, uint8_t *length)
 {
 	uint8_t time[4];
 	uint8_t time_length;
 
+	if (fix == NULL || data == NULL || length == NULL) {
+		return;
+	}
 	switch (type) {
 	case GPS_DATA_XYZ_SV_HDOP:
 		TD_SENSOR_EncodePositionQuality(fix, data, length);
 		break;
 
 	case GPS_DATA_XY_DATE:
-		if( (*length = TD_SENSOR_EncodePositionXY(fix, data, 48, 0)) != 0xFF) {
-			if((time_length = TD_SENSOR_EncodeDateTime(&fix->datetime, time)) != 0xFF) {
+		if ((*length = TD_SENSOR_EncodePositionXY(fix, data, 48, 0)) != 0xFF) {
+			if ((time_length = TD_SENSOR_EncodeDateTime(&fix->datetime, time))
+				!= 0xFF) {
 				TD_SENSOR_UTILS_BitConcat(data, length, time, time_length);
 			}
 		}
@@ -454,19 +454,19 @@ void TD_SENSOR_EncodePosition(SensorDataGPSTypes type, TD_GEOLOC_Fix_t *fix, uin
  * @param[in] length
  *   Pointer the the frame length in bits that will be filled in.
  ******************************************************************************/
-bool TD_SENSOR_SendDataPosition(SensorDataGPSTypes type, TD_GEOLOC_Fix_t *fix, uint8_t *data, uint8_t length)
+bool TD_SENSOR_SendDataPosition(SensorDataGPSTypes type,
+	const TD_GEOLOC_Fix_t *fix, uint8_t *data, uint8_t length)
 {
 	uint8_t msg[9];
 	uint8_t position[9];
 	uint8_t total_length = 0;
 	uint8_t pos_length;
 	uint8_t byte_count = 0;
+	uint8_t temp;
 
 	// Bits must be on the left side to be concatenated
-	uint8_t temp = type << 4;
-
+	temp = type << 4;
 	TD_SENSOR_EncodePosition(type, fix, position, &pos_length);
-
 	if (pos_length == 0xFF) {
 		return false;
 	}

@@ -2,7 +2,7 @@
  * @file
  * @brief Watchdog peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -48,6 +48,23 @@
  * @brief Watchdog peripheral API for the TD RF modules
  * @{
  ******************************************************************************/
+
+/*******************************************************************************
+ *************************   DEFINES   *****************************************
+ ******************************************************************************/
+
+/** @addtogroup WATCHDOG_DEFINES Defines
+ * @{ */
+
+#ifdef TRACE_STD
+#define DEBUG_PRINTF(...)	tfp_printf(__VA_ARGS__)
+#else
+
+/** printf macro for WATCHDOG debug */
+#define DEBUG_PRINTF(...)
+#endif
+
+/** @} */
 
 /*******************************************************************************
  ************************   PRIVATE VARIABLES   ********************************
@@ -152,7 +169,7 @@ bool TD_WATCHDOG_Init(uint16_t period)
 
 /***************************************************************************//**
  * @brief
- *   Start/Stop the watchdog
+ *   Start/Stop the watchdog.
  *
  * @param[in] enable
  *   Set to true to enable the watchdog, false to disable it.
@@ -172,35 +189,23 @@ bool TD_WATCHDOG_Enable(bool enable, bool automatic)
 		// If not already activated and we want activation
 		if (enable && !TD_Watchdog_Enabled) {
 
+			DEBUG_PRINTF("Enable watchdog, auto:%d\r\n",automatic);
 			TD_Watchdog_Enabled = true;
 			// Force a wake-up every period to allow feeding watchdog in time
 			//(before RTC overflow)
-			if (!automatic) {
-				TD_Watchdog_Timer = TD_SCHEDULER_Append(TD_WATCHDOG_Interval,
-														0,
-														0,
-														0xFF,
-														0,
-														0);
-
-
-			} else {
-				TD_Watchdog_Timer = TD_SCHEDULER_Append(TD_WATCHDOG_Interval,
-														0,
-														0,
-														0xFF,
-														TD_WATCHDOG_Callback,
-														0);
-			}
-
+			TD_Watchdog_Timer = TD_SCHEDULER_Append(TD_WATCHDOG_Interval,
+				0,
+				0,
+				0xFF,
+				automatic ? TD_WATCHDOG_Callback : NULL,
+				0);
 			if (TD_Watchdog_Timer != 0xFF) {
 				WDOG_Enable(true);
-
-				// Feed
 				TD_WATCHDOG_Feed();
 				return true;
 			}
 		} else if (!enable && TD_Watchdog_Enabled) {
+			DEBUG_PRINTF("Disable watchdog, auto:%d\r\n", automatic);
 
 			// If not activated and activation wanted
 			if (TD_Watchdog_Timer != 0xFF) {
@@ -210,18 +215,20 @@ bool TD_WATCHDOG_Enable(bool enable, bool automatic)
 				TD_Watchdog_Timer = 0xFF;
 			}
 			WDOG_Enable(false);
+			TD_Watchdog_Enabled = false;
 			return true;
 		} else if (enable && automatic && (TD_Watchdog_Timer == 0xFF)) {
-
+			DEBUG_PRINTF("set auto:%d\r\n", automatic);
 			// If activate + auto + auto not activated, start auto
 			TD_Watchdog_Timer = TD_SCHEDULER_Append(TD_WATCHDOG_Interval,
-													0,
-													0,
-													0xFF,
-													TD_WATCHDOG_Callback,
-													0);
+				0,
+				0,
+				0xFF,
+				TD_WATCHDOG_Callback,
+				0);
 			return true;
-		}	else if (enable && !automatic && TD_Watchdog_Timer != 0xFF) {
+		} else if (enable && !automatic && TD_Watchdog_Timer != 0xFF) {
+			DEBUG_PRINTF("set auto:%d\r\n",automatic);
 
 			// If activate + !auto + auto activated, stop auto
 			TD_SCHEDULER_Remove(TD_Watchdog_Timer);
@@ -234,7 +241,7 @@ bool TD_WATCHDOG_Enable(bool enable, bool automatic)
 
 /***************************************************************************//**
  * @brief
- *   Feed the watchdog
+ *   Feed the watchdog.
  *
  * @details
  *   This function must be called before the watchdog period expires to avoid

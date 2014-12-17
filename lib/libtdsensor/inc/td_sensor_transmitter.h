@@ -2,7 +2,7 @@
  * @file
  * @brief Sensor Transmitter
  * @author Telecom Design S.A.
- * @version 1.1.1
+ * @version 1.2.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -34,6 +34,8 @@
 #ifndef __TD_SENSOR_TRANSMITTER_H
 #define __TD_SENSOR_TRANSMITTER_H
 
+#include <td_config_ext.h>
+
 #include "sensor_send.h"
 #include "td_sensor.h"
 
@@ -41,21 +43,21 @@
 extern "C" {
 #endif
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup TD_SENSOR_TRANSMITTER Sensor Transmitter
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
-	/*******************************************************************************
-	 *************************   TYPEDEFS     **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   TYPEDEFS     **********************************
+	 **************************************************************************/
 
 	/** @addtogroup TD_SENSOR_TRANSMITTER_TYPEDEFS Typedefs
 	 * @{ */
 
 	/** Retransmission structure */
 	typedef struct {
-		uint8_t payload[10];					///< Data payload to retransmit
+		uint8_t payload[12];					///< Data payload to retransmit
 		uint8_t timer; 							///< Timer ID to be able to stop it when receiving an ACK
 	} TD_SENSOR_TRANSMITTER_Retransmission_t;
 
@@ -63,27 +65,24 @@ extern "C" {
 	typedef struct {
 		uint8_t data[12];						///< SIGFOX payload data
 		uint8_t count;							///< SIGFOX transmit retry count
+		uint8_t index_retransmit;               ///< Index of retransmit array if any
 	} TD_SENSOR_TRANSMITTER_Transmission_t;
-
-	/* Function pointer for code removal purposes */
-	typedef void (*TD_SENSOR_TRANSMITTER_Init_t)(void);
-
-	/* Function pointer for code removal purposes */
-	typedef void (*TD_SENSOR_TRANSMITTER_Process_t)(void);
 
 	/** @} */
 
-	/*******************************************************************************
-	 *************************   PROTOTYPES   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   PROTOTYPES   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup TD_SENSOR_TRANSMITTER_GLOBAL_FUNCTIONS Global Functions
 	 * @{ */
 
-	bool TD_SENSOR_TRANSMITTER_SendSigfox(TD_SENSOR_Frame_t *frame, uint8_t count, uint8_t entry_id, TD_SENSOR_TransmitProfile_t *profile);
-	void TD_SENSOR_TRANSMITTER_Process(void);
-	void TD_SENSOR_TRANSMITTER_Init(void);
+	DECLARE_DYNAMIC(bool, TD_SENSOR_TRANSMITTER_SendSigfox, uint8_t *frame,
+		uint8_t count, uint8_t entry_id, TD_SENSOR_TransmitProfile_t *profile);
+	DECLARE_DYNAMIC(void, TD_SENSOR_TRANSMITTER_Process, void);
+	DECLARE_DYNAMIC(void, TD_SENSOR_TRANSMITTER_Init, void);
 	void TD_SENSOR_TRANSMITTER_SetRetry(uint8_t retries);
+	void TD_SENSOR_TRANSMITTER_SetAck(bool ack);
 	uint8_t TD_SENSOR_TRANSMITTER_LenToRealDuration(uint8_t length);
 
 	/** @} */
@@ -92,6 +91,9 @@ extern "C" {
 	 * @{ */
 
 	void TD_SENSOR_TRANSMITTER_MonitorDutyCycle(bool enable);
+	DECLARE_DYNAMIC(bool, TD_SENSOR_TRANSMITTER_IsTxAllowed, uint8_t length,
+		uint8_t retries);
+	void TD_SENSOR_TRANSMITTER_SetUserCallback(void (*user_callback)(void));
 
 	/** @} */
 

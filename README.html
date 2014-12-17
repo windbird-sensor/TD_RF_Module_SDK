@@ -14,7 +14,7 @@ and auto-generated API documentation to develop for the TD RF modules.</p>
 
 <h1>UPDATE:</h1>
 
-<p>We strongly recommend to update the SDK from previous 4.0.0 version to the newest 4.1.0 version as soon as possible and regenerate the firmwares for all devices produced, as this version contains a modification that will ensure the best performance with the latest SIGFOX network updates.</p>
+<p>We strongly recommend to update the SDK from previous 4.0.0 version to the newest 4.1.0 version for TD1202 RF modules and to 5.0.0 version for TD1204 and TD1208 modules as soon as possible and regenerate the firmwares for all devices produced, as this version contains a modification that will ensure the best performance with the latest SIGFOX network updates.</p>
 
 <h1>Getting the Sources</h1>
 
@@ -169,6 +169,100 @@ fixed Flash/Debug commands or menu buttons: they need to be added explicitly on 
 </ol>
 
 <h1>Release Notes</h1>
+
+<h2>v5.0.0 (December 2014)</h2>
+
+<ul>
+<li>This release is a major update of TD RF Module SDK.</li>
+</ul>
+
+<h3>Release Notes</h3>
+
+<h4>Major Updates</h4>
+
+<h4><strong>libtdcore</strong></h4>
+
+<ul>
+<li>Added the CAPSENSE module for capacitive touch buttons</li>
+<li>UART module now handles both LEUART and standard UART</li>
+</ul>
+
+<h5><strong>libtdrf</strong></h5>
+
+<ul>
+<li>Bidirectional (down-link) communication</li>
+<li>Transparent (use sender's SIGFOX ID) or non-transparent (use proxy's SIGFOX ID) SIGFOX proxy</li>
+<li>Fast LAN mode: once synchronized, transmitter and receiver can exchange data at maximum speed</li>
+</ul>
+
+<h5><strong>libtdtools</strong></h5>
+
+<ul>
+<li>New library for managing switches and LEDs</li>
+</ul>
+
+<h4>Minor Updates</h4>
+
+<h4><strong>libtdcore</strong></h4>
+
+<ul>
+<li>Increased maximum number of AT extensions to 16</li>
+<li>Now handling the different EFM32 power modes</li>
+<li>Unified the RF and standard GPIO management</li>
+</ul>
+
+<h5><strong>libtdrf</strong></h5>
+
+<ul>
+<li>Custom transmit (user callback function to write into FIFO) and receive (user callback function to read from FIFO and stop RX)</li>
+<li>Changed the TD LAN windowed listen period to variable up to 6.7 s instead of fixed 1 s, using the <code>LAN_PERIOD</code> and <code>LAN_ADDRESS_SIZE</code> configuration parameters</li>
+</ul>
+
+<h5><strong>libtdsensor</strong></h5>
+
+<ul>
+<li>Corresponds to UDM v2.3</li>
+</ul>
+
+<h5><strong>libtdgeoloc</strong></h5>
+
+<ul>
+<li>Now uses the UBlox 7 raw format instead of NMEA by default</li>
+<li>No longer use Sensor switch monitoring for accelerometer interrupts, have the driver handle it directly for efficiency's sake</li>
+<li>Added click monitoring</li>
+<li>Added power mode usage</li>
+<li>Added GPS autonomous computation handling</li>
+<li>Added ephemeris management</li>
+</ul>
+
+<h4>Bug Fixes</h4>
+
+<h4><strong>libtdcore</strong></h4>
+
+<ul>
+<li>Handles UART overflow gracefully</li>
+</ul>
+
+<h5><strong>libtdrf</strong></h5>
+
+<ul>
+<li>Corrected a timing problem on first frame detected with new base station software upgrade (already corrected in v4.1.0)</li>
+</ul>
+
+<h5><strong>libtdsensor</strong></h5>
+
+<ul>
+<li>Do not set encoded voltage length if no length pointer provided to <code>TD_SENSOR_EncodeLocalVoltage()</code> or <code>TD_SENSOR_EncodeLocalTemperature()</code></li>
+</ul>
+
+<h5><strong>libtdgeoloc</strong></h5>
+
+<ul>
+<li>Skipped first meaningless accelerometer data values in callback</li>
+<li>Fixed a bug in AT$AR= (read accelerometer register)</li>
+<li>Initialized the first byte in Sensor position data frame</li>
+<li>Fixed non-volatile accelerometer IRQ flag</li>
+</ul>
 
 <h2>v4.1.0 (December 2014)</h2>
 

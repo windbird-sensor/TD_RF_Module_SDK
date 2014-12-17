@@ -2,7 +2,7 @@
  * @file
  * @brief Sensor Gateway Application example
  * @author Telecom Design S.A.
- * @version 2.0.2
+ * @version 2.0.4
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -41,6 +41,7 @@
 #include <td_uart.h>
 #include <td_flash.h>
 #include <td_scheduler.h>
+
 #include <td_sensor.h>
 #include <td_sensor_gateway.h>
 #include <sensor_register.h>
@@ -163,9 +164,9 @@ void TD_USER_Setup(void)
 
 	// Initialize the UART console
 	init_printf(TD_UART_Init(9600, true, false),
-		    		TD_UART_Putc,
-		    		TD_UART_Start,
-		    		TD_UART_Stop);
+		TD_UART_Putc,
+		TD_UART_Start,
+		TD_UART_Stop);
 
 	// Changing the version will clear all flash content thus allowing resetting
 	// the gateway
@@ -190,10 +191,10 @@ void TD_USER_Setup(void)
 	// Start Reception
 	TD_SENSOR_GATEWAY_StartReception();
 	devices = TD_SENSOR_GATEWAY_GetDeviceCount();
-	tfp_printf("Devices found = %d\r\n",devices);
+	tfp_printf("Devices found = %d\r\n", devices);
 
 	// If we are still waiting for devices open registration
-	if (devices<MAX_EXPECTED_DEVICE) {
+	if (devices < MAX_EXPECTED_DEVICE) {
 
 		// Open registration
 		TD_SENSOR_GATEWAY_StartRegistration(OnRegistration);

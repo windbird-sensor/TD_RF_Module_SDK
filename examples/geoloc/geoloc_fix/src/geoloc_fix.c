@@ -2,7 +2,7 @@
  * @file
  * @brief Simple GPS continuous fix application for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -65,7 +65,8 @@
  ******************************************************************************/
 static void GPSFix(TD_GEOLOC_Fix_t *fix, bool timeout)
 {
-	int latitude, longitude, latitude_int, latitude_fract, longitude_int, longitude_fract;
+	int latitude, longitude, latitude_int, latitude_fract, longitude_int,
+		longitude_fract;
 	char latitude_direction, longitude_direction;
 
 	if (fix->type >= TD_GEOLOC_TIME_FIX) {

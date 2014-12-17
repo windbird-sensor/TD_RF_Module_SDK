@@ -2,7 +2,7 @@
  * @file
  * @brief Sensor Device
  * @author Telecom Design S.A.
- * @version 1.2.0
+ * @version 1.3.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -39,12 +39,17 @@
 #include <td_lan.h>
 #include <td_utils.h>
 #include <td_scheduler.h>
+#include <td_config_ext.h>
+#include <td_measure.h>
+#include <td_sigfox.h>
 
+#include "sensor_data.h"
 #include "sensor_send.h"
 #include "td_sensor.h"
 #include "td_sensor_lan.h"
 #include "td_sensor_transmitter.h"
 #include "td_sensor_device.h"
+#include "td_sensor_utils.h"
 
 /***************************************************************************//**
  * @addtogroup TD_SENSOR_DEVICE Sensor LAN Device
@@ -58,11 +63,18 @@
 /** @addtogroup TD_SENSOR_DEVICE_DEFINES Defines
  * @{ */
 
+//#define DEBUG_PRINTF
+#ifdef DEBUG_PRINTF
+
 /** Conditional printf macro */
-#define DEBUG_PRINTF(...) //tfp_printf(__VA_ARGS__)
+#define DEBUG_PRINTF(...) tfp_printf(__VA_ARGS__)
 
 /** Conditional dump macro */
-#define DEBUG_DUMP(t,d,s) //tfp_dump(t,d,s)
+#define DEBUG_DUMP(t,d,s) tfp_dump(t,d,s)
+#else
+	#define DEBUG_PRINTF(...)
+	#define DEBUG_DUMP(t,d,s)
+#endif
 
 /* Time in seconds to wait after a forward */
 #define SIGFOX_TRANSMISSION_TIME 2
@@ -75,21 +87,6 @@
 
 /** @} */
 
-/*******************************************************************************
-****************************   TYPEDEFS   **************************************
-*******************************************************************************/
-
-/** @addtogroup TD_SENSOR_DEVICE_TYPEDEFS Typedefs
- * @{ */
-
-/** Device queue message entry */
-typedef struct {
-	TD_SENSOR_LAN_Frame_t frame;		///< Data frame to transmit
-	bool tx_on_lan_fail : 1;			///< Transfer over SIGFOX upon LAN failure flag
-	uint8_t *data_rx;					///< Received data frame
-} __PACKED TD_DeviceQueueFrame;
-
-/** @} */
 
 /*******************************************************************************
  **************************  PRIVATE VARIABLES   *******************************
@@ -100,6 +97,9 @@ typedef struct {
 
 /** Received frame */
 static TD_LAN_frame_t device_RX;
+
+/** Let to known if an ack frame is expected */
+static bool AckExpected = false;
 
 /** Receive enable flag */
 static bool ReceptionEnabled = false;
@@ -116,8 +116,14 @@ static uint32_t BroadcastMask = 0xFFFFFF;
 /** Enable broadcast receive flag */
 static bool ListenBroadcast = false;
 
+/** Enable network receive flag */
+static bool ListenNetwork = false;
+
 /** Device Address */
 static uint32_t DeviceAddress = 0;
+
+/* Device registration type */
+static TD_SENSOR_GATEWAY_Registration_t RegistrationType = EN_TYPE_REG_NONE;
 
 /** LAN Data received callback */
 static int8_t (*DataCallback)(bool broadcast, uint32_t address, uint8_t *data, uint8_t len, uint8_t *reply) = 0;
@@ -129,7 +135,7 @@ static int8_t (*KeepaliveCallback)(bool broadcast, uint32_t address, uint32_t in
 static bool GatewayBusy = false;
 
 /** Circular buffer to queue local frame */
-static TD_DeviceQueueFrame DeviceQueue[DEVICE_QUEUE];
+extern TD_SENSOR_DEVICE_DeviceQueueFrame_t *DeviceQueue;
 
 /** Queue count */
 static uint8_t DeviceQueueCount = 0;
@@ -139,6 +145,12 @@ static uint8_t DeviceQueueIndex = 0;
 
 /** Asynchronous forward flag */
 static bool UseAsynchForward = false;
+
+/** User callback to execute before and after lan transmission */
+static void (*UserCallback)(void) = 0;
+
+/** Rx period */
+static uint32_t RxPeriod = 0;
 
 /** @} */
 
@@ -165,7 +177,8 @@ static bool UseAsynchForward = false;
  * @param[in] count
  *  Length in bytes of the buffer used to send back data.
  ******************************************************************************/
-static void TD_SENSOR_DEVICE_Ack(TD_LAN_frame_t *rx_frame, TD_SENSOR_LAN_AckCode_t code, uint8_t *data, uint8_t count)
+static void TD_SENSOR_DEVICE_Ack(TD_LAN_frame_t *rx_frame,
+	TD_SENSOR_LAN_AckCode_t code, uint8_t *data, uint8_t count)
 {
 	int i;
 	TD_LAN_frame_t tx_frame;
@@ -194,9 +207,16 @@ static void TD_SENSOR_DEVICE_Ack(TD_LAN_frame_t *rx_frame, TD_SENSOR_LAN_AckCode
 		}
 	}
 
+	if (UserCallback != 0) {
+		(*UserCallback)();
+	}
+
 	// Send an Ack frame
 	if (!TD_LAN_SendFrame(1, &tx_frame, rx_frame)) {
 		DEBUG_PRINTF("LAN Error %d \r\n", TD_LAN_LastError());
+	}
+	if (UserCallback != 0) {
+		(*UserCallback)();
 	}
 }
 
@@ -211,7 +231,8 @@ static void TD_SENSOR_DEVICE_Ack(TD_LAN_frame_t *rx_frame, TD_SENSOR_LAN_AckCode
  * @param[in] repetitions
  *	Timer argument. Not used.
  ******************************************************************************/
-static void TD_SENSOR_DEVICE_GatewayBusyHandler(uint32_t arg, uint8_t repetitions)
+static void TD_SENSOR_DEVICE_GatewayBusyHandler(uint32_t arg,
+	uint8_t repetitions)
 {
 	GatewayBusy = false;
 }
@@ -256,7 +277,9 @@ static void TD_SENSOR_DEVICE_WaitForGateway(void)
  * @return
  *   Returns the acknowledge result.
  ******************************************************************************/
-static TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_SendFrame(TD_SENSOR_LAN_FrameType_t type, uint8_t *payload, uint8_t count, uint8_t *data_rx)
+static TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_SendFrame(
+		TD_SENSOR_LAN_FrameType_t type, uint8_t *payload, uint8_t count,
+	uint8_t *data_rx)
 {
 	TD_SENSOR_LAN_AckCode_t ack;
 	TD_SENSOR_LAN_Frame_t frame;
@@ -270,15 +293,32 @@ static TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_SendFrame(TD_SENSOR_LAN_FrameTyp
 	SET_LOCALSENSORFRAME_COUNT(frame.header, count);
 	memcpy(frame.data, payload, count);
 	DEBUG_DUMP("Send frame: ", (uint8_t *) &frame, TD_LAN_PAYLOAD_SIZE);
+
+	// If a UserCallback is defined execute it before and after a lan
+	// transmission
+	if (UserCallback != 0) {
+		(*UserCallback)();
+	}
+	AckExpected = true;
 	ack = TD_SENSOR_LAN_SendFrame(&frame, data_rx);
+	AckExpected = false;
+	if (UserCallback != 0) {
+		(*UserCallback)();
+	}
+
+	// If a UserCallback is defined execute it before and after a lan
+	// transmission
 	if (type == LOCAL_FORWARD) {
 		if (ack == ACK_OK) {
 
 			// Gateway is now most likely to be busy
 			// Assumes 3 frames are being sent
 			DEBUG_PRINTF("Gateway busy for %d\r\n",
-				((TD_SENSOR_TRANSMITTER_LenToRealDuration(count - 4) * 3) / 100) + 1);
-			if (TD_SCHEDULER_AppendIrq(((TD_SENSOR_TRANSMITTER_LenToRealDuration(count - 4) * 3) / 100) + 1,
+				((TD_SENSOR_TRANSMITTER_LenToRealDuration(count - 4) * 3) / 100)
+					 + 1);
+			if (TD_SCHEDULER_AppendIrq(
+				((TD_SENSOR_TRANSMITTER_LenToRealDuration(count - 4) * 3) / 100)
+					+ 1,
 				0,
 				0,
 				1,
@@ -294,11 +334,15 @@ static TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_SendFrame(TD_SENSOR_LAN_FrameTyp
 		// Gateway is busy, we just don't know how long
 		// TODO: random or custom? JUST REMOVE ALL THIS!!!
 		DEBUG_PRINTF("Wait gateway 2\r\n");
-		if (TD_SCHEDULER_AppendIrq(DEVICE_AUTOMATIC_WAIT_TIME, 0, 0, 1, TD_SENSOR_DEVICE_GatewayBusyHandler, 0) != 0xFF) {
+		if (TD_SCHEDULER_AppendIrq(DEVICE_AUTOMATIC_WAIT_TIME, 0, 0, 1,
+			TD_SENSOR_DEVICE_GatewayBusyHandler, 0) != 0xFF) {
 			GatewayBusy = true;
 		}
 	}
 #endif
+
+	// Check battery status
+	TD_SENSOR_BatteryCallBack(true);
 
 	return ack;
 }
@@ -323,7 +367,8 @@ static TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_SendFrame(TD_SENSOR_LAN_FrameTyp
  *   Returns false if the device queue is full or if the length to send is
  *   too large, true otherwise.
  ******************************************************************************/
-static bool TD_SENSOR_DEVICE_AppendInQueue(TD_SENSOR_LAN_FrameType_t type, uint8_t *payload, uint8_t count, uint8_t *data_rx)
+static bool TD_SENSOR_DEVICE_AppendInQueue(TD_SENSOR_LAN_FrameType_t type,
+	uint8_t *payload, uint8_t count, uint8_t *data_rx)
 {
 	int index;
 
@@ -347,7 +392,8 @@ static bool TD_SENSOR_DEVICE_AppendInQueue(TD_SENSOR_LAN_FrameType_t type, uint8
 	memcpy(DeviceQueue[index].frame.data, payload, count);
 
 	// Fill remaining bytes with zeros
-	memset(&DeviceQueue[index].frame.data[count], 0, TD_SENSOR_LAN_PAYLOAD_SIZE - count);
+	memset(&DeviceQueue[index].frame.data[count], 0,
+		TD_SENSOR_LAN_PAYLOAD_SIZE - count);
 	DeviceQueue[index].tx_on_lan_fail  = TxOnLanFail;
 	DeviceQueueCount++;
 	return true;
@@ -364,7 +410,7 @@ static TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_QueueManager(void)
 	TD_SENSOR_LAN_ForwardFrame_t forward;
 	uint8_t count;
 
-	TD_SENSOR_Frame_t frame;
+	TD_SENSOR_LAN_Frame_t frame;
 	TD_SENSOR_TransmitProfile_t profile;
 
 	// If we can transmit and transmission list is not empty
@@ -372,9 +418,12 @@ static TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_QueueManager(void)
 		if (!GatewayBusy) {
 
 			// Treatment will vary depending on type
-			type = (TD_SENSOR_LAN_FrameType_t) GET_LOCALSENSORFRAME_TYPE(DeviceQueue[DeviceQueueIndex].frame.header);
-			count = GET_LOCALSENSORFRAME_COUNT(DeviceQueue[DeviceQueueIndex].frame.header);
-			ack = TD_SENSOR_DEVICE_SendFrame(type, DeviceQueue[DeviceQueueIndex].frame.data, count, 0);
+			type = (TD_SENSOR_LAN_FrameType_t)GET_LOCALSENSORFRAME_TYPE(
+				DeviceQueue[DeviceQueueIndex].frame.header);
+			count = GET_LOCALSENSORFRAME_COUNT(
+				DeviceQueue[DeviceQueueIndex].frame.header);
+			ack = TD_SENSOR_DEVICE_SendFrame(type,
+				DeviceQueue[DeviceQueueIndex].frame.data, count, 0);
 
 			// If acknowledged then remove from queue
 			if (ack != NOT_ACKED) {
@@ -387,22 +436,28 @@ static TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_QueueManager(void)
 				DeviceQueueCount--;
 			} else if (type == LOCAL_FORWARD) {
 
-				// If forwarded frame and transmission on LAN failed, send directly over SIGFOX
+				// If forwarded frame and transmission on LAN failed, send
+				// directly over SIGFOX
 				if (DeviceQueue[DeviceQueueIndex].tx_on_lan_fail) {
 
-					// Byte copy from array to forward frame (array was created the other way round)
-					memcpy((uint8_t *)&forward, DeviceQueue[DeviceQueueIndex].frame.data, count);
+					// Byte copy from array to forward frame (array was created
+					// the other way round)
+					memcpy((uint8_t *)&forward,
+						DeviceQueue[DeviceQueueIndex].frame.data, count);
 
 					// Get real SIGFOX count
 					count -= sizeof(forward.profile);
 
 					// Copy SIGFOX payload to Sensor Frame
-					memcpy(frame.payload, forward.sigfox, count);
-					profile.interval = GET_LOCALFORWARDFRAME_INTERVAL(forward.profile);
-					profile.repetition = GET_LOCALFORWARDFRAME_REPETITION(forward.profile);
+					memcpy(frame.data, forward.sigfox, count);
+					profile.interval = GET_LOCALFORWARDFRAME_INTERVAL(
+						forward.profile);
+					profile.repetition = GET_LOCALFORWARDFRAME_REPETITION(
+						forward.profile);
 
 					// Send frame directly via SIGFOX
-					if (TD_SENSOR_TRANSMITTER_SendSigfox(&frame, count, 0, &profile)) {
+					if (TD_SENSOR_TRANSMITTER_SendSigfox((uint8_t *) &frame,
+						count, 0, &profile)) {
 						ack = TRANSMITTER_SENT;
 					} else {
 						ack = TRANSMITTER_BUSY;
@@ -428,28 +483,30 @@ static TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_QueueManager(void)
 
 /***************************************************************************//**
  * @brief
- *  Send a Forward frame on the LAN.
+ *  Forward a frame on LAN synchronously or asynchronously.
  *
  * @param[in] payload
- *   Pointer to the buffer containing the ata to be forwarded by the gateway.
+ *   Pointer to the buffer containing the data to be forwarded by the gateway.
  *
  * @param[in] count
  *   Length in bytes of the SIGFOX data (Sensor header + payload data)
  *
  * @param[in] repetition
- *   Retransmissions count.
+ *  Retransmissions count from 0 to 16
  *
  * @param[in] interval
- *    Retransmission interval in seconds.
+ *   Retransmission interval in seconds from 0 to 2^28.
  *
  * @return
- *   Returns the acknowledge result.
+ *  Returns the acknowledge result if frame could be sent right away
+ *  or SENSOR_LAN_FRAME_ERROR if parameters are out of range.
  ******************************************************************************/
-TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_Forward(uint8_t *payload, uint8_t count, uint8_t repetition, uint32_t interval)
+TD_SENSOR_LAN_AckCode_t DYNAMIC(TD_SENSOR_DEVICE_Forward)(uint8_t *payload,
+	uint8_t count, uint8_t repetition, uint32_t interval)
 {
 	TD_SENSOR_LAN_ForwardFrame_t local_frame;
 
-	if (count > 12) {
+	if ((count > 12) || (repetition >= 16) || (interval >= (1 << 28))) {
 		return SENSOR_LAN_FRAME_ERROR;
 	}
 
@@ -463,50 +520,17 @@ TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_Forward(uint8_t *payload, uint8_t count
 	memcpy(local_frame.sigfox, payload, count);
 
 	// Useful payload size, not frame size!
-	return TD_SENSOR_DEVICE_SendFrame(LOCAL_FORWARD, (uint8_t *) &local_frame, count + sizeof (local_frame.profile), 0);
-}
-
-/***************************************************************************//**
- * @brief
- *  Send a Forward frame on LAN asynchronously.
- *
- * @param[in] payload
- *   Pointer to the buffer containing the ata to be forwarded by the gateway.
- *
- * @param[in] count
- *   Length in bytes of the SIGFOX data (Sensor header + payload data)
- *
- * @param[in] repetition
- *  Retransmissions count.
- *
- * @param[in] interval
- *   Retransmission interval in seconds.
- *
- * @return
- *  Returns the acknowledge result if frame could be sent right away.
- ******************************************************************************/
-TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_ForwardAsynch(uint8_t *payload, uint8_t count, uint8_t repetition, uint32_t interval)
-{
-	TD_SENSOR_LAN_ForwardFrame_t local_frame;
-
-	if (count > 12) {
-		return SENSOR_LAN_FRAME_ERROR;
-	}
-
-	// Fill in frame data
-	local_frame.profile = 0;
-	SET_LOCALFORWARDFRAME_REPETITION(local_frame.profile, repetition);
-	SET_LOCALFORWARDFRAME_INTERVAL(local_frame.profile, interval);
-
-	// Copy sensor frame header + real data
-	// Order matters here as frame starts with header then data follows
-	memcpy(local_frame.sigfox, payload, count);
-
-	// Useful payload size, not frame size!
-	if (!TD_SENSOR_DEVICE_AppendInQueue(LOCAL_FORWARD, (uint8_t *) &local_frame, count + sizeof (local_frame.profile), 0)) {
-		return SENSOR_LAN_QUEUED;
+	count += sizeof (local_frame.profile);
+	if (UseAsynchForward) {
+		if (!TD_SENSOR_DEVICE_AppendInQueue(LOCAL_FORWARD,
+			(uint8_t *) &local_frame, count, 0)) {
+			return SENSOR_LAN_QUEUED;
+		} else {
+			return TD_SENSOR_DEVICE_QueueManager();
+		}
 	} else {
-		return TD_SENSOR_DEVICE_QueueManager();
+		return TD_SENSOR_DEVICE_SendFrame(LOCAL_FORWARD,
+			(uint8_t *) &local_frame, count, 0);
 	}
 }
 
@@ -515,8 +539,8 @@ TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_ForwardAsynch(uint8_t *payload, uint8_t
  *  Send a Keep alive frame on LAN
  *
  * @param[in] keepalive
- *   Set to true to enable connection monitoring on gateway side. Set to false to
- *   disable connection monitoring.
+ *   Set to true to enable connection monitoring on gateway side. Set to false
+ *   to disable connection monitoring.
  *
  * @param[in] interval
  *   Keep-alive interval monitoring in seconds if keepalive is true.
@@ -534,18 +558,66 @@ TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_ForwardAsynch(uint8_t *payload, uint8_t
  * @return
   *   Returns the acknowledge result.
  ******************************************************************************/
-TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_KeepAlive(bool keepalive, uint32_t interval, bool rssi, int8_t level_low, int8_t level_ok)
+TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_KeepAlive(bool keepalive,
+	uint32_t interval, bool rssi, int8_t level_low, int8_t level_ok)
 {
-	TD_SENSOR_LAN_KeepAliveFrame_t frame;
+	uint8_t payload[11] = {0};
+	uint8_t *pPayload;
+	uint8_t voltage, temperature;
+	uint32_t battery_level_mv;
+	int32_t temperature_level;
+	const TD_SENSOR_Configuration_t *config;
 
-	frame.keepalive = keepalive;
-	frame.interval = interval;
-	frame.rssi = rssi;
-	frame.level_low = level_low;
-	frame.level_ok = level_ok;
+	config = TD_SENSOR_GetModuleConfiguration();
+	battery_level_mv = TD_LAN_PowerVoltageExtended();
+	if (!TD_SENSOR_EncodeLocalVoltage(battery_level_mv, &voltage, NULL)) {
+		voltage = 0;
+	}
+	temperature_level = TD_MEASURE_TemperatureExtended();
+	if (!TD_SENSOR_EncodeLocalTemperature(temperature_level, &temperature,
+		NULL)) {
+		temperature = 0;
+	}
+
+	// Build payload
+	pPayload = payload;
+
+	// Build interval
+	interval = HTONL(interval);
+	memcpy(pPayload, &interval, sizeof (interval));
+	pPayload += sizeof (interval);
+
+	// Build level low
+	*pPayload = level_low;
+	pPayload += sizeof (level_low);
+
+	// Build level ok
+	*pPayload = level_ok;
+	pPayload += sizeof (level_ok);
+
+	// Build keepalive
+	*pPayload = keepalive;
+	pPayload += sizeof(keepalive);
+
+	// Build rssi
+	*pPayload = rssi;
+	pPayload += sizeof (rssi);
+
+	// Build voltage level
+	*pPayload = voltage;
+	pPayload += sizeof (voltage);
+
+	// Build temperature level
+	*pPayload = temperature;
+	pPayload += sizeof (temperature);
+
+	// Build battery_low
+	*pPayload = config->battery.state ? true : false;
+	pPayload += sizeof (config->battery.state);
 
 	// Useful payload size, not frame size!
-	return TD_SENSOR_DEVICE_SendFrame(LOCAL_KEEPALIVE, (uint8_t *) &frame, sizeof(TD_SENSOR_LAN_KeepAliveFrame_t), 0);
+	return TD_SENSOR_DEVICE_SendFrame(LOCAL_KEEPALIVE, payload,
+		pPayload - payload, 0);
 }
 
 /** @} */
@@ -569,14 +641,16 @@ TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_KeepAlive(bool keepalive, uint32_t inte
  * @return
  *   Returns the acknowledge result.
  ******************************************************************************/
-TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_Data(uint8_t *data, uint8_t count, uint8_t data_rx[TD_SENSOR_LAN_PAYLOAD_SIZE - 1])
+TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_Data(uint8_t *data, uint8_t count,
+	uint8_t data_rx[TD_SENSOR_LAN_PAYLOAD_SIZE - 1])
 {
 	if (count > 16) {
 		return SENSOR_LAN_FRAME_ERROR;
 	}
 
 	// Useful payload size, not frame size!
-	return TD_SENSOR_DEVICE_SendFrame(LOCAL_DATA, (uint8_t *) data, count, data_rx);
+	return TD_SENSOR_DEVICE_SendFrame(LOCAL_DATA, (uint8_t *) data, count,
+		data_rx);
 }
 
 /***************************************************************************//**
@@ -609,6 +683,7 @@ TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_Register(void)
 		case ACK_OK:
 			lan_address.address = rx[0] | rx[1] << 8 | rx[2] << 16 | rx[3] << 24;
 			DeviceAddress = lan_address.address;
+			RegistrationType = (TD_SENSOR_GATEWAY_Registration_t) rx[8];
 			TD_SENSOR_LAN_setLanAddress(lan_address.address, BROADCAST_MASK);
 			TD_FLASH_WriteVariables();
 			break;
@@ -633,7 +708,8 @@ TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_Register(void)
  * @return
  * 	Always return 1;
  ******************************************************************************/
-static int TD_SENSOR_DEVICE_FrameReceived(TD_LAN_frame_t *tx_frame, TD_LAN_frame_t *rx_frame)
+int DYNAMIC(TD_SENSOR_DEVICE_FrameReceived)(TD_LAN_frame_t *tx_frame,
+	TD_LAN_frame_t *rx_frame)
 {
 	uint8_t frame_count;
 	int i;
@@ -643,20 +719,36 @@ static int TD_SENSOR_DEVICE_FrameReceived(TD_LAN_frame_t *tx_frame, TD_LAN_frame
 	uint32_t address;
 	uint8_t reply[15];
 	int8_t reply_count;
+	TD_SENSOR_LAN_KeepAliveFrame_t keepalive_frame;
+	int8_t rssi;
 
-	// We don't want to handle acknowledgments here
-	if (GET_ACK(rx_frame->header)) {
-		return 1;
+	if (AckExpected == true) {
+
+		//We don't want to handle acknowledgments here
+		if (GET_ACK(rx_frame->header)) {
+			return 1;
+		} else {
+			return -1;
+		}
 	}
 	address = GET_ADDRESS(rx_frame->header);
-	if (ListenBroadcast) {
+	DEBUG_PRINTF("\r\nReceived message for address = %08X, i am address = %08X\r\n", address, DeviceAddress);
+
+	if (ListenBroadcast | ListenNetwork) {
 		if (address == (DeviceAddress | 0xFF)) {
+			DEBUG_PRINTF("\r\nReceived broadcast message\r\n");
 			broadcast = true;
+
+			// If we received unwanted frames on the network
 		} else if ((address & BroadcastMask) != (DeviceAddress & BroadcastMask)) {
+
+			DEBUG_PRINTF("\r\nReceived UNwanted message\r\n");
 			if (ReceptionEnabled) {
-				TD_LAN_ReceiveFrame(32768 * 1, 0, &device_RX);
+				TD_LAN_ReceiveFrame(RxPeriod, 0, &device_RX);
 			}
 			return 1;
+		} else {
+			DEBUG_PRINTF("\r\nReceived wanted message, address = %08X, BroadcastMask = %08X\r\n", address, BroadcastMask);
 		}
 	}
 	frame = (TD_SENSOR_LAN_Frame_t *) rx_frame->payload;
@@ -676,7 +768,8 @@ static int TD_SENSOR_DEVICE_FrameReceived(TD_LAN_frame_t *tx_frame, TD_LAN_frame
 			}
 		}
 		if (DataCallback != 0) {
-			reply_count = (*DataCallback)(broadcast, address, frame->data, frame_count, reply);
+			reply_count = (*DataCallback)(broadcast, address, frame->data,
+				frame_count, reply);
 			if (reply_count >= 0 && !broadcast) {
 				TD_SENSOR_DEVICE_Ack(rx_frame, ACK_OK, reply, reply_count);
 			}
@@ -686,13 +779,14 @@ static int TD_SENSOR_DEVICE_FrameReceived(TD_LAN_frame_t *tx_frame, TD_LAN_frame
 			TD_SENSOR_DEVICE_Ack(rx_frame, ACK_OK, frame->data, frame_count);
 		}
 	} else if (type == LOCAL_KEEPALIVE) {
-		TD_SENSOR_LAN_KeepAliveFrame_t *keepalive_frame;
-		int8_t rssi = TD_LAN_ReadLatchedRSSI();
-		keepalive_frame = (TD_SENSOR_LAN_KeepAliveFrame_t *)(frame->data);
+		rssi = TD_LAN_ReadLatchedRSSI();
+		memcpy(&keepalive_frame.interval, frame->data,
+			sizeof (keepalive_frame.interval));
+		keepalive_frame.interval = NTOHL(keepalive_frame.interval);
 		if (KeepaliveCallback != 0) {
 			reply_count = (*KeepaliveCallback)(broadcast,
 				address,
-				keepalive_frame->interval,
+				keepalive_frame.interval,
 				rssi,
 				/* frame->data */ 0,
 				/* frame_count */ 0,
@@ -707,7 +801,7 @@ static int TD_SENSOR_DEVICE_FrameReceived(TD_LAN_frame_t *tx_frame, TD_LAN_frame
 		}
 	}
 	if (ReceptionEnabled) {
-		TD_LAN_ReceiveFrame(32768 * 1, 0, &device_RX);
+		TD_LAN_ReceiveFrame(RxPeriod, 0, &device_RX);
 	}
 	return 1;
 }
@@ -729,7 +823,9 @@ static int TD_SENSOR_DEVICE_FrameReceived(TD_LAN_frame_t *tx_frame, TD_LAN_frame
  *   The callback function should return a retry count >= 0 to send an
  *   acknowledgment reply, or < 0 to not send an acknowledgment reply.
  ******************************************************************************/
-void TD_SENSOR_DEVICE_SetDataCallback(int8_t (*user_data_callback)(bool broadcast, uint32_t address, uint8_t *data, uint8_t len, uint8_t *reply))
+void TD_SENSOR_DEVICE_SetDataCallback(int8_t (*user_data_callback)(
+		bool broadcast, uint32_t address, uint8_t *data, uint8_t len,
+	uint8_t *reply))
 {
 	DataCallback = user_data_callback;
 }
@@ -751,7 +847,9 @@ void TD_SENSOR_DEVICE_SetDataCallback(int8_t (*user_data_callback)(bool broadcas
  *   The callback function should return a retry count >= 0 to send an
  *   acknowledgment reply, or < 0 to not send an acknowledgment reply.
  ******************************************************************************/
-void TD_SENSOR_DEVICE_SetKeepAliveCallback(int8_t (*user_keepalive_callback)(bool broadcast, uint32_t address, uint32_t interval, int8_t rssi, uint8_t *data, uint8_t length, uint8_t *reply))
+void TD_SENSOR_DEVICE_SetKeepAliveCallback(int8_t (*user_keepalive_callback)(
+		bool broadcast, uint32_t address, uint32_t interval, int8_t rssi,
+	uint8_t *data, uint8_t length, uint8_t *reply))
 {
 	KeepaliveCallback = user_keepalive_callback;
 }
@@ -766,14 +864,19 @@ void TD_SENSOR_DEVICE_StartReception(void)
 	TD_LAN_SetUserCallback(TD_SENSOR_DEVICE_FrameReceived);
 	ReceptionEnabled = true;
 	TD_SENSOR_LAN_setLanAddress(DeviceAddress, BROADCAST_MASK);
-	TD_LAN_ReceiveFrame(T1S, 0, &device_RX);
+
+	if (RxPeriod == 0) {
+		RxPeriod = CONFIG_LAN_PERIOD;
+	}
+
+	TD_LAN_ReceiveFrame(RxPeriod, 0, &device_RX);
 }
 
 /***************************************************************************//**
  * @brief
  *  Process the device queue.
  ******************************************************************************/
-void TD_SENSOR_DEVICE_Process(void)
+void DYNAMIC(TD_SENSOR_DEVICE_Process)(void)
 {
 	TD_SENSOR_DEVICE_QueueManager();
 }
@@ -793,7 +896,46 @@ void TD_SENSOR_DEVICE_StartBroadcastReception(uint32_t mask)
 	TD_LAN_SetUserCallback(TD_SENSOR_DEVICE_FrameReceived);
 	ReceptionEnabled = true;
 	TD_SENSOR_LAN_setLanAddress(DeviceAddress | 0xFF, 0xFFFFFF);
-	TD_LAN_ReceiveFrame(T1S, 0, &device_RX);
+
+	if (RxPeriod == 0) {
+		RxPeriod = CONFIG_LAN_PERIOD;
+	}
+	TD_LAN_ReceiveFrame(RxPeriod, 0, &device_RX);
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Start network reception including broadcast.
+ *  Allow to setup an additional mask which will
+ *  be applied by software.
+ *
+ * @param[in] mask
+ *  An additional mask address to apply to the received frame.
+ ******************************************************************************/
+void TD_SENSOR_DEVICE_StartNetworkReception(uint32_t mask)
+{
+	BroadcastMask = mask;
+	ListenNetwork = true;
+	TD_LAN_SetUserCallback(TD_SENSOR_DEVICE_FrameReceived);
+	ReceptionEnabled = true;
+
+	// Reminder : BYTE3 BYTE2 BYTE1 BYTE0
+	// Network address is coded using BYTE2 and BYTE1
+	// Gateway address is composed by network address and BYTE0 forced to 0x00
+	// Devices address is composed by network address and BYTE0 given by Gateway
+	// during pairing.
+
+	// Force last byte of Device address to 0x00 and set the mask address with
+	// last byte equal to 0x00, this permits to receive all frames coming
+	// from network address. Then a software filter is done to reject unwanted
+	// frames
+
+	//tfp_printf("\r\nDeviceAddress = %08X\r\n", DeviceAddress);
+	TD_SENSOR_LAN_setLanAddress(DeviceAddress & 0x00FFFF00, 0x00FFFF00);
+	if (RxPeriod == 0) {
+		RxPeriod = CONFIG_LAN_PERIOD;
+	}
+	TD_LAN_ReceiveFrame(RxPeriod, 0, &device_RX);
 }
 
 /***************************************************************************//**
@@ -815,10 +957,10 @@ bool TD_SENSOR_DEVICE_StartSynchReception(void)
  ******************************************************************************/
 void TD_SENSOR_DEVICE_StopReception(void)
 {
-	TD_LAN_SetUserCallback(0);
 	TD_LAN_Abort();
 	ReceptionEnabled = false;
 	ListenBroadcast = false;
+	ListenNetwork = false;
 }
 
 /***************************************************************************//**
@@ -859,6 +1001,22 @@ bool TD_SENSOR_DEVICE_isReceptionEnabled(void)
 bool TD_SENSOR_DEVICE_isBroadcastReceptionEnabled(void)
 {
 	if (ReceptionEnabled && ListenBroadcast) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Check whether broadcast reception is enabled or not.
+ *
+ * @return
+ *  Returns true if broadcast reception is enabled, false otherwise.
+ ******************************************************************************/
+bool TD_SENSOR_DEVICE_isNetworkReceptionEnabled(void)
+{
+	if (ReceptionEnabled && ListenNetwork) {
 		return true;
 	} else {
 		return false;
@@ -1002,6 +1160,34 @@ void TD_SENSOR_DEVICE_SetAsynchronousForward(bool asynch)
 bool TD_SENSOR_DEVICE_IsAsynchronousForward(void)
 {
 	return UseAsynchForward;
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Return device registration type.
+ ******************************************************************************/
+TD_SENSOR_GATEWAY_Registration_t TD_SENSOR_DEVICE_GetRegistrationType(void)
+{
+	return RegistrationType;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Callback to call before and after lan transmission
+ ******************************************************************************/
+void TD_SENSOR_DEVICE_SetUserCallback(void (*user_callback)(void))
+{
+	UserCallback = user_callback;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Callback to set tx and rx reception period
+ ******************************************************************************/
+void TD_SENSOR_DEVICE_SetTxRxPeriod(uint32_t tx_period, uint32_t rx_period)
+{
+	RxPeriod = rx_period;
+	TD_SENSOR_LAN_SetTxPeriod(tx_period);
 }
 
 /** @} */

@@ -3,15 +3,15 @@
 
 \section Overview
 
-The tdrf library are high-level functions to make use of the on-board RF chip either for Sigfox transmission or
+The tdrf library contains high-level functions that make use of the on-board RF chip either for Sigfox transmission or
 for short range communication.
 
 \section Detailed Description
 
 \subsection Sigfox
-file: td_sigfox.h
+files: td_sigfox.h, td_sigfox_downlink.h, td_sigfox_proxy.h
 
-Provides the Sigfox transmission function as well as battery level while transmitting.
+Provides the Sigfox transmission function, with both uplink and downlink capabilities, and with support for either direct, proxy or transparent proxy transmissions.
 
 \subsection LAN
 file: td_lan.h

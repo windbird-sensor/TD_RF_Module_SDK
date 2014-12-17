@@ -1,383 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
-		<cconfiguration id="iar.arm.toolchain.project.exe.configuration.debug.v5.4.0.1914464558.1990563401.297814257.402206755.412616989">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="iar.arm.toolchain.project.exe.configuration.debug.v5.4.0.1914464558.1990563401.297814257.402206755.412616989" moduleId="org.eclipse.cdt.core.settings" name="TD1202 Debug">
-				<externalSettings/>
-				<extensions>
-					<extension id="com.iar.cdt.errorParser.com.iar.cdt.errorParser.ErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-				</extensions>
-			</storageModule>
-			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="rm -rf" description="" id="iar.arm.toolchain.project.exe.configuration.debug.v5.4.0.1914464558.1990563401.297814257.402206755.412616989" name="TD1202 Debug" parent="iar.arm.toolchain.project.exe.configuration.debug.v5.4.0">
-					<folderInfo id="iar.arm.toolchain.project.exe.configuration.debug.v5.4.0.1914464558.1990563401.297814257.402206755.412616989." name="/" resourcePath="">
-						<toolChain id="iar.arm.toolchain.project.exe.configuration.debug.toolchain.v5.4.0.837629850" name="IAR Toolchain for ARM - 6.x" superClass="iar.arm.toolchain.project.exe.configuration.debug.toolchain.v5.4.0">
-							<option id="iar.arm.toolchain.option.cpuCore.v5.4.0.369220500" name="Processor core:" superClass="iar.arm.toolchain.option.cpuCore.v5.4.0" value="iar.arm.toolchain.option.cpuCore.Cortex-M3.v5.4.0" valueType="enumerated"/>
-							<option id="iar.arm.toolchain.option.endianMode.v5.4.0.644157977" name="Endian mode:" superClass="iar.arm.toolchain.option.endianMode.v5.4.0"/>
-							<option id="iar.arm.toolchain.option.bigEndianFormat.v5.4.0.1257009525" name="Big-endian format:" superClass="iar.arm.toolchain.option.bigEndianFormat.v5.4.0"/>
-							<option id="iar.arm.toolchain.option.printfFormatter.v5.4.0.828158898" name="Printf formatter:" superClass="iar.arm.toolchain.option.printfFormatter.v5.4.0"/>
-							<option id="iar.arm.toolchain.option.scanfFormatter.v5.4.0.577848444" name="Scanf formatter:" superClass="iar.arm.toolchain.option.scanfFormatter.v5.4.0"/>
-							<option id="iar.arm.toolchain.option.bufferedOutput.v6.1.0.1028205856" name="Buffered terminal output" superClass="iar.arm.toolchain.option.bufferedOutput.v6.1.0"/>
-							<option id="iar.arm.toolchain.option.mfc.v5.5.2.696653725" name="Enable multi-file compilation" superClass="iar.arm.toolchain.option.mfc.v5.5.2"/>
-							<option id="iar.arm.toolchain.option.useCMSIS.v6.2.2.1259142381" name="Use CMSIS" superClass="iar.arm.toolchain.option.useCMSIS.v6.2.2" value="true" valueType="boolean"/>
-							<option id="iar.arm.toolchain.option.fpu.v5.4.0.536256049" name="FPU:" superClass="iar.arm.toolchain.option.fpu.v5.4.0"/>
-							<option id="iar.arm.toolchain.option.libraryConfig.v5.4.0.371846369" name="Library:" superClass="iar.arm.toolchain.option.libraryConfig.v5.4.0"/>
-							<option id="iar.arm.toolchain.option.misra-c.enable.1127415702" name="Enable MISRA-C" superClass="iar.arm.toolchain.option.misra-c.enable"/>
-							<option id="iar.arm.toolchain.option.deviceInfo.v5.4.3.1448472979" name="Device info storage option" superClass="iar.arm.toolchain.option.deviceInfo.v5.4.3" value="config/devices/EnergyMicro/EFM32TG/EFM32TG210F32.menu" valueType="string"/>
-							<option id="iar.arm.toolchain.option.deviceName.v5.5.0.1632443552" name="Device (change with Project &gt; Select Device...)" superClass="iar.arm.toolchain.option.deviceName.v5.5.0" value="EnergyMicro EFM32TG210F32" valueType="string"/>
-							<option id="iar.arm.toolchain.option.deviceTag.v6.3.1.1437231354" name="Device tag storage option" superClass="iar.arm.toolchain.option.deviceTag.v6.3.1" value="EFM32TG210F32" valueType="string"/>
-							<option id="iar.arm.toolchain.option.useDSPLibrary.v6.2.2.765001674" name="DSP Library" superClass="iar.arm.toolchain.option.useDSPLibrary.v6.2.2"/>
-							<option id="iar.arm.toolchain.option.semihosted.v5.4.0.1863626464" name="Include semihosting interface" superClass="iar.arm.toolchain.option.semihosted.v5.4.0"/>
-							<option id="iar.arm.toolchain.option.lowLevelInterfaceCortex.v5.4.0.700552681" name="Library low-level&#10;interface implementation&#10;(Cortex-M cores):" superClass="iar.arm.toolchain.option.lowLevelInterfaceCortex.v5.4.0"/>
-							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF" id="iar.arm.toolchain.targetPlatform.v5.4.0.332796898" isAbstract="false" name="IAR Target platform for ARM (ELF)" osList="win32,linux" superClass="iar.arm.toolchain.targetPlatform.v5.4.0"/>
-							<builder buildPath="${workspace_loc:/blink-IAR/Debug}" id="iar.arm.toolchain.builder.2.1157001002" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="iar.arm.toolchain.builder.2"/>
-							<tool id="iar.arm.toolchain.compiler.v5.4.1.420254318" name="IAR C/C++ Compiler for ARM" superClass="iar.arm.toolchain.compiler.v5.4.1">
-								<option defaultValue="true" id="iar.arm.toolchain.compiler.option.debugInfo.v5.4.0.1652282578" name="Generate debug information" superClass="iar.arm.toolchain.compiler.option.debugInfo.v5.4.0" valueType="boolean"/>
-								<option defaultValue="iar.arm.toolchain.compiler.option.optLevel.none.v5.4.0" id="iar.arm.toolchain.compiler.option.optLevel.v5.4.0.323364991" name="Optimization level:" superClass="iar.arm.toolchain.compiler.option.optLevel.v5.4.0" valueType="enumerated"/>
-								<option defaultValue="true" id="iar.arm.toolchain.compiler.option.optCSE.v5.4.0.2138653723" name="Disable common subexpression elimination" superClass="iar.arm.toolchain.compiler.option.optCSE.v5.4.0" value="true" valueType="boolean"/>
-								<option defaultValue="true" id="iar.arm.toolchain.compiler.option.optUnroll.v5.4.0.1977035412" name="Disable loop unrolling" superClass="iar.arm.toolchain.compiler.option.optUnroll.v5.4.0" value="true" valueType="boolean"/>
-								<option defaultValue="true" id="iar.arm.toolchain.compiler.option.optInline.v5.4.0.2061800754" name="Disable function inlining" superClass="iar.arm.toolchain.compiler.option.optInline.v5.4.0" value="true" valueType="boolean"/>
-								<option defaultValue="true" id="iar.arm.toolchain.compiler.option.optCodeMotion.v5.4.0.333782957" name="Disable code motion" superClass="iar.arm.toolchain.compiler.option.optCodeMotion.v5.4.0" value="true" valueType="boolean"/>
-								<option defaultValue="true" id="iar.arm.toolchain.compiler.option.optAliasAnalysis.v5.4.0.764778985" name="Disable type-based alias analysis" superClass="iar.arm.toolchain.compiler.option.optAliasAnalysis.v5.4.0" value="true" valueType="boolean"/>
-								<option defaultValue="true" id="iar.arm.toolchain.compiler.option.optStaticClustering.v5.4.0.89358488" name="Disable static clustering" superClass="iar.arm.toolchain.compiler.option.optStaticClustering.v5.4.0" value="true" valueType="boolean"/>
-								<option defaultValue="true" id="iar.arm.toolchain.compiler.option.optScheduling.v5.4.0.1510734421" name="Disable instruction scheduling" superClass="iar.arm.toolchain.compiler.option.optScheduling.v5.4.0" value="true" valueType="boolean"/>
-								<option id="iar.arm.toolchain.compiler.option.language.v6.1.0.1025875966" name="Language" superClass="iar.arm.toolchain.compiler.option.language.v6.1.0"/>
-								<option id="iar.arm.toolchain.compiler.option.cppdialect.v6.1.0.1259199089" name="C++ dialect" superClass="iar.arm.toolchain.compiler.option.cppdialect.v6.1.0"/>
-								<option id="iar.arm.toolchain.compiler.option.cpuMode.v5.4.0.8319424" name="Processor mode:" superClass="iar.arm.toolchain.compiler.option.cpuMode.v5.4.0" value="iar.arm.toolchain.compiler.option.cpuMode.thumb.v5.4.0" valueType="enumerated"/>
-								<option id="iar.arm.toolchain.compiler.option.incPaths.v5.4.0.1975571969" name="Additional include directories" superClass="iar.arm.toolchain.compiler.option.incPaths.v5.4.0" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib-IAR}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device-IAR}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32TG/Include}&quot;"/>
-								</option>
-								<option id="iar.arm.toolchain.compiler.option.defines.v5.4.0.1435007079" name="Defined Symbols:" superClass="iar.arm.toolchain.compiler.option.defines.v5.4.0" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="DEBUG"/>
-									<listOptionValue builtIn="false" value="DEBUG_EFM"/>
-									<listOptionValue builtIn="false" value="EFM32TG210F32"/>
-									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_TD1202"/>
-								</option>
-								<option id="iar.arm.toolchain.compiler.option.preserveComments.v6.2.0.601931392" name="Preserve comments" superClass="iar.arm.toolchain.compiler.option.preserveComments.v6.2.0"/>
-								<option id="iar.arm.toolchain.compiler.option.generateLineDirectives.v6.2.0.831405520" name="Generate #line directives" superClass="iar.arm.toolchain.compiler.option.generateLineDirectives.v6.2.0"/>
-								<option id="iar.arm.toolchain.compiler.option.additionalUserOptions.2060175295" name="Use command line options" superClass="iar.arm.toolchain.compiler.option.additionalUserOptions" value="--silent" valueType="string"/>
-								<inputType id="iar.arm.toolchain.compiler.inputType.v5.4.1.590222257" name="IAR C/C++ Compiler Input Type" superClass="iar.arm.toolchain.compiler.inputType.v5.4.1"/>
-							</tool>
-							<tool id="iar.arm.toolchain.assembler.v5.4.0.591347148" name="IAR Assembler for ARM" superClass="iar.arm.toolchain.assembler.v5.4.0">
-								<option defaultValue="true" id="iar.arm.toolchain.assembler.option.debugInfo.v5.4.0.1934676103" name="Generate debug information" superClass="iar.arm.toolchain.assembler.option.debugInfo.v5.4.0" valueType="boolean"/>
-								<option id="iar.arm.toolchain.assembler.option.includePaths.v5.4.0.1377750571" name="Additional include directories:" superClass="iar.arm.toolchain.assembler.option.includePaths.v5.4.0" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib-IAR}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device-IAR}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32TG/Include}&quot;"/>
-								</option>
-								<option id="iar.arm.toolchain.assembler.option.definedSymbols.v5.4.0.923789354" name="Defined symbols:" superClass="iar.arm.toolchain.assembler.option.definedSymbols.v5.4.0" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="DEBUG"/>
-									<listOptionValue builtIn="false" value="DEBUG_EFM"/>
-									<listOptionValue builtIn="false" value="EFM32TG210F32"/>
-									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_TD1202"/>
-								</option>
-								<option id="iar.arm.toolchain.assembler.option.asmListContents.v6.2.0.59774163" name="Include listing" superClass="iar.arm.toolchain.assembler.option.asmListContents.v6.2.0"/>
-								<option id="iar.arm.toolchain.assembler.option.includeMacroDefinitions.v6.2.0.18213723" name="Macro definitions" superClass="iar.arm.toolchain.assembler.option.includeMacroDefinitions.v6.2.0"/>
-								<option id="iar.arm.toolchain.assembler.option.includeMacroExpansions.v6.2.0.366622557" name="Macro expansions" superClass="iar.arm.toolchain.assembler.option.includeMacroExpansions.v6.2.0"/>
-								<option id="iar.arm.toolchain.assembler.option.includeAsmLinesOnly.v6.2.0.2129066704" name="Assembled lines only" superClass="iar.arm.toolchain.assembler.option.includeAsmLinesOnly.v6.2.0"/>
-								<option id="iar.arm.toolchain.assembler.option.includeMultilineCode.v6.2.0.554634085" name="Multiline code" superClass="iar.arm.toolchain.assembler.option.includeMultilineCode.v6.2.0"/>
-								<option id="iar.arm.toolchain.assembler.option.crossRefDefines.v6.2.0.1637208009" name="#defines" superClass="iar.arm.toolchain.assembler.option.crossRefDefines.v6.2.0"/>
-								<option id="iar.arm.toolchain.assembler.option.crossRefInternalSymbols.v6.2.0.606562315" name="Internal symbols" superClass="iar.arm.toolchain.assembler.option.crossRefInternalSymbols.v6.2.0"/>
-								<option id="iar.arm.toolchain.assembler.option.crossRefDualLineSpacing.v6.2.0.1602050447" name="Dual line spacing" superClass="iar.arm.toolchain.assembler.option.crossRefDualLineSpacing.v6.2.0"/>
-								<option id="iar.arm.toolchain.assembler.option.extraOptions.v5.4.0.1330873827" name="Use command line options:" superClass="iar.arm.toolchain.assembler.option.extraOptions.v5.4.0" value="--silent" valueType="string"/>
-								<inputType id="iar.arm.toolchain.assembler.inputType.asmFile.v5.4.0.1847400200" name="IAR Assembler input type for ARM (asm, s)" superClass="iar.arm.toolchain.assembler.inputType.asmFile.v5.4.0"/>
-							</tool>
-							<tool id="iar.arm.toolchain.linker.v5.4.0.807638907" name="IAR Linker for ARM" superClass="iar.arm.toolchain.linker.v5.4.0">
-								<option id="iar.arm.toolchain.linker.option.icfFile.v5.4.0.295495159" name="Linker configuration file:" superClass="iar.arm.toolchain.linker.option.icfFile.v5.4.0" value="../EFM32TG210F32.icf" valueType="string"/>
-								<option id="iar.arm.toolchain.linker.option.devicePostProcess.v5.5.2.1566999906" name="IElfToolPostProcess" superClass="iar.arm.toolchain.linker.option.devicePostProcess.v5.5.2"/>
-								<option id="iar.arm.toolchain.linker.option.outFormat.v5.5.2.1877453282" name="Output format:" superClass="iar.arm.toolchain.linker.option.outFormat.v5.5.2" value="iar.arm.toolchain.linker.option.outFormat.binary.v5.5.2" valueType="enumerated"/>
-								<option id="iar.arm.toolchain.linker.option.overrideDefaultOutputFile.v5.5.2.1246531211" name="Override default output file" superClass="iar.arm.toolchain.linker.option.overrideDefaultOutputFile.v5.5.2"/>
-								<option id="iar.arm.toolchain.linker.option.generateAdditonalOutput.v5.5.2.1113150287" name="Generate additional output" superClass="iar.arm.toolchain.linker.option.generateAdditonalOutput.v5.5.2" value="true" valueType="boolean"/>
-								<option id="iar.arm.toolchain.linker.option.additionalLibraries.v5.5.0.638240112" name="Additional libraries" superClass="iar.arm.toolchain.linker.option.additionalLibraries.v5.5.0" valueType="libs">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/IAR Debug/libtdgeoloc.a}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/IAR Debug/libtdsensor.a}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/IAR Debug/libtdrf.a}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers/IAR Debug/libtddrivers.a}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/IAR Debug/libtdcore.a}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/IAR Debug/libemlib.a}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/IAR Debug/libDevice.a}&quot;"/>
-								</option>
-								<option id="iar.arm.toolchain.linker.option.performVFE.v6.2.2.770541294" name="Perform C++ Virtual Function Elimination" superClass="iar.arm.toolchain.linker.option.performVFE.v6.2.2"/>
-								<option id="iar.arm.toolchain.linker.option.forceVFE.v6.2.2.489204203" name="Even if some modules are missing VFE information" superClass="iar.arm.toolchain.linker.option.forceVFE.v6.2.2"/>
-								<option id="iar.arm.toolchain.linker.option.fillPattern.v5.5.2.1911921448" name="Fill pattern:" superClass="iar.arm.toolchain.linker.option.fillPattern.v5.5.2"/>
-								<option id="iar.arm.toolchain.linker.option.fillStart.v5.5.2.1797676647" name="Start address:" superClass="iar.arm.toolchain.linker.option.fillStart.v5.5.2"/>
-								<option id="iar.arm.toolchain.linker.option.fillEnd.v5.5.2.1914453370" name="End address:" superClass="iar.arm.toolchain.linker.option.fillEnd.v5.5.2"/>
-								<option id="iar.arm.toolchain.linker.option.generateChecksum.v5.5.2.1432242841" name="Generate checksum" superClass="iar.arm.toolchain.linker.option.generateChecksum.v5.5.2"/>
-								<option id="iar.arm.toolchain.linker.option.logFileInitializationDecisions.v5.4.0.711176066" name="Log initialization decisions" superClass="iar.arm.toolchain.linker.option.logFileInitializationDecisions.v5.4.0"/>
-								<option id="iar.arm.toolchain.linker.option.logFileModuleSelections.v5.4.0.7944558" name="Log module selections" superClass="iar.arm.toolchain.linker.option.logFileModuleSelections.v5.4.0"/>
-								<option id="iar.arm.toolchain.linker.option.logFileSectionSelections.v5.4.0.1792098380" name="Log section selections" superClass="iar.arm.toolchain.linker.option.logFileSectionSelections.v5.4.0"/>
-								<option id="iar.arm.toolchain.linker.option.logFileVeenerStatistics.v5.4.0.1761435600" name="Log veener statistics" superClass="iar.arm.toolchain.linker.option.logFileVeenerStatistics.v5.4.0"/>
-								<option id="iar.arm.toolchain.linker.option.logFileLibrarySelections.v5.5.0.759823887" name="Log automatic library selection" superClass="iar.arm.toolchain.linker.option.logFileLibrarySelections.v5.5.0"/>
-								<option id="iar.arm.toolchain.linker.option.logFileRedirectedSymbols.v5.5.0.1338069614" name="Log redirected symbols" superClass="iar.arm.toolchain.linker.option.logFileRedirectedSymbols.v5.5.0"/>
-								<option id="iar.arm.toolchain.linker.option.logFileUnusedFragments.v5.5.0.2063976904" name="Log unused section fragments" superClass="iar.arm.toolchain.linker.option.logFileUnusedFragments.v5.5.0"/>
-								<option id="iar.arm.toolchain.linker.option.libPaths.v5.5.1.830110708" name="Library paths" superClass="iar.arm.toolchain.linker.option.libPaths.v5.5.1" valueType="libPaths">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/IAR Debug}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/IAR Debug}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers/IAR Debug}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/IAR Debug}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib-IAR/Debug}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device-IAR/Debug}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/IAR Debug}&quot;"/>
-								</option>
-								<option id="iar.arm.toolchain.linker.option.extraOptions.v5.4.0.78271606" name="Use command line options:" superClass="iar.arm.toolchain.linker.option.extraOptions.v5.4.0" value="--silent" valueType="string"/>
-								<inputType id="iar.arm.toolchain.linker.inputType.object.v5.4.0.1766811425" name="IAR Linker Input Type for ARM (o)" superClass="iar.arm.toolchain.linker.inputType.object.v5.4.0">
-									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
-									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
-								</inputType>
-							</tool>
-							<tool id="iar.arm.toolchain.archive.v5.4.0.732805412" name="IAR Library Builder for ARM" superClass="iar.arm.toolchain.archive.v5.4.0"/>
-						</toolChain>
-					</folderInfo>
-				</configuration>
-			</storageModule>
-			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
-				<externalSettings containerId="Device;iar.arm.toolchain.project.library.configuration.debug.v5.4.0.1820574718" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/Device-IAR"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/Device"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/Device-IAR/Debug"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/Device/IAR Debug"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="Device-IAR" srcPrefixMapping="" srcRootPath=""/>
-						<entry flags="RESOLVED" kind="libraryFile" name="Device" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<externalSettings containerId="emlib;iar.arm.toolchain.project.library.configuration.debug.v5.4.0.872161341" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/emlib-IAR"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/emlib-IAR/Debug"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="emlib-IAR" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<externalSettings containerId="libtdrf;iar.arm.toolchain.project.library.configuration.debug.v5.4.0.133491925.583666232.355635148" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/libtdrf"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/libtdrf/IAR Debug"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="libtdrf" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<externalSettings containerId="libtddrivers;iar.arm.toolchain.project.library.configuration.debug.v5.4.0.133491925.602364429.1798058079" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/libtddrivers"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/libtddrivers/IAR Debug"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="libtddrivers" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<externalSettings containerId="libtdgeoloc;iar.arm.toolchain.project.library.configuration.debug.v5.4.0.133491925.602364429.1097586341" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/libtdgeoloc"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/libtdgeoloc/IAR Debug"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="libtdgeoloc" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<externalSettings containerId="libtdsensor;iar.arm.toolchain.project.library.configuration.debug.v5.4.0.133491925.602364429" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/libtdsensor"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/libtdsensor/IAR Debug"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="libtdsensor" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-			</storageModule>
-		</cconfiguration>
-		<cconfiguration id="iar.arm.toolchain.project.exe.configuration.release.v5.4.0.906220437.1061650086.239798615.1655237169.629806206">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="iar.arm.toolchain.project.exe.configuration.release.v5.4.0.906220437.1061650086.239798615.1655237169.629806206" moduleId="org.eclipse.cdt.core.settings" name="TD1202 Release">
-				<externalSettings/>
-				<extensions>
-					<extension id="com.iar.cdt.errorParser.com.iar.cdt.errorParser.ErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-				</extensions>
-			</storageModule>
-			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="rm -rf" description="" id="iar.arm.toolchain.project.exe.configuration.release.v5.4.0.906220437.1061650086.239798615.1655237169.629806206" name="TD1202 Release" parent="iar.arm.toolchain.project.exe.configuration.release.v5.4.0">
-					<folderInfo id="iar.arm.toolchain.project.exe.configuration.release.v5.4.0.906220437.1061650086.239798615.1655237169.629806206." name="/" resourcePath="">
-						<toolChain id="iar.arm.toolchain.project.exe.configuration.release.toolchain.v5.4.0.1946079468" name="IAR Toolchain for ARM - 6.x" superClass="iar.arm.toolchain.project.exe.configuration.release.toolchain.v5.4.0">
-							<option id="iar.arm.toolchain.option.cpuCore.v5.4.0.791195211" name="Processor core:" superClass="iar.arm.toolchain.option.cpuCore.v5.4.0" value="iar.arm.toolchain.option.cpuCore.Cortex-M3.v5.4.0" valueType="enumerated"/>
-							<option id="iar.arm.toolchain.option.endianMode.v5.4.0.358466718" name="Endian mode:" superClass="iar.arm.toolchain.option.endianMode.v5.4.0"/>
-							<option id="iar.arm.toolchain.option.bigEndianFormat.v5.4.0.928369709" name="Big-endian format:" superClass="iar.arm.toolchain.option.bigEndianFormat.v5.4.0"/>
-							<option id="iar.arm.toolchain.option.printfFormatter.v5.4.0.385850552" name="Printf formatter:" superClass="iar.arm.toolchain.option.printfFormatter.v5.4.0"/>
-							<option id="iar.arm.toolchain.option.scanfFormatter.v5.4.0.1323040636" name="Scanf formatter:" superClass="iar.arm.toolchain.option.scanfFormatter.v5.4.0"/>
-							<option id="iar.arm.toolchain.option.bufferedOutput.v6.1.0.1617013972" name="Buffered terminal output" superClass="iar.arm.toolchain.option.bufferedOutput.v6.1.0"/>
-							<option id="iar.arm.toolchain.option.mfc.v5.5.2.379697092" name="Enable multi-file compilation" superClass="iar.arm.toolchain.option.mfc.v5.5.2"/>
-							<option id="iar.arm.toolchain.option.deviceInfo.v5.4.3.634327144" name="Device info storage option" superClass="iar.arm.toolchain.option.deviceInfo.v5.4.3" value="config/devices/EnergyMicro/EFM32TG/EFM32TG210F32.menu" valueType="string"/>
-							<option id="iar.arm.toolchain.option.deviceName.v5.5.0.247161423" name="Device (change with Project &gt; Select Device...)" superClass="iar.arm.toolchain.option.deviceName.v5.5.0" value="EnergyMicro EFM32TG210F32" valueType="string"/>
-							<option id="iar.arm.toolchain.option.deviceTag.v6.3.1.1880754023" name="Device tag storage option" superClass="iar.arm.toolchain.option.deviceTag.v6.3.1" value="EFM32TG210F32" valueType="string"/>
-							<option id="iar.arm.toolchain.option.useCMSIS.v6.2.2.458535245" name="Use CMSIS" superClass="iar.arm.toolchain.option.useCMSIS.v6.2.2" value="true" valueType="boolean"/>
-							<option id="iar.arm.toolchain.option.fpu.v5.4.0.1005229912" name="FPU:" superClass="iar.arm.toolchain.option.fpu.v5.4.0"/>
-							<option id="iar.arm.toolchain.option.libraryConfig.v5.4.0.1600189023" name="Library:" superClass="iar.arm.toolchain.option.libraryConfig.v5.4.0"/>
-							<option id="iar.arm.toolchain.option.misra-c.enable.1087121582" name="Enable MISRA-C" superClass="iar.arm.toolchain.option.misra-c.enable"/>
-							<option id="iar.arm.toolchain.option.useDSPLibrary.v6.2.2.552351648" name="DSP Library" superClass="iar.arm.toolchain.option.useDSPLibrary.v6.2.2"/>
-							<option id="iar.arm.toolchain.option.semihosted.v5.4.0.2129738165" name="Include semihosting interface" superClass="iar.arm.toolchain.option.semihosted.v5.4.0"/>
-							<option id="iar.arm.toolchain.option.lowLevelInterfaceCortex.v5.4.0.1440881156" name="Library low-level&#10;interface implementation&#10;(Cortex-M cores):" superClass="iar.arm.toolchain.option.lowLevelInterfaceCortex.v5.4.0"/>
-							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF" id="iar.arm.toolchain.targetPlatform.v5.4.0.524216881" isAbstract="false" name="IAR Target platform for ARM (ELF)" osList="win32,linux" superClass="iar.arm.toolchain.targetPlatform.v5.4.0"/>
-							<builder buildPath="${workspace_loc:/blink-IAR/Release}" id="iar.arm.toolchain.builder.2.1679723976" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="iar.arm.toolchain.builder.2"/>
-							<tool id="iar.arm.toolchain.compiler.v5.4.1.1593674879" name="IAR C/C++ Compiler for ARM" superClass="iar.arm.toolchain.compiler.v5.4.1">
-								<option defaultValue="false" id="iar.arm.toolchain.compiler.option.debugInfo.v5.4.0.709135324" name="Generate debug information" superClass="iar.arm.toolchain.compiler.option.debugInfo.v5.4.0" valueType="boolean"/>
-								<option defaultValue="iar.arm.toolchain.compiler.option.optLevel.highBalance.v5.4.0" id="iar.arm.toolchain.compiler.option.optLevel.v5.4.0.675579873" name="Optimization level:" superClass="iar.arm.toolchain.compiler.option.optLevel.v5.4.0" valueType="enumerated"/>
-								<option id="iar.arm.toolchain.compiler.option.defines.v5.4.0.596309283" name="Defined Symbols:" superClass="iar.arm.toolchain.compiler.option.defines.v5.4.0" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="EFM32TG210F32"/>
-									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_TD1202"/>
-								</option>
-								<option id="iar.arm.toolchain.compiler.option.cpuMode.v5.4.0.1616236494" name="Processor mode:" superClass="iar.arm.toolchain.compiler.option.cpuMode.v5.4.0" value="iar.arm.toolchain.compiler.option.cpuMode.thumb.v5.4.0" valueType="enumerated"/>
-								<option id="iar.arm.toolchain.compiler.option.incPaths.v5.4.0.6735485" name="Additional include directories" superClass="iar.arm.toolchain.compiler.option.incPaths.v5.4.0" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib-IAR}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device-IAR}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32TG/Include}&quot;"/>
-								</option>
-								<option id="iar.arm.toolchain.compiler.option.language.v6.1.0.1209474916" name="Language" superClass="iar.arm.toolchain.compiler.option.language.v6.1.0"/>
-								<option id="iar.arm.toolchain.compiler.option.cppdialect.v6.1.0.1616959461" name="C++ dialect" superClass="iar.arm.toolchain.compiler.option.cppdialect.v6.1.0"/>
-								<option id="iar.arm.toolchain.compiler.option.additionalUserOptions.1011970435" name="Use command line options" superClass="iar.arm.toolchain.compiler.option.additionalUserOptions" value="--silent" valueType="string"/>
-								<inputType id="iar.arm.toolchain.compiler.inputType.v5.4.1.315169155" name="IAR C/C++ Compiler Input Type" superClass="iar.arm.toolchain.compiler.inputType.v5.4.1"/>
-							</tool>
-							<tool id="iar.arm.toolchain.assembler.v5.4.0.1917090647" name="IAR Assembler for ARM" superClass="iar.arm.toolchain.assembler.v5.4.0">
-								<option defaultValue="false" id="iar.arm.toolchain.assembler.option.debugInfo.v5.4.0.1019431629" name="Generate debug information" superClass="iar.arm.toolchain.assembler.option.debugInfo.v5.4.0" valueType="boolean"/>
-								<option id="iar.arm.toolchain.assembler.option.includePaths.v5.4.0.1150025158" name="Additional include directories:" superClass="iar.arm.toolchain.assembler.option.includePaths.v5.4.0" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib-IAR}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device-IAR}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32TG/Include}&quot;"/>
-								</option>
-								<option id="iar.arm.toolchain.assembler.option.definedSymbols.v5.4.0.884718228" name="Defined symbols:" superClass="iar.arm.toolchain.assembler.option.definedSymbols.v5.4.0" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="EFM32TG210F32"/>
-									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_TD1202"/>
-								</option>
-								<option id="iar.arm.toolchain.assembler.option.extraOptions.v5.4.0.1197304227" name="Use command line options:" superClass="iar.arm.toolchain.assembler.option.extraOptions.v5.4.0" value="--silent" valueType="string"/>
-								<inputType id="iar.arm.toolchain.assembler.inputType.asmFile.v5.4.0.1026680459" name="IAR Assembler input type for ARM (asm, s)" superClass="iar.arm.toolchain.assembler.inputType.asmFile.v5.4.0"/>
-							</tool>
-							<tool id="iar.arm.toolchain.linker.v5.4.0.874199690" name="IAR Linker for ARM" superClass="iar.arm.toolchain.linker.v5.4.0">
-								<option id="iar.arm.toolchain.linker.option.icfFile.v5.4.0.1134543866" name="Linker configuration file:" superClass="iar.arm.toolchain.linker.option.icfFile.v5.4.0" value="../EFM32TG210F32.icf" valueType="string"/>
-								<option id="iar.arm.toolchain.linker.option.devicePostProcess.v5.5.2.1735429137" name="IElfToolPostProcess" superClass="iar.arm.toolchain.linker.option.devicePostProcess.v5.5.2"/>
-								<option id="iar.arm.toolchain.linker.option.generateAdditonalOutput.v5.5.2.1066002699" name="Generate additional output" superClass="iar.arm.toolchain.linker.option.generateAdditonalOutput.v5.5.2" value="true" valueType="boolean"/>
-								<option id="iar.arm.toolchain.linker.option.outFormat.v5.5.2.126873407" name="Output format:" superClass="iar.arm.toolchain.linker.option.outFormat.v5.5.2" value="iar.arm.toolchain.linker.option.outFormat.binary.v5.5.2" valueType="enumerated"/>
-								<option id="iar.arm.toolchain.linker.option.additionalLibraries.v5.5.0.37837626" name="Additional libraries" superClass="iar.arm.toolchain.linker.option.additionalLibraries.v5.5.0" valueType="libs">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/IAR Release/libtdgeoloc.a}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/IAR Release/libtdsensor.a}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/IAR Release/libtdrf.a}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers/IAR Release/libtddrivers.a}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/IAR Release/libtdcore.a}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/IAR Release/libemlib.a}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/IAR Release/libDevice.a}&quot;"/>
-								</option>
-								<option id="iar.arm.toolchain.linker.option.performVFE.v6.2.2.1867810191" name="Perform C++ Virtual Function Elimination" superClass="iar.arm.toolchain.linker.option.performVFE.v6.2.2"/>
-								<option id="iar.arm.toolchain.linker.option.forceVFE.v6.2.2.1348978452" name="Even if some modules are missing VFE information" superClass="iar.arm.toolchain.linker.option.forceVFE.v6.2.2"/>
-								<option id="iar.arm.toolchain.linker.option.libPaths.v5.5.1.1464857155" name="Library paths" superClass="iar.arm.toolchain.linker.option.libPaths.v5.5.1" valueType="libPaths">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/IAR Release}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/IAR Release}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers/IAR Release}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/IAR Release}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/IAR Release}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib-IAR/Release}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device-IAR/Release}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/IAR Release}&quot;"/>
-								</option>
-								<option id="iar.arm.toolchain.linker.option.extraOptions.v5.4.0.1038439295" name="Use command line options:" superClass="iar.arm.toolchain.linker.option.extraOptions.v5.4.0" value="--silent" valueType="string"/>
-								<inputType id="iar.arm.toolchain.linker.inputType.object.v5.4.0.1999168993" name="IAR Linker Input Type for ARM (o)" superClass="iar.arm.toolchain.linker.inputType.object.v5.4.0">
-									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
-									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
-								</inputType>
-							</tool>
-							<tool id="iar.arm.toolchain.archive.v5.4.0.132846330" name="IAR Library Builder for ARM" superClass="iar.arm.toolchain.archive.v5.4.0"/>
-						</toolChain>
-					</folderInfo>
-				</configuration>
-			</storageModule>
-			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
-				<externalSettings containerId="Device;iar.arm.toolchain.project.library.configuration.release.v5.4.0.2019096550" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/Device-IAR"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/Device"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/Device-IAR/Release"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/Device/IAR Release"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="Device-IAR" srcPrefixMapping="" srcRootPath=""/>
-						<entry flags="RESOLVED" kind="libraryFile" name="Device" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<externalSettings containerId="emlib;iar.arm.toolchain.project.library.configuration.release.v5.4.0.552853568" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/emlib-IAR"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/emlib-IAR/Release"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="emlib-IAR" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<externalSettings containerId="libtdcore;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1266702257.28093770.2138595547.707365066" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/libtdcore"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/libtdcore/IAR Release"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="libtdcore" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<externalSettings containerId="libtdrf;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1266702257.28093770.739953675" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/libtdrf"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/libtdrf/IAR Release"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="libtdrf" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<externalSettings containerId="libtddrivers;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1266702257.1753994578.506738900" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/libtddrivers"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/libtddrivers/IAR Release"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="libtddrivers" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<externalSettings containerId="libtdgeoloc;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1266702257.1753994578.1537794616" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/libtdgeoloc"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/libtdgeoloc/IAR Release"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="libtdgeoloc" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-				<externalSettings containerId="libtdsensor;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1266702257.1753994578" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/libtdsensor"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/libtdsensor/IAR Release"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="libtdsensor" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
-			</storageModule>
-		</cconfiguration>
 		<cconfiguration id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.1245585772">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.1245585772" moduleId="org.eclipse.cdt.core.settings" name="TD1204 Release">
 				<externalSettings/>
@@ -424,6 +47,7 @@
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level.272822254" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.size" valueType="enumerated"/>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def.512975687" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="NDEBUG"/>
+									<listOptionValue builtIn="false" value="SIGFOX_V1=1"/>
 									<listOptionValue builtIn="false" value="EFM32G210F128"/>
 									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_TD1204"/>
 								</option>
@@ -439,6 +63,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
 								</option>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename.1008805267" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename" value="" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections.1893872002" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections" value="true" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections.2116671818" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections" value="true" valueType="boolean"/>
 								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.729312903" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input"/>
 							</tool>
 							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.release.801159139" name="ARM Sourcery Windows GCC C++ Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.release">
@@ -471,6 +97,7 @@
 								</option>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile.1315815672" name="Script file (-T)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile" value="..\..\Device\EnergyMicro\EFM32G\Source\G++\efm32g.ld" valueType="string"/>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart.975549963" name="Do not use standard start files (-nostartfiles)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart" value="false" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections.1666880514" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections" value="true" valueType="boolean"/>
 								<inputType id="org.eclipse.cdt.cross.arm.gnu.c.linker.input.1293138642" superClass="org.eclipse.cdt.cross.arm.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -559,6 +186,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
 								</option>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename.1677983875" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename" value="" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections.2069724066" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections" value="true" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections.1728886126" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections" value="true" valueType="boolean"/>
 								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.1514756531" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input"/>
 							</tool>
 							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.release.818955121" name="ARM Sourcery Windows GCC C++ Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.release">
@@ -591,6 +220,7 @@
 								</option>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile.554285025" name="Script file (-T)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile" value="..\..\Device\EnergyMicro\EFM32G\Source\G++\efm32g.ld" valueType="string"/>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart.397901095" name="Do not use standard start files (-nostartfiles)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart" value="false" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections.1698992088" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections" value="true" valueType="boolean"/>
 								<inputType id="org.eclipse.cdt.cross.arm.gnu.c.linker.input.524013168" superClass="org.eclipse.cdt.cross.arm.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -679,6 +309,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
 								</option>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename.1879591468" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename" value="" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections.1774944524" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections" value="true" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections.1639531438" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections" value="true" valueType="boolean"/>
 								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.1458218012" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input"/>
 							</tool>
 							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.debug.509710139" name="ARM Sourcery Windows GCC C++ Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.debug">
@@ -711,6 +343,7 @@
 								</option>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile.348915715" name="Script file (-T)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile" value="..\..\Device\EnergyMicro\EFM32G\Source\G++\efm32g.ld" valueType="string"/>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart.175690213" name="Do not use standard start files (-nostartfiles)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart" value="false" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections.2044606934" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections" value="true" valueType="boolean"/>
 								<inputType id="org.eclipse.cdt.cross.arm.gnu.c.linker.input.1778459779" superClass="org.eclipse.cdt.cross.arm.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -799,6 +432,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
 								</option>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename.1365685022" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename" value="" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections.152024535" name="Function sections (-ffunction-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections" value="true" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections.292867190" name="Data sections (-fdata-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections" value="true" valueType="boolean"/>
 								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.1502849032" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input"/>
 							</tool>
 							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.debug.1917097707" name="ARM Sourcery Windows GCC C++ Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.debug">
@@ -831,6 +466,7 @@
 								</option>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile.1889216905" name="Script file (-T)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile" value="..\..\Device\EnergyMicro\EFM32G\Source\G++\efm32g.ld" valueType="string"/>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart.370157122" name="Do not use standard start files (-nostartfiles)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart" value="false" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections.101989761" name="Remove unused sections (-Xlinker --gc-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections" value="true" valueType="boolean"/>
 								<inputType id="org.eclipse.cdt.cross.arm.gnu.c.linker.input.602579035" superClass="org.eclipse.cdt.cross.arm.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -897,13 +533,14 @@
 		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
 		</configuration>
+		<configuration configurationName="TD1205 Release"/>
 		<configuration configurationName="Release">
 			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
 		</configuration>
-		<configuration configurationName="TD1204 Release">
+		<configuration configurationName="GCC Release">
 			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
 		</configuration>
-		<configuration configurationName="GCC Release">
+		<configuration configurationName="TD1204 Release">
 			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
 		</configuration>
 		<configuration configurationName="TD1204 Debug">

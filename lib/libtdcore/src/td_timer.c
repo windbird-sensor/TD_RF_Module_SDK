@@ -2,7 +2,7 @@
  * @file
  * @brief Timer peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 2.0.3
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -150,7 +150,8 @@ void TD_TIMER_Start(uint32_t frequency)
 	// Set Top Value
 	TIMER_TopSet(TIMER1, top);
 
-	// Set compare value starting at 0 - it will be incremented in the interrupt handler
+	// Set compare value starting at 0 - it will be incremented in the interrupt
+	// handler
 	TIMER_CompareBufSet(TIMER1, 0, top >> 1);
 
 	// Configure timer

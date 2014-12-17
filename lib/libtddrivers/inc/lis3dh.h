@@ -1,8 +1,10 @@
+/** @cond TD_PRIVATE */
 /***************************************************************************//**
  * @file
- * @brief Driver definition for the LIS3DH accelerometer used in TD12xx RF modules.
+ * @brief Driver definition for the LIS3DH accelerometer used in TD12xx RF
+ * modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -36,24 +38,29 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <td_gpio.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-	/**************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup TD_LIS3DH LIS3DH
 	 * @brief LIS3DH accelerometer driver.
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
-	/******************************************************************************
-	 **************************  DEFINES   ****************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 **************************  DEFINES   *************************************
+	 **************************************************************************/
 
 	/** @addtogroup TD_LIS3DH_DEFINES Defines
 	 * @{ */
 
-// LIS3DH accelerometer IRQ sources
+	/** LIS3DH accelerometer ID */
+#define LIS3DH_ID 0x33
+
+	// LIS3DH accelerometer IRQ sources
 #define LIS3DH_IRQ_OVERRUN		(1 << 1)	///< LIS3DH FIFO Overrun interrupt on INT1
 #define LIS3DH_IRQ_WTM			(1 << 2)	///< LIS3DH FIFO Watermark interrupt on INT1
 #define LIS3DH_IRQ_DRDY2		(1 << 3)	///< LIS3DH DRDY2 interrupt on INT1
@@ -62,7 +69,7 @@ extern "C" {
 #define LIS3DH_IRQ_AOI1			(1 << 6)	///< LIS3DH AOI1 interrupt on INT1
 #define LIS3DH_IRQ_CLICK		(1 << 7)	///< LIS3DH CLICK interrupt on INT11
 
-// LIS3DH accelerometer IRQ events
+	// LIS3DH accelerometer IRQ events
 #define LIS3DH_INT1_CFG_XLIE	(1 << 0)	///< LIS3DH Enable interrupt generation on X low event or on Direction recognition
 #define LIS3DH_INT1_CFG_XHIE	(1 << 1)	///< LIS3DH Enable interrupt generation on X high event or on Direction recognition
 #define LIS3DH_INT1_CFG_YLIE	(1 << 2)	///< LIS3DH Enable interrupt generation on Y low event or on Direction recognition
@@ -71,6 +78,14 @@ extern "C" {
 #define LIS3DH_INT1_CFG_ZHIE	(1 << 5)	///< LIS3DH Enable interrupt generation on Z high event or on Direction recognition
 #define LIS3DH_INT1_CFG_6D		(1 << 6)	///< LIS3DH 6 direction detection function enabled
 #define LIS3DH_INT1_CFG_AOI		(1 << 7)	///< LIS3DH And/Or combination of Interrupt events
+
+	// LIS3DH accelerometer IRQ Click events
+#define LIS3DH_INT1_CFG_XS		(1 << 0)	///< LIS3DH Enable interrupt single CLICK-CLICK on X axis.
+#define LIS3DH_INT1_CFG_XD		(1 << 1)	///< LIS3DH Enable interrupt double CLICK-CLICK on X axis.
+#define LIS3DH_INT1_CFG_YS		(1 << 2)	///< LIS3DH Enable interrupt single CLICK-CLICK on Y axis.
+#define LIS3DH_INT1_CFG_YD		(1 << 3)	///< LIS3DH Enable interrupt double CLICK-CLICK on Y axis.
+#define LIS3DH_INT1_CFG_ZS		(1 << 4)	///< LIS3DH Enable interrupt single CLICK-CLICK on Z axis.
+#define LIS3DH_INT1_CFG_ZD		(1 << 5)	///< LIS3DH Enable interrupt double CLICK-CLICK on Z axis.
 
 	/** LIS3DH accelerometer IRQ events for all 3 axis */
 #define LIS3DH_3D \
@@ -83,9 +98,9 @@ extern "C" {
 
 	/** @} */
 
-	/*******************************************************************************
-	 *************************   PROTOTYPES   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   PROTOTYPES   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup TD_LIS3DH_GLOBAL_FUNCTIONS Global Functions
 	 * @{ */
@@ -93,24 +108,30 @@ extern "C" {
 	void TD_LIS3DH_ClearIRQ(void);
 	void TD_LIS3DH_SetFilterRef(void);
 	void TD_LIS3DH_ConfigHighPass(bool enable, uint8_t cutoff);
-	void TD_LIS3DH_Configure(uint8_t mode, uint8_t rate, uint8_t axis, uint8_t scale);
+	void TD_LIS3DH_Configure(uint8_t mode, uint8_t rate, uint8_t axis,
+		uint8_t scale);
 	void TD_LIS3DH_SetFIFOMode(uint8_t mode, uint8_t watermak);
-	uint8_t TD_LIS3DH_GetFIFOStatus();
+	uint8_t TD_LIS3DH_GetFIFOStatus(void);
 	void TD_LIS3DH_GetXYZ(uint16_t *x, uint16_t *y, uint16_t *z);
 	uint8_t TD_LIS3DH_GetEventSource(void);
 	void TD_LIS3DH_DebugReg(void);
-	void TD_LIS3DH_ConfigureIRQ(uint8_t source, uint8_t event, uint8_t threshold, uint8_t duration);
 	uint8_t TD_LIS3DH_Status(void);
 	uint8_t TD_LIS3DH_Who(void);
 	bool TD_LIS3DH_Init(void);
+	void TD_LIS3DH_ConfigureClickIRQ(uint8_t event, uint8_t threshold,
+		uint8_t duration);
+	uint8_t TD_LIS3DH_GetClickEventSource(void);
+	void LIS3DH_EnableInterrupt(TD_GPIO_callback_t callback);
+	void LIS3DH_DisableInterrupt(void);
+	void TD_LIS3DH_ConfigHighPass(bool enable, uint8_t cutoff);
+	void TD_LIS3DH_ConfigureInterrupt(uint8_t source, bool latched);
+	void TD_LIS3DH_ConfigureEvent(uint8_t event, uint8_t threshold,
+		uint8_t duration);
+	void TD_LIS3DH_ConfigureClickEvent(uint8_t event, uint8_t threshold,
+		uint8_t duration);
+	void TD_LIS3DH_GetMagnetoXYZ(uint16_t *x, uint16_t *y, uint16_t *z);
+	void TD_LSM303E_GetMagnetoXYZ(uint16_t *x, uint16_t *y, uint16_t *z);
 	void TD_LIS3DH_Dump(void);
-	uint8_t TD_LIS3DH_ReadRegister(uint8_t address);
-	void TD_LIS3DH_WriteRegister(uint8_t address, uint8_t value);
-
-	/** @} */
-
-	/** @addtogroup TD_LIS3DH_USER_FUNCTIONS User Functions
-	 * @{ */
 
 	/** @} */
 
@@ -121,4 +142,4 @@ extern "C" {
 #endif
 
 #endif // __LIS3DH_H
-
+/** @endcond */

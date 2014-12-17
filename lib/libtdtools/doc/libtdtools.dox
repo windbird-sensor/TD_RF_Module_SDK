@@ -1,0 +1,34 @@
+/**
+\mainpage libtdtools
+
+\section Overview
+
+The libtdtools library provides tools for managing low-level hardware devices,
+such as buttons, switches or LEDs.
+
+The libtdtools library is organized as a collection of independent modules, each
+one addressing a particular software or hardware entity.
+
+\section Detailed Description
+
+\subsection LED
+file: td_tools_led.h
+
+Provides automatic functions to turn of/off and blink LEDs using the scheduler.
+
+\subsection Switch
+file: td_switch.h
+
+Provides automatic functions to handle switches and push-buttons, including
+debounce processing.
+
+\subsection Tools
+file: td_tools.h
+
+Provides an initialization function that handles automatic setting of switches
+and LEDs handlers.
+
+\section Examples
+
+  - switch_polling: perform button polling handling multiple durations
+*/

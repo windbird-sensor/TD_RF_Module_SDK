@@ -2,7 +2,7 @@
  * @file
  * @brief Watchdog demonstration application for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -75,7 +75,7 @@ static void TimerFunction1(uint32_t arg, uint8_t repetition)
 {
 	// Print timer info and time
 	now = TD_SCHEDULER_GetTime() >> 15;
-	tfp_printf("Function 1 Timer %d Rep %d Time %d\r\n", arg, repetition,now);
+	tfp_printf("Function 1 Timer %d Rep %d Time %d\r\n", arg, repetition, now);
 
 	// When Timer 2 has only 27 repetitions left
 	if (arg == 2 && repetition == 45) {
@@ -122,11 +122,12 @@ void TD_USER_Setup(void)
 	// Initialize the timer with 10 repetitions and 3 s interval, Func1, Arg 1
 	TD_SCHEDULER_Append(3, 0 , 0, 10, TimerFunction1, 1);
 
-	// Init timer with 64 repetitions and 2s interval, Func1, Arg 2
+	// Initialize timer with 64 repetitions and 2s interval, Func1, Arg 2
 	TD_SCHEDULER_Append(1, 0 , 0, 64, TimerFunction1, 2);
 
 	// Initialize timer with infinite repetitions and 1s interval, Func2, Arg 3
-	LedTimer = TD_SCHEDULER_AppendIrq(0, 8192 , 0, TD_SCHEDULER_INFINITE, LedBlink, 0);
+	LedTimer = TD_SCHEDULER_AppendIrq(0, 8192 , 0, TD_SCHEDULER_INFINITE,
+		LedBlink, 0);
 }
 
 /***************************************************************************//**

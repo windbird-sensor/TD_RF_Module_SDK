@@ -2,7 +2,7 @@
  * @file
  * @brief Simple accelerometer data monitor application for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -65,14 +65,14 @@
  * @param[in] z
  *   Z-axis acceleration value.
  ******************************************************************************/
-static void DataCallback(TD_ACCELERO_Data_t data[32], uint8_t count, bool overrun)
+static void DataCallback(TD_ACCELERO_Data_t data[32], uint8_t count, bool
+	overrun)
 {
 	int i;
 
 	for (i = 0; i < count; i++) {
 		tfp_printf("%d \t %d \t %d\r\n", data[i].x, data[i].y, data[i].z);
 	}
-
 	if (overrun) {
 		tfp_printf("overrun\r\n");
 	}
@@ -85,7 +85,6 @@ static void DataCallback(TD_ACCELERO_Data_t data[32], uint8_t count, bool overru
  ******************************************************************************/
 void TD_USER_Setup(void)
 {
-
 	// Initialize the LEUART
 	init_printf(TD_UART_Init(9600, true, false),
 				TD_UART_Putc,
@@ -110,8 +109,9 @@ void TD_USER_Setup(void)
 		TD_ACCELERO_2G,				// Scale 2 g
 		0,							// High-pass filter disabled
 		TD_ACCELERO_STREAM,			// FIFO stream mode
-		0,							// Update watermark disabled (32 max, 0 is real-time)
+		10,							// Update watermark disabled (32 max, 0 is real-time)
 		DataCallback);
+	TD_ACCELERO_Dump();
 }
 
 /***************************************************************************//**

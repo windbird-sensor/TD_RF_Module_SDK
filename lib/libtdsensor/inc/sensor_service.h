@@ -2,7 +2,7 @@
  * @file
  * @brief API for sending Service frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.0.1
+ * @version 1.2.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -37,18 +37,32 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "sensor_send.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup SENSOR_SERVICE Sensor Service
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
-	/*******************************************************************************
-	 ***********************   ENUMERATIONS   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 **************************  DEFINES   *************************************
+	 **************************************************************************/
+
+	/** @addtogroup SENSOR_SERVICE_DEFINES Defines
+	 * @{ */
+
+	/** Maximum Sensor service payload size in bytes */
+#define TD_SENSOR_SERVICE_MAX_DATA_LENGTH	9
+
+	/** @} */
+
+	/***************************************************************************
+	 ***********************   ENUMERATIONS   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup SENSOR_SERVICE_ENUMERATIONS Enumerations
 	 * @{ */
@@ -61,16 +75,71 @@ extern "C" {
 
 	/** @} */
 
-	/*******************************************************************************
-	 *************************   PROTOTYPES   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   PROTOTYPES   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup SENSOR_SERVICE_USER_FUNCTIONS User Functions
 	 * @{ */
 
-	bool TD_SENSOR_SendSMS(uint8_t *SMS);
-	bool TD_SENSOR_SendTweet(uint8_t *Tweet);
-	void TD_SENSOR_SetServiceTransmissionProfile(uint8_t count, uint32_t interval);
+	bool TD_SENSOR_SendService(TD_SENSOR_SERVICE_Types_t service, uint8_t *data);
+
+	/***********************************************************************//**
+	 * @brief
+	 *   Send an SMS.
+	 *
+	 * @details
+	 * 	 At most 9 bytes can be sent.
+	 *
+	 * @param[in] sms
+	 *   Pointer to the SMS data to send. The data must be padded with zeros, up
+	 *   to MAX_SMS_LEN.
+	 *
+	 * @return
+	 *   Returns true if the data has been sent over the SIGFOX network, false
+	 *   otherwise.
+	 **************************************************************************/
+	static bool __INLINE TD_SENSOR_SendSMS(uint8_t *sms)
+	{
+		return TD_SENSOR_SendService(SERVICE_SMS, sms);
+	}
+
+	/***********************************************************************//**
+	 * @brief
+	 *   Send a tweet.
+	 *
+	 * @details
+	 * 	 At most 9 bytes can be sent.
+	 *
+	 * @param[in] tweet
+	 *   Pointer to the tweet data to send. The data must be padded with zeros,
+	 *   up to MAX_TWEET_LEN.
+	 *
+	 * @return
+	 *   Returns true if the data has been sent over the SIGFOX network, false
+	 *   otherwise.
+	 **************************************************************************/
+	static bool __INLINE TD_SENSOR_SendTweet(uint8_t *tweet)
+	{
+		return TD_SENSOR_SendService(SERVICE_TWEET, tweet);
+	}
+
+	/***********************************************************************//**
+	 * @brief
+	 *   Set a transmission profile for a service frame type.
+	 *
+	 * @param[in] repetition
+	 *	Number of repetitions.
+	 *
+	 * @param[in] interval
+	 *	Interval between two repetitions in seconds.
+	 **************************************************************************/
+	static void  __INLINE TD_SENSOR_SetServiceTransmissionProfile(
+		uint8_t repetition,
+		uint32_t interval)
+	{
+		TD_SENSOR_SetTransmissionProfile(SRV_FRM_SERVICE, repetition, interval);
+	}
 
 	/** @} */
 

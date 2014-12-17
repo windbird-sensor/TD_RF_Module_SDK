@@ -2,7 +2,7 @@
  * @file
  * @brief Utility functions for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.2
+ * @version 2.0.3
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -31,9 +31,7 @@
  *
  ******************************************************************************/
 
-#include <stdio.h>
 #include <stdint.h>
-#include <string.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -256,7 +254,8 @@ long long atolli(char *instr, char ignore)
 	if (*instr == '+') {
 		instr++;
 	}
-	for (; *instr && ((*instr >= '0' && *instr <= '9') || (*instr == ignore)); instr++) {
+	for (; *instr && ((*instr >= '0' && *instr <= '9') || (*instr == ignore));
+		instr++) {
 
 		if (*instr != ignore) {
 			retval = (10 * retval) + (*instr - '0');
@@ -405,6 +404,41 @@ int memcmp(const void *s1, const void *s2, size_t n)
 
 #endif
 
+
+/***************************************************************************//**
+ * @brief
+ *   Copy a string into an other
+ *
+ * @param[out] dst
+ *  Pointer to the destination string
+ *
+ * @param[in] src
+ *  Pointer to the source string.
+ ******************************************************************************/
+char *strcpy(char *dst, const char *src)
+{
+	char *save = dst;
+
+	for (; (*dst = *src) != '\0'; ++src, ++dst) {
+		;
+	}
+	return save;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Compare two strings
+ ******************************************************************************/
+int strcmp(const char *s1, const char *s2)
+{
+    for (; *s1 == *s2; s1++, s2++) {
+		if (*s1 == '\0')  {
+		    return 0;
+		}
+	}
+    return ((*(unsigned char *) s1 < *(unsigned char *) s2) ? -1 : 1);
+}
+
 /***************************************************************************//**
  * @brief
  *   Stack usage
@@ -414,10 +448,19 @@ int memcmp(const void *s1, const void *s2, size_t n)
  ******************************************************************************/
 int TD_STACK_Usage(void)
 {
-	extern const char __cs3_stack;
+	uint32_t sp;
+#if defined(__GNUC__)
+	extern char __cs3_stack[];
+	char *limit = __cs3_stack;
+	sp = __get_MSP();
+#endif
+#if defined(__ICCARM__)
+	extern char CSTACK$$Limit[];
+	char *limit = CSTACK$$Limit;
 	uint8_t dummy;
-
-	return (uint32_t) &__cs3_stack - (uint32_t) &dummy;
+	sp = (uint32_t) &dummy;
+#endif
+	return (uint32_t) limit - sp;
 }
 
 /***************************************************************************//**
@@ -428,7 +471,8 @@ void TD_IRQ_Dump(void)
 {
 	uint32_t irq;
 	uint8_t msk;
-	extern TD_GPIO_hook_t TD_GPIO_Hooks[TD_GPIO_MAX_HOOKS];
+	int i;
+	extern TD_GPIO_callback_t TD_GPIO_CallbackInterrupts[16];
 
 	TD_RTC_handler_t hdle;
 	char *irqs = "";
@@ -464,8 +508,26 @@ void TD_IRQ_Dump(void)
 	hdle = TD_RTC_SetUserHandler(NULL);
 	TD_RTC_SetUserHandler(hdle);
 	tfp_printf("USERHandler:0x%08X\r\n", hdle);
-	tfp_printf("GPIO_Hook[USER]:0x%08X[0x%08X]\r\n", TD_GPIO_Hooks[TD_GPIO_USER].callback, TD_GPIO_Hooks[TD_GPIO_USER].mask);
-	tfp_printf("GPIO_Hook[SYS]:0x%08X[0x%08X]\r\n", TD_GPIO_Hooks[TD_GPIO_SYSTEM].callback, TD_GPIO_Hooks[TD_GPIO_SYSTEM].mask);
+	for (i = 0; i < 16; i++) {
+		tfp_printf("GPIO_Cbk[%d]:0x%08X\r\n",
+			i, TD_GPIO_CallbackInterrupts[i]);
+	}
+	irq = NVIC->ISER[0];
+#ifdef EFM32G210F128
+	tfp_printf("IRQ enabled:0x%08X ",irq);
+	const char *irq_list[]={"DMA", "GPIO_EVEN", "TIMER0", "USART0_RX",
+			"USART0_TX", "ACMP0", "ADC0", "DAC0", "I2C0", "GPIO_ODD", "TIMER1",
+			"!", "USART1_RX", "USART1_TX", "!", "!", "!", "!", "LEUART0", "!",
+			"LETIMER0","PCNT0", "!", "!", "RTC", "CMU", "VCMP", "!", "MSC",
+			"AES", "!", "!"};
+	for (i = 0; i < sizeof (irq_list) / sizeof (char*); i++) {
+		if (irq & 1) {
+			tfp_printf("%s ", irq_list[i]);
+		}
+		irq >>= 1;
+	}
+	tfp_printf("\r\n");
+#endif
 	__set_PRIMASK(msk);
 }
 

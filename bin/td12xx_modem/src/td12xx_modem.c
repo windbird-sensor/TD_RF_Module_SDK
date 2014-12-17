@@ -2,7 +2,7 @@
  * @file
  * @brief User Application implementation for TD12xx RF module.
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 2.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -56,6 +56,9 @@
 #if AT_SIGFOX
 #include <at_sigfox.h>
 #endif
+#if AT_PROXY
+#include <at_proxy.h>
+#endif
 
 #if AT_SENSOR
 #include <at_sensor.h>
@@ -68,9 +71,7 @@
 #include <at_accelero.h>
 #endif
 
-#if defined(SIGFOX_V1) && defined(SIGFOX_DOWNLINK)
 #include <td_sigfox.h>
-#endif
 
 /* This file declare all "dynamic" library data. It should be last included file
  * Standard size value can be override before including this file
@@ -83,8 +84,19 @@
 #define TD_SENSOR_GATEWAY_MAX_DEVICE 5
 #endif
 
+#define TD_SIGFOX_USE_TEST_CARRIER_CODE		// this one can be removed
+#define TD_SIGFOX_USE_DOWNLINK_TEST_CODE
+//#define TD_SCHEDULER_REMOVE_CODE
 #define TD_TRAP_RESET_CODE
 #define PRODUCT_LED_BLINK 1
+//#define TD_SIGFOX_TRANSMIT_FORWARD_ONLY
+//#define TD_SIGFOX_TRANSMIT_LOCAL_ONLY
+//#define TD_SIGFOX_TRANSMIT_NONE
+//#define TD_SIGFOX_REMOVE_CODE
+//#define TD_SIGFOX_PROXY_REMOVE_CODE
+//#define TD_SIGFOX_DOWNLINK_REMOVE_CODE
+//#define TD_SIGFOX_RECEIVE_NONE
+//#define PRODUCT_EARLY_DEBUG
 #include <td_config.h>
 
 /*******************************************************************************
@@ -98,11 +110,11 @@ void TD_USER_Setup(void)
 {
 	// Initialize the LEUART
 	init_printf(TD_UART_Init(9600, true, false),
-				TD_UART_Putc,
-				TD_UART_Start,
-				TD_UART_Stop);
+		TD_UART_Putc,
+		TD_UART_Start,
+		TD_UART_Stop);
 
-    // Define variables version to avoid wrong flash init
+	// Define variables version to avoid wrong flash init
 	TD_FLASH_SetVariablesVersion(FLASH_VARIABLES_VERSION);
 
 #if AT_CORE
@@ -113,6 +125,9 @@ void TD_USER_Setup(void)
 #endif
 #if AT_SIGFOX
 	AT_AddExtension(&sigfox_extension);
+#endif
+#if AT_PROXY
+	AT_AddExtension(&proxy_extension);
 #endif
 #if AT_LAN_RF
 	AT_AddExtension(&lan_extension);
@@ -127,15 +142,17 @@ void TD_USER_Setup(void)
 #if AT_GEOLOC
 	AT_AddExtension(&geoloc_extension);
 	AT_AddExtension(&accelero_extension);
-#endif
 
+#endif
 	// Initialize the AT command parser
 	AT_Init();
 
 #if AT_SENSOR
 
     //Initialize Sensor
-    TD_SENSOR_Init(TD_SENSOR_GetModuleType(),  TD_LAN_GetFrequency(), TD_LAN_GetPowerLevel());
+    TD_SENSOR_Init(TD_SENSOR_GetModuleType(), TD_LAN_GetFrequency(),
+    	TD_LAN_GetPowerLevel());
+    TD_SENSOR_SetModuleApplicationRelease(SOFTWARE_RELEASE);
 #endif
 
 #if AT_GEOLOC
@@ -156,7 +173,6 @@ void TD_USER_Loop(void)
 	int c;
 
 #if AT_LAN_RF
-
 	// Process local RF
 	TD_LAN_Process();
 #endif
@@ -173,7 +189,6 @@ void TD_USER_Loop(void)
 	TD_GEOLOC_Process();
 	TD_ACCELERO_Process();
 #endif
-
 	while ((c = TD_UART_GetChar()) >= 0) {
 		AT_Parse(c);
 	}

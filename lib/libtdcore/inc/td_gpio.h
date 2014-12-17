@@ -2,7 +2,7 @@
  * @file
  * @brief General Purpose IO (GPIO) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.2
+ * @version 2.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -35,20 +35,21 @@
 #define __TD_GPIO_H
 
 #include <stdbool.h>
+#include <em_gpio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup GPIO
 	 * @brief General Purpose IO (GPIO) peripheral API for the TDxxxx RF modules
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
-	/*******************************************************************************
-	 *************************   DEFINES   *****************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   DEFINES   *************************************
+	 **************************************************************************/
 
 	/** @addtogroup GPIO_DEFINES Defines
 	 * @{ */
@@ -67,14 +68,36 @@ extern "C" {
 
 	/** @} */
 
-	/*******************************************************************************
-	 *************************   TYPEDEFS   ****************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 ***********************   ENUMERATIONS   **********************************
+	 **************************************************************************/
+
+	/** @addtogroup GPIO_ENUMERATIONS Enumerations
+	 * @{ */
+
+	/** TD GPIO ports identifiers */
+	typedef enum {
+		TD_GPIO_PortA = 0, 		/**< Port A */
+		TD_GPIO_PortB = 1, 		/**< Port B */
+		TD_GPIO_PortC = 2, 		/**< Port C */
+		TD_GPIO_PortD = 3, 		/**< Port D */
+		TD_GPIO_PortE = 4, 		/**< Port E */
+		TD_GPIO_PortF = 5,  	/**< Port F */
+		TD_GPIO_PortRadio = 16, /**< RF port */
+		TD_GPIO_PortNull = 255  /**< Null port */
+	} TD_GPIO_Port_TypeDef;
+
+	/** @} */
+
+	/***************************************************************************
+	 *************************   TYPEDEFS   ************************************
+	 **************************************************************************/
 
 	/** @addtogroup GPIO_TYPEDEFS Typedefs
 	 * @{ */
 
-	/** Interrupt process callback function. mask contains bitfield of one or multiple I/O that triggered IRQ */
+	/** Interrupt process callback function. mask contains bitfield of one or
+	 * multiple I/O that triggered IRQ */
 	typedef void (*TD_GPIO_callback_t)(uint32_t mask);
 
 	/** GPIO IRQ hook structure */
@@ -85,41 +108,19 @@ extern "C" {
 
 	/** @} */
 
-	/*******************************************************************************
-	 *************************   PROTOTYPES   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   PROTOTYPES   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup GPIO_USER_FUNCTIONS User Functions
 	 * @{ */
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @brief
 	 *   Default GPIO IRQ processing function.
-	 ******************************************************************************/
+	 **************************************************************************/
 	static __INLINE void TD_GPIO_DefaultHook(void)
 	{
-	}
-
-	/***************************************************************************//**
-	 * @brief
-	 *   Register a callback function for processing interrupts matching a given bit mask.
-	 *
-	 * @ param[in] type
-	 *   The type of callback to set up.
-	 *
-	 * @param[in] callback
-	 *   Pointer to callback function called when an interrupt matching the mask is
-	 *   received.
-	 *
-	 * @param[in] mask
-	 *   Mask for testing a received even interrupts against.
-	 ******************************************************************************/
-	static __INLINE void TD_GPIO_SetCallback(int type, TD_GPIO_callback_t callback, uint32_t mask)
-	{
-		extern TD_GPIO_hook_t TD_GPIO_Hooks[];
-
-		TD_GPIO_Hooks[type].callback = callback;
-		TD_GPIO_Hooks[type].mask = mask;
 	}
 
 	/** @addtogroup GPIO_PROTOTYPES Prototypes
@@ -127,22 +128,16 @@ extern "C" {
 
 	void TD_GPIO_Init(void);
 	void TD_GPIO_Dump(void);
+	TD_GPIO_callback_t TD_GPIO_SetCallbackExtended(uint8_t bit,
+		TD_GPIO_callback_t callback);
+	void TD_GPIO_PinModeSet(TD_GPIO_Port_TypeDef port, unsigned int bit,
+		GPIO_Mode_TypeDef mode, unsigned int out);
+	void TD_GPIO_DriveModeSet(TD_GPIO_Port_TypeDef port,
+		GPIO_DriveMode_TypeDef mode);
 
-	/** @} */
-	/** @} */
-
-	/*******************************************************************************
-	 **************************   PUBLIC VARIABLES   *******************************
-	 ******************************************************************************/
-
-	/** @addtogroup GPIO_GLOBAL_VARIABLES Global Variables
-	 * @{ */
-	/** @addtogroup GPIO_EXTERN External Declarations
-	 * @{ */
-
-	/** Array of GPIO IRQ hooks for system/user/odd/even IRQs */
-	extern TD_GPIO_hook_t TD_GPIO_Hooks[];
-
+	// Depreciated
+	void TD_GPIO_SetCallback(int type, TD_GPIO_callback_t callback,
+		uint32_t mask);
 	/** @} */
 	/** @} */
 

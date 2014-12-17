@@ -2,7 +2,7 @@
  * @file
  * @brief Sensor Gateway
  * @author Telecom Design S.A.
- * @version 1.2.0
+ * @version 1.3.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -39,14 +39,16 @@
 #include <td_rtc.h>
 #include <td_scheduler.h>
 #include <td_printf.h>
+#include <td_config_ext.h>
+#include <td_sigfox.h>
 
-#include "sensor_private.h"
 #include "sensor_event.h"
 #include "td_sensor.h"
 #include "td_sensor_lan.h"
 #include "td_sensor_device.h"
 #include "td_sensor_transmitter.h"
 #include "td_sensor_gateway.h"
+#include "td_sensor_utils.h"
 
 /***************************************************************************//**
  * @addtogroup TD_SENSOR_GATEWAY Sensor LAN Gateway
@@ -61,10 +63,10 @@
  * @{ */
 
 /** Conditional printf macro */
-#define DEBUG_PRINTF(...) /*tfp_printf(__VA_ARGS__)*/
+#define DEBUG_PRINTF(...) //tfp_printf(__VA_ARGS__)
 
 /* Time in seconds to wait after a forward */
-#define DEBUG_DUMP(t,d,s) /*tfp_dump(t,d,s)*/
+#define DEBUG_DUMP(t,d,s) //tfp_dump(t,d,s)
 
 /** @} */
 
@@ -78,6 +80,9 @@
 /** Frame received buffer */
 static TD_LAN_frame_t gateway_RX;
 
+/** Let to known if an ack frame is expected */
+static bool AckExpected = false;
+
 /** Computed Gateway address */
 static uint32_t GatewayAddress = 0;
 
@@ -90,6 +95,9 @@ static uint32_t DeviceCount = 1;
 /** Registration enable flag */
 static bool RegistrationEnabled = false;
 
+/** Pairing enable flag */
+static bool PairingEnabled = false;
+
 /** Reception enable flag */
 static bool ReceptionEnabled  = false;
 
@@ -99,11 +107,26 @@ static bool ReceptionEnByReg = false;
 /** LAN Data received callback */
 static int8_t (*DataCallback)(uint8_t *data, uint8_t len, uint8_t *reply) = 0;
 
+/** LAN Data received callback extended */
+static int8_t (*DataCallbackExt)(uint8_t entry_id, uint8_t *data, uint8_t len, uint8_t *reply) = 0;
+
+/** Connection callback */
+static void (*ConnectionCallback)(bool state, uint8_t id) = 0;
+
 /** Registration callback */
 static void (*RegistrationCallback)(uint32_t lan_address, uint32_t sigfox_id) = 0;
 
-/* For code removal purposes */
+/** Registration type */
+static TD_SENSOR_GATEWAY_Registration_t RegistrationType = EN_TYPE_REG_NONE;
+
+/** User callback to execute before and after LAN transmission */
+static void (*UserCallback)(void) = 0;
+
+/** For code removal purposes */
 extern TD_LAN_callback_t const TD_SENSOR_GATEWAY_FrameReceived_;
+
+/** Rx period */
+static uint32_t RxPeriod = 0;
 
 /** @} */
 
@@ -113,46 +136,6 @@ extern TD_LAN_callback_t const TD_SENSOR_GATEWAY_FrameReceived_;
 
 /** @addtogroup TD_SENSOR_GATEWAY_LOCAL_FUNCTIONS Local Functions
  * @{ */
-
-/***************************************************************************//**
- * @brief
- *  Compute a 16 bit address from a 32 bit one.
- *
- * @param[in] address
- *  The input 32 bits address.
- *
- * @return
- *  The output 16 bit address.
- ******************************************************************************/
-static uint16_t TD_SENSOR_LAN_ComputeAddressTo16bits(uint32_t address)
-{
-	uint8_t xor_even = 0, xor_odd = 0;
-
-	xor_even = ((address >> 24) & 0xFF) ^ ((address >> 8) & 0xFF);
-	xor_odd = ((address >> 16) & 0xFF) ^ ((address >> 0) & 0xFF);
-	return (xor_even << 8) | xor_odd;
-}
-
-/***************************************************************************//**
- * @brief
- *  Compute an 8 bit address from a 32 bit one.
- *
- * @param[in] address
- *  The input 32 bits address.
- *
- * @return
- *  The output 8 bit address.
- ******************************************************************************/
-static uint8_t TD_SENSOR_LAN_ComputeAddressTo8bits(uint32_t address)
-{
-	int i;
-	uint8_t xor = 0;
-
-	for (i = 0; i < 4; i++) {
-		xor ^= (address >> (8 * i));
-	}
-	return xor;
-}
 
 /***************************************************************************//**
  * @brief
@@ -175,14 +158,19 @@ static void TD_SENSOR_GATEWAY_KeepAliveHandler(uint32_t arg, uint8_t repetitions
 
 	// Save previous status
 	prev_status = DeviceList[entry_id].config.keepalive.status;
-	DeviceList[entry_id].config.keepalive.status = DeviceList[entry_id].config.keepalive.validated;
+	DeviceList[entry_id].config.keepalive.status =
+		DeviceList[entry_id].config.keepalive.validated;
 
 	// Compare status with previous
 	if (prev_status != (uint8_t) DeviceList[entry_id].config.keepalive.status) {
 		if (!DeviceList[entry_id].config.keepalive.status) {
 
 			// Send connection lost
-			TD_SENSOR_SendEventConnection(0, entry_id);
+			if (ConnectionCallback != 0) {
+				(*ConnectionCallback)(0, entry_id);
+			} else {
+				TD_SENSOR_SendEventConnection(0, entry_id);
+			}
 		}
 	}
 
@@ -202,18 +190,19 @@ static void TD_SENSOR_GATEWAY_KeepAliveHandler(uint32_t arg, uint8_t repetitions
  * @return
  *   Returns an entry ID if the device has been added, 255 otherwise.
  ******************************************************************************/
-static uint32_t TD_SENSOR_GATEWAY_AppendDevicePrivate(TD_SENSOR_GATEWAY_Device_t *device)
+static uint32_t TD_SENSOR_GATEWAY_AppendDevicePrivate(
+	TD_SENSOR_GATEWAY_Device_t *device)
 {
 	uint32_t address;
 	int i = 0;
 
-	if (DeviceCount > CONFIG_TD_SENSOR_GATEWAY_MAX_DEVICE) {
+	if (DeviceCount >= CONFIG_TD_SENSOR_GATEWAY_MAX_DEVICE) {
 		return 255;
 	}
 	if (device->lan_address == 0) {
 
 		// If device is already registered, give it back its previous address
-		for (i = 0; i < CONFIG_TD_SENSOR_GATEWAY_MAX_DEVICE; i++) {
+		for (i = 1; i < CONFIG_TD_SENSOR_GATEWAY_MAX_DEVICE; i++) {
 			if (device->sigfox_id == DeviceList[i].sigfox_id) {
 				return DeviceList[i].lan_address;
 			}
@@ -288,7 +277,8 @@ static uint8_t TD_SENSOR_GATEWAY_GetDevice(uint8_t lan_address)
  * @param[in] count
  *  Length of the data in bytes.
  ******************************************************************************/
-static void TD_SENSOR_GATEWAY_Ack(TD_LAN_frame_t *rx_frame, TD_SENSOR_LAN_AckCode_t code, uint8_t *data, uint8_t count)
+static void TD_SENSOR_GATEWAY_Ack(TD_LAN_frame_t *rx_frame,
+	TD_SENSOR_LAN_AckCode_t code, uint8_t *data, uint8_t count)
 {
 	int i;
 	TD_LAN_frame_t tx_frame;
@@ -319,9 +309,17 @@ static void TD_SENSOR_GATEWAY_Ack(TD_LAN_frame_t *rx_frame, TD_SENSOR_LAN_AckCod
 		}
 	}
 
+	if (UserCallback != 0) {
+		(*UserCallback)();
+	}
+
 	// Send the acknowlegment frame
 	if (!TD_LAN_SendFrame(1, &tx_frame, rx_frame)) {
 		DEBUG_PRINTF("LAN Error %d \r\n", TD_LAN_LastError());
+	}
+
+	if (UserCallback != 0) {
+		(*UserCallback)();
 	}
 }
 
@@ -366,17 +364,21 @@ static void TD_SENSOR_GATEWAY_CheckRSSI(uint8_t entry_id)
  * @param[in] frame
  * 	Pointer to the keep-alive frame.
  ******************************************************************************/
-static void TD_SENSOR_GATEWAY_ConfigureDeviceMonitoring(uint8_t entry, TD_SENSOR_LAN_KeepAliveFrame_t *frame)
+static void TD_SENSOR_GATEWAY_ConfigureDeviceMonitoring(uint8_t entry,
+	TD_SENSOR_LAN_KeepAliveFrame_t *frame)
 {
-	if (frame->keepalive == false && DeviceList[entry].config.keepalive.monitor == true) {
+	if (frame->keepalive == false &&
+		DeviceList[entry].config.keepalive.monitor == true) {
 		DeviceList[entry].config.keepalive.monitor = false;
 		TD_SCHEDULER_Remove(DeviceList[entry].config.keepalive.timer);
 	} else if (frame->keepalive == true) {
 		if (DeviceList[entry].config.keepalive.monitor == false) {
 
 			// Add a keep-alive timer for this device
-			DeviceList[entry].config.keepalive.timer = TD_SCHEDULER_Append(frame->interval,
-				0, frame->interval / 2,
+			DeviceList[entry].config.keepalive.timer = TD_SCHEDULER_Append(
+				frame->interval,
+				0,
+				frame->interval / 2,
 				0xFF,
 				TD_SENSOR_GATEWAY_KeepAliveHandler,
 				entry);
@@ -392,6 +394,9 @@ static void TD_SENSOR_GATEWAY_ConfigureDeviceMonitoring(uint8_t entry, TD_SENSOR
 		}
 		DeviceList[entry].config.keepalive.monitor = true;
 		DeviceList[entry].config.keepalive.interval = frame->interval;
+		DeviceList[entry].config.keepalive.voltage_level = frame->voltage_level;
+		DeviceList[entry].config.keepalive.temperature_level = frame->temp_level;
+		DeviceList[entry].config.keepalive.battery = frame->battery;
 		if (!frame->rssi) {
 			DeviceList[entry].config.rssi.monitor = false;
 		} else {
@@ -401,6 +406,9 @@ static void TD_SENSOR_GATEWAY_ConfigureDeviceMonitoring(uint8_t entry, TD_SENSOR
 			DeviceList[entry].config.rssi.level_ok = frame->level_ok;
 		}
 	}
+
+	// Save configuration changes in Flash memory
+	TD_FLASH_WriteVariables();
 }
 
 /***************************************************************************//**
@@ -416,7 +424,8 @@ static void TD_SENSOR_GATEWAY_ConfigureDeviceMonitoring(uint8_t entry, TD_SENSOR
  * @return
  * 	Always returns 1;
  ******************************************************************************/
-int TD_SENSOR_GATEWAY_FrameReceived(TD_LAN_frame_t *tx_frame, TD_LAN_frame_t *rx_frame)
+int DYNAMIC(TD_SENSOR_GATEWAY_FrameReceived)(TD_LAN_frame_t *tx_frame,
+	TD_LAN_frame_t *rx_frame)
 {
 	int i;
 	TD_SENSOR_LAN_Frame_t frame;
@@ -429,13 +438,24 @@ int TD_SENSOR_GATEWAY_FrameReceived(TD_LAN_frame_t *tx_frame, TD_LAN_frame_t *rx
 	uint8_t reply[15];
 	int8_t reply_count;
 	uint32_t new_lan_address;
+	uint8_t msgSize;
+	TD_SENSOR_LAN_KeepAliveFrame_t *keepalive_frame;
+	TD_SENSOR_GATEWAY_Device_t new_device;
+	TD_SENSOR_LAN_RegisterFrame_t *reg_frame;
+	TD_SENSOR_LAN_PairingParams_t newPairingParams;
 
-	/* Acknowledgment reply is time-critical, adding traces may slow down a lot and
-	 * may prevent acknoledgments from being received on time
+	/* Acknowledgment reply is time-critical, adding traces may slow down a lot
+	 * and may prevent acknowledgments from being received on time
 	 */
 	// We don't want to handle frame with acknowledge flag here
-	if (GET_ACK(rx_frame->header)) {
-		return 1;
+	if (AckExpected == true) {
+
+		// We don't want to handle acknowledgements here
+		if (GET_ACK(rx_frame->header)) {
+			return 1;
+		} else {
+			return -1;
+		}
 	}
 
 	//TODO: Improve to get it fine for different network
@@ -451,11 +471,12 @@ int TD_SENSOR_GATEWAY_FrameReceived(TD_LAN_frame_t *tx_frame, TD_LAN_frame_t *rx
 		// Otherwise find corresponding entryID
 		entry = TD_SENSOR_GATEWAY_GetDevice(lan_address);
 	}
-	DEBUG_PRINTF("E %d\r\n", entry)
+	DEBUG_PRINTF("E %d\r\n", entry);
 	DEBUG_DUMP("RX: ", gateway_RX.payload, TD_LAN_PAYLOAD_SIZE);
 	memcpy(&frame, gateway_RX.payload, TD_LAN_PAYLOAD_SIZE);
 	frame_count = GET_LOCALSENSORFRAME_COUNT(frame.header);
-	frame_type = (TD_SENSOR_LAN_FrameType_t) GET_LOCALSENSORFRAME_TYPE(frame.header);
+	frame_type = (TD_SENSOR_LAN_FrameType_t) GET_LOCALSENSORFRAME_TYPE(
+		frame.header);
 	DEBUG_DUMP("Frame: ", &frame, 16);
 
 	// Data count is on 4 bits but we need to handle 0-16 length
@@ -481,60 +502,81 @@ int TD_SENSOR_GATEWAY_FrameReceived(TD_LAN_frame_t *tx_frame, TD_LAN_frame_t *rx
 				case LOCAL_FORWARD: {
 					TD_SENSOR_GATEWAY_Ack(&gateway_RX, ACK_OK, 0, 0);
 					memcpy((uint8_t *)&forward_frame, frame.data, frame_count);
-					profile.interval = GET_LOCALFORWARDFRAME_INTERVAL(forward_frame.profile);
-					profile.repetition = GET_LOCALFORWARDFRAME_REPETITION(forward_frame.profile);
+					profile.interval = GET_LOCALFORWARDFRAME_INTERVAL(
+						forward_frame.profile);
+					profile.repetition = GET_LOCALFORWARDFRAME_REPETITION(
+						forward_frame.profile);
 					DEBUG_DUMP("Forward: ", &forward_frame, frame_count);
-					DEBUG_PRINTF(" \r\nProfile:%d %d\r\n", profile.interval, profile.repetition);
+					DEBUG_PRINTF(" \r\nProfile:%d %d\r\n", profile.interval,
+						profile.repetition);
 
 					//TODO: Replace SIGFOX frame and profile decoding!
-					TD_SENSOR_TRANSMITTER_SendSigfox((TD_SENSOR_Frame_t *) forward_frame.sigfox,
-						frame_count - sizeof (TD_SENSOR_TransmitProfile_t),
+					TD_SENSOR_TRANSMITTER_SendSigfox(forward_frame.sigfox,
+						frame_count - sizeof (forward_frame.profile),
 						entry,
 						&profile);
 				}
 				break;
 
-				case LOCAL_KEEPALIVE: {
-					TD_SENSOR_LAN_KeepAliveFrame_t *keepalive_frame;
-					TD_SENSOR_GATEWAY_Ack(&gateway_RX, ACK_OK, 0, 0);
-					keepalive_frame = (TD_SENSOR_LAN_KeepAliveFrame_t *)(frame.data);
-					TD_SENSOR_GATEWAY_ConfigureDeviceMonitoring(entry, keepalive_frame);
+				case LOCAL_KEEPALIVE:
+					keepalive_frame = (TD_SENSOR_LAN_KeepAliveFrame_t *)
+						(frame.data);
+					keepalive_frame->interval = NTOHL(keepalive_frame->interval);
+					TD_SENSOR_GATEWAY_ConfigureDeviceMonitoring(entry,
+						keepalive_frame);
 					if (DeviceList[entry].config.keepalive.monitor) {
+						TD_SENSOR_GATEWAY_Ack(&gateway_RX, ACK_OK, 0, 0);
 
-						// If keep-alive status indicates a connection lost (battery was replaced
-						// for example), then we need to resynchronize, i.e. restart the timer
-						// on keep-alive reception with very same parameters
+						// If keep-alive status indicates a connection lost
+						// (battery was replaced for example), then we need to
+						// resynchronize, i.e. restart the timer on keep-alive
+						// reception with very same parameters
 						if (DeviceList[entry].config.keepalive.status == false) {
-							TD_SCHEDULER_SetInterval(DeviceList[entry].config.keepalive.timer,
+
+							TD_SCHEDULER_SetInterval(
+								DeviceList[entry].config.keepalive.timer,
 								DeviceList[entry].config.keepalive.interval,
 								0,
 								DeviceList[entry].config.keepalive.interval / 2);
-							TD_SENSOR_SendEventConnection(1, entry);
+
+							// Send connection ok
+							if (ConnectionCallback != 0) {
+								(*ConnectionCallback)(1, entry);
+							} else {
+								TD_SENSOR_SendEventConnection(1, entry);
+							}
 							DeviceList[entry].config.keepalive.status = true;
 						}
-						TD_SENSOR_GATEWAY_Ack(&gateway_RX, ACK_OK, 0, 0);
 						DeviceList[entry].config.keepalive.validated = true;
 					} else {
 						TD_SENSOR_GATEWAY_Ack(&gateway_RX, ACK_ERROR, 0, 0);
 					}
-				}
-				break;
+					break;
 
 				case LOCAL_REGISTER:
 					TD_SENSOR_GATEWAY_Ack(&gateway_RX, ACK_ERROR, 0, 0);
 					break;
 
+
 				case LOCAL_DATA:
-					if (DataCallback != 0) {
-						reply_count = (*DataCallback)(frame.data, frame_count, reply);
+					if ((DataCallback != 0) || (DataCallbackExt != 0)) {
+						if (DataCallback != 0) {
+							reply_count = (*DataCallback)(frame.data,
+								frame_count, reply);
+						} else {
+							reply_count = (*DataCallbackExt)(entry, frame.data,
+								frame_count, reply);
+						}
 						if (reply_count > 0) {
 
 							// Custom acknowledgment
-							TD_SENSOR_GATEWAY_Ack(&gateway_RX, ACK_OK, reply, reply_count);
+							TD_SENSOR_GATEWAY_Ack(&gateway_RX, ACK_OK, reply,
+								reply_count);
 						} else if (reply_count == 0) {
 
 							// Simple-copy acknowledgment
-							TD_SENSOR_GATEWAY_Ack(&gateway_RX, ACK_OK, frame.data, frame_count);
+							TD_SENSOR_GATEWAY_Ack(&gateway_RX, ACK_OK,
+								frame.data, frame_count);
 						} else {
 
 							// No acknowledgment
@@ -542,43 +584,57 @@ int TD_SENSOR_GATEWAY_FrameReceived(TD_LAN_frame_t *tx_frame, TD_LAN_frame_t *rx
 					} else {
 
 						// Simple-copy acknowledgment
-						TD_SENSOR_GATEWAY_Ack(&gateway_RX, ACK_OK, frame.data, frame_count);
+						TD_SENSOR_GATEWAY_Ack(&gateway_RX, ACK_OK, frame.data,
+							frame_count);
 					}
 					break;
 
+				default:
+					break;
 				}
 				TD_SENSOR_GATEWAY_CheckRSSI(entry);
 			}
 		} else if (frame_count > 0) {
 
-			// Only a LAN registration frame is allowed if a device is not already paired
+			// Only a LAN registration frame is allowed if a device is not
+			// already paired
 			if (frame_type == LOCAL_REGISTER) {
-				if (RegistrationEnabled) {
-					TD_SENSOR_GATEWAY_Device_t new_device;
-					TD_SENSOR_LAN_RegisterFrame_t *reg_frame;
-					TD_SENSOR_LAN_KeepAliveFrame_t *keep_frame;
+				if (RegistrationEnabled || PairingEnabled) {
+
+					//TODO: handle pairing
 					reg_frame = (TD_SENSOR_LAN_RegisterFrame_t *) (frame.data);
-					keep_frame = (TD_SENSOR_LAN_KeepAliveFrame_t *)
-						(&frame.data[sizeof (TD_SENSOR_LAN_RegisterFrame_t)]);
 					new_device.sigfox_id = reg_frame->SigfoxID;
 					new_device.device_class = reg_frame->device_class;
 					new_device.lan_address = 0;
 
 					// Get an address for the device
-					new_lan_address = TD_SENSOR_GATEWAY_AppendDevicePrivate(&new_device);
+					new_lan_address = TD_SENSOR_GATEWAY_AppendDevicePrivate(
+						&new_device);
 					if (new_lan_address == 255) {
 
 						// If no address could be assigned to the device
 						TD_SENSOR_GATEWAY_Ack(&gateway_RX, ACK_ERROR, 0, 0);
 					} else {
+
 						// If an address could be given to the device
 						TD_SENSOR_LAN_Address_t newAdress;
 						newAdress.address = new_lan_address;
 						newAdress.mask = NETWORK_MASK;
-						TD_SENSOR_GATEWAY_Ack(&gateway_RX, ACK_OK, (uint8_t *) &newAdress, 8);
-						TD_SENSOR_GATEWAY_ConfigureDeviceMonitoring(entry, keep_frame);
+						newPairingParams.lanAddress = newAdress;
+						newPairingParams.pairingType = (uint8_t) RegistrationType;
+						if (RegistrationType != EN_TYPE_REG_NONE) {
+							msgSize = sizeof (TD_SENSOR_LAN_PairingParams_t);
+						} else {
+							msgSize = sizeof (TD_SENSOR_LAN_Address_t);
+						}
+
+						/******************ACK MUST BE SENT QUCIKLY*************/
+						TD_SENSOR_GATEWAY_Ack(&gateway_RX, ACK_OK,
+							(uint8_t *) &newPairingParams, msgSize);
+
 						if (RegistrationCallback != 0) {
-							(*RegistrationCallback)(newAdress.address, new_device.sigfox_id);
+							(*RegistrationCallback)(newAdress.address,
+								new_device.sigfox_id);
 						}
 
 						// Save configuration changes in Flash memory
@@ -612,23 +668,15 @@ int TD_SENSOR_GATEWAY_FrameReceived(TD_LAN_frame_t *tx_frame, TD_LAN_frame_t *rx
  * @return
  *  Returns false if LAN initialization failed, true otherwise.
  ******************************************************************************/
-bool TD_SENSOR_GATEWAY_Init(void)
+bool DYNAMIC(TD_SENSOR_GATEWAY_Init)(void)
 {
 	int i;
+	const TD_SIGFOX_Proxy_t *pProxy;
+	const TD_SIGFOX_ProxyStatus_t *pProxyStatus;
+	const TD_SIGFOX_ProxyConfig_t *pProxyConfig;
 
+	bool booster_found = false, booster_exist = false;
 	GatewayAddress = (TD_SENSOR_LAN_ComputeAddressTo16bits(SigfoxID)) << 8;
-	if (!TD_FLASH_DeclareVariable((uint8_t *) &DeviceCount, sizeof (uint32_t), 0)) {
-		DeviceCount = 1;
-	}
-	if (!TD_FLASH_DeclareVariable((uint8_t *) DeviceList,
-		sizeof (TD_SENSOR_GATEWAY_Device_t) * CONFIG_TD_SENSOR_GATEWAY_MAX_DEVICE,
-		0)) {
-		DeviceList[0].sigfox_id = SigfoxID;
-		DeviceList[0].lan_address = GatewayAddress;
-		for (i = 1; i < CONFIG_TD_SENSOR_GATEWAY_MAX_DEVICE; i++) {
-			DeviceList[i].sigfox_id = 0;
-		}
-	}
 
 	// Reset keep-alive and RSSI for all devices
 	for (i = 1; i < CONFIG_TD_SENSOR_GATEWAY_MAX_DEVICE; i++) {
@@ -637,7 +685,102 @@ bool TD_SENSOR_GATEWAY_Init(void)
 		DeviceList[i].config.rssi.status = false;
 		DeviceList[i].config.rssi.monitor = false;
 	}
+
+	// If a booster is paired, add it in DeviceList
+	pProxy = TD_SIGFOX_PROXY_Get();
+	pProxyStatus = &pProxy->status;
+	pProxyConfig = &pProxy->config;
+	if (pProxyStatus->paired == true)	{
+
+		// Check if the booster is already added to DeviceList
+		for (i = 1; i < CONFIG_TD_SENSOR_GATEWAY_MAX_DEVICE; i++) {
+
+			// If Booster Sigfox id is found
+			if (DeviceList[i].sigfox_id == pProxyStatus->id) {
+				booster_found = true;
+				break;
+			}
+		}
+
+		// It's a new booster
+		if (booster_found == false) {
+
+			// Check if a booster already exist in pairing table
+			for (i = 1; i < CONFIG_TD_SENSOR_GATEWAY_MAX_DEVICE; i++) {
+
+				// If Booster class is found
+				if (DeviceList[i].device_class == 0x0009) {
+					booster_exist = true;
+					break;
+				}
+			}
+
+			// If there is no booster in pairing table
+			if (booster_exist == false)	{
+
+				// If there is any place in device table
+				if (DeviceCount <= CONFIG_TD_SENSOR_GATEWAY_MAX_DEVICE) {
+
+					// Set to 0, not used for booster
+					memset(&DeviceList[DeviceCount].config.keepalive, 0,
+						sizeof (DeviceList[DeviceCount].config.keepalive));
+					memset(&DeviceList[DeviceCount].config.rssi, 0,
+						sizeof (DeviceList[DeviceCount].config.rssi));
+
+					// Set booster infos
+					DeviceList[DeviceCount].sigfox_id = pProxyStatus->id;
+					DeviceList[DeviceCount].lan_address = pProxyStatus->address;
+					DeviceList[DeviceCount].type = SENSOR_GATEWAY;
+					DeviceList[DeviceCount].device_class = pProxyConfig->class;
+					DeviceCount++;
+				} else {
+
+					// There is no place in pairing table
+					TD_SIGFOX_PROXY_ClearPairing();
+					return false;
+				}
+			} else {
+
+				// Previous booster exist in pairing table, replace it
+				DeviceList[i].sigfox_id = pProxyStatus->id;
+				DeviceList[i].lan_address = pProxyStatus->address;
+				DeviceList[i].type = SENSOR_GATEWAY;
+				DeviceList[i].device_class = pProxyConfig->class;
+			}
+		}
+	}
 	return TD_SENSOR_LAN_setLanAddress(GatewayAddress, NETWORK_MASK);
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Declare flash variables.
+ *
+ * @return
+ *   Nothing.
+ ******************************************************************************/
+void TD_SENSOR_GATEWAY_DeclareFlashVariable(void)
+{
+	uint8_t i;
+	uint32_t gatewayAddress = 0;
+
+	TD_SENSOR_Configuration_t *config;
+	config = TD_SENSOR_GetModuleConfiguration();
+	gatewayAddress = (TD_SENSOR_LAN_ComputeAddressTo16bits(SigfoxID)) << 8;
+	if (!TD_FLASH_DeclareVariable((uint8_t *) &DeviceCount, sizeof (uint32_t), 0)) {
+		DeviceCount = 1;
+	}
+	if (!TD_FLASH_DeclareVariable((uint8_t *) DeviceList,
+		sizeof (TD_SENSOR_GATEWAY_Device_t) * CONFIG_TD_SENSOR_GATEWAY_MAX_DEVICE,
+		0)) {
+		DeviceList[0].sigfox_id = SigfoxID;
+		DeviceList[0].lan_address = gatewayAddress;
+		DeviceList[0].type = config->type;
+		DeviceList[0].device_class = config->class;
+		for (i = 1; i < CONFIG_TD_SENSOR_GATEWAY_MAX_DEVICE; i++) {
+			DeviceList[i].sigfox_id = 0;
+		}
+	}
 }
 
 /** @} */
@@ -661,9 +804,21 @@ bool TD_SENSOR_GATEWAY_Init(void)
  * @param[out] data_rx
  *  Pointer to a buffer that will received the reply.
  ******************************************************************************/
-TD_SENSOR_LAN_AckCode_t TD_SENSOR_GATEWAY_SendDataByAddress(uint32_t address, uint8_t *data, uint8_t length, uint8_t *data_rx)
+TD_SENSOR_LAN_AckCode_t TD_SENSOR_GATEWAY_SendDataByAddress(uint32_t address,
+	uint8_t *data, uint8_t length, uint8_t *data_rx)
 {
-	return TD_SENSOR_LAN_SendFrameTo(address, LOCAL_DATA, data, length, data_rx);
+	TD_SENSOR_LAN_AckCode_t ret;
+
+	AckExpected = true;
+	if (UserCallback != 0) {
+		UserCallback();
+	}
+	ret = TD_SENSOR_LAN_SendFrameTo(address, LOCAL_DATA, data, length, data_rx);
+	if (UserCallback != 0) {
+		UserCallback();
+	}
+	AckExpected = false;
+	return ret;
 }
 
 /***************************************************************************//**
@@ -676,14 +831,54 @@ TD_SENSOR_LAN_AckCode_t TD_SENSOR_GATEWAY_SendDataByAddress(uint32_t address, ui
  * @param length
  *  Size in bytes of data to be sent.
  ******************************************************************************/
-void TD_SENSOR_GATEWAY_SendDataBroadcast(uint8_t *data, uint8_t length)
+TD_SENSOR_LAN_AckCode_t TD_SENSOR_GATEWAY_SendDataBroadcast(uint8_t *data, uint8_t length)
 {
+	TD_SENSOR_LAN_AckCode_t ret;
 	uint8_t temp = TD_SENSOR_LAN_GetFrameRetry();
 
 	// No acknowledgment as this is a broadcast
+	AckExpected = true;
 	TD_SENSOR_LAN_SetFrameRetry(0);
-	TD_SENSOR_LAN_SendFrameTo(GatewayAddress | 0xFF, LOCAL_DATA, data, length, 0);
+	if (UserCallback != 0) {
+		UserCallback();
+	}
+	ret = TD_SENSOR_LAN_SendFrameTo(GatewayAddress | 0xFF, LOCAL_DATA, data, length,
+			0);
+	if (UserCallback != 0) {
+		UserCallback();
+	}
 	TD_SENSOR_LAN_SetFrameRetry(temp);
+	AckExpected = false;
+	return ret;
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Broadcast a data frame to all devices without waiting Ack.
+ *
+ * @param[in] data
+ *  Pointer to the buffer containing the data to be broadcasted.
+ *
+ * @param length
+ *  Size in bytes of data to be sent.
+ ******************************************************************************/
+TD_SENSOR_LAN_AckCode_t TD_SENSOR_GATEWAY_SendDataBroadcastWithoutAck(uint8_t *data, uint8_t length)
+{
+	TD_SENSOR_LAN_AckCode_t ret;
+	uint8_t temp = TD_SENSOR_LAN_GetFrameRetry();
+
+	// No acknowledgment as this is a broadcast
+	AckExpected = false;
+	TD_SENSOR_LAN_SetFrameRetry(0);
+	if (UserCallback != 0) {
+		UserCallback();
+	}
+	ret = TD_SENSOR_LAN_SendFrameTo(GatewayAddress | 0xFF, LOCAL_DATA, data, length, 0);
+	if (UserCallback != 0) {
+		UserCallback();
+	}
+	TD_SENSOR_LAN_SetFrameRetry(temp);
+	return ret;
 }
 
 /***************************************************************************//**
@@ -702,30 +897,90 @@ void TD_SENSOR_GATEWAY_SendDataBroadcast(uint8_t *data, uint8_t length)
  * @param[in] length
  *   Reserved for future use.
  ******************************************************************************/
-void TD_SENSOR_GATEWAY_SendKeepAliveBroadcast(bool enabled, uint8_t interval, uint8_t *data, uint8_t length)
+void TD_SENSOR_GATEWAY_SendKeepAliveBroadcast(bool enabled, uint8_t interval,
+	uint8_t *data, uint8_t length)
 {
 	TD_SENSOR_LAN_KeepAliveFrame_t frame;
+	uint8_t payload[7] = {0};
+	uint8_t *pPayload = NULL;
+	//uint8_t keepalive_rssi = 0;
 	uint8_t temp = TD_SENSOR_LAN_GetFrameRetry();
 
-	// No acknowledgment as this is abroadcast
+	// No acknowledgment as this is a broadcast
 	TD_SENSOR_LAN_SetFrameRetry(0);
-	frame.keepalive = true;
+	memset(&frame, 0, sizeof (frame));
 	frame.interval = interval;
-	frame.rssi = true;
 	frame.level_low = 0;
 	frame.level_ok = 0;
+	frame.keepalive = true;
+	frame.rssi = true;
+	AckExpected = true;
+	pPayload = payload;
+
+	/* Build interval */
+	frame.interval = HTONL(frame.interval);
+	memcpy(pPayload, &frame.interval, sizeof (frame.interval));
+	pPayload += sizeof (interval);
+
+	/* Build level low */
+	*pPayload = frame.level_low;
+	pPayload += sizeof (frame.level_low);
+
+	/* Build level ok */
+	*pPayload = frame.level_ok;
+	pPayload += sizeof (frame.level_ok);
+
+	/* Build keepalive and rssi */
+	*pPayload = (frame.keepalive == true ? 0x01 : 0x00) |
+		(frame.rssi == true ? 0x02 : 0x00);
+	//pPayload += sizeof(keepalive_rssi);
+	pPayload += sizeof (uint8_t);
+	if (UserCallback != 0) {
+		UserCallback();
+	}
 	TD_SENSOR_LAN_SendFrameTo(GatewayAddress | 0xFF,
 		LOCAL_KEEPALIVE,
-		(uint8_t *) &frame,
-		sizeof (TD_SENSOR_LAN_KeepAliveFrame_t),
+		payload,
+		pPayload - payload,
 		0);
+	if (UserCallback != 0) {
+		UserCallback();
+	}
 	TD_SENSOR_LAN_SetFrameRetry(temp);
+	AckExpected = false;
 }
-
 
 /***************************************************************************//**
  * @brief
- *  Get a pointer to the Device list.
+ *   Returns device index in device list array if any.
+ *
+ * @param[in] device_class
+ *   The device class to match.
+ *
+ * @param[out] device_list
+ *   Pointer to an array that will receive the matching indices.
+ *
+ * @return
+ *   Returns the number of devices with the device_class, max is 5 devices
+ ******************************************************************************/
+uint8_t TD_SENSOR_GATEWAY_GetDeviceIndex(uint16_t device_class,
+	uint8_t *device_list)
+{
+	uint8_t index, indexDev = 0;
+
+	for (index = 1; index < DeviceCount; index++) {
+		if (DeviceList[index].device_class == device_class) {
+			if (indexDev < 5) {
+				device_list[indexDev++] = index;
+			}
+		}
+	}
+	return indexDev;
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Get a pointer to the Device list including gateway itself at index 0.
  *
  * @return
  *  Returns a pointer to the device list.
@@ -745,8 +1000,8 @@ const TD_SENSOR_GATEWAY_Device_t *TD_SENSOR_GATEWAY_GetDeviceList(void)
 uint8_t TD_SENSOR_GATEWAY_GetDeviceCount(void)
 {
 
-	// Do not count in the gateway itself
-	return DeviceCount - 1;
+	// Device count includes gateway itself
+	return DeviceCount;
 }
 
 /***************************************************************************//**
@@ -776,7 +1031,7 @@ void TD_SENSOR_GATEWAY_DeleteAllDevices(void)
  *  Delete one registered device from the device list.
  *
  * @param [in] lan_address
- *  The device ALN address to delete.
+ *  The device LAN address to delete.
  ******************************************************************************/
 void TD_SENSOR_GATEWAY_DeleteDevice(uint32_t lan_address)
 {
@@ -807,6 +1062,32 @@ void TD_SENSOR_GATEWAY_DeleteDevice(uint32_t lan_address)
 
 /***************************************************************************//**
  * @brief
+ *  Delete one registered device from the device list by using its entry id.
+ *
+ * @param [in] entry_id
+ *  The device entry id to delete.
+ ******************************************************************************/
+void TD_SENSOR_GATEWAY_DeleteDeviceByEntryId(uint8_t entry_id)
+{
+	int index;
+
+	// Stop device keep-alive timer if any
+	if (DeviceList[entry_id].config.keepalive.monitor) {
+		TD_SCHEDULER_Remove(DeviceList[entry_id].config.keepalive.timer);
+	}
+	if (entry_id < DeviceCount) {
+		for (index = entry_id; index < DeviceCount; index++) {
+			memcpy((char *)&DeviceList[index], (char *)&DeviceList[index + 1], sizeof(TD_SENSOR_GATEWAY_Device_t));
+		}
+
+		// Reset device on the top of the table
+		memset((char *)&DeviceList[DeviceCount], 0, sizeof (TD_SENSOR_GATEWAY_Device_t));
+		DeviceCount--;
+	}
+}
+
+/***************************************************************************//**
+ * @brief
  *  Set a callback on Local Data Frame Reception
  *
  * @param[in] user_data_callback
@@ -820,9 +1101,53 @@ void TD_SENSOR_GATEWAY_DeleteDevice(uint32_t lan_address)
  *   This function must return as quickly as possible in the case where an
  *   acknowledgment should be sent.
  ******************************************************************************/
-void TD_SENSOR_GATEWAY_SetDataCallback(int8_t (*user_data_callback)(uint8_t *data, uint8_t length, uint8_t *reply))
+void TD_SENSOR_GATEWAY_SetDataCallback(int8_t (*user_data_callback)(
+		uint8_t *data, uint8_t length, uint8_t *reply))
 {
 	DataCallback = user_data_callback;
+}
+
+
+/***************************************************************************//**
+ * @brief
+ *  Set a callback on Local Data Frame Reception
+ *
+ * @param[in] user_data_callback
+ *   Pointer to a callback function that will be called upon local data frame
+ *   reception with the following arguments:
+ *     - data ill be a pointer to a buffer containing the received payload
+ *     - length will be the size in bytes of the received payload
+ *     - reply will be a pointer to the buffer to be filled with reply if used
+ *   The callback function should return the reply length which must be <=15, or
+ *   < 0 if no acknowledgment is required.
+ *   This function must return as quickly as possible in the case where an
+ *   acknowledgment should be sent.
+ ******************************************************************************/
+void TD_SENSOR_GATEWAY_SetDataCallbackExt(int8_t (*user_data_callback)(
+		uint8_t entry_id, uint8_t *data, uint8_t length, uint8_t *reply))
+{
+	DataCallbackExt = user_data_callback;
+}
+
+
+/***************************************************************************//**
+ * @brief
+ *  Set a callback to execute when connection with a device is lost or
+ *  connected
+ *
+ * @param[in] user_connection_callback
+ *   Pointer to a callback function that will be called upon connection is lost
+ *   or retrieved with the following arguments:
+ *     - state will be connection state (0 = lost, 1 = connected)
+ *     - id will be the device id in pairing table
+ *   The callback function should return nothing.
+ *   This function must return as quickly as possible in the case where an
+ *   acknowledgment should be sent.
+ ******************************************************************************/
+void TD_SENSOR_GATEWAY_SetConnectionCallback(void (*user_connection_callback)
+	(bool state, uint8_t id))
+{
+	ConnectionCallback = user_connection_callback;
 }
 
 /***************************************************************************//**
@@ -832,9 +1157,12 @@ void TD_SENSOR_GATEWAY_SetDataCallback(int8_t (*user_data_callback)(uint8_t *dat
 void TD_SENSOR_GATEWAY_StartReception(void)
 {
 	ReceptionEnabled = true;
-	TD_LAN_SetUserCallback(TD_SENSOR_GATEWAY_FrameReceived_);
+	TD_LAN_SetUserCallback(TD_SENSOR_GATEWAY_FrameReceived);
 	//tfp_printf("TD_SENSOR_GATEWAY_StartReception:0x%08X\r\n",&gateway_RX);
-	TD_LAN_ReceiveFrame(CONFIG_LAN_PERIOD, 0, &gateway_RX);
+	if (RxPeriod == 0) {
+		RxPeriod = CONFIG_LAN_PERIOD;
+	}
+	TD_LAN_ReceiveFrame(RxPeriod, 0, &gateway_RX);
 }
 
 /***************************************************************************//**
@@ -869,11 +1197,31 @@ bool TD_SENSOR_GATEWAY_IsReceptionEnabled(void)
  *     - lan_address will be the LAN address of the newly registered device
  *     - sigfox_id will be the corresponding SIGFOX ID of he device
  ******************************************************************************/
-void TD_SENSOR_GATEWAY_StartRegistration(void (*callback)(uint32_t lan_address, uint32_t sigfox_id))
+void TD_SENSOR_GATEWAY_StartRegistration(void (*callback)(uint32_t lan_address,
+	uint32_t sigfox_id))
+{
+	TD_SENSOR_GATEWAY_StartRegistrationExt(callback, EN_TYPE_REG_NONE);
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Open Device registration
+ *
+ * @param[in] callback
+ *  User callback which will be called when a registration occur
+ *  with computed lan_address and sigfox id of the newly registered device as
+ *  parameters.
+ *
+ * @param[in] type
+ *  Registration type to start.
+ ******************************************************************************/
+void TD_SENSOR_GATEWAY_StartRegistrationExt(void (*callback)(
+		uint32_t lan_address, uint32_t sigfox_id),
+	TD_SENSOR_GATEWAY_Registration_t type)
 {
 	bool rx_en = ReceptionEnabled;
 
-	// Stop reception if enabled
+	// Stop reception if activated
 	if (rx_en) {
 		ReceptionEnByReg = false;
 		TD_SENSOR_GATEWAY_StopReception();
@@ -881,6 +1229,7 @@ void TD_SENSOR_GATEWAY_StartRegistration(void (*callback)(uint32_t lan_address, 
 		ReceptionEnByReg = true;
 	}
 	RegistrationCallback = callback;
+	RegistrationType = type;
 	TD_SENSOR_LAN_setLanAddress(BROADCAST_ADDRESS, BROADCAST_MASK);
 	RegistrationEnabled = true;
 
@@ -890,7 +1239,7 @@ void TD_SENSOR_GATEWAY_StartRegistration(void (*callback)(uint32_t lan_address, 
 
 /***************************************************************************//**
  * @brief
- *  Stop device registration.
+ *  Close Device registration
  ******************************************************************************/
 void TD_SENSOR_GATEWAY_StopRegistration(void)
 {
@@ -923,13 +1272,68 @@ void TD_SENSOR_GATEWAY_StopRegistration(void)
  * @return
  *   Returns an entry ID if the device has been added, 255 otherwise.
  ******************************************************************************/
-uint32_t TD_SENSOR_GATEWAY_AppendDevice(uint32_t sigfox_id, uint16_t class, uint32_t lan_address)
+uint32_t TD_SENSOR_GATEWAY_AppendDevice(uint32_t sigfox_id, uint16_t class,
+	uint32_t lan_address)
 {
 	TD_SENSOR_GATEWAY_Device_t device;
 	device.sigfox_id = sigfox_id;
 	device.device_class = class;
 	device.lan_address = lan_address;
-	return (TD_SENSOR_GATEWAY_AppendDevicePrivate(&device) | (GatewayAddress & NETWORK_MASK));
+	return (TD_SENSOR_GATEWAY_AppendDevicePrivate(&device) |
+		(GatewayAddress & NETWORK_MASK));
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Start pairing
+ ******************************************************************************/
+void TD_SENSOR_GATEWAY_StartPairing(void)
+{
+	TD_SENSOR_LAN_setLanAddress(BROADCAST_ADDRESS, NETWORK_MASK);
+	PairingEnabled = true;
+	TD_SENSOR_GATEWAY_StartReception();
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Stop pairing
+ ******************************************************************************/
+void TD_SENSOR_GATEWAY_StopPairing(void)
+{
+	PairingEnabled = false;
+	TD_SENSOR_LAN_setLanAddress(GatewayAddress, NETWORK_MASK);
+	TD_SENSOR_GATEWAY_StartReception();
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Callback to call before and after Lan/Sigfox transmission
+ ******************************************************************************/
+void TD_SENSOR_GATEWAY_SetUserCallback(void (*user_callback)(void))
+{
+	UserCallback = user_callback;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Callback to set tx and rx reception period
+ ******************************************************************************/
+void TD_SENSOR_GATEWAY_SetTxRxPeriod(uint32_t tx_period, uint32_t rx_period)
+{
+	RxPeriod = rx_period;
+	TD_SENSOR_LAN_SetTxPeriod(tx_period);
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Get the current Ack expected state.
+ *
+ * @return
+ *  Returns the current Ack expected state.
+ ******************************************************************************/
+bool TD_SENSOR_GATEWAY_GetAckExpectedState(void)
+{
+	return AckExpected;
 }
 
 /** @} */

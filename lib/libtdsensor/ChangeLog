@@ -1,71 +1,136 @@
-= Version 1.0.0 =
+# Version 1.0.0 #
+
   * Initial revision
 
-= Version 2.0.0 =
+# Version 2.0.0 #
 
-#### Changes ####
+## Major Revision ##
 
-  * Removed the `sensor_config.h` header, now replaced with the more genral `CONFIG` system
+  * Corresponds to UDM v2.2
+
+## Changes ##
+
+  * Removed the `sensor_config.h` header, now replaced with the more general `CONFIG` system
   * Removed all the private headers
-  * Added TD_SENSOR_SendData()
-  * Added TD_SENSOR_EncodeCellPhoneNumber()
-  * Added TD_SENSOR_SendDataCellPhoneNumber()
-  * Added TD_SENSOR_EncodeLocalVoltage()
-  * Added TD_SENSOR_EncodeLocalTemperature()
-  * Added TD_SENSOR_SendEvent()
-  * Added TD_SENSOR_SendEventBootExt()
-  * Added TD_SENSOR_SetTransmissionProfile()
-  * Added TD_SENSOR_MonitorInit()
-  * Added TD_SENSOR_BatteryCallBack()
-  * Added TD_SENSOR_InternalInit()
-  * Added TD_SENSOR_Dump()
-  * Added TD_SENSOR_MonitorSwitchIrq() to monitor a switch using IRQs
-  * Added TD_SENSOR_SetModuleConfiguration()
-  * Added TD_SENSOR_GetCustomBootCause()
-  * Added TD_SENSOR_GetBootCause()
-  * Added TD_SENSOR_SetCustomBootCause()
-  * Added TD_SENSOR_IsBatteryDead()
-  * Added TD_SENSOR_ClearBatteryDead()
-  * Added TD_SENSOR_DEVICE_Data()
-  * Added TD_SENSOR_DEVICE_Register()
-  * Added TD_SENSOR_DEVICE_isRegistered(void)
-  * Added TD_SENSOR_DEVICE_Reset(void)
-	* Added TD_SENSOR_DEVICE_SetDataCallback()
-	* Added TD_SENSOR_DEVICE_SetKeepAliveCallback()
-	* Added TD_SENSOR_DEVICE_StartReception()
-	* Added TD_SENSOR_DEVICE_StartBroadcastReception()
-	* Added TD_SENSOR_DEVICE_StartSynchReception()
-	* Added TD_SENSOR_DEVICE_StopReception()
-	* Added TD_SENSOR_DEVICE_isReceptionEnabled()
-	* Added TD_SENSOR_DEVICE_isBroadcastReceptionEnabled()
-	* Added TD_SENSOR_DEVICE_SetTxOnLanFail()
-	* Added TD_SENSOR_DEVICE_GetTxOnLanFail()
-	* Added TD_SENSOR_DEVICE_SetTxSkipLan()
-	* Added TD_SENSOR_DEVICE_GetTxSkipLan()
-	* Added TD_SENSOR_DEVICE_GetAddress()
-	* Added TD_SENSOR_DEVICE_SetAddress()
-	* Added TD_SENSOR_DEVICE_GetBroadcastMask()
-	* Added TD_SENSOR_DEVICE_SetAsynchronousForward()
-	* Added TD_SENSOR_GATEWAY_FrameReceived()
-	* Added TD_SENSOR_GATEWAY_IsReceptionEnabled()
-	* Added TD_SENSOR_GATEWAY_AppendDevice()
-	* Added TD_SENSOR_GATEWAY_SendDataByAddress()
-	* Added TD_SENSOR_GATEWAY_SendDataBroadcast()
-	* Added TD_SENSOR_GATEWAY_SendKeepAliveBroadcast()
-	* Added TD_SENSOR_GATEWAY_SetDataCallback()
-	* Added TD_SENSOR_GATEWAY_GetDeviceCount()
-	* Added TD_SENSOR_GATEWAY_GetDeviceList()
-	* Added TD_SENSOR_TRANSMITTER_SetRetry()
-	* Added TD_SENSOR_TRANSMITTER_LenToRealDuration()
-	* Added TD_SENSOR_UTILS_BitConcat()
+  * Added `TD_SENSOR_SendData()`
+  * Added `TD_SENSOR_EncodeCellPhoneNumber()`
+  * Added `TD_SENSOR_SendDataCellPhoneNumber()`
+  * Added `TD_SENSOR_EncodeLocalVoltage()`
+  * Added `TD_SENSOR_EncodeLocalTemperature()`
+  * Added `TD_SENSOR_SendEvent()`
+  * Added `TD_SENSOR_SendEventBootExt()`
+  * Added `TD_SENSOR_SetTransmissionProfile()`
+  * Added `TD_SENSOR_MonitorInit()`
+  * Added `TD_SENSOR_BatteryCallBack()`
+  * Added `TD_SENSOR_InternalInit()`
+  * Added `TD_SENSOR_Dump()`
+  * Added `TD_SENSOR_MonitorSwitchIrq()` to monitor a switch using IRQs
+  * Added `TD_SENSOR_SetModuleConfiguration()`
+  * Added `TD_SENSOR_GetCustomBootCause()`
+  * Added `TD_SENSOR_GetBootCause()`
+  * Added `TD_SENSOR_SetCustomBootCause()`
+  * Added `TD_SENSOR_IsBatteryDead()`
+  * Added `TD_SENSOR_ClearBatteryDead()`
+  * Added `TD_SENSOR_DEVICE_Data()`
+  * Added `TD_SENSOR_DEVICE_Register()`
+  * Added `TD_SENSOR_DEVICE_isRegistered(void)`
+  * Added `TD_SENSOR_DEVICE_Reset(void)`
+  * Added `TD_SENSOR_DEVICE_SetDataCallback()`
+  * Added `TD_SENSOR_DEVICE_SetKeepAliveCallback()`
+  * Added `TD_SENSOR_DEVICE_StartReception()`
+  * Added `TD_SENSOR_DEVICE_StartBroadcastReception()`
+  * Added `TD_SENSOR_DEVICE_StartSynchReception()`
+  * Added `TD_SENSOR_DEVICE_StopReception()`
+  * Added `TD_SENSOR_DEVICE_isReceptionEnabled()`
+  * Added `TD_SENSOR_DEVICE_isBroadcastReceptionEnabled()`
+  * Added `TD_SENSOR_DEVICE_SetTxOnLanFail()`
+  * Added `TD_SENSOR_DEVICE_GetTxOnLanFail()`
+  * Added `TD_SENSOR_DEVICE_SetTxSkipLan()`
+  * Added `TD_SENSOR_DEVICE_GetTxSkipLan()`
+  * Added `TD_SENSOR_DEVICE_GetAddress()`
+  * Added `TD_SENSOR_DEVICE_SetAddress()`
+  * Added `TD_SENSOR_DEVICE_GetBroadcastMask()`
+  * Added `TD_SENSOR_DEVICE_SetAsynchronousForward()`
+  * Added `TD_SENSOR_GATEWAY_FrameReceived()`
+  * Added `TD_SENSOR_GATEWAY_IsReceptionEnabled()`
+  * Added `TD_SENSOR_GATEWAY_AppendDevice()`
+  * Added `TD_SENSOR_GATEWAY_SendDataByAddress()`
+  * Added `TD_SENSOR_GATEWAY_SendDataBroadcast()`
+  * Added `TD_SENSOR_GATEWAY_SendKeepAliveBroadcast()`
+  * Added `TD_SENSOR_GATEWAY_SetDataCallback()`
+  * Added `TD_SENSOR_GATEWAY_GetDeviceCount()`
+  * Added `TD_SENSOR_GATEWAY_GetDeviceList()`
+  * Added `TD_SENSOR_TRANSMITTER_SetRetry()`
+  * Added `TD_SENSOR_TRANSMITTER_LenToRealDuration()`
+  * Added `TD_SENSOR_UTILS_BitConcat()`
 
-#### Additions ####
-
-##### **libtdsensor** #####
+## Additions ##
 
   * Added a retransmission profile system
-  * Added a custom BootEvent
+  * Added a custom `BootEvent`
   * Added queue handling for message transmission
   * Added a *forward* option (optional gateway)
   * Extension of the **Device** and **Gateway** APIs
-  * Extension of the set of Sensor Events
+  * Extension to the set of avaialble Sensor Events
+
+# Version 3.0.0 #
+
+## Major Revision ##
+
+  * Corresponds to UDM v2.3
+
+## Changes ##
+
+  * Added `TD_SENSOR_SendDataPIN()`
+  * Added `TD_SENSOR_EncodePIN()`
+  * Added `TD_SENSOR_SetDataTransmissionProfile()`
+  * Re-implemented `TD_SENSOR_SetCellPhoneNumber()` as a macro
+  * Added `TD_SENSOR_SendEventTemperatureExt()`
+  * Added `TD_SENSOR_SendEventFor()`
+  * Re-implemented `TD_SENSOR_SendEventBoot()` as a macro
+  * Re-implemented `TD_SENSOR_SetEventTransmissionProfile()` as a macro
+  * Added extended keep-alive frames
+  * Added `TD_SENSOR_SendKeepAliveExt()`
+  * Added `TD_SENSOR_SendKeepAliveVoltageTemperatureFor()`
+  * Re-implemented `TD_SENSOR_SetKeepAliveTransmissionProfile()` as a macro
+  * Added Ping frames
+  * Removed useless `sensor_private.h` header file
+  * Re-implemented `TD_SENSOR_SendRaw()` as a macro
+  * Re-implemented `TD_SENSOR_SetRawTransmissionProfile()` as a macro
+  * Added `TD_SENSOR_SendRegisterExtended()`
+  * Added `TD_SENSOR_SendRegisterForBooster()`
+  * Re-implemented `TD_SENSOR_SetRegisterTransmissionProfile()` as a macro
+  * Added `TD_SENSOR_SendUDM()`
+  * Added `TD_SENSOR_SEND_SetUserCallback()`
+  * Re-implemented `TD_SENSOR_SetTransmissionProfile()` as a macro
+  * Re-implemented `TD_SENSOR_SendSMS()` as a macro
+  * Re-implemented `TD_SENSOR_SendTweet()` as a macro
+  * Re-implemented `TD_SENSOR_SetServiceTransmissionProfile()` as a macro
+  * Added `TD_SENSOR_DEVICE_StartNetworkReception()`
+  * Added `TD_SENSOR_DEVICE_isNetworkReceptionEnabled()`
+  * Added `TD_SENSOR_DEVICE_GetRegistrationType()`
+  * Added `TD_SENSOR_DEVICE_SetUserCallback()`
+  * Added `TD_SENSOR_DEVICE_SetTxRxPeriod()`
+  * Added `TD_SENSOR_GATEWAY_StartRegistrationExt()`
+  * Added `TD_SENSOR_GATEWAY_DeleteDeviceByEntryId()`
+  * `TD_SENSOR_GATEWAY_SendDataByAddress()` now returns the ACK code
+  * `TD_SENSOR_GATEWAY_SendDataBroadcast()` now returns the ACK code
+  * Added `TD_SENSOR_GATEWAY_SendDataBroadcastWithoutAck()`
+  * Added `TD_SENSOR_GATEWAY_SetDataCallbackExt()`
+  * Added `TD_SENSOR_GATEWAY_SetConnectionCallback()`
+  * Added `TD_SENSOR_GATEWAY_GetDeviceIndex()`
+  * Added `TD_SENSOR_GATEWAY_SetUserCallback()`
+  * Added `TD_SENSOR_GATEWAY_SetStreamDataCallback()`
+  * Added `TD_SENSOR_GATEWAY_SetTxRxPeriod()`
+  * Added `TD_SENSOR_GATEWAY_GetAckExpectedState()`
+  * Added `TD_SENSOR_TRANSMITTER_IsTxAllowed()`
+  * Added `TD_SENSOR_TRANSMITTER_SetUserCallback()`
+  * Added endian conversion macros
+  * Added `TD_SENSOR_InitExtended()`
+  * Added `TD_SENSOR_MonitorConnectionExt()`
+  * Added `TD_SENSOR_SetModuleApplicationRelease()`
+
+## Bug Fixes ##
+
+  * Do not set encoded voltage length if no length pointer provided to `TD_SENSOR_EncodeLocalVoltage()` or `TD_SENSOR_EncodeLocalTemperature()`
+

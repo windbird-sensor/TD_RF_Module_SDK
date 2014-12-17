@@ -2,7 +2,7 @@
  * @file
  * @brief Temperature/Supply Voltage measure API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.1.0
+ * @version 2.2.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -62,7 +62,7 @@
  * @note
  *   See section 2.3.4 in the reference manual for details on this calculation.
  *
- * @param adcSample
+ * @param adc_result
  *   Raw value from ADC to be converted to Celsius.
  *
  * @return
@@ -73,12 +73,12 @@ static int32_t convertToCelsiusThenth(int32_t adc_result)
 	// Factory calibration temperature from device information page
 	// See table 5.4 in EFM32TG Reference Manual
 	int32_t cal_temp_0 = ((DEVINFO->CAL & _DEVINFO_CAL_TEMP_MASK)
-						  >> _DEVINFO_CAL_TEMP_SHIFT);
+		>> _DEVINFO_CAL_TEMP_SHIFT);
 
 	// Factory calibration value from device information page
 	// See table 5.4 in EFM32TG Reference Manual
-	int32_t adc0_temp_0_read_1v25 = ((DEVINFO->ADC0CAL2 & _DEVINFO_ADC0CAL2_TEMP1V25_MASK)
-									 >> _DEVINFO_ADC0CAL2_TEMP1V25_SHIFT);
+	int32_t adc0_temp_0_read_1v25 = ((DEVINFO->ADC0CAL2 &
+		_DEVINFO_ADC0CAL2_TEMP1V25_MASK) >> _DEVINFO_ADC0CAL2_TEMP1V25_SHIFT);
 
 	/* Temperature measurement is given by the following formula from section
 	 * 24.3.4.2 in the EFM32TG Reference Manual:
@@ -101,13 +101,16 @@ static int32_t convertToCelsiusThenth(int32_t adc_result)
 	 *           = cal_temp_0 + ((adc0_temp_0_read_1v25 - adc_result) * 10) / 63
 	 *
 	 * Eventually:
-	 * t_celsius_thenth = round(cal_temp_0 * 10 + ((adc0_temp_0_read_1v25 - adc_result) * 100) / 63)
+	 * t_celsius_thenth = round(cal_temp_0 * 10 + ((adc0_temp_0_read_1v25 -
+	 * adc_result) * 100) / 63)
 	 *
-	 * We just pre-multiply this computation by 2 and post-divide it by 2, adding 1 for rounding
-	 * if intermediate LSB is 1.
+	 * We just pre-multiply this computation by 2 and post-divide it by 2,
+	 * adding 1 for rounding if intermediate LSB is 1.
 	 */
-	int32_t t_celsius_tenth = cal_temp_0 * 20 + ((adc0_temp_0_read_1v25 - adc_result) * 200) / 63;
-	return (t_celsius_tenth & 1) ? (t_celsius_tenth >> 1) + 1 : t_celsius_tenth >> 1;
+	int32_t t_celsius_tenth = cal_temp_0 * 20 +
+		((adc0_temp_0_read_1v25 - adc_result) * 200) / 63;
+	return (t_celsius_tenth & 1) ? (t_celsius_tenth >> 1) + 1 :
+		t_celsius_tenth >> 1;
 }
 
 /** @} */
@@ -124,7 +127,8 @@ static int32_t convertToCelsiusThenth(int32_t adc_result)
  *   Accurately measure the Power Supply voltage or the temperature.
  *
  * @param[in] mode
- *   If true, measure the temperature, if false, measure the power supply voltage.
+ *   If true, measure the temperature, if false, measure the power supply
+ *   voltage.
  *
  * @return
  *   The measured temperature is given in 1/10 degrees Celsius, the power supply
@@ -168,22 +172,83 @@ int32_t TD_MEASURE_VoltageTemperatureExtended(bool mode)
 
 /***************************************************************************//**
  * @brief
+ *   Accurately measure voltage on a given pin.
+ *
+ * @param[in] input
+ *   Channel on which measurement should be done. PD4 = channel 4,
+ *   PD5 = Channel 5 ...
+ *
+ * @param[in] ref
+ *   Voltage reference to use. Your voltage reference should be > to your
+ *   voltage value
+ *
+ * @return
+ *   The ADC output. Corresponding voltage can be found by computing:
+ *
+ *   voltage = reference_range*input/4096
+ *
+ *   ex: 1.25V input, return = 1000
+ *
+ *   voltage = 1.25 * 1000 / 4096 = 305 mV
+ *
+ *
+ *   ex: 5V diff input, return = 2048
+ *
+ *   voltage = -5000 + (10000 * 2048) / 4096 = 0V
+ *
+ ******************************************************************************/
+uint32_t TD_MEASURE_SingleVoltage(ADC_SingleInput_TypeDef input,
+	ADC_Ref_TypeDef ref)
+{
+	uint32_t setpoint;
+
+	// Base the ADC configuration on the default setup
+	ADC_InitSingle_TypeDef single_init = ADC_INITSINGLE_DEFAULT;
+	ADC_Init_TypeDef init = ADC_INIT_DEFAULT;
+
+	// Initialize timebase
+	init.timebase = ADC_TimebaseCalc(0);
+	init.prescale = ADC_PrescaleCalc(40000, 0);
+	CMU_ClockEnable(cmuClock_ADC0, true);
+	ADC_Init(ADC0, &init);
+
+	// Set reference and input
+	single_init.reference = ref;
+	single_init.input = input;
+	ADC_InitSingle(ADC0, &single_init);
+
+	// Start one ADC sample
+	ADC_Start(ADC0, adcStartSingle);
+
+	// Active wait for ADC to complete
+	while ((ADC0->STATUS & ADC_STATUS_SINGLEDV) == 0) {
+		;
+	}
+	setpoint = ADC_DataSingleGet(ADC0);
+	CMU_ClockEnable(cmuClock_ADC0, false);
+	return(setpoint);
+}
+
+/***************************************************************************//**
+ * @brief
  *   Measure the Power Supply voltage or the temperature.
  *
  * @param[in] mode
- *   If true, measure the temperature, if false, measure the power supply voltage.
+ *   If true, measure the temperature, if false, measure the power supply
+ *   voltage.
  *
  * @note
  *   This function is limited to positive temperature in degrees Celsius only.
  *   Please consider using TD_MEASURE_VoltageTemperatureExtended instead for
- *   proper handling of negative temperatures and values in 1/10 degrees Celsius.
+ *   proper handling of negative temperatures and values in 1/10 degrees
+ *   Celsius.
  *   This function returns voltages in a non-standard format and in tens of mV,
  *   please consider using TD_MEASURE_VoltageTemperatureExtended instead for
  *   values directly in mV.
  *
  * @return
  *   The measured temperature is given in degrees Celsius, and the power supply
- *    voltage in 1/10s of mV plus 2 V if MSB is 0, or plus 3 V if MSB is 1.
+ *   voltage in 1/10s of mV plus 2 V if MSB is 0, or plus 3 V if MSB is 1.
  ******************************************************************************/
 uint8_t TD_MEASURE_VoltageTemperature(bool mode)
 {

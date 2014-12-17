@@ -2,7 +2,7 @@
  * @file
  * @brief Flash controller (MSC) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.1.0
+ * @version 2.1.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -41,6 +41,7 @@
 #include "td_flash.h"
 #include "td_trap.h"
 #include "td_utils.h"
+#include "td_config_ext.h"
 
 /***************************************************************************//**
  * @addtogroup FLASH
@@ -55,6 +56,27 @@
 /** @addtogroup FLASH_DEFINES Defines
  * @{ */
 
+//#define FLASH_DEBUG_READ
+//#define FLASH_DEBUG_WRITE
+
+#ifdef FLASH_DEBUG_READ
+/** Turn on trace mode if tfp_printf not commented */
+#define DEBUG_PRINTF_READ(...) tfp_printf(__VA_ARGS__)
+#else
+
+/** Macro to debug Flash reads */
+#define DEBUG_PRINTF_READ(...)
+#endif
+
+#ifdef FLASH_DEBUG_WRITE
+/** Turn on trace mode if tfp_printf not commented */
+#define DEBUG_PRINTF_WRITE(...) tfp_printf(__VA_ARGS__)
+#else
+
+/** Macro to debug Flash writes */
+#define DEBUG_PRINTF_WRITE(...)
+#endif
+
 #ifdef __ICCARM__
 #pragma language = extended
 #pragma segment = "USER_ROM_CONFIG"
@@ -63,12 +85,21 @@
 #ifdef __ICCARM__
 /** Special user config page (512 bytes) */
 #define E2P_USER       (uint32_t) __segment_begin("USER_ROM_CONFIG")
+#define CODE_END       ((uint32_t) __segment_begin("USER_ROM_CONFIG") - 513)
+
 #else
-/** Beginning of Flash memory from linker script */
+
+/** Beginning of user in Flash memory from linker script */
 extern const char __userrom_start;
 
-/** Special user config page (512 bytes) */
+/** End of code in Flash memory from linker script */
+extern const char __cs3_regions_end;
+
+/** Special user configuration page (512 bytes) */
 #define E2P_USER   (uint32_t) &__userrom_start
+
+/** End of code address */
+#define CODE_END   (uint32_t) &__cs3_regions_end
 #endif
 
 /** Special factory page (512 bytes) */
@@ -78,6 +109,10 @@ extern const char __userrom_start;
 #define DWORDSZ         sizeof (uint32_t)
 
 /** @} */
+
+/******************************************************************************
+ *************************   TYPEDEFS   ***************************************
+ ******************************************************************************/
 
 /** @addtogroup FLASH_TYPEDEFS Typedefs
  * @{ */
@@ -116,6 +151,9 @@ static uint32_t FlashVariablesVersion = 0;
 
 /** Flash Logger */
 static TD_FLASH_logger_t FlashLogger;
+
+/** Flash dirty flag, data is not valid */
+static bool FlashVariableDirty = false;
 
 /** @} */
 
@@ -192,11 +230,11 @@ __RAMFUNCTION void TD_FLASH_WriteWord(uint32_t *address, uint32_t data)
 	MSC->WRITECTRL |= MSC_WRITECTRL_WREN;
 
 	// Load address
-	MSC->ADDRB    = (uint32_t) address;
+	MSC->ADDRB = (uint32_t) address;
 	MSC->WRITECMD = MSC_WRITECMD_LADDRIM;
 
 	// Load data
-	MSC->WDATA    = data;
+	MSC->WDATA = data;
 
 	// Trigger write once
 	MSC->WRITECMD = MSC_WRITECMD_WRITEONCE;
@@ -235,7 +273,7 @@ __RAMFUNCTION void TD_FLASH_ErasePage(uint32_t *blockStart)
 	MSC->WRITECTRL |= MSC_WRITECTRL_WREN;
 
 	// Load address
-	MSC->ADDRB    = (uint32_t) blockStart;
+	MSC->ADDRB = (uint32_t) blockStart;
 	MSC->WRITECMD = MSC_WRITECMD_LADDRIM;
 
 	// Send Erase Page command
@@ -333,7 +371,8 @@ static uint8_t TD_FLASH_CRC8(uint8_t *buffer, uint32_t size)
 *   If the buffer parameter is null, the corresponding Flash region is filled
 *   with null and its CRC is set to 0xDEADC0DE.
 ******************************************************************************/
-static void TD_FLASH_WriteRegion(uint32_t start, void *buffer, uint32_t count, void *extended_buffer, uint32_t extended_count)
+static void TD_FLASH_WriteRegion(uint32_t start, void *buffer, uint32_t count,
+	void *extended_buffer, uint32_t extended_count)
 {
 	uint32_t *flash_pointer = (uint32_t *) start;
 	uint32_t *ram_pointer = (uint32_t *) buffer;
@@ -346,13 +385,14 @@ static void TD_FLASH_WriteRegion(uint32_t start, void *buffer, uint32_t count, v
 
 	if (ram_pointer != 0) {
 
-	// Compute buffer CRC
-	crc = TD_FLASH_CRC32(ram_pointer, count);
+		// Compute buffer CRC
+		crc = TD_FLASH_CRC32(ram_pointer, count);
 	} else {
 		crc = 0xDEC0ADDE;
 	}
 
-	// Optimization - check if block is already erased. This will typically happen when the chip is new
+	// Optimization - check if block is already erased. This will typically
+	// happen when the chip is new
 	for (i = 0; i < FLASH_PAGE_SIZE / DWORDSZ; i++) {
 		acc &= *flash_pointer++;
 	}
@@ -367,13 +407,12 @@ static void TD_FLASH_WriteRegion(uint32_t start, void *buffer, uint32_t count, v
 
 	// Write buffer CRC first
 	TD_FLASH_WriteWord(flash_pointer++, crc);
-
 	if (ram_pointer != 0) {
 
-	// Copy buffer into Flash
-	for (i = 0; i < count; i++) {
-		TD_FLASH_WriteWord(flash_pointer++, *ram_pointer++);
-	}
+		// Copy buffer into Flash
+		for (i = 0; i < count; i++) {
+			TD_FLASH_WriteWord(flash_pointer++, *ram_pointer++);
+		}
 	} else {
 
 		// Zero-fill Flash
@@ -394,7 +433,7 @@ static void TD_FLASH_WriteRegion(uint32_t start, void *buffer, uint32_t count, v
 
 		// Write full page-wide CRC at the end of page
 		TD_FLASH_WriteWord((uint32_t *)(start + FLASH_PAGE_SIZE - sizeof (uint32_t)),
-						   crc);
+			crc);
 	}
 
 	// Disable writing to the MSC
@@ -427,7 +466,8 @@ static void TD_FLASH_WriteRegion(uint32_t start, void *buffer, uint32_t count, v
 * @return
 *   Returns true upon success, false if a checksum error has been detected
 ******************************************************************************/
-static bool TD_FLASH_ReadRegion(uint32_t *start, void *buffer, uint32_t count, void *extended_buffer, uint32_t extended_count)
+static bool TD_FLASH_ReadRegion(uint32_t *start, void *buffer, uint32_t count,
+	void *extended_buffer, uint32_t extended_count)
 {
 	uint32_t *flash_pointer = start;
 	uint32_t crc;
@@ -448,10 +488,12 @@ static bool TD_FLASH_ReadRegion(uint32_t *start, void *buffer, uint32_t count, v
 	}
 	if (start == (uint32_t *) E2P_FACTORY) {
 
-		// Reading from the Factory region, try to read the extended device descriptor
+		// Reading from the Factory region, try to read the extended device
+		// descriptor
 		memcpy(&device_ext, flash_pointer, sizeof (TD_DEVICE_EXT));
 		crc = *(start + FLASH_PAGE_SIZE / DWORDSZ - 1);
-		if (crc == TD_FLASH_CRC32((uint32_t *) start, FLASH_PAGE_SIZE / DWORDSZ - 1) &&
+		if (crc == TD_FLASH_CRC32((uint32_t *) start, FLASH_PAGE_SIZE / DWORDSZ
+			- 1) &&
 			device_ext.DeviceVersion == 2) {
 
 			/* In device descriptor version 2, there is no more base descriptor
@@ -474,7 +516,8 @@ static bool TD_FLASH_ReadRegion(uint32_t *start, void *buffer, uint32_t count, v
 
 		// Read the CRC covering the whole region in its last word
 		crc = *(start + FLASH_PAGE_SIZE / DWORDSZ - 1);
-		if (crc != TD_FLASH_CRC32((uint32_t *) start, FLASH_PAGE_SIZE / DWORDSZ - 1)) {
+		if (crc != TD_FLASH_CRC32((uint32_t *) start, FLASH_PAGE_SIZE / DWORDSZ
+			- 1)) {
 			return false;
 		}
 	}
@@ -496,9 +539,14 @@ static bool TD_FLASH_ReadRegion(uint32_t *start, void *buffer, uint32_t count, v
 ******************************************************************************/
 void TD_FLASH_DeleteVariables(void)
 {
+	int i;
+
 	__disable_irq();
 	TD_FLASH_Init();
-	TD_FLASH_ErasePage((uint32_t *) E2P_USER);
+
+	for (i = 0; i < CONFIG_TD_FLASH_USER_PAGE; i++) {
+		TD_FLASH_ErasePage((uint32_t *) E2P_USER - (i * FLASH_PAGE_SIZE));
+	}
 
 	// Disable writing to the MSC
 	MSC->WRITECTRL &= ~MSC_WRITECTRL_WREN;
@@ -508,6 +556,13 @@ void TD_FLASH_DeleteVariables(void)
 	__enable_irq();
 	FlashDataCount = 0;
 	FlashDataSize = 0;
+
+	// Reset TD_FLASH_DataList
+	for (i = 0; i < CONFIG_TD_FLASH_MAX_DATA_POINTER; i++) {
+		TD_FLASH_DataList[i].data_pointer = NULL;
+		TD_FLASH_DataList[i].data_size = 0;
+	}
+
 	TD_FLASH_SetVariablesVersion(FlashVariablesVersion);
 }
 
@@ -517,24 +572,18 @@ void TD_FLASH_DeleteVariables(void)
 ******************************************************************************/
 void TD_FLASH_WriteVariables(void)
 {
-	uint32_t i, acc = 0xFFFFFFFF;
+	uint32_t i;
 	uint32_t crc;
 	uint32_t temp = 0, count;
-	uint32_t total_word = 0;
 	uint8_t *pdata;
 	int j, k;
+	uint32_t *p = (uint32_t *) E2P_USER;
+	uint32_t *page = (uint32_t *) E2P_USER;
 
-	// Optimization - check if block is already erased. This will typically happen when the chip is new
-	for (i = (uint32_t) E2P_USER; i < ((uint32_t) E2P_USER + FlashDataSize + 1); i++) {
-		acc &= *((int32_t *) i);
-	}
 	__disable_irq();
 	TD_FLASH_Init();
 
-	// If the accumulator is unchanged, there is no need to do an erase
-	if (acc != 0xFFFFFFFF) {
-		TD_FLASH_ErasePage((uint32_t *) E2P_USER);
-	}
+	TD_FLASH_ErasePage((uint32_t *) E2P_USER);
 
 	// For each variable
 	for (i = 0; i < FlashDataCount; i++) {
@@ -543,18 +592,32 @@ void TD_FLASH_WriteVariables(void)
 		// Round count to DWORD
 		count = (TD_FLASH_DataList[i].data_size + DWORDSZ - 1) / DWORDSZ;
 
+		DEBUG_PRINTF_WRITE("WV %d %d %d\r\n",
+			i,
+			count,
+			TD_FLASH_DataList[i].data_size);
+
 		// Copy data pointer
 		pdata = TD_FLASH_DataList[i].data_pointer;
 
 		// Compute crc
-		crc = TD_FLASH_CRC8(TD_FLASH_DataList[i].data_pointer, TD_FLASH_DataList[i].data_size);
+		crc = TD_FLASH_CRC8(TD_FLASH_DataList[i].data_pointer,
+			TD_FLASH_DataList[i].data_size);
 
 		// Append index and size info
 		temp = (crc << 24) | (TD_FLASH_DataList[i].data_size & 0xFFFF) << 8 | (i);
 
 		// Write first byte
-		TD_FLASH_WriteWord((uint32_t *)(E2P_USER + total_word), temp);
-		total_word += DWORDSZ;
+		DEBUG_PRINTF_WRITE("WH %08x %08X\r\n",p,temp);
+		TD_FLASH_WriteWord(p++, temp);
+
+		// Change page
+		if (p - page >= FLASH_PAGE_SIZE / 4) {
+			page -= FLASH_PAGE_SIZE / 4;
+			p -= FLASH_PAGE_SIZE / 2;
+			DEBUG_PRINTF_WRITE("CP %08x %08x\r\n", p, page);
+			TD_FLASH_ErasePage(page);
+		}
 
 		// Write data
 		for (j = 0; j < count; j++) {
@@ -566,8 +629,17 @@ void TD_FLASH_WriteVariables(void)
 					break;
 				}
 			}
-			TD_FLASH_WriteWord((uint32_t *)(E2P_USER + total_word), temp);
-			total_word += DWORDSZ;
+
+		//	DEBUG_PRINTF_WRITE("WP %08x\r\n",p);
+			TD_FLASH_WriteWord(p++, temp);
+
+			// Change page
+			if (p - page >= FLASH_PAGE_SIZE / 4) {
+				page -= FLASH_PAGE_SIZE / 4;
+				p -= FLASH_PAGE_SIZE / 2;
+				DEBUG_PRINTF_WRITE("CP %08x %08x\r\n", p, page);
+				TD_FLASH_ErasePage(page);
+			}
 		}
 	}
 
@@ -577,6 +649,7 @@ void TD_FLASH_WriteVariables(void)
 
 	// Interrupts can be enabled whenever not writing to or erasing flash
 	__enable_irq();
+	FlashVariableDirty = false;
 }
 
 /***************************************************************************//**
@@ -591,7 +664,7 @@ void TD_FLASH_WriteVariables(void)
 *
 * @param[out] index
 *   Index of data variable for further read. Will be 0xFF if the flash is full or
-*    if too many data variables have already been added.
+*    if too many data variables have already been added. Can be NULL
 *
 * @return
 * 	Returns true if the data variable has been found in flash and its value has
@@ -599,17 +672,36 @@ void TD_FLASH_WriteVariables(void)
 ******************************************************************************/
 bool TD_FLASH_DeclareVariable(uint8_t *variable, uint16_t size, uint8_t *index)
 {
-	// Make sure that there are not too many variables declared
+	uint8_t i;
+
 	if (index) {
 		*index = 0xFF;
 	}
+
+	// Make sure that there are not too many variables declared
 	if (FlashDataCount >= CONFIG_TD_FLASH_MAX_DATA_POINTER) {
 		TD_Trap(TRAP_FLASH_POINTER_OVF , FlashDataCount);
 		return false;
 	} else {
 
+		// Check if this variable is already declared
+		for (i = 0; i < CONFIG_TD_FLASH_MAX_DATA_POINTER; i++) {
+
+			// If variable is ever declared
+			if ((TD_FLASH_DataList[i].data_pointer == variable)
+				&& (TD_FLASH_DataList[i].data_size == size)) {
+
+				// Return index
+				if (index) {
+					*index = i;
+				}
+				return true;
+			}
+		}
+
 		// Make sure there is enough room for this variable
-		if (FlashDataSize + size + 4 > FLASH_PAGE_SIZE) {
+		if (FlashDataSize + size + 4 >
+			FLASH_PAGE_SIZE * CONFIG_TD_FLASH_USER_PAGE ) {
 			TD_Trap(TRAP_FLASH_VAR_FULL, FlashDataSize << 16 | size);
 			return false;
 		} else {
@@ -651,13 +743,14 @@ bool TD_FLASH_DeclareVariable(uint8_t *variable, uint16_t size, uint8_t *index)
 uint16_t TD_FLASH_ReadVariable(uint8_t index, uint8_t *buffer)
 {
 	uint32_t i, j, crc, count, temp;
-	uint32_t *pr;
+	uint32_t *pr, *page;
 	uint8_t *pdata = buffer;
 
 	pr = (uint32_t *) E2P_USER;
+	page = (uint32_t *) E2P_USER;
 
 	// Make sure index is within valid range
-	if (index > FlashDataCount) {
+	if (index > FlashDataCount || FlashVariableDirty) {
 		return 0;
 	}
 
@@ -665,21 +758,46 @@ uint16_t TD_FLASH_ReadVariable(uint8_t index, uint8_t *buffer)
 	for (i = 0; i < index; i++) {
 		count = (TD_FLASH_DataList[i].data_size + DWORDSZ - 1) / DWORDSZ;
 		pr += count + 1;
+		while (pr - page >= FLASH_PAGE_SIZE / 4) {
+			page -= FLASH_PAGE_SIZE / 4;
+			pr -= FLASH_PAGE_SIZE / 2;
+		}
 	}
 
 	// Get data size is blocks of 4 bytes.
 	count = (TD_FLASH_DataList[index].data_size + DWORDSZ - 1) / DWORDSZ;
 	temp = *pr++;
 	crc = (temp >> 24) & 0xFF;
+	DEBUG_PRINTF_READ("RH %08x %08X\r\n",pr - 1, temp);
+	if (pr - page >= FLASH_PAGE_SIZE / 4) {
+		DEBUG_PRINTF_READ("CP %08x %08x\r\n", pr, page);
+		page -= FLASH_PAGE_SIZE / 4;
+		pr -= FLASH_PAGE_SIZE / 2;
+	}
 
 	// Check index and size
-	if (((temp & 0xFF) != index) || (((temp >> 8) & 0xFFFF) != TD_FLASH_DataList[index].data_size)) {
+	if (((temp & 0xFF) != index)) {
+		DEBUG_PRINTF_READ("Index KO %d %d\r\n", temp & 0xFF, index);
+		return 0;
+	}
+
+	if ((((temp >> 8) & 0xFFFF) != TD_FLASH_DataList[index].data_size)) {
+		DEBUG_PRINTF_READ("Size KO %d %d\r\n",
+			((temp >> 8) & 0xFFFF),
+			TD_FLASH_DataList[index].data_size);
 		return 0;
 	}
 
 	// Read data
 	for (i = 0; i < count; i++) {
+
+		//DEBUG_PRINTF_READ("RP %08x\r\n",pr);
 		temp = *pr++;
+		if (pr - page >= FLASH_PAGE_SIZE / 4) {
+			DEBUG_PRINTF_READ("CP %08x %08x\r\n", pr, page);
+			page -= FLASH_PAGE_SIZE / 4;
+			pr -= FLASH_PAGE_SIZE / 2;
+		}
 		for (j = 0; j < 4; j++) {
 			if ((i << 2) + j < TD_FLASH_DataList[index].data_size) {
 				*pdata++ = (temp >> (j << 3)) & 0xFF;
@@ -691,6 +809,7 @@ uint16_t TD_FLASH_ReadVariable(uint8_t index, uint8_t *buffer)
 
 	// Make sure the CRC is fine
 	if (crc != TD_FLASH_CRC8(buffer, TD_FLASH_DataList[index].data_size)) {
+		DEBUG_PRINTF_READ("CRC KO\r\n");
 		return 0;
 	}
 
@@ -701,30 +820,34 @@ uint16_t TD_FLASH_ReadVariable(uint8_t index, uint8_t *buffer)
 /***************************************************************************//**
 * @brief
 * Set a version and delete all flash content if current version in Flash is not
-* the same.
+* the same. Can only be executed once.
 *
 * @param[in] version
 *   Version number.
 ******************************************************************************/
 void TD_FLASH_SetVariablesVersion(uint32_t version)
 {
-	if (TD_FLASH_DeclareVariable((uint8_t *) &FlashVariablesVersion, 4, 0)) {
-		if (FlashVariablesVersion != version) {
+	uint8_t code_page;
 
-			// Set new version
-			FlashVariablesVersion = version;
-			TD_FLASH_DeleteVariables();
+	// Compute code pages usage in Flash memory
+	code_page = CODE_END / FLASH_PAGE_SIZE;
 
-			// Write new version
-			TD_FLASH_WriteVariables();
-		}
-	} else {
+	// Increment if fractional part
+	if (code_page * FLASH_PAGE_SIZE != CODE_END) {
+		code_page++;
+	}
 
-		// Set new version
+	// Make sure we are not trying to use more flash than we have
+	if (CONFIG_TD_FLASH_USER_PAGE > E2P_USER / FLASH_PAGE_SIZE + 1 - code_page) {
+		TD_Trap(TRAP_USER_FLASH_OVW_CODE,
+		CONFIG_TD_FLASH_USER_PAGE << 8 | code_page);
+		return;
+	}
+
+	if (!TD_FLASH_DeclareVariable((uint8_t *) &FlashVariablesVersion, 4, 0) ||
+		FlashVariablesVersion != version) {
 		FlashVariablesVersion = version;
-
-		// Write new version
-		TD_FLASH_WriteVariables();
+		FlashVariableDirty = true;
 	}
 }
 
@@ -763,7 +886,8 @@ void TD_FLASH_DumpVariables(uint8_t *data)
 *   Page address in Flash memory where the logger ends.
 *
 ******************************************************************************/
-void TD_FLASH_InitLogger(bool reset, uint8_t id, uint8_t data_size, uint32_t first_page_adress, uint32_t last_page_adress)
+void DYNAMIC(TD_FLASH_InitLogger)(bool reset, uint8_t id, uint8_t data_size,
+	uint32_t first_page_adress, uint32_t last_page_adress)
 {
 	uint32_t adress;
 	uint8_t word_data_size;
@@ -788,7 +912,8 @@ void TD_FLASH_InitLogger(bool reset, uint8_t id, uint8_t data_size, uint32_t fir
 		TD_FLASH_Init();
 
 		// Erase all pages
-		for (adress = first_page_adress; adress < last_page_adress; adress += FLASH_PAGE_SIZE) {
+		for (adress = first_page_adress; adress < last_page_adress;
+			adress += FLASH_PAGE_SIZE) {
 			TD_FLASH_ErasePage((uint32_t *) adress);
 		}
 		TD_FLASH_Deinit();
@@ -826,7 +951,8 @@ void TD_FLASH_LoggerWrite(uint8_t id, uint32_t *data)
 	int i;
 
 	if (FlashLogger.id == id &&
-			FlashLogger.current_write_adress + (FlashLogger.data_size * DWORDSZ) < FlashLogger.last_page_adress) {
+		FlashLogger.current_write_adress + (FlashLogger.data_size * DWORDSZ) <
+		FlashLogger.last_page_adress) {
 		__disable_irq();
 		TD_FLASH_Init();
 		for (i = 0; i < FlashLogger.data_size; i++) {
@@ -942,7 +1068,8 @@ void TD_FLASH_DeviceWrite(TD_DEVICE *device)
 ******************************************************************************/
 void TD_FLASH_DeviceWriteExtended(TD_DEVICE *device, TD_DEVICE_EXT *device_ext)
 {
-	TD_FLASH_WriteRegion(E2P_FACTORY, device, sizeof (TD_DEVICE), device_ext, sizeof (TD_DEVICE_EXT));
+	TD_FLASH_WriteRegion(E2P_FACTORY, device, sizeof (TD_DEVICE), device_ext,
+		sizeof (TD_DEVICE_EXT));
 }
 /** @endcond */
 
@@ -958,7 +1085,8 @@ void TD_FLASH_DeviceWriteExtended(TD_DEVICE *device, TD_DEVICE_EXT *device_ext)
 ******************************************************************************/
 bool TD_FLASH_DeviceRead(TD_DEVICE *device)
 {
-	return TD_FLASH_ReadRegion((uint32_t *) E2P_FACTORY, device, sizeof (TD_DEVICE), 0, 0);
+	return TD_FLASH_ReadRegion((uint32_t *) E2P_FACTORY, device,
+		sizeof (TD_DEVICE), 0, 0);
 }
 
 /***************************************************************************//**
@@ -976,7 +1104,8 @@ bool TD_FLASH_DeviceRead(TD_DEVICE *device)
 ******************************************************************************/
 bool TD_FLASH_DeviceReadExtended(TD_DEVICE *device, TD_DEVICE_EXT *device_ext)
 {
-	return TD_FLASH_ReadRegion((uint32_t *) E2P_FACTORY, device, sizeof (TD_DEVICE), device_ext, sizeof (TD_DEVICE_EXT));
+	return TD_FLASH_ReadRegion((uint32_t *) E2P_FACTORY, device,
+		sizeof (TD_DEVICE), device_ext, sizeof (TD_DEVICE_EXT));
 }
 
 /** @} */

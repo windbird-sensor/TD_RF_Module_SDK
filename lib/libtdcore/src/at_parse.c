@@ -2,7 +2,7 @@
  * @file
  * @brief AT parser API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.2
+ * @version 2.0.3
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -47,24 +47,25 @@
  * @details
  *   # Introduction
  *
- *   The AT command parser provides a [Hayes command set](http://en.wikipedia.org/wiki/Hayes_command_set)
- *   compatible command parser. Originally established by Hayes for its
- *   SmartModem 300 modem in 1981, this command set has  been further extended by
- *   other manufacturers and standardized by the ITU-T as "Recommendation V.250"
- *   and the 3GPP Consortium as "ETSI GSM 07.07 (3GPP TS 27.007)".
+ *   The AT command parser provides a [Hayes command set]
+ *   (http://en.wikipedia.org/wiki/Hayes_command_set) compatible command parser.
+ *   Originally established by Hayes for its SmartModem 300 modem in 1981, this
+ *   command set has  been further extended by other manufacturers and
+ *   standardized by the ITU-T as "Recommendation V.250" and the 3GPP Consortium
+ *   as "ETSI GSM 07.07 (3GPP TS 27.007)".
  *
  *   # Implementation
  *
  *   This implementation provides an extensible AT command parser that performs
- *   a lexical analysis of a character stream, followed by a grammatical analysis
- *   into command and parameter tokens, that are used to call pieces of code in
- *   charge of handling the corresponding command and returning both a character
- *   stream and a result code.
+ *   a lexical analysis of a character stream, followed by a grammatical
+ *   analysis into command and parameter tokens, that are used to call pieces of
+ *   code in charge of handling the corresponding command and returning both a
+ *   character stream and a result code.
  *
  *   This AT command parser is independent of the input and output devices used
- *   to read and write the character streams, as it receives the input characters
- *   using its AT_Parse() function, and calls the tfp_printf() for outputting
- *   characters.
+ *   to read and write the character streams, as it receives the input
+ *   characters using its AT_Parse() function, and calls the tfp_printf() for
+ *   outputting characters.
  *
  *   # Calling Sequence
  *
@@ -88,8 +89,25 @@
 /** @addtogroup AT_DEFINES Defines
  * @{ */
 
+//#define DEBUG_INFO
+//#define DEBUG_WARNING
+#ifdef DEBUG_INFO
+#define PRINTF_INFO(...) tfp_printf(__VA_ARGS__);
+#else
+
+/** Macro to print information when debugging */
+#define PRINTF_INFO(...)
+#endif
+#ifdef DEBUG_WARNING
+#define PRINTF_WARNING(...) tfp_printf(__VA_ARGS__);
+#else
+
+/** Macro to print warnings when debugging */
+#define PRINTF_WARNING(...)
+#endif
+
 /** Maximum number of AT extensions */
-#define AT_EXTENSION_NUMBER 9
+#define AT_EXTENSION_NUMBER 16
 
 #ifndef AT_FORCE_BANNER
 /** Flag to force startup banner */
@@ -159,6 +177,9 @@ static char const AT_help[] = {
 /** @addtogroup AT_GLOBAL_VARIABLES Global Variables
  * @{ */
 
+/** AT variable persistence buffer */
+extern uint8_t *AT_persist_buffer;
+
 /** AT parser extensions */
 AT_extension_t *AT_extension[AT_EXTENSION_NUMBER] = {0};
 
@@ -176,9 +197,6 @@ int AT_argc = 0;
 
 /** Pointer to last character in AT command buffer */
 char *AT_last = &AT_buffer[0];
-
-/** AT persist buffer */
-uint8_t AT_persist_buffer[AT_PERSIST_SIZE];
 
 /** AT parser state */
 AT_states AT_state = AT_A;
@@ -201,7 +219,7 @@ bool AT_banner = AT_FORCE_BANNER ? true : false;
 /** @} */
 
 /*******************************************************************************
- **************************   PRIVATE FUNCTIONS   *******************************
+ **************************   PRIVATE FUNCTIONS   ******************************
  ******************************************************************************/
 
 /** @addtogroup AT_LOCAL_FUNCTIONS Local Functions
@@ -216,27 +234,41 @@ static void AT_SavePersistBuffer(void)
 	int extension;
 	uint8_t persist_size = 1, extension_write, *persist_pointer;
 
+	PRINTF_INFO("AT_echo:%d AT_verbose:%d AT_quietResult:%d AT_extended:%d AT_banner:%d\r\n",
+		AT_echo, AT_verbose, AT_quietResult, AT_extended, AT_banner);
 	persist_pointer = AT_persist_buffer;
+	PRINTF_INFO("AT_persist_buffer:0x%08X\r\n",persist_pointer);
 	*persist_pointer = (AT_echo == true) ? 0x01 : 0x00;
 	*persist_pointer |= (AT_verbose == true) ? 0x02 : 0x00;
 	*persist_pointer |= (AT_quietResult == true) ? 0x04 : 0x00;
 	*persist_pointer |= (AT_extended == true) ? 0x08 : 0x00;
 	*persist_pointer |= (AT_banner == true) ? 0x10 : 0x00;
+	PRINTF_INFO("persist header:0x%02X\r\n", *persist_pointer);
 	persist_pointer++;
 	for (extension = 0; extension < AT_EXTENSION_NUMBER; extension++) {
 		if (AT_extension[extension] == 0) {
 			break;
 		}
 		if (AT_extension[extension]->persist != 0) {
+			PRINTF_INFO("persist %d(0x%08X) read\r\n",
+				extension,AT_extension[extension]);
 			persist_size += AT_extension[extension]->persist(false, 0, 0);
 		}
+	}
+	if (persist_size > CONFIG_AT_PERSIST_SIZE) {
+		PRINTF_WARNING("persist overflow:%d > %d\r\n",
+			persist_size, CONFIG_AT_PERSIST_SIZE);
+		persist_size = CONFIG_AT_PERSIST_SIZE;
 	}
 	for (extension = 0; extension < AT_EXTENSION_NUMBER; extension++) {
 		if (AT_extension[extension] == 0) {
 			break;
 		}
 		if (AT_extension[extension]->persist != 0) {
-			extension_write = AT_extension[extension]->persist(true, persist_pointer, persist_size);
+			PRINTF_INFO("persist %d(0x%08X) save\r\n",
+				extension,AT_extension[extension]);
+			extension_write = AT_extension[extension]->persist(true,
+				persist_pointer, persist_size);
 			persist_pointer += extension_write;
 			persist_size -= extension_write;
 		}
@@ -384,7 +416,8 @@ uint8_t AT_Tokenize(char c, int *extension)
 			if (*s == '\0') {
 				if (command->token == AT && AT_buffer[2] != '\0') {
 
-					// Matched "AT", but have some extra characters behind => unknown command
+					// Matched "AT", but have some extra characters behind =>
+					// unknown command
 					break;
 				}
 
@@ -498,6 +531,7 @@ bool AT_AddExtension(AT_extension_t *extension)
 
 	for (i = 0; i < AT_EXTENSION_NUMBER; i++) {
 		if (AT_extension[i] == 0) {
+			PRINTF_INFO("AT_AddExt 0x%08X in %d\r\n", extension, i);
 			AT_extension[i] = extension;
 			if (i < AT_EXTENSION_NUMBER - 1) {
 				AT_extension[i + 1] = 0;
@@ -542,27 +576,39 @@ void AT_Init(void)
 			break;
 		}
 		if (AT_extension[i]->init != 0) {
+			PRINTF_INFO("Ext %d(0x%08X) Init\r\n", i, AT_extension[i]);
 			AT_extension[i]->init();
 		}
 		if (AT_extension[i]->persist != 0) {
+			PRINTF_INFO("Ext %d(0x%08X) persist read\r\n", i ,AT_extension[i]);
 			persist_size += AT_extension[i]->persist(false, 0, 0);
 		}
 	}
-	if (persist_size > AT_PERSIST_SIZE) {
-		persist_size = AT_PERSIST_SIZE;
+	if (persist_size > CONFIG_AT_PERSIST_SIZE) {
+		PRINTF_WARNING("persist oversize:%d>%d\r\n", persist_size,
+			CONFIG_AT_PERSIST_SIZE);
+		TD_Trap(TRAP_AT_PERSIST_OVERSIZE,persist_size);
 	}
-	/* Read persist data. If not available, create them. After that AT_persist_buffer is correctly filled */
-	if (!TD_FLASH_DeclareVariable((uint8_t *) AT_persist_buffer, AT_PERSIST_SIZE, 0)) {
+	PRINTF_INFO("Persist size : %d\r\n",persist_size);
+
+	// Read persistent data. If not available, create them. After that,
+	// AT_persist_buffer should be correctly filled in
+	if (!TD_FLASH_DeclareVariable((uint8_t *) AT_persist_buffer, persist_size,
+		0)) {
+		PRINTF_INFO("No saved variable, create\r\n");
 		AT_SavePersistBuffer();
 	}
 
 	// Read persistent data
 	persist_pointer = AT_persist_buffer;
+	PRINTF_INFO("persist header:0x%02X\r\n", *persist_pointer);
 	AT_echo = (*persist_pointer & 0x01) ? true : false;
 	AT_verbose = (*persist_pointer & 0x02) ? true : false;
 	AT_quietResult = (*persist_pointer & 0x04) ? true : false;
 	AT_extended = (*persist_pointer & 0x08) ? true : false;
 	AT_banner  = (*persist_pointer & 0x10) ? true : false;
+	PRINTF_INFO("AT_echo:%d AT_verbose:%d AT_quietResult:%d AT_extended:%d AT_banner:%d\r\n",
+		AT_echo, AT_verbose, AT_quietResult, AT_extended,AT_banner);
 	persist_pointer++;
 
 	// Pass persistent data to each extension
@@ -571,15 +617,19 @@ void AT_Init(void)
 			break;
 		}
 		if (AT_extension[i]->persist != 0) {
-			extension_read = AT_extension[i]->persist(false, persist_pointer, persist_size);
+			PRINTF_INFO("Extension %d(0x%08X) persist 0x%08X ptr:0x%08X sz:%d\r\n",
+				i, AT_extension[i], AT_extension[i]->persist, persist_pointer,
+				persist_size);
+			extension_read = AT_extension[i]->persist(false, persist_pointer,
+				persist_size);
 			persist_pointer += extension_read;
 			persist_size -= extension_read;
 		}
 	}
-
 	if (AT_verbose == true && AT_quietResult == false && AT_banner == true) {
 		AT_printf("^SYSSTART\r\n");
 	}
+	PRINTF_INFO("AT_Init OK\r\n");
 }
 
 /***************************************************************************//**
@@ -668,7 +718,8 @@ void AT_Parse(char c)
 	if (token == AT_PARSE) {
 		token = AT_Tokenize(c, &extension);
 	}
-	if (token > AT_BASE_LAST && extension < AT_EXTENSION_NUMBER && AT_extension[extension]->parse != 0) {
+	if (token > AT_BASE_LAST && extension < AT_EXTENSION_NUMBER &&
+		AT_extension[extension]->parse != 0) {
 		extension_result = AT_extension[extension]->parse(token);
 		if (extension_result != AT_NOTHING) {
 			AT_PrintResult(extension_result);
@@ -697,8 +748,8 @@ void AT_Parse(char c)
 			}
 		}
 		AT_printf("%s\r\n", CONFIG_MANUFACTURER);
-		tfp_printf("Hardware Version: %s\r\n", CONFIG_HARDWARE_VERSION);
-		tfp_printf("Software Version: %s\r\n", CONFIG_SOFTWARE_VERSION);
+		tfp_printf("Hardware Version: %s\r\nSoftware Version: %s\r\n",
+			CONFIG_HARDWARE_VERSION, CONFIG_SOFTWARE_VERSION);
 		TD_FLASH_DeviceRead(&device);
 		tfp_printf("S/N: %08X\r\n", device.Serial);
 		if (TD_FLASH_DeviceReadExtended(&device, &device_ext) == true) {
@@ -710,15 +761,12 @@ void AT_Parse(char c)
 				tfp_printf("TDID: %12s\r\n", td_serial);
 			}
 		}
-		tfp_printf("ACTIVE PROFILE\r\n");
-		tfp_printf("E%d V%d Q%d",
+		tfp_printf("ACTIVE PROFILE\r\nE%d V%d Q%d X%d S200:%d",
 				   AT_echo,
 				   AT_verbose,
-				   AT_quietResult);
-		tfp_printf(" X%d S200:%d",
+				   AT_quietResult,
 				   AT_extended,
-				   AT_banner
-				  );
+				   AT_banner);
 		for (extension = 0; extension < AT_EXTENSION_NUMBER; extension++) {
 			if (AT_extension[extension] == 0) {
 				break;

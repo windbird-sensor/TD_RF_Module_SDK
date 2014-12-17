@@ -2,7 +2,7 @@
  * @file
  * @brief AT Sensor
  * @author Telecom Design S.A.
- * @version 1.1.1
+ * @version 1.1.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -258,7 +258,8 @@ static uint8_t sensor_persist(bool write, uint8_t *buffer, uint8_t count)
 
 		} else {
 
-			// Profiles must be set before sensor is initialized as it might trigger sending frames
+			// Profiles must be set before sensor is initialized as it might
+			// trigger sending frames
 			for (i = 0; i < AT_SENSOR_PROFILE_TYPE_COUNT; i++) {
 				Profiles[i].repetition = *buffer++;
 				Profiles[i].interval = (*buffer++) << 8;
@@ -279,7 +280,8 @@ static uint8_t sensor_persist(bool write, uint8_t *buffer, uint8_t count)
 			buffer += sizeof(TD_SENSOR_Configuration_t);
 		}
 	}
-	return sizeof (TD_SENSOR_Configuration_t) + (3 * AT_SENSOR_PROFILE_TYPE_COUNT);
+	return sizeof (TD_SENSOR_Configuration_t) +
+		(3 * AT_SENSOR_PROFILE_TYPE_COUNT);
 }
 
 /***************************************************************************//**
@@ -374,7 +376,10 @@ static int8_t sensor_parse(uint8_t token)
 		if (AT_argc != 0) {
 			result = AT_ERROR;
 		} else {
-			AT_printf("%d,%d,%d\r\n", config->battery.monitor, config->battery.level_low, config->battery.level_ok);
+			AT_printf("%d,%d,%d\r\n",
+				config->battery.monitor,
+				config->battery.level_low,
+				config->battery.level_ok);
 		}
 		break;
 
@@ -384,7 +389,8 @@ static int8_t sensor_parse(uint8_t token)
 					&& AT_atoll(AT_argv[1]) <= 3300
 					&& AT_atoll(AT_argv[2]) >= 2100
 					&& AT_atoll(AT_argv[2]) <= 3300) {
-				TD_SENSOR_MonitorBattery(true, AT_atoll(AT_argv[1]), AT_atoll(AT_argv[2]), 0);
+				TD_SENSOR_MonitorBattery(true, AT_atoll(AT_argv[1]),
+					AT_atoll(AT_argv[2]), 0);
 			} else {
 				result = AT_ERROR;
 			}
@@ -535,7 +541,8 @@ static int8_t sensor_parse(uint8_t token)
 		if (AT_argc == 2) {
 			if (AT_atoll(AT_argv[0]) == 1 && AT_atoll(AT_argv[1]) >= 10
 					&& AT_atoll(AT_argv[1]) <= 4294967295UL) {
-				if (!TD_SENSOR_MonitorConnection(true, AT_atoll(AT_argv[1]))) {
+				if (!TD_SENSOR_MonitorConnectionExt(true, AT_atoll(AT_argv[1]),
+					NULL)) {
 					result = AT_ERROR;
 				}
 			} else {
@@ -543,7 +550,7 @@ static int8_t sensor_parse(uint8_t token)
 			}
 		} else if (AT_argc == 1) {
 			if (AT_atoll(AT_argv[0]) == 0) {
-				TD_SENSOR_MonitorConnection(false, 0);
+				TD_SENSOR_MonitorConnectionExt(false, 0, NULL);
 			} else {
 				result = AT_ERROR;
 			}
@@ -673,7 +680,8 @@ static int8_t sensor_parse(uint8_t token)
 			if (profile <= 5 && repetitions <= 15 && interval <= 600) {
 				Profiles[profile].interval = interval;
 				Profiles[profile].repetition = repetitions;
-				TD_SENSOR_SetTransmissionProfile((TD_SENSOR_FrameType_t) profile, repetitions, interval);
+				TD_SENSOR_SetTransmissionProfile(
+					(TD_SENSOR_FrameType_t) profile, repetitions, interval);
 			} else {
 				result = AT_ERROR;
 			}
@@ -689,7 +697,10 @@ static int8_t sensor_parse(uint8_t token)
 	case AT_SENSOR_GET_RETRANSMISSION_PROFILE:
 		if (AT_argc == 0) {
 			for (i = 0; i < AT_SENSOR_PROFILE_TYPE_COUNT; i++) {
-				AT_printf("%d, %d, %d\r\n", i, Profiles[i].repetition, Profiles[i].interval);
+				AT_printf("%d, %d, %d\r\n",
+					i,
+					Profiles[i].repetition,
+					Profiles[i].interval);
 			}
 		}
 		break;

@@ -10,6 +10,7 @@
 		<project>libtdgeoloc</project>
 		<project>libtdrf</project>
 		<project>libtdsensor</project>
+		<project>CMSIS</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -2,7 +2,7 @@
  * @file
  * @brief API for sending Event frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.2.0
+ * @version 1.3.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -37,62 +37,79 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "sensor_send.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup SENSOR_EVENT Sensor Event
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
-	/*******************************************************************************
-	 ***********************   ENUMERATIONS   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	*************************   DEFINES   **************************************
+	***************************************************************************/
 
-	 /** @addtogroup SENSOR_EVENT_ENUMERATIONS Enumerations
+	/** @addtogroup SENSOR_EVENT_DEFINES Defines
+	 * @{ */
+
+	/** Maximum Sensor custom event data size */
+#define TD_SENSOR_EVENT_CUSTOM_MAX_SIZE	9
+
+	/** Maximum Sensor extended boot event custom data size */
+#define TD_SENSOR_EVENT_BOOT_MAX_SIZE	7
+
+	/** @} */
+
+	/***************************************************************************
+	 ***********************   ENUMERATIONS   **********************************
+	 **************************************************************************/
+
+	/** @addtogroup SENSOR_EVENT_ENUMERATIONS Enumerations
 	 * @{ */
 
 	/** Event Type*/
 	typedef enum {
-		EVENT_BATTERY_LOW,
-		EVENT_BATTERY_OK,
-		EVENT_CONNECTION_LOST,
-		EVENT_CONNECTION_OK,
-		EVENT_RSSI_LOW,
-		EVENT_RSSI_OK,
-		EVENT_TEMP_LOW,
-		EVENT_TEMP_HIGH,
-		EVENT_TEMP_OK,
-		EVENT_BOOT,
-		EVENT_SWITCH_ON,
-		EVENT_SWITCH_OFF,
-		EVENT_ACCELERO_MOVE,
-		EVENT_CUSTOM_1 = 0x80,
-		EVENT_CUSTOM_2 = 0x81,
-		EVENT_CUSTOM_3 = 0x82,
-		EVENT_CUSTOM_4 = 0x83,
-		EVENT_CUSTOM_5 = 0x84,
-		EVENT_CUSTOM_6 = 0x85,
-		EVENT_CUSTOM_7 = 0x86,
-		EVENT_CUSTOM_8 = 0x87,
-		EVENT_CUSTOM_9 = 0x88,
-		EVENT_CUSTOM_10 = 0x89,
-		EVENT_CUSTOM_11 = 0x8A,
-		EVENT_CUSTOM_12 = 0x8B,
-		EVENT_CUSTOM_13 = 0x8C,
-		EVENT_CUSTOM_14 = 0x8D,
-		EVENT_CUSTOM_15 = 0x8E,
-		EVENT_CUSTOM_16 = 0x8F,
-		EVENT_CUSTOM_17 = 0x90,
-		EVENT_CUSTOM_18 = 0x91,
-		EVENT_CUSTOM_19 = 0x92,
-		EVENT_CUSTOM_20 = 0x93,
-		EVENT_CUSTOM_21 = 0x94,
-		EVENT_CUSTOM_22 = 0x95,
-		EVENT_CUSTOM_23 = 0x96,
-		EVENT_CUSTOM_24 = 0x97,
-		EVENT_CUSTOM_25 = 0x98,
+		EVENT_BATTERY_LOW = 0,
+		EVENT_BATTERY_OK = 1,
+		EVENT_CONNECTION_LOST = 2,
+		EVENT_CONNECTION_OK = 3,
+		EVENT_RSSI_LOW = 4,
+		EVENT_RSSI_OK = 5,
+		EVENT_TEMP_LOW = 6,
+		EVENT_TEMP_HIGH = 7,
+		EVENT_TEMP_OK = 8,
+		EVENT_BOOT = 9,
+		EVENT_SWITCH_ON = 10,
+		EVENT_SWITCH_OFF = 11,
+		EVENT_ACCELERO_MOVE = 12,
+		EVENT_CUSTOM_1 = 128,
+		EVENT_CUSTOM_2 = 129,
+		EVENT_CUSTOM_3 = 130,
+		EVENT_CUSTOM_4 = 131,
+		EVENT_CUSTOM_5 = 132,
+		EVENT_CUSTOM_6 = 133,
+		EVENT_CUSTOM_7 = 134,
+		EVENT_CUSTOM_8 = 135,
+		EVENT_CUSTOM_9 = 136,
+		EVENT_CUSTOM_10 = 137,
+		EVENT_CUSTOM_11 = 138,
+		EVENT_CUSTOM_12 = 139,
+		EVENT_CUSTOM_13 = 140,
+		EVENT_CUSTOM_14 = 141,
+		EVENT_CUSTOM_15 = 142,
+		EVENT_CUSTOM_16 = 143,
+		EVENT_CUSTOM_17 = 144,
+		EVENT_CUSTOM_18 = 145,
+		EVENT_CUSTOM_19 = 146,
+		EVENT_CUSTOM_20 = 147,
+		EVENT_CUSTOM_21 = 148,
+		EVENT_CUSTOM_22 = 149,
+		EVENT_CUSTOM_23 = 150,
+		EVENT_CUSTOM_24 = 151,
+		EVENT_CUSTOM_25 = 152,
 	}
 	TD_SENSOR_EVENT_Types_t;
 
@@ -105,22 +122,56 @@ extern "C" {
 
 	/** @} */
 
-	/*******************************************************************************
-	 *************************   PROTOTYPES   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   PROTOTYPES   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup SENSOR_EVENT_USER_FUNCTIONS User Functions
 	 * @{ */
 
-	bool TD_SENSOR_SendEvent(TD_SENSOR_EVENT_Types_t event, uint8_t *data, uint8_t len);
-	bool TD_SENSOR_SendEventBattery(bool state, uint8_t battery_level);
-	bool TD_SENSOR_SendEventRSSI(bool state, uint8_t EntryID);
-	bool TD_SENSOR_SendEventConnection(bool state, uint8_t entryID);
+	bool TD_SENSOR_SendEvent(TD_SENSOR_EVENT_Types_t event_type, uint8_t *data,
+		uint8_t length);
+	bool TD_SENSOR_SendEventBattery(bool state, uint32_t battery_level);
+	bool TD_SENSOR_SendEventRSSI(bool state, uint8_t id);
+	bool TD_SENSOR_SendEventConnection(bool state, uint8_t id);
 	bool TD_SENSOR_SendEventTemperature(uint8_t state);
-	bool TD_SENSOR_SendEventBoot(void);
-	bool TD_SENSOR_SendEventBootExt(uint8_t cause, uint8_t custom_cause, uint8_t *data, uint8_t len);
+	bool TD_SENSOR_SendEventTemperatureExt(uint8_t state,
+		int16_t temperature_level);
+	bool TD_SENSOR_SendEventBootExt(uint8_t cause, uint8_t custom_cause,
+		uint8_t *data, uint8_t length);
 	bool TD_SENSOR_SendEventSwitch(uint8_t port, uint8_t bit, bool state);
-	void TD_SENSOR_SetEventTransmissionProfile(uint8_t repetition, uint32_t interval);
+	bool TD_SENSOR_SendEventFor(TD_SENSOR_EVENT_Types_t event_type, uint8_t id,
+		uint8_t *data,	uint8_t length);
+
+	/***********************************************************************//**
+	 * @brief
+	 *   Send a boot event to Sensor.
+	 *
+	 * @return
+	 *   Returns true if the data has been sent over the SIGFOX network, false
+	 *   otherwise.
+	 **************************************************************************/
+	static bool __INLINE TD_SENSOR_SendEventBoot(void)
+	{
+		return TD_SENSOR_SendEvent(EVENT_BOOT, 0, 0);
+	}
+
+	/***********************************************************************//**
+	 * @brief
+	 *   Set a transmission profile for an event frame type.
+	 *
+	 * @param[in] repetition
+	 *	Number of repetitions.
+	 *
+	 * @param[in] interval
+	 *	Interval between two repetitions in seconds.
+	 **************************************************************************/
+	static void __INLINE TD_SENSOR_SetEventTransmissionProfile(
+		uint8_t repetition,
+		uint32_t interval)
+	{
+		TD_SENSOR_SetTransmissionProfile(SRV_FRM_EVENT, repetition, interval);
+	}
 
 	/** @} */
 

@@ -2,7 +2,7 @@
  * @file
  * @brief AT Sensor Send
  * @author Telecom Design S.A.
- * @version 1.1.1
+ * @version 1.1.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -210,7 +210,8 @@ static int8_t sensor_send_parse(uint8_t token)
 		if (AT_argc == 2) {
 			uint8_t index = AT_atoll(AT_argv[0]) - 1;
 			if (index <= 3) {
-				if (!TD_SENSOR_SetCellPhoneNumber((TD_SENSOR_DATA_PhoneIndex_t) index, (uint8_t *) AT_argv[1])) {
+				if (!TD_SENSOR_SetCellPhoneNumber((TD_SENSOR_DATA_PhoneIndex_t)
+					index, (uint8_t *) AT_argv[1])) {
 					result = AT_ERROR;
 				}
 			} else {
@@ -245,11 +246,13 @@ static int8_t sensor_send_parse(uint8_t token)
 			if (AT_atoll(AT_argv[1]) >= 1 && AT_atoll(AT_argv[1]) <= 15
 					&& (AT_argv[0][0] == '0' || AT_argv[0][0] == '1')) {
 				if (AT_argv[0][0] == '0') {
-					if (!TD_SENSOR_SendEventConnection(false, AT_atoll(AT_argv[1]))) {
+					if (!TD_SENSOR_SendEventConnection(false,
+						AT_atoll(AT_argv[1]))) {
 						result = AT_ERROR;
 					}
 				} else if (AT_argv[0][0] == '1') {
-					if (!TD_SENSOR_SendEventConnection(true, AT_atoll(AT_argv[1]))) {
+					if (!TD_SENSOR_SendEventConnection(true,
+						AT_atoll(AT_argv[1]))) {
 						result = AT_ERROR;
 					}
 				}
@@ -320,7 +323,8 @@ static int8_t sensor_send_parse(uint8_t token)
 			if (AT_atoll(AT_argv[0]) >= 0 && AT_atoll(AT_argv[0]) <= 5
 					&& AT_atoll(AT_argv[1]) >= 0 && AT_atoll(AT_argv[1]) <= 15
 					&& AT_atoll(AT_argv[2]) >= 0 && AT_atoll(AT_argv[2]) <= 1) {
-				if (!TD_SENSOR_SendEventSwitch(AT_atoll(AT_argv[0]), AT_atoll(AT_argv[1]), AT_atoll(AT_argv[2]))) {
+				if (!TD_SENSOR_SendEventSwitch(AT_atoll(AT_argv[0]),
+					AT_atoll(AT_argv[1]), AT_atoll(AT_argv[2]))) {
 					result = AT_ERROR;
 				}
 			} else {
@@ -395,7 +399,7 @@ static int8_t sensor_send_parse(uint8_t token)
 		}
 		break;
 
-		/*****************************REGISTER SENSOR****************************/
+		/*****************************REGISTER SENSOR********************/
 	case AT_SENSOR_REGISTER:
 		if (AT_argc == 0) {
 
@@ -441,7 +445,7 @@ static int8_t sensor_send_parse(uint8_t token)
  *************************   PUBLIC VARIABLES   ********************************
  ******************************************************************************/
 
-/** @addtogroup AT_SENSOR_LAN_GLOBAL_VARIABLES Global Variables
+/** @addtogroup AT_SENSOR_SEND_GLOBAL_VARIABLES Global Variables
  * @{ */
 
 /** AT extension structure for TD Sensor Send */

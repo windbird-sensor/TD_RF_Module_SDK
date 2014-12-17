@@ -2,7 +2,7 @@
  * @file
  * @brief API for sending Data frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.0.1
+ * @version 1.0.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -42,15 +42,15 @@
 extern "C" {
 #endif
 
-	/**************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup SENSOR_DATA_GEOLOC
 	 * @brief Geolocalization Sensor data.
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
-	/*******************************************************************************
-	 ***********************   ENUMERATIONS   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 ***********************   ENUMERATIONS   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup SENSOR_DATA_GEOLOC_ENUMERATIONS Enumerations
 	 * @{ */
@@ -58,30 +58,29 @@ extern "C" {
 	/** Sensor GPS data types */
 	typedef enum {
 		GPS_DATA_XYZ_SV_HDOP = 0,	///< XYZ data + Satellites in View + Horizontal Degree of Precision (no compression)
-		GPS_DATA_XY_DATE = 1,		///< XY data + date (no compression)
+		GPS_DATA_XY_DATE = 1,		///< XY data + date (6 bytes + 2.5 bytes)
 		GPS_DATA_XY_1M = 2,			///< XY data with a 1 m resolution (6 bytes - compressed)
 		GPS_DATA_XY_20M = 3,		///< XY data with a 20 m resolution (5 bytes - compressed)
 		GPS_DATA_XY_300M = 4,		///< XY data with a 300 m resolution (4 bytes - compressed)
-	}
-	SensorDataGPSTypes;
+	} SensorDataGPSTypes;
 
 	/** @} */
 
-	/*******************************************************************************
-	 *************************   PROTOTYPES   **************************************
-	 ******************************************************************************/
-
-	/** @addtogroup SENSOR_DATA_GEOLOC_GLOBAL_FUNCTIONS Global Functions
-	 * @{ */
-	/** @} */
+	/***************************************************************************
+	 *************************   PROTOTYPES   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup SENSOR_DATA_GEOLOC_USER_FUNCTIONS User Functions
 	* @{ */
 
-	bool TD_SENSOR_SendDataPosition(SensorDataGPSTypes type, TD_GEOLOC_Fix_t *fix, uint8_t *data, uint8_t length);
-	void TD_SENSOR_EncodePosition(SensorDataGPSTypes type, TD_GEOLOC_Fix_t *fix, uint8_t *data, uint8_t *length);
-	int8_t TD_SENSOR_EncodePositionXY(TD_GEOLOC_Fix_t *fix, uint8_t *data, uint8_t len, uint16_t nofix);
-	int8_t TD_SENSOR_EncodeDateTime(TD_GEOLOC_DateTime_t *datetime, uint8_t *data);
+	bool TD_SENSOR_SendDataPosition(SensorDataGPSTypes type,
+		const TD_GEOLOC_Fix_t *fix, uint8_t *data, uint8_t length);
+	void TD_SENSOR_EncodePosition(SensorDataGPSTypes type,
+		const TD_GEOLOC_Fix_t *fix, uint8_t *data, uint8_t *length);
+	int8_t TD_SENSOR_EncodePositionXY(const TD_GEOLOC_Fix_t *fix,
+		uint8_t *data, uint8_t len, uint16_t nofix);
+	int8_t TD_SENSOR_EncodeDateTime(const TD_GEOLOC_DateTime_t *datetime,
+		uint8_t *data);
 
 	/** @} */
 	/** @} (end addtogroup SENSOR_DATA_GEOLOC) */

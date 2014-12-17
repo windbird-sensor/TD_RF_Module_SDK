@@ -2,7 +2,7 @@
  * @file
  * @brief CMU (Clock Management Unit) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.2
+ * @version 2.0.3
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -35,6 +35,7 @@
 #include <em_cmu.h>
 
 #include "td_core.h"
+#include "td_printf.h"
 #include "td_cmu.h"
 
 /***************************************************************************//**
@@ -44,6 +45,29 @@
  ******************************************************************************/
 
 /*******************************************************************************
+ *******************************   DEFINES   ***********************************
+ ******************************************************************************/
+
+/** @addtogroup CMU_DEFINES Defines
+ * @{ */
+
+/** Macro to dump a clock status */
+#define DUMP_CLOCK_EN(lst)\
+	first = true;\
+	for (i = 0; i < sizeof (lst) / sizeof (char*); i++){\
+		if (status & (1 << i)){\
+			if (!first){\
+				tfp_printf(",");\
+			}\
+			tfp_printf(lst[i]);\
+			first = false;\
+		}\
+	}\
+	tfp_printf("\r\n");
+
+/** @} */
+
+/*******************************************************************************
  **************************   PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
@@ -51,9 +75,10 @@
  * @{ */
 
 /***************************************************************************//**
- * @brief Initialize the CMU device
- * @param[in] external Use external crystal if true
- * otherwise use internal RC if false
+ * @brief Initialize the CMU device.
+ *
+ * @param[in] external
+ *   Use external crystal if true, otherwise use internal RC if false.
  ******************************************************************************/
 void TD_CMU_Init(bool external)
 {
@@ -68,6 +93,66 @@ void TD_CMU_Init(bool external)
 
 	// Enable the clock to the interface of the low energy modules
 	CMU_ClockEnable(cmuClock_CORELE, true);
+}
+
+/***************************************************************************//**
+ * @brief Dump the CMU configuration.
+ *
+ * @param[in] cmu
+ *   Pointer to the CMU configuration.
+ ******************************************************************************/
+void TD_CMU_Dump(CMU_TypeDef *cmu)
+{
+	uint32_t status, clk_sel;
+	uint8_t i, first;
+	static char *lst_hf_core[]={"AES","DMA","LEbus","EBI"};
+	static char *lst_hf_per[]={"USART0","USART1","USART2","UART0","TIM0","TIM1",
+		"TIM2","ACMP0","ACMP1","PRS","DAC0","GPIO","VCMP","ADC0","I2C0"};
+	static char *lst_lfa[]={"RTC","LETIMER","LCD"};
+	static char *lst_lfb[]={"LEUART0","LEUART1"};
+	static char *clk_lst[]={"Dis/ULFRC","LFRCO","LFXO","HFCOREDIV2"};
+
+	if (!cmu) {
+		cmu = CMU;
+	}
+	tfp_printf("CMU_CTRL:0x%08X\r\n", cmu->CTRL);
+	status = cmu->STATUS;
+	tfp_printf("        |EN|RDY|HFCLK\r\n");
+	tfp_printf("HFRCO   |%c | %c |%c\r\n",
+		status&CMU_STATUS_HFRCOENS ? 'X':' ',
+		status&CMU_STATUS_HFRCORDY ? 'X':' ',
+		status&CMU_STATUS_HFRCOSEL ? 'X':' ');
+	tfp_printf("HFXO    |%c | %c |%c\r\n",
+		status&CMU_STATUS_HFXOENS ? 'X':' ',
+		status&CMU_STATUS_HFXORDY ? 'X':' ',
+		status&CMU_STATUS_HFXOSEL ? 'X':' ');
+	tfp_printf("AUXHFRCO|%c | %c |%c\r\n",
+		status&CMU_STATUS_AUXHFRCOENS ? 'X':' ',
+		status&CMU_STATUS_AUXHFRCORDY ? 'X':' ',
+		' ');
+	tfp_printf("LFRCO   |%c | %c |%c\r\n",
+		status&CMU_STATUS_LFRCOENS ? 'X':' ',
+		status&CMU_STATUS_LFRCORDY ? 'X':' ',
+		status&CMU_STATUS_LFRCOSEL ? 'X':' ');
+	tfp_printf("LFXO    |%c | %c |%c\r\n",
+		status&CMU_STATUS_LFXOENS ? 'X':' ',
+		status&CMU_STATUS_LFXORDY ? 'X':' ',
+		status&CMU_STATUS_LFXOSEL ? 'X':' ');
+	tfp_printf("CMU_HFCORECLKDIV:%d\r\n", CMU->HFCORECLKDIV);
+	tfp_printf("CMU_HFPERCLKDIV:0x%02X\r\n", CMU->HFPERCLKDIV);
+	status = cmu->HFCORECLKEN0;
+	clk_sel = cmu->LFCLKSEL;
+	tfp_printf("HF Core Clk En:");
+	DUMP_CLOCK_EN(lst_hf_core)
+	status = cmu->HFPERCLKEN0;
+	tfp_printf("HF Periph Clk En:");
+	DUMP_CLOCK_EN(lst_hf_per)
+	status = cmu->LFACLKEN0;
+	tfp_printf("LF Periph Clk A %s En:", clk_lst[clk_sel & 3]);
+	DUMP_CLOCK_EN(lst_lfa)
+	status = cmu->LFBCLKEN0;
+	tfp_printf("LF Periph Clk B %s En:", clk_lst[(clk_sel >> 2) & 3]);
+	DUMP_CLOCK_EN(lst_lfb)
 }
 
 /** @} */

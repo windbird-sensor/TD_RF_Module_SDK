@@ -1,17 +1,20 @@
-= Version 1.0.0 =
+# Version 1.0.0 #
+
   * Initial revision
 
-= Version 1.0.1 =
+# Version 1.0.1 #
+
   * Disable system startup banner by default in AT parser
   * Corrected behavior of "A/" (replay last command)
   * Read updated serial number just before displaying it
-  * Added TD_RTC_SetOffsetTime(), TD_RTC_GetOverflowCounter() and __time32() for system time managment
-  * Set UART RX port to totem-pole instead of GND with pull-up reistor
-  * Added TD_UART_AvailableChars() tocount thenumber of available UART characters
+  * Added `TD_RTC_SetOffsetTime()`, `TD_RTC_GetOverflowCounter()` and `__time32()` for system time managment
+  * Set UART RX port to totem-pole instead of GND with pull-up resistor
+  * Added `TD_UART_AvailableChars()` to count the number of available UART characters
   * Added Keep-Alive handling in main idle loop
   * Bumped hardware module revision to F
 
- = Version 2.0.0 =
+# Version 2.0.0 #
+
   * Renamed libtd1202 to libtdcore
   * Added build configuration for GCC/IAR, Debug/Release, Tiny Gecko/Gecko
   * Implemented New module pin naming (ADC0=>USR2, ADC1=>USR3, IO1=>USR4, TIM1=>ADC0)
@@ -19,120 +22,226 @@
   * Added AT£FS command to print free stack
   * Added Extended Flash FACTORY area to store 64-bit SIGFOX key
   * Changed persistence in Flash API to use FLASH_Variables
-  * TD_FLASH_Init(), TD_FLASH_DeInit(), TD_FLASH_WriteWord(), TD_FLASH_ErasePage() are now part of public API
+  * TD_FLASH_Init(), `TD_FLASH_DeInit()`, `TD_FLASH_WriteWord()`, `TD_FLASH_ErasePage()` are now part of public API
   * Added Extended TD_MEASURE functions to get voltages in millivolts and temperatures in tenths of degrees Celsius
-  * Added TD_MEASURE_EnableBatteryLevelMonitoring()
+  * Added `TD_MEASURE_EnableBatteryLevelMonitoring()`
   * Added PRINTF macro
   * Corrected a buffer overflow in tfp_dump()
-  * Added TD_RTC_UserAlarmAfter() function to program a relative alarm
-  * Added TD_UART_Flush()
+  * Added `TD_RTC_UserAlarmAfter()` function to program a relative alarm
+  * Added `TD_UART_Flush()`
   * Added TS_SCHEDULER module
-  * Added TD_RTC_Process() function to handle keep-alive
-  * Added TD_RTC_SetOverflowHandler()
+  * Added `TD_RTC_Process()` function to handle keep-alive
+  * Added `TD_RTC_SetOverflowHandler()`
 
- = Version 3.0.0 =
- 
-#### Minor Updates ####
+# Version 3.0.0 #
+
+## Minor Updates ##
   * Battery level monitoring (with IRQs) available
   * Optional printf int64 support
   * Stdlib atoll support
-  
-#### Additions ####
+
+## Additions ##
   * Added the `WATCHDOG` module
   * Added the `AT CORE` module which implements basic "system" AT command
   * Added the `SPI` module to manage sharing of the SPI bus (multiple peripherals on the same SPI bus)
-  * Added a link-time `OPTION` mechanism to customize the behaviour and/or limits of binary-only objects/libraries
+  * Added a link-time `OPTION` mechanism to customize the behavior and/or limits of binary-only objects/libraries
   * Added a fully configurable `TRAP` system to handle System/User code faults
   * Added system dumps debugging tools
-  * Added a Flash logger machanism to the `FLASH` module  
-  
-#### Changes ####
+  * Added a Flash logger mechanism to the `FLASH` module
 
-##### Flash: #####
+## Changes ##
 
-  * Renamed TD_FLASH_ReadDataBuffer() to TD_FLASH_ReadVariable(), kept old name as macro for compatibility
-  * Renamed TD_FLASH_DeclareFlashVariable() to TD_FLASH_DeclareVariable(), kept old name as macro for compatibility
-  * Renamed TD_FLASH_UpdateFlashVariables() to TD_FLASH_WriteVariables(), kept old name as macro for compatibility
-  * Renamed TD_FLASH_DeleteFlashVariables() to TD_FLASH_DeleteVariables(), kept old name as macro for compatibility
-  * Renamed TD_Flash_Deinit() to TD_FLASH_Deinit()), kept old name as macro for compatibility
-  * Added TD_FLASH_SetVariablesVersion()        
-  * Added TD_FLASH_DumpVariables()
-  * Added TD_FLASH_InitLogger()
-  * Added TD_FLASH_LoggerWrite()
-  * Added TD_FLASH_LoggerResetRead()
-  * Added TD_FLASH_LoggerReadNext()                    
+### Flash: ###
 
-##### GPIO: #####
+  * Renamed `TD_FLASH_ReadDataBuffer()` to `TD_FLASH_ReadVariable()`, kept old name as macro for compatibility
+  * Renamed `TD_FLASH_DeclareFlashVariable()` to `TD_FLASH_DeclareVariable()`, kept old name as macro for compatibility
+  * Renamed `TD_FLASH_UpdateFlashVariables()` to `TD_FLASH_WriteVariables()`, kept old name as macro for compatibility
+  * Renamed `TD_FLASH_DeleteFlashVariables()` to `TD_FLASH_DeleteVariables()`, kept old name as macro for compatibility
+  * Renamed `TD_Flash_Deinit()` to `TD_FLASH_Deinit()`, kept old name as macro for compatibility
+  * Added `TD_FLASH_SetVariablesVersion()`
+  * Added `TD_FLASH_DumpVariables()`
+  * Added `TD_FLASH_InitLogger()`
+  * Added `TD_FLASH_LoggerWrite()`
+  * Added `TD_FLASH_LoggerResetRead()`
+  * Added `TD_FLASH_LoggerReadNext()`
 
-  * The TD_GPIO_callback_t callback function now receive the IRQ mask as argument
-  * Added TD_GPIO_Dump()  
+### GPIO: ###
 
-##### MEASURE: #####
+  * The `TD_GPIO_callback_t` callback function now receive the IRQ mask as argument
+  * Added `TD_GPIO_Dump()`
 
-  * Removed the non-API function TD_MEASURE_EnableBatteryLevelMonitoring()
-  * Removed the non-API function TD_MEASURE_DisableBatteryLevelMonitoring()
+### MEASURE: ###
 
-##### PRINTF: #####
+  * Removed the non-API function `TD_MEASURE_EnableBatteryLevelMonitoring()`
+  * Removed the non-API function `TD_MEASURE_DisableBatteryLevelMonitoring()`
 
-  * Added tfp_printf_dump() to dump a buffer in hexadecimal
+### PRINTF: ###
 
-##### RTC: #####
+  * Added `tfp_printf_dump()` to dump a buffer in hexadecimal
 
-  * Added the TD_WakeMainLoop() to wake up the main event loop from IRQ handlers
-  * Added TD_RTC_ClearOverflow()
-    
-##### Scheduler: #####
+### RTC: ###
 
-  * Added TD_SCHEDULER_AppendIrq() to use the scheduler from IRQ handling
-  * Added TD_SCHEDULER_Dump()
-  * Added TD_ElapsedTime()
-  * Added TD_SCHEDULER_GetTime()
-  * Added TD_SCHEDULER_Restart()
+  * Added the `TD_WakeMainLoop()` to wake up the main event loop from IRQ handlers
+  * Added `TD_RTC_ClearOverflow()`
 
-###### stdlib: ######
+### Scheduler: ###
 
-  * Added GET_BITFIELD()
-  * Added SET_BITFIELD()
-  * Added GET_BITFIELD_MASK()    
-  * Added atolli()
-  * Added a2i()
-  * Added a2d()
-  * Added i2a()
-  * Added ui2a()
-  * Added li2a()
-  * Added uli2a()
-  * Added TD_STACK_Usage()
-  * Added TD_IRQ_Dump()
-                            
-#### Bug Fixes ####
+  * Added `TD_SCHEDULER_AppendIrq()` to use the scheduler from IRQ handling
+  * Added `TD_SCHEDULER_Dump()`
+  * Added `TD_ElapsedTime()`
+  * Added `TD_SCHEDULER_GetTime()`
+  * Added `TD_SCHEDULER_Restart()`
 
-##### AT Parser: #####
+### stdlib: ###
+
+  * Added `GET_BITFIELD()`
+  * Added `SET_BITFIELD()`
+  * Added `GET_BITFIELD_MASK()`
+  * Added `atolli()`
+  * Added `a2i()`
+  * Added `a2d()`
+  * Added `i2a()`
+  * Added `ui2a()`
+  * Added `li2a()`
+  * Added `uli2a()`
+  * Added `TD_STACK_Usage()`
+  * Added `TD_IRQ_Dump()`
+
+## Bug Fixes ##
+
+### AT Parser: ###
 
   * Upon start-up, if a parser extension module has no persistent data stored, its store function will be called immediately to fix it.
   * Correction on numeric parameter read in AT command (function AT_atoll) on value with leading spaces characters eg. " `123`": the first digit was incorrectly dropped and result set to 23
 
-##### Flash: #####
+### Flash: ###
 
   * Corrections on "user variables" handling
 
-##### GPIO: #####
+### GPIO: ###
 
   * Modification of behavior in the IRQ handling. List of I/O that actually triggered interrupt (mask) must no longer be read by `GPIO_IntGet()` but is directly passed to the to Hook callback registered for I/O interrupt handling
 
-##### System: #####
+### System: ###
 
   * A fully deterministic, guaranteed main loop processing (including the `TD_USER_Loop` function) can be trigged by calling the `TD_WakeMainLoop()` function, all others systems (while(flags) processing) must be removed. `TD_WakeMainLoop()` must be used in user interrupt handlers
 
-##### RTC: #####
+### RTC: ###
 
   * Major correction on low level function to allow calls in all possible context (background task, IRQs), with all special RTC cases handled
   * Know limitation : a call to `TD_RTC_Delay()` while in IRQ handling will result in an active wait (not energy efficient). However, calling a wait function like `TD_RTC_Delay()` in IRQ context is a bad practice
 
-##### Scheduler: #####
+### Scheduler: ###
 
   * Adding a Timer is now possible in IRQ context
   * Major rewrite of the **SCHEDULER** processing to remove some race, full strengthening on `TD_SCHEDULER_AppendIrq()`, `TD_SCHEDULER_Append()`, `TD_SCHEDULER_Remove()` from anywhere in the user code, in any context
 
-###### stdlib: ######
+### stdlib: ###
 
-  * atoi now handles correctly signed value
+  * `atoi` now handles correctly signed value
+
+# Version 4.0.0 #
+
+## Minor Updates ##
+
+  * Swapped EEPROM and sequence Flash sectors
+
+## Additions ##
+
+  * Added the CAPSENSE module for capacitive touch buttons
+
+## Changes ##
+
+### AT Parser: ###
+
+  * Increased maximum number of AT extensions to 16
+
+### Config: ###
+
+  * Added dynamic functions
+  * Added early debug
+  * Added bootloader configuration
+  * Added stack size configuration
+  * Added fined-tuned RF power computation
+  * Added sensor monitoring
+  * added LEUART location
+
+### GPIO: ###
+
+  * Unified the RF and standard GPIO management using `TD_GPIO_PinModeSet()`,
+    `TD_GPIO_DriveModeSet()`
+  * Replaced bit-indexed `TD_GPIO_Hooks` table by `TD_GPIO_CallbackInterrupts`
+    table with dispatch mechanism
+  * Added `TD_GPIO_SetCallbackExt()`
+
+### MEASURE: ###
+
+  * Added `TD_MEASURE_SingleVoltage()`
+
+### PRINTF: ###
+  * Added `tfp_printf_buf()`
+  * Redefined `tfp_printf_dump()`
+  * Added right-padding format
+  * Added `get_printf()`
+
+### RTC: ###
+
+  * Added some RTC time constants
+  * Added EFM32 power modes with `TD_RTC_GetPowerMode()`,
+    `TD_RTC_SetPowerMode()` and `TD_RTC_EnterPowerMode()`
+  * Added `TD_RTC_SignedTimeDiff()`
+
+### Scheduler: ###
+
+  * Added `TD_TimeDiff()`
+
+### SPI: ###
+
+  * Created simple SPI bus for Tiny Gecko with only RF chip on SPI bus
+  * Added `TD_SPI_WriteReadByte()`
+
+### TRAP: ###
+
+  * Added `TD_CHECK_REENTRENCY_IN()`
+  * Added some new trap codes
+  * Added centralized system dumps
+  * Added `TD_STACK_RESET`
+  * Added `TD_NopHere()`
+  * Added `TD_TRAP_StackProtect()`
+  * Added `TD_TRAP_StackTrace()`
+  * Added `TD_TRAP_StackCheck()`
+
+### UART: ###
+
+  * Added new port structure
+  * Added `TD_UART_InitGlobal()`
+  * Added `TD_UART_InitExtended()`
+  * Added `TD_UART_AvailableCharsExt()`
+  * Added `TD_UART_GetCharExtended()`
+  * Added `TD_UART_DisableExtended()`
+  * Added `TD_UART_FlushExt()`
+  * Added `TD_UART_SendBuffer()`
+  * Added `TD_UART_Disable()`
+  * Added `TD_UART_SendRepeat()`
+  * Added `TD_UART_GetStats()`
+
+### stdlib: ###
+
+  * Added `strcpy()`
+  * Added `strcmp()`
+
+## Bug Fixes ##
+
+### Scheduler: ###
+
+  * Trapped invalid timers
+  * Trapped queue overflows
+
+### UART: ###
+
+  * Don't loose characters when flushing RX buffer
+  * Signaled RX buffer overflow conditions
+
+### Utils: ###
+
+  * Corrected `TD_STACK_Usage()`

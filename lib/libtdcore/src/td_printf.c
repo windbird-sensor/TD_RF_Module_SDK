@@ -2,7 +2,7 @@
  * @file
  * @brief printf utility for the TDxxxx RF modules.
  * @author Kustaa Nyholm
- * @version 2.0.2
+ * @version 2.0.3
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2004 Kustaa Nyholm</b>
@@ -74,16 +74,16 @@ typedef void (*stop)(void *);
  * @{ */
 
 /** Pointer to opaque context for outputting characters */
-static void *stdout_putp;
+static __BOOTVARIABLE void *stdout_putp  = NULL;
 
 /** Pointer to function for flushing characters out */
-static putcf stdout_putf;
+static __BOOTVARIABLE putcf stdout_putf  = NULL;
 
 /** Pointer to function for starting to use the output stream */
-static start stdout_start;
+static __BOOTVARIABLE start stdout_start = NULL;
 
 /** Pointer to function for stopping to use the output stream */
-static stop stdout_stop;
+static __BOOTVARIABLE stop stdout_stop  = NULL;
 
 /** @} */
 
@@ -105,7 +105,7 @@ static stop stdout_stop;
  *   Pointer to flush output function.
  *
  * @param[in] n
- *   Number of left-padding characters.
+ *   Number of left-padding characters is positive, right padding if negative.
  *
  * @param[in] z
  *   Padding with zero characters if not null, with blank caracters otherwise.
@@ -118,15 +118,30 @@ static void putchw(void *putp, putcf putf, int n, char z, char *bf)
 	char fc = z ? '0' : ' ';
 	char ch;
 	char *p = bf;
+	bool end = false;
 
+	// If pad size neg, pad at end
+	if (n < 0){
+		n = -n;
+		end = true;
+	}
+
+	// Compute padding size
 	while (*p++ && n > 0) {
 		n--;
 	}
-	while (n-- > 0) {
-		putf(putp, fc);
+	if (!end) {
+		while (n-- > 0) {
+			putf(putp, fc);
+		}
 	}
 	while ((ch = *bf++)) {
 		putf(putp, ch);
+	}
+	if (end) {
+		while (n-- > 0) {
+			putf(putp, fc);
+		}
 	}
 }
 
@@ -136,9 +151,6 @@ static void putchw(void *putp, putcf putf, int n, char z, char *bf)
  *
  * @param[out] p
  *   Pointer to the output buffer.
- *
- * @param[in] putf
- *   Pointer to flush output function.
  *
  * @param[in] c
  *   Input character.
@@ -199,9 +211,11 @@ void tfp_format(void *putp, putcf putf, char *fmt, va_list va)
 	char bf[12];
 
 	char ch;
+	char neg = 0;
 
 	while ((ch = *(fmt++))) {
 		if (ch != '%') {
+			neg = 0;
 			putf(putp, ch);
 		} else {
 			char lz = 0;
@@ -214,8 +228,15 @@ void tfp_format(void *putp, putcf putf, char *fmt, va_list va)
 				ch = *(fmt++);
 				lz = 1;
 			}
+			if (ch == '-'){
+				ch = *(fmt++);
+				neg = 1;
+			}
 			if (ch >= '0' && ch <= '9') {
 				ch = a2i(ch, &fmt, 10, &w);
+				if (neg) {
+					w = -w;
+				}
 			}
 #ifdef PRINTF_LONG_SUPPORT
 			if (ch == 'l') {
@@ -290,12 +311,29 @@ abort:
  * @param[in] stop
  *   Pointer to function for stopping to use the output stream.
  ******************************************************************************/
-void init_printf(void *putp, void (*putf)(void *, char), void (*start)(void *), void (*stop)(void *))
+void init_printf(void *putp, tfp_putf_t putf, tfp_start_stop_t start,
+	tfp_start_stop_t stop)
 {
 	stdout_putp = putp;
 	stdout_putf = putf;
 	stdout_start = start;
 	stdout_stop = stop;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Get Printf initialization function.
+ *
+ * @param[in] list
+ *   Pointer to character output function.
+ *
+ ******************************************************************************/
+void get_printf(void **list)
+{
+	list[0] = stdout_putp;
+	list[1] = (void **) stdout_putf;
+	list[2] = (void **) stdout_start;
+	list[3] = (void **) stdout_stop;
 }
 
 /***************************************************************************//**
@@ -323,6 +361,32 @@ void tfp_printf(char *fmt, ...)
 		stdout_stop(stdout_putp);
 	}
 	va_end(va);
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Output a buffer.
+ *
+ * @param[in] buf
+ *   Pointer to a buffer string
+ *
+ * @param[in] len
+ *   Buffer length
+ *
+ ******************************************************************************/
+void tfp_print_buf(char *buf, int len)
+{
+	if (stdout_start) {
+		stdout_start(stdout_putp);
+	}
+	if (stdout_putf) {
+		while (len--){
+			stdout_putf(stdout_putp,*buf++);
+		}
+	}
+	if (stdout_stop) {
+		stdout_stop(stdout_putp);
+	}
 }
 
 /***************************************************************************//**
@@ -386,7 +450,7 @@ void tfp_sprintf(char *s, char *fmt, ...)
  ******************************************************************************/
 void tfp_dump(char *prompt, unsigned char *buffer, unsigned char length)
 {
-	static char dump[(3 * 16) + 3];
+	char dump[(3 * 16) + 3];
 	unsigned char i, j, k;
 	char hex[4];
 

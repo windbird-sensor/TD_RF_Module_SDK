@@ -1,2 +1,49 @@
-= Version 1.0.0 =
+# Version 1.0.0 #
+
   * Initial revision
+
+# Version 2.0.0 #
+
+## Minor Updates ##
+
+  * Removed non-functional GPS simulation command
+  * Non-API function `TD_NMEA_Init()` no longer takes a callback function as argument
+  * No longer use Sensor switch monitoring for accelerometer interrupts, have the driver handle it directly for efficiency's sake
+
+## Additions ##
+
+  * Added click monitoring
+  * Added power mode usage
+  * Added GPS autonomous computation handling
+  * Added ephemeris management
+  * Decode NMEA satellites in view sentence (GPGSV)
+  * Added `TD_NMEA_PARSER_Parse()`
+  * Added `TD_NMEA_PARSER_IsMessageUpdated()`
+  * Added `TD_NMEA_PARSER_SetDataPointer()`
+  * Added `TD_NMEA_PARSER_isDisplayUsed()`
+  * Added `TD_NMEA_PARSER_Process()`
+  * Added `TD_NMEA_GetParser()`
+  * Added `TD_ACCELERO_PowerDown()`, `TD_ACCELERO_NormalPower()` and `TD_ACCELERO_LowPower()` to API
+  * Added `TD_ACCELERO_ReadRegister()` and `TD_ACCELERO_WriteRegister()` to the API
+  * Added `TD_ACCELERO_ClearFilter()`
+  * Added `TD_ACCELERO_SetWatermark()`
+  * Added `TD_ACCELERO_MonitorClickEvent()`
+  * Added `TD_GEOLOC_EnableAutonomous()`
+  * Added `TD_GEOLOC_AddSecondsToDateTime()`
+  * Added `TD_GEOLOC_PollEphemeris()`
+  * Added `TD_GEOLOC_PollAutonomous()`
+  * Added `TD_GEOLOC_SendAutonomous()`
+  * Added `TD_GEOLOC_SendHui()`
+  * Added `TD_GEOLOC_SendIni()`
+  * Added `TD_GEOLOC_SendEphemeris()`
+
+## Changes ##
+
+  * Use GPS in raw U8blox data mode instead of NMEA mode for better efficiency
+
+## Bug Fixes ##
+
+  * Skipped first meaningless accelerometer data values in callback
+  * Fixed a bug in AT$AR= (read accelerometer register)
+  * Initialized the first byte in Sensor position data frame
+  * Fixed non-volatile accelerometer IRQ flag

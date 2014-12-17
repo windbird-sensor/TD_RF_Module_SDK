@@ -1,9 +1,35 @@
-/**
- * @file cflash.c
- * @brief COVEA MCS flashing utility
+/***************************************************************************//**
+ * @file
+ * @brief TD RF Module flashing utility.
  * @author Telecom Design S.A.
- * @version 1.0.0
- */
+ * @version 1.1.0
+ ******************************************************************************
+ * @section License
+ * <b>(C) Copyright 2012-2013 Telecom Design S.A., http://www.telecom-design.com</b>
+ ******************************************************************************
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Telecom Design SA has no
+ * obligation to support this Software. Telecom Design SA is providing the
+ * Software "AS IS", with no express or implied warranties of any kind,
+ * including, but not limited to, any implied warranties of merchantability
+ * or fitness for any particular purpose or warranties against infringement
+ * of any proprietary rights of a third party.
+ *
+ * Telecom Design SA will not be liable for any consequential, incidental, or
+ * special damages, or any other relief, or for any claim by any third party,
+ * arising from your use of this Software.
+ *
+  ******************************************************************************/
 
 #include <features.h>
 #include <stdlib.h>
@@ -34,21 +60,43 @@ typedef struct _HDR
 // DEFINES:
 // ****************************************************************************
 
+#define CONSOLE			0
+
+#define SUCCESS			0
+#define ERROR_FILE		1
+#define ERROR_ACK		2
+#define ERROR_SYNC		3
+#define ERROR_INT		4
+#define ERROR_REBOOT		5
+#define ERROR_FLASH		6
+#define ERROR_READ		7
+#define	ERROR_WRITE		8
+
+#define TIMEOUT			200	//In 1/10 of second
+
 #define FRM_SZ                  60
 #define HDR_SZ                  sizeof(HDR)
 #define DAT_SZ                  (FRM_SZ - HDR_SZ)
 
-#define WRITE_RAM 		        0x40
-#define WRITE_FLASH		        0x50
-#define ERASE_ANDWRITEFLASH	    0x60
-#define REBOOT			        0x70
-#define JUMP			        0x80
+#define WRITE_RAM 		0x4
+#define WRITE_FLASH		0x5
+#define ERASE_ANDWRITEFLASH	0x6
+#define REBOOT			0x7
+#define JUMP			0x8
 
 #define ACK                     0x30
+#define ACK_UPGRADE		0x31
+#define ACK_REBOOT		0x32
+
+/*Code hack*/
+#define ACK_3			0x34
+#define ACK_4			0x38
+#define ACK_5			0x70
+#define ACK_6			0xb0
 
 #define ESC                     0x1b
 
-#define VERSION                 "1.1"
+#define VERSION                 "4.1"
 
 // ****************************************************************************
 // STATICS:
@@ -65,17 +113,6 @@ static speed_t baud_bits[] = {
   0, B9600, B19200, B38400, B57600, B115200, B230400, B460800
 };
 
-static struct {
-    char *  name;
-    int     code;
-} products[] = {
-    { "gtw",    0x01    },
-    { "smk",    0x02    },
-    { "kbd",    0x03    },
-    { "mot",    0x81    },
-    { NULL,     0x00    }
-};
-
 static unsigned long    totalBytes;
 static int              serial_fd;
 
@@ -84,6 +121,10 @@ static unsigned int     baudrate    = 115200;
 static bool             trace       = false;
 
 static struct termios   orig_termios;
+
+
+void dump(char *text, unsigned char *s, unsigned char sz);
+
 
 // ****************************************************************************
 // CODE:
@@ -145,12 +186,14 @@ static int indexOfBaud(int baudrate)
   return 0;
 }
 
-/* Opens serial port, set's it to 57600bps 8N1 RTS/CTS mode.
+
+/**
+ *  Opens serial port, set's it to 115200bps 8N1 RTS/CTS mode.
  *
- * PARAMS:
- * dev - device name
- * RETURNS :
- * file descriptor or -1 on error
+ * @param[in@ dev
+ *   device name
+ * @return
+ *   file descriptor or -1 on error
  */
 static int open_serialport(char *dev)
 {
@@ -159,6 +202,7 @@ static int open_serialport(char *dev)
     if ((fd = open(dev, O_RDWR | O_NOCTTY)) != -1) {
 
         int index = indexOfBaud(baudrate);
+		struct termios options_rst;
         struct termios options_cpy;
         struct termios options;
 
@@ -176,7 +220,8 @@ static int open_serialport(char *dev)
         options.c_cflag = (CLOCAL | CREAD | CS8 | HUPCL);                       // Enable the receiver and set local mode and 8N1
 
         if (index > 0) {
-            options.c_cflag |= baud_bits[index];                                // Set speed
+			cfsetispeed(&options, baud_bits[index]);
+			cfsetospeed(&options, baud_bits[index]);
         } else {
             printf("Invalid serial speed %d.\r\n", baudrate);
         }
@@ -189,29 +234,53 @@ static int open_serialport(char *dev)
         options.c_cc[VTIME] = 0;                                                // Non blocking read
         options.c_cc[VMIN]  = 0;
 
-        /**
-         * Set serial port options. Then switch baudrate to zero for a while
-         * and then back up. This is needed to get some modems
-         * (such as Siemens MC35i) to wake up.
-         */
-
         tcflush(fd, TCIFLUSH);
 
-        options_cpy = options;                                                  // Set the new options for the port...
-        tcsetattr(fd, TCSANOW, &options);
-        options = options_cpy;
-
-        options.c_cflag &= ~baud_bits[index];                                   // Do like minicom: set speed to 0 and back
-        tcsetattr(fd, TCSANOW, &options);
-        options = options_cpy;
-
-        sleep(1);
-
-        options.c_cflag |= baud_bits[index];
         tcsetattr(fd, TCSANOW, &options);
     }
 
     return fd;
+}
+
+void SendReset(int fd)
+{
+	struct termios options_rst;
+	struct termios options;
+        int ret;
+        int loopIdx;
+
+	fcntl(fd, F_SETFL, 0);
+
+    tcgetattr(fd, &options);                                                // Get the parameters
+
+	unsigned char atz[10] = {0x41, 0x54, 0x5A, 0x0D, 0xA, 0x41, 0x54, 0x5A, 0x0D, 0xA};
+
+	options_rst = options;													// Set the reset options for the port...
+	cfsetispeed(&options_rst, B9600);
+	cfsetospeed(&options_rst, B9600);
+	tcsetattr(fd, TCSANOW, &options_rst);
+
+	write(fd, atz, 10);
+
+	usleep(100000);
+
+        while ((ret = read(serial_fd, atz, sizeof(atz))) == 0) {
+        }
+
+        if (trace) {
+            printf("SendReset: ");
+            for (loopIdx = 0; loopIdx < 10; loopIdx++)
+                printf ("%02x ", atz[loopIdx]);
+            for (loopIdx = 0; loopIdx < 10; loopIdx++) {
+                if (atz[loopIdx] >= ' ')
+                    printf ("%c", atz[loopIdx]);
+                else
+                    printf (".");
+            }
+            printf("\r\n");
+        }
+
+	tcsetattr(fd, TCSANOW, &options);
 }
 
 void dump(char *text, unsigned char *s, unsigned char sz)
@@ -220,6 +289,15 @@ void dump(char *text, unsigned char *s, unsigned char sz)
     unsigned char i, j, k;
     static char hex[10];
 
+/*
+    for (i = 0; i < sz; i++) {
+        if (s[i] >= ' ')
+            printf("%c", s[i]);
+        else
+            printf(".");
+    }
+    printf("\r\n");
+*/
     printf("%s", text);
 
     for (i = 0, k = 0; i < sz; i++) {
@@ -249,8 +327,8 @@ static unsigned char waitack(unsigned short delay)
     FD_ZERO(&rfds);
     FD_SET(serial_fd, &rfds);
 
-    timeout.tv_sec  = delay / 1000;                                             // Set the requested select timeout
-    timeout.tv_usec = 0;
+    timeout.tv_sec  = 0;//delay / 1000;                                             // Set the requested select timeout
+    timeout.tv_usec = delay*1000;
 
     if (select(serial_fd + 1, &rfds, NULL, NULL, &timeout) > 0) {               // Wait for characters
         if (FD_ISSET(serial_fd, &rfds)) {
@@ -266,69 +344,102 @@ static unsigned char waitack(unsigned short delay)
     return 0;                                                                   // Nothing received
 }
 
-static bool upgrade(char *filename) 
-{ 
+static bool upgrade(char *filename)
+{
     unsigned int i, ret, sz, percent, old = -1;
-    unsigned char binline[FRM_SZ];
+    unsigned char binline[FRM_SZ], flood;
     HDR *hdr = (HDR *)binline;
 	unsigned char c;
 	char prompt[20];
-	int count = 0;
+	int count = 0, cpt = 0;
 	FILE *fp;
 
 	if ((fp = fopen(filename, "rb")) == NULL) {
 		printf("Failure : couldn't open file %s\r\n", filename);
+		fprintf(stderr, "ErrorCode : %d\r\n", ERROR_FILE);
 		return false;
 	}
 
     fseek(fp, 0L, SEEK_END);
 	totalBytes = ftell(fp);                                                     // Get File size (progress bar)
     fseek(fp, 0L, SEEK_SET);
-	
+
     printf("Flashing %ld bytes on products id %#-2.2x\r\n", totalBytes, product);
-	printf("Acquiring, 'U' to upgrade, any other key to abort...\r\n");
+	printf("Synchronising, any key to abort...\r\n");
 
-	for (i = 0; i < FRM_SZ; i++) {
-        write(serial_fd, "X", 1);                                               // padding...
-    }
+	SendReset(serial_fd);
+	printf("ATZ reset sent...\r\n");
 
-	sleep(1);
+	flood = 'X';
+	ret = write(serial_fd, &flood, 1);
 
-	hdr->address = 0;
-	hdr->command = 0;
-	hdr->product = product;
 
-	while (!kbhit()) {                                                          // loop sending upgrade pattern
+	while (!kbhit() && ((c = waitack(100)) != ACK_UPGRADE) && cpt < TIMEOUT) {                   // loop sending upgrade pattern
 
-		ret = write(serial_fd, binline, FRM_SZ);
+		ret = write(serial_fd, &flood, 1);
+		cpt++;
 
-		if ((c = waitack(1000)) != ACK) {
-			printf("Did not get local ACK (%02x)\r\n", c);
-			fclose(fp);
-			return false;
-		}
-
-		usleep(20000);
 	}
 
+        printf ("cpt: %d - c: %02x / %c\r\n", cpt, c, c);
+
+	if(c == ACK_UPGRADE) {
+                printf("Dans upgrade - product: %02x...\r\n", product);
+		memset(binline, 0, FRM_SZ);
+		binline[DAT_SZ] = 0x2B;	//'+';
+                hdr->product = product;
+
+#if CONSOLE
+		printf("OK,\r\n'U' to upgrade, any other key to abort...\r\n");
+
+		while (!kbhit()) {
+#endif
+			ret = write(serial_fd, binline, FRM_SZ);
+
+			if ((c = waitack(10000)) != ACK) {
+				printf("Did not get local ACK (%02x)\r\n", c);
+				fprintf(stderr, "ErrorCode : %d\r\n", ERROR_ACK);
+				fclose(fp);
+				return false;
+			}
+#if CONSOLE
+			sleep(2);
+		}
+#endif
+	} else if (cpt >= TIMEOUT) {
+                printf("Synchronisation timeout\r\n");
+                fprintf(stderr, "ErrorCode : %d\r\n", ERROR_SYNC);
+                return false;
+	} else {
+		getchar();
+		printf("Synchronisation interrupted\r\n");
+		fprintf(stderr, "ErrorCode : %d\r\n", ERROR_SYNC);
+		return false;
+	}
+
+#if CONSOLE
     if (getch() != 'U') {
         printf("Interrupted...\r\n");
+	fprintf(stderr, "ErrorCode : %d\r\n", ERROR_INT);
         return false;
     }
+#endif
 
     printf("Upgrading, hit ESC to abort...\r\n");
 
     hdr->command = WRITE_FLASH;
 
-    while (true) {	
+    while (true) {
 
         if (kbhit() && (getch() == ESC)) {
-            printf("\r\nInterrupted\r\n");                                      // keyboard interrupt
+            printf("\r\nFlashing interrupted\r\n");                                      // keyboard interrupt
+	    fprintf(stderr, "ErrorCode : %d\r\n", ERROR_FLASH);
             return false;
         }
 
         if ((sz = fread(&binline[HDR_SZ], 1, DAT_SZ, fp)) < 0) {
             printf("\r\nRead error (%s)\r\n", strerror(errno));                 // file read error
+            fprintf(stderr, "ErrorCode : %d\r\n", ERROR_READ);
             return false;
         }
 
@@ -343,11 +454,14 @@ static bool upgrade(char *filename)
 
 	    if ((ret = write(serial_fd, binline, FRM_SZ)) != FRM_SZ) {              // send data packet
             printf("\r\nWrite error (%d/%d)\r\n", ret, FRM_SZ);
+	    fprintf(stderr, "ErrorCode : %d\r\n", ERROR_WRITE);
             return false;
 	    }
 
-	    if (waitack(1000) != ACK) {                                             // wait for local acknowledge
+	    if (waitack(6000) != ACK ) {
+                        // wait for local acknowledge
 			printf("\r\nWrite ack error\r\n");
+			fprintf(stderr, "ErrorCode : %d\r\n", ERROR_WRITE);
 			return false;
 		}
 
@@ -360,10 +474,10 @@ static bool upgrade(char *filename)
 	    }
 
 	    usleep(50000);                                                          // important: wait 50ms
-    }	
+    }
 
     printf("\r\nUpgrade OK\r\n");
-		
+
     hdr->command = REBOOT;                                                      // reboot product
     memset(&binline[HDR_SZ], 'X', DAT_SZ);
 
@@ -372,24 +486,25 @@ static bool upgrade(char *filename)
     }
 
     write(serial_fd, binline, FRM_SZ);
-	
-    if (waitack(3000) != ACK) {
+
+    if (waitack(6000) != ACK_REBOOT) {
 		printf("Did not get local ACK for reboot\r\n");
+		fprintf(stderr, "ErrorCode : %d\r\n", ERROR_REBOOT);
 		return false;
 	}
 
+    fprintf(stderr, "ErrorCode : %d\r\n", SUCCESS);
     return true;
 }
 
 // shows how to use this program
 static void usage(void)
 {
-  printf("cflash version %s\n", VERSION);
   printf("Usage: [options] <file>\n");
   printf("options:\n");
   printf("  -d <device>         : Serial port device to connect to [/dev/ttyUSB0]\n");
   printf("  -b <baudrate>       : Serial port speed (0,9600,19200, ...)\n");
-  printf("  -p <product>        : Product type (gtw, smk, kbd, mot, or value 1..255)\n");
+  printf("  -p <product>        : Product type (1..255)\n");
   printf("  -t                  : Activate trace mode\n");
   printf("  -h                  : Show this help message\n");
 }
@@ -398,25 +513,17 @@ int main(int argc, char *argv[])
 {
     char *dev = "/dev/ttyUSB0";
     char *filename;
-    int opt, i;
+    int opt;
     bool ok;
 
-    printf("cflash version #%s\n", VERSION);
+    printf("cflash version %s\n", VERSION);
+    printf("Copyright (c) 2012-2013 Telecom Design S.A.\n");
 
     while ((opt = getopt(argc, argv, "d:p:b:th?")) > 0) {
 
         switch (opt) {
             case 'p':
-                if (optarg[0] > '9') {
-                    for (i = 0; products[i].name; i++) {
-                        if (strcasecmp(optarg, products[i].name) == 0) {
-                            product = products[i].code;
-                            break;
-                        }
-                    }
-                } else {
-                    product = strtoul(optarg, 0, 0);
-                }
+				product = strtoul(optarg, 0, 0);
                 break;
             case 'd':
                 dev = optarg;
@@ -450,7 +557,7 @@ int main(int argc, char *argv[])
     reset_terminal_mode();
 
     close(serial_fd);
-    exit(ok? 0: 1);
+    exit (ok ? 0 : 1);
 }
 
 // ****************************************************************************

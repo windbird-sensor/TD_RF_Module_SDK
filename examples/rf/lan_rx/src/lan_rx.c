@@ -2,7 +2,7 @@
  * @file
  * @brief TD LAN RX example for TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 2.0.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -86,9 +86,9 @@ void TD_USER_Setup(void)
 
     // Initialize the LEUART
     init_printf(TD_UART_Init(9600, true, false),
-    		TD_UART_Putc,
-    		TD_UART_Start,
-    		TD_UART_Stop);
+		TD_UART_Putc,
+		TD_UART_Start,
+		TD_UART_Stop);
 
     // Initialize the LAN
     if (TD_LAN_Init(true, (NODE_ADDRESS | NODE_NETWORK), NODE_MASK) == false) {
@@ -102,7 +102,6 @@ void TD_USER_Setup(void)
 
     for (i = 1; i < 1000000; i++) {
     	if (TD_LAN_ReceiveFrameSync(&RX)) {
-    		tfp_dump("FRAME=", (uint8_t *) &RX, TD_LAN_FRAME_SIZE);
 
     		// Reply frame to sender with acknowledge flag set
     		TX.header = RX.header;
@@ -110,7 +109,8 @@ void TD_USER_Setup(void)
     		for (j = 0; j < TD_LAN_PAYLOAD_SIZE; j++) {
     			TX.payload[j] = RX.payload[j];
     		}
-    		TD_LAN_SendFrame(RETRIES, &TX, &RX);
+    		TD_LAN_SendFrame(1, &TX, &RX);
+    		tfp_dump("FRAME=", (uint8_t *) &RX, TD_LAN_FRAME_SIZE);
     	}
 
         // Random delay from 0 up to 2S

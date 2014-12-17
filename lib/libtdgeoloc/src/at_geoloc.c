@@ -2,7 +2,7 @@
  * @file
  * @brief Geolocalization AT command extension for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.0.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -84,7 +84,6 @@ typedef enum geoloc_tokens_t {
 
 /** AT geolocation command set */
 static AT_command_t const geoloc_commands[] = {
-
 	{"AT$GD", AT_GEOLOC_DUMP},				///< Full GPS state dump
 	{"AT$GLOG=", AT_GEOLOC_LOG},			///< Flash logger activation
 	{"AT$GPS=", AT_GEOLOC_MODE},			///< GPS try to fix and power mode
@@ -160,7 +159,8 @@ static void GPSCallback(TD_GEOLOC_Fix_t *fix, bool timeout)
 
 		// Stop to send if required
 		if (SendOnFix) {
-			if (EndMode == TD_GEOLOC_NAVIGATION || EndMode == TD_GEOLOC_POWER_SAVE_MODE) {
+			if (EndMode == TD_GEOLOC_NAVIGATION ||
+				EndMode == TD_GEOLOC_POWER_SAVE_MODE) {
 
 				// Would be more efficient to go to soft backup
 				TD_GEOLOC_StopFix(TD_GEOLOC_HW_BCKP);
@@ -175,8 +175,8 @@ static void GPSCallback(TD_GEOLOC_Fix_t *fix, bool timeout)
 
 		// Apply end mode
 		if (SendOnFix) {
-			if ((EndMode == TD_GEOLOC_NAVIGATION || EndMode == TD_GEOLOC_POWER_SAVE_MODE)
-					|| FixTimeout == 0xFFFF) {
+			if ((EndMode == TD_GEOLOC_NAVIGATION ||
+				EndMode == TD_GEOLOC_POWER_SAVE_MODE) || FixTimeout == 0xFFFF) {
 				TD_GEOLOC_TryToFix(Mode, FixTimeout, GPSCallback);
 			}
 		}
@@ -197,14 +197,11 @@ static int8_t geoloc_parse(uint8_t token)
 {
 	int8_t result = AT_OK;
 	int gps_mode = -1, parser_mode = -1, sat, hdop, timeout, end_mode;
-	uint8_t position[10], msg[10];
-	uint8_t pos_len, msg_len;
-	int i = 0;
 
 	switch (token) {
 	case AT_GEOLOC_DUMP:
 		if (AT_argc == 0) {
-			TD_SystemDump(DUMP_UBX7);
+			TD_SystemDump(DUMP_GEOLOC);
 		} else {
 			result = AT_ERROR;
 		}
@@ -221,7 +218,8 @@ static int8_t geoloc_parse(uint8_t token)
 	case AT_GEOLOC_MODE:
 		if (AT_argc >= 1) {
 			gps_mode = AT_atoll(AT_argv[0]);
-			if (AT_argc == 6 && (gps_mode == 1 || gps_mode == 3 || gps_mode == 4)) {
+			if (AT_argc == 6 && (gps_mode == 1 || gps_mode == 3 ||
+				gps_mode == 4)) {
 				sat = AT_atoll(AT_argv[1]);
 				hdop = AT_atoll(AT_argv[2]);
 				timeout = AT_atoll(AT_argv[3]);
@@ -337,63 +335,6 @@ static int8_t geoloc_parse(uint8_t token)
 			result = AT_ERROR;
 		}
 		break;
-
-	case AT_GEOLOC_SIM:
-		if (AT_argc == 6) {
-			TD_GEOLOC_Fix_t fix;
-			fix.position.latitude = AT_atoll(AT_argv[1]);
-			fix.position.longitude = AT_atoll(AT_argv[2]);
-			fix.quality.sat = AT_atoll(AT_argv[3]);
-			fix.quality.hdop = AT_atoll(AT_argv[4]);
-			msg[0] = 0;
-			TD_SENSOR_EncodePosition(GPS_DATA_XYZ_SV_HDOP, &fix, position, &pos_len);
-			msg_len = 4; //stuff useless type for retro compatibility
-			TD_SENSOR_UTILS_BitConcat(msg, &msg_len, position, pos_len);
-			for (i = 0; i < AT_atoll(AT_argv[5]); i++) {
-				TD_SENSOR_SendEvent((TD_SENSOR_EVENT_Types_t) AT_atoll(AT_argv[0]), msg, BITS_TO_BYTES(msg_len));
-			}
-			//TD_SENSOR_SendDataPosition(GPS_DATA_XYZ_SV_HDOP, &fix, 0, 0);
-		} else if (AT_argc == 2) {
-			for (i = 0; i < AT_atoll(AT_argv[1]); i++) {
-				TD_SENSOR_SendEvent((TD_SENSOR_EVENT_Types_t) AT_atoll(AT_argv[0]), 0, 0);
-			}
-		} else {
-			result = AT_ERROR;
-		}
-		break;
-
-#if 0
-	case AT_GEOLOC_TIME_TRACKING:
-		if (AT_argc >= 1) {
-			int enable = AT_atoll(AT_argv[0]);
-			if (enable == 0 && AT_argc == 1) {
-				TD_GEOLOC_SendPositionOntimer(false, 0, 0);
-			} else if (enable == 1 && AT_argc == 5) {
-				int interval = AT_atoll(AT_argv[1]);
-				int sv = AT_atoll(AT_argv[2]);
-				int hdop = AT_atoll(AT_argv[3]);
-				int timeout = AT_atoll(AT_argv[4]);
-
-				//TODO: check values
-				if (interval >= 10 && interval <= 0xFFFF &&
-						sv < 16 && sv >= 3 && hdop >= 0 && hdop) {
-					condition.info_parsed = POSITION_3D_UPDATE;
-					condition.req_quality.sat = sv;
-					condition.req_quality.hdop = hdop;
-					condition.timeout = timeout;
-					TD_GEOLOC_SetCallback(0);
-					TD_GEOLOC_SendPositionOntimer(true, interval, &condition);
-				} else {
-					result = AT_ERROR;
-				}
-			} else {
-				result = AT_ERROR;
-			}
-		} else {
-			result = AT_ERROR;
-		}
-		break;
-#endif
 
 	default:
 		result = AT_NOTHING;

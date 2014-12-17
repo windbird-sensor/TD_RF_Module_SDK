@@ -88,6 +88,11 @@ file: td_cmu.h
 
 Provides functions to initialise the clock management unit properly. Do not use!
 
+\subsection Capsense
+file: td_capsense.h
+
+Provides functions to manage the capacitive touch buttons.
+
 \section Limitation
 
 \subsection Scheduler

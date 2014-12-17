@@ -2,7 +2,7 @@
  * @file
  * @brief General Purpose IO (GPIO) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.2
+ * @version 2.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -56,8 +56,8 @@
 /** @addtogroup GPIO_GLOBAL_VARIABLES Global Variables
  * @{ */
 
-/** Array of GPIO IRQ hooks for system/user/odd/even IRQs */
-TD_GPIO_hook_t TD_GPIO_Hooks[TD_GPIO_MAX_HOOKS];
+/** Callback array */
+TD_GPIO_callback_t TD_GPIO_CallbackInterrupts[16];
 
 /** @} */
 
@@ -66,6 +66,36 @@ TD_GPIO_hook_t TD_GPIO_Hooks[TD_GPIO_MAX_HOOKS];
 #else
 #pragma GCC optimize ("O3")
 #endif
+
+/*******************************************************************************
+ **************************  PRIVATE FUNCTIONS   *******************************
+ ******************************************************************************/
+
+/** @addtogroup WATCHDOG_LOCAL_FUNCTIONS Local Functions
+ * @{ */
+
+/***************************************************************************//**
+ * @brief
+ *   Dispatch an interrupt to the registered callback functions.
+ *
+ * @param[in] flag
+ *   The binary interrupt flag to check for dispatching.
+ ******************************************************************************/
+static void InterruptDispatch(uint32_t flag)
+{
+	int i;
+
+	for (i = 0; i < 16; i++) {
+		if ((1 << i) & flag) {
+			if (TD_GPIO_CallbackInterrupts[i] != 0) {
+				(*TD_GPIO_CallbackInterrupts[i])(1 << i);
+			}
+			TD_WakeMainLoop();
+		}
+	}
+}
+
+/** @} */
 
 /*******************************************************************************
  **************************   PUBLIC FUNCTIONS   *******************************
@@ -85,38 +115,21 @@ TD_GPIO_hook_t TD_GPIO_Hooks[TD_GPIO_MAX_HOOKS];
 void GPIO_ODD_IRQHandler(void)
 {
 	uint32_t flag;
-	uint32_t system_mask = TD_GPIO_Hooks[TD_GPIO_SYSTEM_ODD].mask;
-	uint32_t user_mask = TD_GPIO_Hooks[TD_GPIO_USER_ODD].mask;
 
 	// Get interrupt bits
 	flag = (GPIO_IntGet() & TD_GPIO_ODD_MASK) & GPIO_IntGetEnabled();
 
 	// Acknowledge IRQ
 	// We acknowledge all IRQ read, for this IRQ (EVEN) and enabled
-	// even if theses IRQ are not used (otherwise, it will infinitely reenter in this IRQ)
+	// even if theses IRQ are not used (otherwise, it will infinitely reenter in
+	// this IRQ)
 	GPIO_IntClear(flag);
+
 #ifdef WAKE_MAIN_LOOP_DEBUG
 	tfp_printf("IO:0x%08X\r\n");
 #endif
 
-	// System hook set on odd IRQ
-	if (TD_GPIO_Hooks[TD_GPIO_SYSTEM_ODD].callback && (flag & system_mask)) {
-
-		// Call the IRQ hook
-		TD_GPIO_Hooks[TD_GPIO_SYSTEM_ODD].callback(flag & system_mask);
-
-		// Remember that this interrupt source has been processed
-		flag &= ~system_mask;
-		TD_WakeMainLoop();
-	}
-
-	// User hook on odd IRQ
-	if (TD_GPIO_Hooks[TD_GPIO_USER_ODD].callback && (flag & user_mask)) {
-
-		// Call the IRQ hook
-		TD_GPIO_Hooks[TD_GPIO_USER_ODD].callback(flag & user_mask);
-		TD_WakeMainLoop();
-	}
+	InterruptDispatch(flag);
 }
 
 /***************************************************************************//**
@@ -130,36 +143,137 @@ void GPIO_ODD_IRQHandler(void)
 void GPIO_EVEN_IRQHandler(void)
 {
 	uint32_t flag;
-	uint32_t system_mask = TD_GPIO_Hooks[TD_GPIO_SYSTEM_EVEN].mask;
-	uint32_t user_mask = TD_GPIO_Hooks[TD_GPIO_USER_EVEN].mask;
 
 	// Get interrupt bits
 	flag = GPIO_IntGet() & TD_GPIO_EVEN_MASK & GPIO_IntGetEnabled();
 
 	// Acknowledge IRQ.
 	// We acknowledge all IRQ read, for this IRQ (EVEN) and enabled
-	// even if theses IRQ are not used (otherwise, it will infinitely reenter in this IRQ)
+	// even if theses IRQ are not used (otherwise, it will infinitely reenter in
+	// this IRQ)
 	GPIO_IntClear(flag);
 #ifdef WAKE_MAIN_LOOP_DEBUG
 	tfp_printf("IO:0x%08X\r\n");
 #endif
-	// System hook set on odd IRQ
-	if (TD_GPIO_Hooks[TD_GPIO_SYSTEM_EVEN].callback && (flag & system_mask)) {
 
-		// Call the IRQ hook
-		TD_GPIO_Hooks[TD_GPIO_SYSTEM_EVEN].callback(flag & system_mask);
+	InterruptDispatch(flag);
+}
 
-		// Remember that this interrupt source has been processed
-		flag &= ~system_mask;
-		TD_WakeMainLoop();
+/***************************************************************************//**
+ * @brief
+ *  Append a callback for this interrupt
+ *
+ * @param bit
+ *  Bit value for input pin. Should be <= 15
+ *
+ * @param callback
+ *  Callback to call on interrupt event
+ *
+ * @return
+ *  return overriden callback.
+ ******************************************************************************/
+TD_GPIO_callback_t TD_GPIO_SetCallbackExtended(uint8_t bit,
+	TD_GPIO_callback_t callback)
+{
+	TD_GPIO_callback_t previous;
+
+	if (bit > 15) {
+		return 0;
+	}
+	previous = TD_GPIO_CallbackInterrupts[bit];
+	TD_GPIO_CallbackInterrupts[bit] = callback;
+	return previous;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Register a callback function for processing interrupts matching a given bit
+ *   mask.
+ *   Depreciated. Please use TD_GPIO_SetCallbackExtended instead.
+ *
+ * @param[in] type
+ *   The type of callback to set up.
+ *
+ * @param[in] callback
+ *   Pointer to callback function called when an interrupt matching the mask is
+ *   received.
+ *
+ * @param[in] mask
+ *   Mask for testing a received even interrupts against.
+ ******************************************************************************/
+void TD_GPIO_SetCallback(int type, TD_GPIO_callback_t callback, uint32_t mask)
+{
+	uint8_t start;
+
+	if (type < TD_GPIO_ODD) {
+
+		 // Even
+		start = 0;
+	} else {
+
+		// Odd
+		start = 1;
 	}
 
-	// User hook on even IRQ
-	if (TD_GPIO_Hooks[TD_GPIO_USER_EVEN].callback && (flag & user_mask)) {
+	// Set callback for all odd or even IOs
+	for (; start < 16; start += 2) {
 
-		// Call the IRQ hook
-		TD_GPIO_Hooks[TD_GPIO_USER_EVEN].callback(flag & user_mask);
-		TD_WakeMainLoop();
+		// If set callback, only apply to masked interrupt
+		// If unset callback, remove all interrupt
+		if (callback == 0 || (callback != 0 && ((1 << start)& mask))) {
+			TD_GPIO_SetCallbackExtended(start, callback);
+		}
+	}
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Overload GPIO_PinModeSet to allow driving:
+ *   - EFM32 pin
+ *   - Radio pin
+ *   - No pin
+ ******************************************************************************/
+void TD_GPIO_PinModeSet(TD_GPIO_Port_TypeDef port, unsigned int bit,
+	GPIO_Mode_TypeDef mode, unsigned int out)
+{
+	uint8_t value;
+
+	if (port == TD_GPIO_PortNull) {
+		return;
+	} else if (port == TD_GPIO_PortRadio) {
+		if (bit > 3) {
+			return;
+		}
+		value = out;
+		switch(mode) {
+		case gpioModeDisabled:
+			TD_RF_GPIO_PinConfigure(bit, TD_RF_GPIO_DISABLED, &value);
+			break;
+
+		case gpioModePushPull:
+		case gpioModePushPullDrive:
+			TD_RF_GPIO_PinConfigure(bit, TD_RF_GPIO_OUTPUT, &value);
+			break;
+
+		default:
+			break;
+		}
+	} else {
+		GPIO_PinModeSet((GPIO_Port_TypeDef) port, bit, mode, out);
+	}
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Overload GPIO_DriveModeSet to allow driving:
+ *   - EFM32 pin
+ *   - Radio pin
+ *   - No pin
+ ******************************************************************************/
+void TD_GPIO_DriveModeSet(TD_GPIO_Port_TypeDef port, GPIO_DriveMode_TypeDef mode)
+{
+	if (port != TD_GPIO_PortNull && port != TD_GPIO_PortRadio) {
+		GPIO_DriveModeSet((GPIO_Port_TypeDef) port, mode);
 	}
 }
 
@@ -177,7 +291,11 @@ void TD_GPIO_Init(void)
 	CMU_OscillatorEnable(cmuOsc_LFXO, true, true);
 
 	// Initialize IRQ hooks
-	memset(TD_GPIO_Hooks, 0, sizeof(TD_GPIO_hook_t)*TD_GPIO_MAX_HOOKS);
+	memset(TD_GPIO_CallbackInterrupts, 0, sizeof (TD_GPIO_callback_t) * 16);
+
+	// Init nvic interrupt
+	NVIC_EnableIRQ(GPIO_EVEN_IRQn);
+	NVIC_EnableIRQ(GPIO_ODD_IRQn);
 }
 
 /***************************************************************************//**
@@ -189,66 +307,24 @@ void TD_GPIO_Dump(void)
 	uint8_t i, j, md;
 	uint64_t mode;
 	uint32_t d;
-	char *txt;
+	static char const str[][6] = {
+		"DIS", "IN", "INP", "INPF", "OUT", "OUTD",
+		"WOR", "WORP", "WAN", "WANF", "WANP", "WANPF",
+		"WAND", "WANDF", "WANDP", "WADPF"
+	};
+	static char const str_drive[][6] = {
+		"STAND","LOWES"," HIGH"," LOW "
+	};
 	for (i = 0; i < 6; i++) {
-		tfp_printf("--Port%c--\r\n", 'A' + i);
+		tfp_printf("--Port%c Drive:%s--\r\n", 'A' + i,
+			str_drive[GPIO->P[i].CTRL&3]);
 		mode = GPIO->P[i].MODEL;
 		mode = mode | (((uint64_t)GPIO->P[i].MODEH) << 32);
 		d = GPIO->P[i].DOUT;
 		for (j = 0; j < 16; j++) {
 			md = mode & 0xF;
 			mode = mode >> 4;
-			switch (md) {
-			case 0:
-				txt = "DIS";
-				break;
-			case 1:
-				txt = "IN";
-				break;
-			case 2:
-				txt = "INP";
-				break;
-			case 3:
-				txt = "INPF";
-				break;
-			case 4:
-				txt = "OUT";
-				break;
-			case 5:
-				txt = "OUTD";
-				break;
-			case 6:
-				txt = "WOR";
-				break;
-			case 7:
-				txt = "WORP";
-				break;
-			case 8:
-				txt = "WAN";
-				break;
-			case 9:
-				txt = "WANF";
-				break;
-			case 10:
-				txt = "WANP";
-				break;
-			case 11:
-				txt = "WANPF";
-				break;
-			case 12:
-				txt = "WAND";
-				break;
-			case 13:
-				txt = "WANDF";
-				break;
-			case 14:
-				txt = "WANDP";
-				break;
-			case 15:
-				txt = "WANDPF";
-				break;
-			}
-			tfp_printf("%01X)%6s:%d|  ", j, txt, d & 1);
+			tfp_printf("%01X)%6s:%d|  ", j, &str[md][0], d & 1);
 			d >>= 1;
 			if ((j & 3) == 3) {
 				tfp_printf("\r\n");

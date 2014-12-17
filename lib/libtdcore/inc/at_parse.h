@@ -2,7 +2,7 @@
  * @file
  * @brief AT parser API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.2
+ * @version 2.0.3
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -43,15 +43,15 @@
 extern "C" {
 #endif
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup AT_PARSER AT Command Parser
 	 * @brief AT parser API for the TDxxxx RF modules
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
-	/*******************************************************************************
-	 *************************   DEFINES   *****************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   DEFINES   *************************************
+	 **************************************************************************/
 
 	/** @addtogroup AT_DEFINES Defines
 	 * @{ */
@@ -68,19 +68,11 @@ extern "C" {
 	/** Maximum number of AT command arguments */
 #define AT_MAX_ARGS		9
 
-#ifdef EFM32TG210F32
-	/** AT persist buffer size */
-#define AT_PERSIST_SIZE	32
-#else
-	/** AT persist buffer size */
-#define AT_PERSIST_SIZE	192
-#endif
-
 	/** @} */
 
-	/*******************************************************************************
-	 ***********************   ENUMERATIONS   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 ***********************   ENUMERATIONS   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup AT_ENUMERATIONS Enumerations
 	 * @{ */
@@ -135,9 +127,9 @@ extern "C" {
 
 	/** @} */
 
-	/*******************************************************************************
-	 *************************   TYPEDEFS   ****************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   TYPEDEFS   ************************************
+	 **************************************************************************/
 
 	/** @addtogroup AT_TYPEDEFS Typedefs
 	 * @{ */
@@ -159,23 +151,24 @@ extern "C" {
 	 * @details
 	 *   #Introduction
 	 *
-	 *   The AT parser extension provides a plugin mechanism that allows to extend
-	 *   the set of available AT commands.
+	 *   The AT parser extension provides a plugin mechanism that allows to
+	 *   extend the set of available AT commands.
 	 *
 	 *   #Implementation
 	 *
 	 *   The At parser extension consists in a structure that contains:
-	 *    - a table with the additional AT commands supported by the extension in
-	 *    ASCII with the corresponding token
-	 *    - some functions that will be called back for some specific purpose: during
-	 *    initialization, while display help or status, when parsing a new character,
-	 *    when a command has been recognized or when the system needs to perform
-	 *    a persistent write of its configuration or when it has to read it back
+	 *    - a table with the additional AT commands supported by the extension
+	 *    in ASCII with the corresponding token
+	 *    - some functions that will be called back for some specific purpose:
+	 *    during initialization, while display help or status, when parsing a
+	 *    new character, when a command has been recognized or when the system
+	 *    needs to perform a persistent write of its configuration or when it
+	 *    has to read it back
 	 *
 	 *    #Calling Sequence
 	 *
-	 *    The only required operation dealing with an AT extension is to register it
-	 *    using AT_AddExtension().
+	 *    The only required operation dealing with an AT extension is to
+	 *    register it using AT_AddExtension().
 	 */
 	typedef struct {
 		AT_command_t const *commands;	///< Pointer to the list of extension commands
@@ -189,18 +182,18 @@ extern "C" {
 
 	/** @} */
 
-	/*******************************************************************************
-	 *************************  CONSTANTS  *****************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************  CONSTANTS  *************************************
+	 **************************************************************************/
 
 	/** @addtogroup AT_CONSTANTS Constants
 	 * @{ */
 
 	/** @} */
 
-	/*******************************************************************************
-	 *************************   PROTOTYPES   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   PROTOTYPES   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup AT_USER_FUNCTIONS User Functions
 	 * @{ */
@@ -218,9 +211,9 @@ extern "C" {
 	/** @} */
 	/** @} */
 
-	/*******************************************************************************
-	 **************************   PUBLIC VARIABLES   *******************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 **************************   PUBLIC VARIABLES   ***************************
+	 **************************************************************************/
 
 	/** @addtogroup AT_GLOBAL_VARIABLES Global Variables
 	 * @{ */

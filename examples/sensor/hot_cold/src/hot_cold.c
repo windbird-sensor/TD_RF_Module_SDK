@@ -2,7 +2,7 @@
  * @file
  * @brief Sensor Temperature Monitoring Application Example
  * @author Telecom Design S.A.
- * @version 1.0.1
+ * @version 1.0.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -33,16 +33,19 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
 #include <efm32.h>
 #include <em_gpio.h>
+
+#include <td_core.h>
 #include <td_scheduler.h>
 #include <td_uart.h>
 #include <td_measure.h>
 #include <td_flash.h>
-#define USE_PRINTF
 #include <td_printf.h>
 #include <td_module.h>
 #include <td_gpio.h>
+
 #include <td_sensor.h>
 #include <sensor_event.h>
 #include <sensor_register.h>
@@ -64,19 +67,15 @@
 #define TEMPERATURE_CHECKING_INTERVAL 10	// Temperature checking interval in seconds
 
 /*******************************************************************************
- ******************************  CONSTANTS  ************************************
- ******************************************************************************/
-
-/*******************************************************************************
  **************************   PRIVATE FUNCTIONS   ******************************
  ******************************************************************************/
-
 
 /***************************************************************************//**
  * @brief
  * Temperature callback. Called on Temperature Events.
  ******************************************************************************/
-static bool TemperatureCallback(TD_SENSOR_TemperatureState_t state, int16_t level)
+static bool TemperatureCallback(TD_SENSOR_TemperatureState_t state,
+	int16_t level)
 {
 	bool return_value = false;
 
@@ -86,17 +85,20 @@ static bool TemperatureCallback(TD_SENSOR_TemperatureState_t state, int16_t leve
 	switch (state) {
 
 		case TEMPERATURE_LOW:
-			tfp_printf("Temperature low event, T=%d.%d \r\n", temp_int, temp_dec);
+			tfp_printf("Temperature low event, T=%d.%d \r\n", temp_int,
+				temp_dec);
 			return_value = true;
 		break;
 
 		case TEMPERATURE_OK:
-			tfp_printf("Temperature OK event, T=%d.%d \r\n", temp_int, temp_dec);
+			tfp_printf("Temperature OK event, T=%d.%d \r\n", temp_int,
+				temp_dec);
 			return_value = true;
 		break;
 
 		case TEMPERATURE_HIGH:
-			tfp_printf("Temperature high event, T=%d.%d \r\n", temp_int, temp_dec);
+			tfp_printf("Temperature high event, T=%d.%d \r\n", temp_int,
+				temp_dec);
 		break;
 
 		default:
@@ -118,21 +120,20 @@ static bool TemperatureCallback(TD_SENSOR_TemperatureState_t state, int16_t leve
  ******************************************************************************/
 void TD_USER_Setup(void)
 {
-
 	TD_FLASH_DeleteVariables();
-
 
 	// Initialize the UART
 	init_printf(TD_UART_Init(9600, true, false),
-	    		TD_UART_Putc,
-	    		TD_UART_Start,
-	    		TD_UART_Stop);
+		TD_UART_Putc,
+		TD_UART_Start,
+		TD_UART_Stop);
 
-	// Init LED
+	// Initialize the LED
 	GPIO_PinModeSet(TIM2_PORT, TIM2_BIT, gpioModePushPull, 0);
 
 	// Print out current temperature
-	tfp_printf("Temperature: %d degrees\r\n", TD_MEASURE_VoltageTemperatureExtended(true) / 10);
+	tfp_printf("Temperature: %d degrees\r\n",
+		TD_MEASURE_VoltageTemperatureExtended(true) / 10);
 
 	// Set the device class
 	TD_SENSOR_SetDeviceClass(DEVICE_CLASS);
@@ -144,8 +145,8 @@ void TD_USER_Setup(void)
 	TD_SENSOR_SendRegister();
 
 	// Enable temperature monitoring and setup a callback on event
-	TD_SENSOR_MonitorTemperature(true, TEMPERATURE_CHECKING_INTERVAL, TEMPERATURE_LEVEL_LOW, TEMPERATURE_LEVEL_HIGH, TemperatureCallback);
-
+	TD_SENSOR_MonitorTemperature(true, TEMPERATURE_CHECKING_INTERVAL,
+		TEMPERATURE_LEVEL_LOW, TEMPERATURE_LEVEL_HIGH, TemperatureCallback);
 }
 
 /***************************************************************************//**

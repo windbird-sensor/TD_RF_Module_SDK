@@ -2,7 +2,7 @@
  * @file
  * @brief Utility functions for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.2
+ * @version 2.0.3
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -42,28 +42,30 @@
 extern "C" {
 #endif
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup UTILS Utility Functions
 	 * @brief Utility functions for the TDxxxx RF modules
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
-	/*******************************************************************************
-	 *************************   DEFINES   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   DEFINES   *************************************
+	 **************************************************************************/
 
 	/** @addtogroup UTILS_DEFINES Defines
 	 * @{ */
 
 	/** Macro to get a bit field */
-#define GET_BITFIELD(b, f)				((b >> f ## _SHIFT) & GET_BITFIELD_MASK(f ## _WIDTH))
+#define GET_BITFIELD(b, f) \
+	((b >> f ## _SHIFT) & GET_BITFIELD_MASK(f ## _WIDTH))
 
 	/** Macro to set a bit field */
-#define SET_BITFIELD(b, f, v)			b &= ~(GET_BITFIELD_MASK(f ## _WIDTH) << f ## _SHIFT); \
-			b |= ((v & GET_BITFIELD_MASK(f ## _WIDTH))  << f ## _SHIFT)
+#define SET_BITFIELD(b, f, v) \
+	b &= ~(GET_BITFIELD_MASK(f ## _WIDTH) << f ## _SHIFT); \
+	b |= ((v & GET_BITFIELD_MASK(f ## _WIDTH))  << f ## _SHIFT)
 
 	/** Macro to compute bit mask given its width */
-#define GET_BITFIELD_MASK(w)			((1 << w) - 1)
+#define GET_BITFIELD_MASK(w) ((1 << w) - 1)
 
 #ifndef NULL
 
@@ -73,16 +75,20 @@ extern "C" {
 
 	/** @} */
 
-	/*******************************************************************************
-	 *************************   PROTOTYPES   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   PROTOTYPES   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup UTILS_USER_FUNCTIONS User Functions
 	 * @{ */
 
+#ifndef _STDLIB_H_
 	long long atoll(char *instr);
+#endif
 	long long atolli(char *instr, char ignore);
+#ifndef _STDLIB_H_
 	int atoi(char *instr);
+#endif
 	char a2i(char ch, char **src, int base, int *nump);
 	int a2d(char ch);
 	void i2a(int num, char *bf);
@@ -96,6 +102,8 @@ extern "C" {
 	int memcmp(const void *s1, const void *s2, size_t n);
 #endif
 
+	char *strcpy(char *dst, const char *src);
+	int strcmp(const char *s1, const char *s2);
 	int TD_STACK_Usage(void);
 	void TD_IRQ_Dump(void);
 

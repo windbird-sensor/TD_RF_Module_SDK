@@ -2,7 +2,7 @@
  * @file
  * @brief AT Sensor LAN
  * @author Telecom Design S.A.
- * @version 1.1.1
+ * @version 1.1.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -87,7 +87,6 @@ typedef enum sensor_lan_tokens_t {
 
 /** Sensor LAN AT command set */
 static AT_command_t const sensor_lan_commands[] = {
-
 	{"AT$LA?", AT_SENSOR_LAN_GET_ADDRESS},
 	{"AT$LD=", AT_SENSOR_LAN_DATA},
 	{"AT$LRD=", AT_SENSOR_LAN_REMOVE_DEVICE},
@@ -176,7 +175,8 @@ static int8_t LanDataCallback(uint8_t *data, uint8_t length, uint8_t *reply)
  * @return
  *   Returns the number of bytes in the reply buffer.
  ******************************************************************************/
-static int8_t DeviceDataCallback(bool broadcast, uint32_t address, uint8_t *data, uint8_t length, uint8_t *reply)
+static int8_t DeviceDataCallback(bool broadcast, uint32_t address,
+	uint8_t *data, uint8_t length, uint8_t *reply)
 {
 	return LanDataCallback(data, length, reply);
 }
@@ -227,7 +227,8 @@ static int8_t sensor_lan_parse(uint8_t token)
 	switch (token) {
 	case AT_SENSOR_LAN_GET_ADDRESS:
 		if (AT_argc == 0 && type != SENSOR_TRANSMITTER) {
-			AT_printf("Address: %02x, Mask: %02x", lan_address->address, lan_address->mask);
+			AT_printf("Address: %02x, Mask: %02x",
+				lan_address->address, lan_address->mask);
 		} else {
 			result = AT_ERROR;
 		}
@@ -318,7 +319,8 @@ static int8_t sensor_lan_parse(uint8_t token)
 		break;
 
 	case AT_SENSOR_LAN_DATA:
-		if ((type == SENSOR_GATEWAY && AT_argc == 2) || (type == SENSOR_DEVICE  && AT_argc == 1)) {
+		if ((type == SENSOR_GATEWAY && AT_argc == 2) ||
+			(type == SENSOR_DEVICE  && AT_argc == 1)) {
 			if (type == SENSOR_GATEWAY) {
 				message = AT_argv[1];
 			} else {
@@ -361,7 +363,8 @@ static int8_t sensor_lan_parse(uint8_t token)
 						break;
 					}
 				} else if (type == SENSOR_DEVICE) {
-					if (TD_SENSOR_DEVICE_Data(data_buffer, data_length,	data_rx_buffer) != ACK_OK) {
+					if (TD_SENSOR_DEVICE_Data(data_buffer, data_length,
+						data_rx_buffer) != ACK_OK) {
 						result = AT_ERROR;
 						break;
 					}

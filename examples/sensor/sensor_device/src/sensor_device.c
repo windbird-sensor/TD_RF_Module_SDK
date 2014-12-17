@@ -1,8 +1,8 @@
 /******************************************************************************
  * @file
- * @brief template file for TDxxxx RF modules.
+ * @brief Sensor Device Application example.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 2.0.3
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -45,7 +45,6 @@
 #include <td_sensor_lan.h>
 #include <td_sensor_device.h>
 #include <sensor_register.h>
-
 
 /* This file declare all "dynamic" library data. It should be last included file
  * Standard size value can be override before including this file
@@ -134,8 +133,8 @@ static void RegistrationSuccess(void)
 	tfp_printf("Registration Success\r\n");
 
 	// Beware: as long as the gateway is still in registration mode, it can't
-	// communicate with the newly registered device, so wait a bit for the gateway
-	// to stop registration
+	// communicate with the newly registered device, so wait a bit for the
+	// gateway to stop registration
 	TD_RTC_Delay(T2S);
 
 	// Send registration
@@ -190,9 +189,9 @@ void TD_USER_Setup(void)
 
 	// Initialize the UART console
 	init_printf(TD_UART_Init(9600, true, false),
-		    		TD_UART_Putc,
-		    		TD_UART_Start,
-		    		TD_UART_Stop);
+		TD_UART_Putc,
+		TD_UART_Start,
+		TD_UART_Stop);
 
 	// Changing the version will clear all flash content thus allowing
 	// resetting the device

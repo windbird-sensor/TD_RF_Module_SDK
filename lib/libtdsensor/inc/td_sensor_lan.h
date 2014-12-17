@@ -2,7 +2,7 @@
  * @file
  * @brief Sensor LAN
  * @author Telecom Design S.A.
- * @version 1.1.1
+ * @version 1.2.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -39,23 +39,23 @@
 
 #include <td_lan.h>
 #include <td_utils.h>
+#include <td_config_ext.h>
 
-#include "sensor_private.h"
 #include "sensor_send.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup TD_SENSOR_LAN Sensor LAN
 	 *
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
-	/*******************************************************************************
-	 **************************  DEFINES   ****************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 **************************  DEFINES   ************************************
+	 **************************************************************************/
 
 	/** @addtogroup TD_SENSOR_LAN_DEFINES Defines
 	 * @{ */
@@ -104,9 +104,9 @@ extern "C" {
 
 	/** @} */
 
-	/*******************************************************************************
-	 ***********************   ENUMERATIONS   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 ***********************   ENUMERATIONS   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup TD_SENSOR_LAN_ENUMERATIONS Enumerations
 	 * @{ */
@@ -117,7 +117,16 @@ extern "C" {
 		LOCAL_FORWARD = 2,
 		LOCAL_KEEPALIVE = 3,
 		LOCAL_DATA = 4,
+		LOCAL_FASTLAN_START = 5,
+		LOCAL_FASTLAN_DATA = 6,
+		LOCAL_RAW_FORWARD = 7,
+		LOCAL_DATA_DOWNLINK = 8
 	} TD_SENSOR_LAN_FrameType_t;
+
+	/** Sensor LAN FastLAN types */
+	typedef enum {
+		FASTLAN_RELAY = 1
+	} TD_SENSOR_FastLANType_t;
 
 	/** Sensor LAN result types */
 	typedef enum {
@@ -133,14 +142,16 @@ extern "C" {
 		SENSOR_LAN_QUEUED,
 		SENSOR_LAN_FRAME_ERROR,
 		LAN_ERROR,
-		LAN_CHANNEL_BUSY
+		LAN_CHANNEL_BUSY,
+		ACK_OK_PARTIAL, //stream frame, got an ack at some point
+		BROADCAST_OK,
 	} TD_SENSOR_LAN_AckCode_t;
 
 	/** @} */
 
-	/*******************************************************************************
-	 **************************  TYPEDEFS   ****************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 **************************  TYPEDEFS   ************************************
+	 **************************************************************************/
 
 	/** @addtogroup TD_SENSOR_LAN_TYPEDEFS Typedefs
 	 * @{ */
@@ -149,29 +160,63 @@ extern "C" {
 	typedef struct {
 		uint32_t address;
 		uint32_t mask;
-	} __PACKED TD_SENSOR_LAN_Address_t;
+	} TD_SENSOR_LAN_Address_t;
+
+	/** LAN pairing structure */
+	typedef struct {
+		TD_SENSOR_LAN_Address_t lanAddress;
+		uint8_t pairingType;
+	} TD_SENSOR_LAN_PairingParams_t;
 
 	/** LAN frame structure
-	 * header is made of:
+	 * The LAN frame is made of:
 	 *
-	 *   | count	   | frame type |
-	 *   | :-----:     | :------:   |
-	 *   | 4 bits      |  4 bits    |
+	 *   | header  | data     |
+	 *   | :-----: | :------: |
+	 *   | 1 byte  | 17 bytes |
 	 *
-	 *   count contains useful data size not data length as 16 bytes are always being sent
+	 * The LAN frame header is made of:
 	 *
+	 *   | frame type | count  |
+	 *   | :--------: | -----: |
+	 *   | 4 bits     | 4 bits |
+	 *
+	 *   The LAN frame type is a TD_SENSOR_LAN_FrameType_t value
+	 *   The LAN count contains the actual useful data size as the data field is
+	 *   fixed to TD_SENSOR_LAN_PAYLOAD_SIZE byte long
 	 * */
 	typedef struct {
 		uint8_t header;
 		uint8_t data[TD_SENSOR_LAN_PAYLOAD_SIZE];
 	} TD_SENSOR_LAN_Frame_t;
 
-	/** Forward frame structure
-	 * profile is made of:
+	/** Register frame structure
+	 *  The LAN REGISTER frame is made of:
 	 *
-	 *   | Repetition  | Interval  |
-	 *   | :-----:     | :------:  |
-	 *   | 4 bits      | 28 bits   |
+	 *   | SIGFOX ID | Device Class |
+	 *   | :-------: | :----------: |
+	 *   | 4 bytes   | 2 bytes      |
+	 *
+	 */
+	typedef struct {
+		uint32_t SigfoxID;
+		uint16_t device_class;
+	} TD_SENSOR_LAN_RegisterFrame_t;
+
+	/** Forward frame structure
+	 * The LAN FORWARD frame is made of:
+	 *
+	 *   | Profile | SIGFOX Data |
+	 *   | :-----: | :---------: |
+	 *   | 4 bytes | 12 bytes    |
+	 *
+	 * The sigfox field contains the SIGFOX data payload to forward.
+	 *
+	 * The profile field is made of:
+	 *
+	 *   | Repetition | Interval |
+	 *   | :--------: | :------: |
+	 *   | 4 bits     | 28 bits  |
 	 *
 	 * */
 	typedef struct {
@@ -181,37 +226,42 @@ extern "C" {
 
 	/** Keepalive frame structure*/
 	typedef struct {
-		uint32_t interval : 32;
-		int8_t level_low : 8;
-		int8_t level_ok : 8;
-		bool keepalive : 1;
-		bool rssi : 1;
-	} __PACKED TD_SENSOR_LAN_KeepAliveFrame_t;
-
-	/** Register frame structure*/
-	typedef struct {
-		uint32_t SigfoxID;
-		uint16_t device_class;
-	} TD_SENSOR_LAN_RegisterFrame_t;
+		uint32_t interval;
+		int8_t level_low;
+		int8_t level_ok;
+		bool keepalive;
+		bool rssi;
+		uint8_t voltage_level;
+		uint8_t temp_level;
+		bool battery;
+	} TD_SENSOR_LAN_KeepAliveFrame_t;
 
 	/** @} */
 
-	/*******************************************************************************
-	 *************************   PROTOTYPES   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   PROTOTYPES   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup TD_SENSOR_LAN_GLOBAL_FUNCTIONS Global Functions
 	 * @{ */
 
-	bool TD_SENSOR_LAN_Init(bool gateway, uint32_t lan_frequency, int16_t lan_power_level);
-	TD_SENSOR_LAN_AckCode_t TD_SENSOR_LAN_SendFrame(TD_SENSOR_LAN_Frame_t *frame, uint8_t *data_rx);
-	TD_SENSOR_LAN_AckCode_t TD_SENSOR_LAN_SendFrameTo(uint32_t address, TD_SENSOR_LAN_FrameType_t type, uint8_t *payload, uint8_t count, uint8_t *data_rx);
+	DECLARE_DYNAMIC(bool, TD_SENSOR_LAN_Init, bool gateway,
+		uint32_t lan_frequency, int16_t lan_power_level);
+	void TD_SENSOR_LAN_DeclareFlashVariable(void);
+	TD_SENSOR_LAN_AckCode_t TD_SENSOR_LAN_SendFrame(TD_SENSOR_LAN_Frame_t *frame,
+		uint8_t *data_rx);
+	TD_SENSOR_LAN_AckCode_t TD_SENSOR_LAN_SendFrameTo(uint32_t address,
+		TD_SENSOR_LAN_FrameType_t type, uint8_t *payload, uint8_t count,
+		uint8_t *data_rx);
+	uint16_t TD_SENSOR_LAN_ComputeAddressTo16bits(uint32_t address);
+	uint8_t TD_SENSOR_LAN_ComputeAddressTo8bits(uint32_t address);
 	bool TD_SENSOR_LAN_setLanAddress(uint32_t adress, uint32_t mask);
 	void TD_SENSOR_LAN_SetFrameRetry(uint8_t retry);
 	uint8_t TD_SENSOR_LAN_GetFrameRetry(void);
 	void TD_SENSOR_LAN_Stop(void);
 	void TD_SENSOR_LAN_Restart(void);
 	void TD_SENSOR_LAN_RestartTest(void);
+	void TD_SENSOR_LAN_SetTxPeriod(uint32_t tx_period);
 
 	/** @} */
 

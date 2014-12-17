@@ -2,7 +2,7 @@
  * @file
  * @brief API for sending KeepAlive frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.2.0
+ * @version 1.3.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -41,6 +41,7 @@
 
 #include "td_sensor.h"
 #include "sensor_send.h"
+#include "sensor_data.h"
 #include "sensor_keepalive.h"
 
 /***************************************************************************//**
@@ -53,43 +54,105 @@
  * @{
  ******************************************************************************/
 
+/*******************************************************************************
+ ************************   DEFINES   *****************************************
+ ******************************************************************************/
+
 /** @addtogroup SENSOR_KEEPALIVE_DEFINES Defines
  * @{ */
 
-#define MAX_KEEPALIVE_PAYLOAD_SIZE 10	///< Keep-alive payload size in bytes
-#define KEEPALIVE_DEFAULT_REPETITON 0 	///< Default retransmission repetition
-#define KEEPALIVE_DEFAULT_INTERVAL 0	///< Default retransmission interval in seconds
+/** Keep-alive payload size in bytes */
+#define MAX_KEEPALIVE_PAYLOAD_SIZE 		10
 
 /** @} */
 
 /*******************************************************************************
- *************************   TYPEDEFS   ****************************************
+ **************************  PRIVATE FUNCTIONS   *******************************
  ******************************************************************************/
 
-/** @addtogroup SENSOR_KEEPALIVE_TYPEDEFS Typedefs
+/** @addtogroup AT_SENSOR_SEND_LOCAL_FUNCTIONS Local Functions
  * @{ */
 
-/** Keep-Alive Frame Structure */
-typedef struct {
-	uint8_t voltage;					///< Voltage value
-	int8_t temperature;					///< Temperature value
-	uint8_t interval;					///< Keep-alive interval in hours
-} __PACKED TD_SENSOR_KEEPALIVE_Frame_t;
-
-/** @} */
-
-/*******************************************************************************
- *************************   PRIVATE VARIABLES   *******************************
+/***************************************************************************//**
+ * @brief
+ *   Send a KEEPALIVE frame to Sensor.
+ *
+ * @param[in] type
+ *   Sensor keep alive frame sub type.
+ *
+ * @param[in] interval
+ *   Interval in seconds at which to send keepalives.
+ *
+ * @param[in] data
+ *  Pointer to the buffer containing the custom data to send.
+ *
+ * @param[in] length
+ *  Custom data size in bytes.
+ *
+ * @return
+ *   True if the data has been sent over the SIGFOX Network.
  ******************************************************************************/
+static bool SendKeepAlive(TD_SENSOR_KEEPALIVE_types_t type, uint8_t interval,
+	uint8_t *data, uint8_t length)
+{
+	TD_SENSOR_Frame_t frame;
+	uint8_t voltage, temperature;
+	uint8_t *p, *start;
+	uint8_t gps[6] = {1, 2, 3, 4, 5, 6};
+	int i;
 
-/** @addtogroup SENSOR_KEEPALIVE_LOCAL_VARIABLES Local Variables
- * @{ */
+	TD_SENSOR_EncodeLocalVoltage(TD_SIGFOX_PowerVoltageExtended(), &voltage,
+		NULL);
+	TD_SENSOR_EncodeLocalTemperature(TD_MEASURE_TemperatureExtended(),
+		&temperature, NULL);
 
-/** Transmission profile */
-static TD_SENSOR_TransmitProfile_t Profile = {KEEPALIVE_DEFAULT_REPETITON, KEEPALIVE_DEFAULT_INTERVAL};
+	p = start = &frame.payload[0];
+	*p++ = type;
+	switch (type) {
+	case KEEPALIVE_VOLTAGE_TEMP:
+		*p++ = interval;
+		*p++ = voltage;
+		*p++ = temperature;
+		break;
 
-/** Redundancy counter for Sensor keep-alive */
-static uint8_t Stamp = -1;
+	case KEEPALIVE_VOLTAGE_TEMP_GEOLOC:
+		*p++ = interval;
+		*p++ = voltage;
+		*p++ = temperature;
+
+		// TODO : GPS simulation, call the right callback
+		for (i = 0; i < sizeof (gps); i++) {
+			*p++ = gps[i];
+		}
+		break;
+
+	case KEEPALIVE_GEOLOC:
+		*p++ = interval;
+
+		// TODO : GPS simulation, call the right callback
+		for (i = 0; i < sizeof (gps); i++) {
+			*p++ = gps[i];
+		}
+		break;
+
+	case KEEPALIVE_CUSTOM:
+	default:
+		*p++ = interval;
+		break;
+	}
+
+	// If there is place to add custom data to payload
+	if (((p - start) + length) <= MAX_KEEPALIVE_PAYLOAD_SIZE) {
+
+		// Copy custom data if any
+		for (i = 0; i < length; i++) {
+			*p++ = data[i];
+		}
+	} else {
+		return false;
+	}
+	return TD_SENSOR_SendUDM(0, SRV_FRM_KEEPALIVE, &frame, p - start);
+}
 
 /** @} */
 
@@ -102,7 +165,7 @@ static uint8_t Stamp = -1;
 
 /***************************************************************************//**
  * @brief
- *   Send a keep-alive frame to Sensor.
+ *   Send a KEEPALIVE frame to Sensor.
  *
  * @return
  *   Returns true if the data has been sent over the SIGFOX network, false
@@ -110,35 +173,70 @@ static uint8_t Stamp = -1;
  ******************************************************************************/
 bool TD_SENSOR_SendKeepAlive(void)
 {
-	TD_SENSOR_KEEPALIVE_Frame_t frame;
-	TD_SENSOR_Configuration_t *config = TD_SENSOR_GetModuleConfiguration();
+	TD_SENSOR_Configuration_t *config;
+	uint8_t interval;
 
-	frame.voltage = TD_SIGFOX_PowerVoltage();
-	frame.temperature = TD_MEASURE_TemperatureExtended() / 10;
-	if (config->keepalive.monitor) {
-		frame.interval = config->keepalive.interval;
-	} else {
-		frame.interval = 0;
-	}
-	Stamp = (Stamp & 0x07) + 1;
-	return TD_SENSOR_Send(&Profile, SRV_FRM_KEEPALIVE, Stamp, (uint8_t *)&frame, 3);
+	config = TD_SENSOR_GetModuleConfiguration();
+	interval = config->keepalive.monitor ? config->keepalive.interval : 0;
+	return SendKeepAlive(KEEPALIVE_VOLTAGE_TEMP, interval, 0, 0);
 }
 
 /***************************************************************************//**
  * @brief
- *   Set a transmission profile for keep-alive frame type.
+ *   Send a KEEPALIVE frame to Sensor.
  *
- * @param[in] repetition
- *	 Number of repetitions.
+ * @param[in] type
+ *   Sensor keep alive frame sub type.
  *
  * @param[in] interval
- *	 Interval between two repetitions in seconds.
+ *   Interval in seconds at which to send keepalives.
+ *
+ * @param[in] data
+ *  Pointer to the buffer containing the custom data to send.
+ *
+ * @param[in] length
+ *  Custom data size in bytes.
+ *
+ * @return
+ *   True if the data has been sent over the SIGFOX Network.
  ******************************************************************************/
-void TD_SENSOR_SetKeepAliveTransmissionProfile(uint8_t repetition, uint32_t interval)
+bool TD_SENSOR_SendKeepAliveExt(TD_SENSOR_KEEPALIVE_types_t type,
+	uint8_t interval, uint8_t *data, uint8_t length)
 {
-	Profile.repetition = repetition;
-	Profile.interval = interval;
+	return SendKeepAlive(type, interval, data, length);
 }
+
+/***************************************************************************//**
+ * @brief
+ *   Send a KEEPALIVE frame with voltage and temperature to Sensor.
+ *
+ * @param[in] id
+ *   Device ID to use as keepalive origin.
+ *
+ * @param[in] interval
+ *   Interval in seconds at which to send keepalives.
+ *
+ * @param[in] voltage
+ *  Pointer to the buffer containing the custom data to send.
+ *
+ * @param[in] temperature
+ *  Custom data size in bytes.
+ *
+ * @return
+ *   True if the data has been sent over the SIGFOX Network.
+ ******************************************************************************/
+bool TD_SENSOR_SendKeepAliveVoltageTemperatureFor(uint8_t id,
+	uint8_t interval, uint8_t voltage, uint8_t temperature)
+{
+	TD_SENSOR_Frame_t frame;
+	frame.payload[0] = KEEPALIVE_VOLTAGE_TEMP;
+	frame.payload[1] = interval;
+	frame.payload[2] = voltage;
+	frame.payload[3] = temperature;
+	return TD_SENSOR_SendUDM(id, SRV_FRM_KEEPALIVE, &frame, 4);
+}
+
+/** @} */
 
 /** @} */
 

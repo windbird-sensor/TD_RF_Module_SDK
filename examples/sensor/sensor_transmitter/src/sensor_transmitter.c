@@ -2,7 +2,7 @@
  * @file
  * @brief Sensor Transmitter Application Example
  * @author Telecom Design S.A.
- * @version 1.0.1
+ * @version 1.0.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -46,6 +46,7 @@
 #include <td_printf.h>
 #include <td_module.h>
 #include <td_gpio.h>
+
 #include <td_sensor.h>
 #include <sensor_event.h>
 #include <sensor_register.h>
@@ -161,7 +162,8 @@ static bool BatteryCallback(bool state, uint16_t level)
  * @brief
  * Temperature callback. Called on Temperature Events.
  ******************************************************************************/
-static bool TemperatureCallback(TD_SENSOR_TemperatureState_t state, int16_t level)
+static bool TemperatureCallback(TD_SENSOR_TemperatureState_t state,
+	int16_t level)
 {
 	tfp_printf("Temperature Callback, state %d, level %d.C\r\n",state,level/10);
 
@@ -175,7 +177,8 @@ static bool TemperatureCallback(TD_SENSOR_TemperatureState_t state, int16_t leve
  ******************************************************************************/
 bool SwitchCallback(GPIO_Port_TypeDef port, unsigned int bit, bool state)
 {
-	tfp_printf("Switch Callback, port: %d - bit: %d - state: %d\r\n", port, bit, state);
+	tfp_printf("Switch Callback, port: %d - bit: %d - state: %d\r\n", port, bit,
+		state);
 
 	// Don't send a SENSOR RF frame
 	return false;
@@ -190,9 +193,9 @@ void TD_USER_Setup(void)
 
 	// Initialize the UART console
 	init_printf(TD_UART_Init(9600, true, false),
-	    		TD_UART_Putc,
-	    		TD_UART_Start,
-	    		TD_UART_Stop);
+		TD_UART_Putc,
+		TD_UART_Start,
+		TD_UART_Stop);
 	tfp_printf("Transmitter Start-up\r\n");
 
 	// Initialize the LED GPIO

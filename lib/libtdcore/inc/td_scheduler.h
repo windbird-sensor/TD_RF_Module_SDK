@@ -2,7 +2,7 @@
  * @file
  * @brief Scheduler API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.1.0
+ * @version 2.1.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -31,8 +31,8 @@
  *
   ******************************************************************************/
 
-#ifndef __TD_SCHEDULER_H_
-#define __TD_SCHEDULER_H_
+#ifndef __TD_SCHEDULER_H
+#define __TD_SCHEDULER_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -43,15 +43,15 @@
 extern "C" {
 #endif
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup SCHEDULER
 	 * @brief Scheduler for the TDxxxx RF modules
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
-	/*******************************************************************************
-	 ***********************   ENUMERATIONS   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 ***********************   ENUMERATIONS   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup SCHEDULER_ENUMERATIONS Enumerations
 	 * @{ */
@@ -59,14 +59,14 @@ extern "C" {
 	/** Scheduler special repeat values */
 	typedef enum  {
 		TD_SCHEDULER_ONE_SHOT = 1,				///< One-shot timer
-		TD_SCHEDULER_INFINITE = 0xFF				///< Infinite timer
+		TD_SCHEDULER_INFINITE = 0xFF			///< Infinite timer
 	} TD_SCHEDULER_repeat_t;
 
 	/** @} */
 
-	/*******************************************************************************
-	 *************************   TYPEDEFS   ****************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   TYPEDEFS   ************************************
+	 **************************************************************************/
 
 	/** @addtogroup SCHEDULER_TYPEDEFS Typedefs
 	 * @{ */
@@ -94,36 +94,37 @@ extern "C" {
 
 	/** @} */
 
-	/*******************************************************************************
-	 *************************   PROTOTYPES   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   PROTOTYPES   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup SCHEDULER_USER_FUNCTIONS User Functions
 	 * @{ */
 
-	void TD_SCHEDULER_Init(void);
+	DECLARE_DYNAMIC(void,TD_SCHEDULER_Init,void);
 	uint8_t TD_SCHEDULER_Append(uint32_t interval,
-								uint16_t tick,
-								uint32_t delay,
-								uint8_t repetition,
-								void (*callback)(uint32_t, uint8_t),
-								uint32_t arg);
+		uint16_t tick,
+		uint32_t delay,
+		uint8_t repetition,
+		void (*callback)(uint32_t, uint8_t),
+		uint32_t arg);
 	uint8_t TD_SCHEDULER_AppendIrq(uint32_t interval,
-								   uint16_t tick,
-								   uint32_t delay,
-								   uint8_t repetition,
-								   void (*callback)(uint32_t, uint8_t),
-								   uint32_t arg);
+		uint16_t tick,
+		uint32_t delay,
+		uint8_t repetition,
+		void (*callback)(uint32_t, uint8_t),
+		uint32_t arg);
 	void TD_SCHEDULER_Remove(uint8_t id);
 	void TD_SCHEDULER_SetInterval(uint8_t id,
-								  uint32_t interval,
-								  uint16_t tick,
-								  uint32_t delay);
+		uint32_t interval,
+		uint16_t tick,
+		uint32_t delay);
 	void TD_SCHEDULER_SetArg(uint8_t id, uint32_t arg);
 	uint8_t TD_SCHEDULER_GetRepetition(uint8_t id);
 	void TD_SCHEDULER_Dump(void);
-	void TD_SCHEDULER_Process(void);
+	DECLARE_DYNAMIC(void,TD_SCHEDULER_Process, void);
 	uint32_t TD_ElapsedTime(void);
+	uint64_t TD_TimeDiff(uint64_t reference);
 	uint64_t TD_SCHEDULER_GetTime(void);
 	void TD_SCHEDULER_Restart(uint8_t id);
 
@@ -135,4 +136,4 @@ extern "C" {
 }
 #endif
 
-#endif // __TD_SCHEDULER_H_
+#endif // __TD_SCHEDULER_H

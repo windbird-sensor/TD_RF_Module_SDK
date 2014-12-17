@@ -2,7 +2,7 @@
  * @file
  * @brief Accelerometer API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.1
+ * @version 1.0.2
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -62,8 +62,14 @@
 /** @addtogroup TD_ACCELERO_DEFINES
  * @{ */
 
+//#define DEBUG_STD
+
 /** Turn on trace mode if tfp_printf not commented */
-#define DEBUG_PRINTF(...) /*tfp_printf(__VA_ARGS__)*/
+#ifdef DEBUG_STD
+#define DEBUG_PRINTF(...) tfp_printf(__VA_ARGS__)
+#else
+#define DEBUG_PRINTF(...)
+#endif
 
 /** Max number of samples that can be read at once. 32 is FIFO size */
 #define ACCELERO_BUF_SIZE	32
@@ -81,10 +87,14 @@
  * @{ */
 
 /** Accelerometer data callback function pointer */
-static void (*DataCallback)(TD_ACCELERO_Data_t data[32], uint8_t count, bool overrun);
+static void (*DataCallback)(TD_ACCELERO_Data_t data[32], uint8_t count,
+	bool overrun);
 
 /** Accelerometer event callback function pointer */
 static void (*EventCallback)(uint8_t source);
+
+/** Accelerometer event callback function pointer */
+static void (*ClickEventCallback)(uint8_t source);
 
 /** Current Accelerometer scale */
 //static TD_ACCELERO_Scales_t CurrentScale = TD_ACCELERO_2G;
@@ -99,7 +109,7 @@ static  TD_ACCELERO_Config_t TD_Accelero;
 static bool ConfigInit = false;
 
 /** Current Interrupt flag */
-static bool AcceleroIrq = false;
+static volatile bool AcceleroIrq = false;
 
 /** @} */
 
@@ -114,25 +124,13 @@ static bool AcceleroIrq = false;
  * @brief
  *   Accelerometer event IRQ handler. Called by Sensor SwitchIrq Monitoring.
  *
- * @param[in] port
- *    Sensor parameter. Unused
- *
- * @param[in] bit
- *    Sensor parameter. Unused
- *
- * @param[in] state
- *   IRQ Pin state
- *
- * @return
- *   Returns false.
+ * @param[in] mask
+ *    IRQ mask, unused
  ******************************************************************************/
-static bool TD_ACCELERO_Irq(GPIO_Port_TypeDef port, unsigned int bit, bool state)
+static void AccelerometerIRQ(uint32_t mask)
 {
-	if (state) {
-		AcceleroIrq = true;
-		TD_WakeMainLoop();
-	}
-	return false;
+	DEBUG_PRINTF("I\r\n");
+	AcceleroIrq = true;
 }
 
 /***************************************************************************//**
@@ -145,7 +143,7 @@ static bool TD_ACCELERO_Irq(GPIO_Port_TypeDef port, unsigned int bit, bool state
  * @param count
  *  Array data count.
  ******************************************************************************/
-static void TD_ACCELERO_HighPassFilter(TD_ACCELERO_Data_t *data, uint8_t count)
+static void HighPassFilter(TD_ACCELERO_Data_t *data, uint8_t count)
 {
 	int i;
 	static int16_t xmem = 0, ymem = 0, zmem = 0, xf = 0, yf = 0, zf = 0;
@@ -165,9 +163,80 @@ static void TD_ACCELERO_HighPassFilter(TD_ACCELERO_Data_t *data, uint8_t count)
 
 /***************************************************************************//**
  * @brief
+ *   Accelero process. Subset of operation used in MonitorData mode.
+ ******************************************************************************/
+static void ProcessMonitorData(TD_ACCELERO_Data_t *data, uint8_t sz)
+{
+	int count = 0;
+	bool overrun = false;
+	uint8_t st, i;
+
+	if (DataCallback != 0) {
+
+		// Empty FIFO by reading all data
+		if (!TD_SPI_Lock(ACCELERO_SPI_ID, NULL)) {
+			TD_Trap(TRAP_SPI_NOT_AVAILABLE, __LINE__);
+			return;
+		}
+
+		// Read current status
+		st = TD_LIS3DH_GetFIFOStatus();
+
+		// Has an overrun occured ?
+		overrun = st & 0x40;
+
+		// How much should we read from FIFO ?
+		count = st & 0x1F;
+		if (count > sz) {
+
+			// If we can't get all data, remember to get in another time
+			AcceleroIrq = true;
+			TD_WakeMainLoop();
+
+			// And clamp ...
+			count = sz;
+		}
+		for (i = 0; i < count; i++) {
+			TD_LIS3DH_GetXYZ((uint16_t*)&data[i].x,
+				(uint16_t*)&data[i].y,(uint16_t*)&data[i].z);
+		}
+
+		// There are still samples but buffer overflows: need an other turn
+		if (GPIO_PinInGet(CONFIG_ACCELERO_IRQ_PORT, CONFIG_ACCELERO_IRQ_BIT) &&
+			count != 32) {
+			DEBUG_PRINTF("IT not clear CNT:%d st:0x%02X!!\r\n", count, st);
+		}
+		if (!count){
+			TD_SPI_UnLock(ACCELERO_SPI_ID);
+			return;
+		}
+
+		// If filter is activated
+		if (Filter) {
+			//TD_LIS3DH_SetFilterRef();
+			HighPassFilter(data, count);
+		}
+		TD_SPI_UnLock(ACCELERO_SPI_ID);
+
+		// Push all data to callback
+		(*DataCallback)(data, count, overrun);
+	}
+}
+
+/** @} */
+
+/*******************************************************************************
+ **************************  PUBLIC FUNCTIONS   *******************************
+ ******************************************************************************/
+
+/** @addtogroup TD_ACCELERO_USER_FUNCTIONS User Functions
+ * @{ */
+
+/***************************************************************************//**
+ * @brief
  *   Power down the accelerometer.
  ******************************************************************************/
-static void TD_ACCELERO_PowerDown(void)
+void TD_ACCELERO_PowerDown(void)
 {
 	if (TD_SPI_Lock(ACCELERO_SPI_ID, NULL)) {
 		TD_LIS3DH_Configure(TD_ACCELERO_POWER_DOWN, 0, 0, 0);
@@ -191,10 +260,10 @@ static void TD_ACCELERO_PowerDown(void)
  *   The accelerometer measurement scale taken from the available
  *   TD_ACCELERO_Scales.
  ******************************************************************************/
-static void TD_ACCELERO_NormalPower(TD_ACCELERO_Rates_t rate, uint8_t axis, TD_ACCELERO_Scales_t scale)
+void TD_ACCELERO_NormalPower(TD_ACCELERO_Rates_t rate, uint8_t axis,
+	TD_ACCELERO_Scales_t scale)
 {
 	if (TD_SPI_Lock(ACCELERO_SPI_ID, NULL)) {
-		//CurrentScale = scale;
 		TD_LIS3DH_Configure(TD_ACCELERO_NORMAL_POWER, rate, axis, scale);
 		TD_SPI_UnLock(ACCELERO_SPI_ID);
 	} else {
@@ -216,10 +285,10 @@ static void TD_ACCELERO_NormalPower(TD_ACCELERO_Rates_t rate, uint8_t axis, TD_A
  *   The accelerometer measurement scale taken from the available
  *   TD_ACCELERO_Scales.
  ******************************************************************************/
-static void TD_ACCELERO_LowPower(TD_ACCELERO_Rates_t rate, uint8_t axis, TD_ACCELERO_Scales_t scale)
+void TD_ACCELERO_LowPower(TD_ACCELERO_Rates_t rate, uint8_t axis,
+	TD_ACCELERO_Scales_t scale)
 {
 	if (TD_SPI_Lock(ACCELERO_SPI_ID, NULL)) {
-		//CurrentScale = scale;
 		TD_LIS3DH_Configure(TD_ACCELERO_LOW_POWER, rate, axis, scale);
 		TD_SPI_UnLock(ACCELERO_SPI_ID);
 	} else {
@@ -228,10 +297,6 @@ static void TD_ACCELERO_LowPower(TD_ACCELERO_Rates_t rate, uint8_t axis, TD_ACCE
 }
 
 /** @} */
-
-/*******************************************************************************
- **************************  PUBLIC FUNCTIONS   *******************************
- ******************************************************************************/
 
 /** @addtogroup TD_ACCELERO_GLOBAL_FUNCTIONS Global Functions
  * @{ */
@@ -242,11 +307,21 @@ static void TD_ACCELERO_LowPower(TD_ACCELERO_Rates_t rate, uint8_t axis, TD_ACCE
  ******************************************************************************/
 void TD_ACCELERO_Dump(void)
 {
+	uint8_t source;
+	int i = 0;
+
+	for (i = 0x07; i <= 0x3D; i++) {
+		if (TD_SPI_Lock(ACCELERO_SPI_ID, NULL)) {
+			source = TD_SPI_FullReadRegister(ACCELERO_SPI_ID,i);
+			TD_SPI_UnLock(ACCELERO_SPI_ID);
+			tfp_printf("Reg 0x%02x 0x%02x\r\n", i, source);
+		} else {
+			TD_Trap(TRAP_SPI_NOT_AVAILABLE, __LINE__);
+		}
+	}
 	if (TD_SPI_Lock(ACCELERO_SPI_ID, NULL)) {
 		TD_LIS3DH_Dump();
 		TD_SPI_UnLock(ACCELERO_SPI_ID);
-	} else {
-		TD_Trap(TRAP_SPI_NOT_AVAILABLE, __LINE__);
 	}
 }
 
@@ -258,8 +333,8 @@ void TD_ACCELERO_Dump(void)
 /***************************************************************************//**
  * @brief
  *   Initialize the accelerometer. Must be called in User_Setup for proper
- *   Accelerometer operation. Will startup monitoring if previously applied using
- *   SetConfig.
+ *   Accelerometer operation. Will startup monitoring if previously applied
+ *   using SetConfig.
  *
  * @return
  *   Returns true if the accelerometer initialized successfully, false otherwise.
@@ -269,7 +344,10 @@ bool TD_ACCELERO_Init(void)
 	bool ret = false;
 
 	// Register the accelerometer on the SPI bus
-	TD_SPI_Register(ACCELERO_SPI_ID, 0xFF, 0, 10000000, usartClockMode3);
+	TD_SPI_Register(ACCELERO_SPI_ID, 0xFF, CONFIG_ACCELERO_SPI_BUS, 10000000,
+		(USART_ClockMode_TypeDef) CONFIG_ACCELERO_SPI_MODE);
+	TD_SPI_RegisterCS(ACCELERO_SPI_ID, CONFIG_ACCELERO_CS_PORT,
+		CONFIG_ACCELERO_CS_BIT);
 
 	// Lock SPI bus
 	if (TD_SPI_Lock(ACCELERO_SPI_ID, NULL)) {
@@ -280,11 +358,20 @@ bool TD_ACCELERO_Init(void)
 		}
 		if (ret) {
 
-			// If config was loaded using setconfig, use it, otherwise initialize
+			// If config was loaded using setconfig, use it, otherwise
+			// initialize
 			if (ConfigInit) {
 				switch (TD_Accelero.monitoring) {
 				case TD_ACCELERO_MONITOR_DATA:
-					TD_ACCELERO_MonitorEvent(false, (TD_ACCELERO_Rates_t) 0, 0, (TD_ACCELERO_Scales_t) 0, 0, 0, 0, 0, 0);
+					TD_ACCELERO_MonitorEvent(false,
+						(TD_ACCELERO_Rates_t) 0,
+						0,
+						(TD_ACCELERO_Scales_t) 0,
+						0,
+						0,
+						0,
+						0,
+						0);
 					TD_ACCELERO_MonitorData(true,
 						TD_Accelero.config.low_power,
 						TD_Accelero.config.rate,
@@ -298,7 +385,14 @@ bool TD_ACCELERO_Init(void)
 					break;
 
 				case TD_ACCELERO_MONITOR_EVENT:
-					TD_ACCELERO_MonitorData(false, false, (TD_ACCELERO_Rates_t) 0, 0, (TD_ACCELERO_Scales_t) 0, 0, (TD_ACCELERO_FifoModes_t) 0, 0, 0);
+					TD_ACCELERO_MonitorData(false, false,
+						(TD_ACCELERO_Rates_t) 0,
+						0,
+						(TD_ACCELERO_Scales_t) 0,
+						0,
+						(TD_ACCELERO_FifoModes_t) 0,
+						0,
+						0);
 					TD_ACCELERO_MonitorEvent(true,
 						TD_Accelero.config.rate,
 						TD_Accelero.event_config.axis,
@@ -315,10 +409,11 @@ bool TD_ACCELERO_Init(void)
 					TD_ACCELERO_PowerDown();
 					break;
 				}
-
 			} else {
 				TD_ACCELERO_PowerDown();
 				TD_Accelero.monitoring = TD_ACCELERO_NO_MONITORING;
+				TD_Accelero.event_config.click = false;
+				TD_Accelero.irq_source = 0;
 			}
 		}
 		TD_SPI_UnLock(ACCELERO_SPI_ID);
@@ -356,6 +451,148 @@ void TD_ACCELERO_SetConfig(TD_ACCELERO_Config_t *config)
 
 /***************************************************************************//**
  * @brief
+ *   Allow reading one register of the accelerometer.
+ *
+ * @param[in] address
+ *  Register address to read the value from.
+ *
+ * @return[in] value
+ *  Returns the read value.
+ ******************************************************************************/
+uint8_t TD_ACCELERO_ReadRegister(uint8_t address)
+{
+	uint8_t value = 0;
+
+	if (TD_SPI_Lock(ACCELERO_SPI_ID, NULL)) {
+		value = TD_SPI_FullReadRegister(ACCELERO_SPI_ID, address);
+		TD_SPI_UnLock(ACCELERO_SPI_ID);
+	} else {
+		TD_Trap(TRAP_SPI_NOT_AVAILABLE, __LINE__);
+	}
+	return value;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Allow writing to the accelerometer register
+ *
+ * @param[in] address
+ *  Register address to write to.
+ *
+ * @param[in] value
+ *  Value to write.
+ ******************************************************************************/
+void TD_ACCELERO_WriteRegister(uint8_t address, uint8_t value)
+{
+	if (TD_SPI_Lock(ACCELERO_SPI_ID, NULL)) {
+		TD_SPI_FullWriteRegister(ACCELERO_SPI_ID, address, value);
+		TD_SPI_UnLock(ACCELERO_SPI_ID);
+	} else {
+		TD_Trap(TRAP_SPI_NOT_AVAILABLE, __LINE__);
+	}
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Clear accelerometer filter.
+ ******************************************************************************/
+void TD_ACCELERO_ClearFilter(void)
+{
+	if (TD_SPI_Lock(ACCELERO_SPI_ID, NULL)) {
+		TD_LIS3DH_SetFilterRef();
+		TD_SPI_UnLock(ACCELERO_SPI_ID);
+	}
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Change watermark information.
+ *
+ * @param[in] watermark
+ *   Watermark level.
+ ******************************************************************************/
+void TD_ACCELERO_SetWatermark(uint8_t watermark)
+{
+	if (TD_SPI_Lock(ACCELERO_SPI_ID, NULL)) {
+		TD_LIS3DH_SetFIFOMode(TD_ACCELERO_STREAM, watermark);
+
+		// To ensure correct processing
+		AcceleroIrq = true;
+		TD_SPI_UnLock(ACCELERO_SPI_ID);
+	} else {
+		TD_Trap(TRAP_SPI_NOT_AVAILABLE, __LINE__);
+	}
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Setup accelerometer click event monitoring. Provide additional high
+ *   value event. Event monitoring must be enabled. Double click not handled.
+ *
+ * @param[in] enable
+ *    Enable accelerometer event monitoring if true, disable if false.
+ *
+ * @param[in] event
+ *    The click event mask to monitor. Available events are
+ *    LIS3DH_INT1_CFG_XS
+ *    LIS3DH_INT1_CFG_YS
+ *    LIS3DH_INT1_CFG_ZS
+ *
+ * @param[in] threshold
+ *    The threshold value to trigger the click.
+ *
+ * @param[in] duration
+ *    The minimum duration to trigger the click.
+ *
+ * @param[in] callback
+ *   Pointer to the function to call back whenever an event occurs. This
+ *   function will receive the event source mask as its argument.
+ ******************************************************************************/
+void TD_ACCELERO_MonitorClickEvent(bool enable, uint8_t event,
+	uint8_t threshold, uint8_t duration, void (*callback)(uint8_t source))
+{
+	TD_Accelero.event_config.click = enable;
+	if (TD_SPI_Lock(ACCELERO_SPI_ID, NULL)) {
+		if (enable)	{
+			TD_LIS3DH_ConfigureClickEvent(event, threshold, duration);
+			if(callback != NULL) {
+				if(TD_Accelero.irq_source == 0) {
+					LIS3DH_EnableInterrupt(AccelerometerIRQ);
+				}
+				TD_Accelero.irq_source |= 1<<7;
+			} else {
+				TD_Accelero.irq_source &= 0x7F;
+				if(TD_Accelero.irq_source == 0) {
+					LIS3DH_DisableInterrupt();
+				}
+			}
+			TD_LIS3DH_ConfigureInterrupt(TD_Accelero.irq_source, true);
+
+			// Clear previous interrupt
+			TD_LIS3DH_GetClickEventSource();
+			ClickEventCallback = callback;
+		} else {
+
+			// Remove interrupt
+			TD_Accelero.irq_source &= 0x7F;
+			if(TD_Accelero.irq_source == 0) {
+				LIS3DH_DisableInterrupt();
+			}
+			TD_LIS3DH_ConfigureInterrupt(TD_Accelero.irq_source, true);
+
+			// Remove callback and event
+			ClickEventCallback = NULL;
+			TD_LIS3DH_ConfigureClickEvent(0,0,0);
+			TD_LIS3DH_GetClickEventSource();
+		}
+		TD_SPI_UnLock(ACCELERO_SPI_ID);
+	} else {
+		TD_Trap(TRAP_SPI_NOT_AVAILABLE, __LINE__);
+	}
+}
+
+/***************************************************************************//**
+ * @brief
  *   Setup accelerometer event monitoring.
  *
  * @param[in] enable
@@ -381,13 +618,16 @@ void TD_ACCELERO_SetConfig(TD_ACCELERO_Config_t *config)
  *    The minimum duration to trigger an event.
  *
  * @param[in] filter
- *   Accelerometer high-pass filter enable flag: enabled if true, disabled if false.
+ *   Accelerometer high-pass filter enable flag: enabled if true, disabled if
+ *   false.
  *
  * @param[in] callback
- *   Pointer to the function to call back whenever an event occurs. This function
- *   will receive the event source mask as its argument.
+ *   Pointer to the function to call back whenever an event occurs. This
+ *   function will receive the event source mask as its argument.
  ******************************************************************************/
-void TD_ACCELERO_MonitorEvent(bool enable, TD_ACCELERO_Rates_t rate, uint8_t axis, TD_ACCELERO_Scales_t scale, uint8_t event, uint8_t threshold, uint8_t duration, int8_t filter, void (*callback)(uint8_t source))
+void TD_ACCELERO_MonitorEvent(bool enable, TD_ACCELERO_Rates_t rate,
+	uint8_t axis, TD_ACCELERO_Scales_t scale, uint8_t event, uint8_t threshold,
+	uint8_t duration, int8_t filter, void (*callback)(uint8_t source))
 {
 	if (TD_SPI_Lock(ACCELERO_SPI_ID, NULL)) {
 		if (enable)	{
@@ -403,19 +643,31 @@ void TD_ACCELERO_MonitorEvent(bool enable, TD_ACCELERO_Rates_t rate, uint8_t axi
 			TD_Accelero.event_config.user_callback = callback;
 			EventCallback = callback;
 			Filter = (filter > 0 ? true : false);
-			TD_LIS3DH_ConfigHighPass(Filter, filter);
-			TD_SENSOR_MonitorSwitchIrq(true, USR4_PORT, USR4_BIT, 0, 1, 0, 0, TD_ACCELERO_Irq);
-			TD_ACCELERO_LowPower(rate, axis, scale);
-			TD_LIS3DH_ConfigureIRQ(LIS3DH_IRQ_AOI1, event, threshold, duration);
 
-			// Usually the pin is up before monitoring the switch so the IRQ is missed
-			if (GPIO_PinInGet(USR4_PORT, USR4_BIT)) {
-				AcceleroIrq = true;
-				TD_WakeMainLoop();
+			// Change power
+			TD_ACCELERO_LowPower(rate, axis, scale);
+			TD_LIS3DH_ConfigureEvent(event, threshold, duration);
+			if (callback != NULL) {
+				if (TD_Accelero.irq_source == 0) {
+					LIS3DH_EnableInterrupt(AccelerometerIRQ);
+				}
+				TD_Accelero.irq_source |= 1 << 6;
+			} else {
+				TD_Accelero.irq_source &= 0xBF;
+				if(TD_Accelero.irq_source == 0) {
+					LIS3DH_DisableInterrupt();
+				}
 			}
+			TD_LIS3DH_ConfigureInterrupt(TD_Accelero.irq_source, true);
+			TD_LIS3DH_ClearIRQ();
+			TD_LIS3DH_ConfigHighPass(Filter, filter);
 		} else {
-			TD_SENSOR_MonitorSwitchIrq(false, USR4_PORT, USR4_BIT, 0, 0, 0, 0, 0);
-			TD_ACCELERO_PowerDown();
+			TD_Accelero.irq_source &= 0xBF;
+			if(TD_Accelero.irq_source == 0) {
+				LIS3DH_DisableInterrupt();
+			}
+			TD_LIS3DH_ConfigureInterrupt(0, true);
+			TD_LIS3DH_ConfigureEvent(0, 0, 0);
 			TD_LIS3DH_ClearIRQ();
 			TD_Accelero.monitoring = TD_ACCELERO_NO_MONITORING;
 		}
@@ -447,7 +699,8 @@ void TD_ACCELERO_MonitorEvent(bool enable, TD_ACCELERO_Rates_t rate, uint8_t axi
  *   TD_ACCELERO_Scales.
  *
  * @param[in] filter
- *   Accelerometer high-pass filter enable flag: enabled if true, disabled if false.
+ *   Accelerometer high-pass filter enable flag: enabled if true, disabled if
+ *   false.
  *
  * @param[in] fifo
  *   The FIFO mode to use for the data.
@@ -456,11 +709,14 @@ void TD_ACCELERO_MonitorEvent(bool enable, TD_ACCELERO_Rates_t rate, uint8_t axi
  *   The number of bytes to wait before triggering an IRQ.
  *
  * @param[in] callback
- *   Pointer to the function to call back whenever new data arrives. This function
- *   will receive a xyz array with up to 32 accelerometer values as well as data
- *   count and an overrun flag as arguments.
+ *   Pointer to the function to call back whenever new data arrives. This
+ *   function will receive a xyz array with up to 32 accelerometer values as
+ *   well as data count and an overrun flag as arguments.
  ******************************************************************************/
-void TD_ACCELERO_MonitorData(bool enable, bool low_power, TD_ACCELERO_Rates_t rate, uint8_t axis, TD_ACCELERO_Scales_t scale, int8_t filter, TD_ACCELERO_FifoModes_t fifo, uint8_t watermark, void (*callback)(TD_ACCELERO_Data_t data[32], uint8_t count, bool overrun))
+void TD_ACCELERO_MonitorData(bool enable, bool low_power,
+	TD_ACCELERO_Rates_t rate, uint8_t axis, TD_ACCELERO_Scales_t scale,
+	int8_t filter, TD_ACCELERO_FifoModes_t fifo, uint8_t watermark,
+	void (*callback)(TD_ACCELERO_Data_t data[32], uint8_t count, bool overrun))
 {
 	if (TD_SPI_Lock(ACCELERO_SPI_ID, NULL)) {
 		if (callback != 0 && enable) {
@@ -472,26 +728,26 @@ void TD_ACCELERO_MonitorData(bool enable, bool low_power, TD_ACCELERO_Rates_t ra
 			TD_Accelero.data_config.axis = axis;
 			TD_Accelero.data_config.user_callback = callback;
 			DataCallback = callback;
-			// TD_LIS3DH_ClearIRQ();
-			TD_SENSOR_MonitorSwitchIrq(true, USR4_PORT, USR4_BIT, 0, 1, 0, 0, TD_ACCELERO_Irq);
-			// TD_LIS3DH_ConfigureIRQ(LIS3DH_IRQ_DRDY1,0,0,0);
+			//TD_LIS3DH_ClearIRQ();
+			LIS3DH_EnableInterrupt(AccelerometerIRQ);
+			if (fifo == TD_ACCELERO_FIFO) {
+				TD_LIS3DH_ConfigureInterrupt(LIS3DH_IRQ_DRDY1, true);
+			}
 
 			// Use stream mode and set IRQ as soon as a sample is available
 			TD_LIS3DH_SetFIFOMode(fifo, watermark);
 			Filter = (filter > 0 ? true : false);
+			DEBUG_PRINTF("MonitorData: low_power:%d rate:%d axis:%d scale:%d\r\n",
+				low_power, rate, axis, scale);
+			DEBUG_PRINTF("Port:%d Bit:%d\r\n", CONFIG_ACCELERO_IRQ_PORT,
+				CONFIG_ACCELERO_IRQ_BIT);
 			if (low_power) {
 				TD_ACCELERO_LowPower(rate, axis, scale);
 			} else {
 				TD_ACCELERO_NormalPower(rate, axis, scale);
 			}
-
-			// Usually the pin is up before monitoring the switch so the IRQ is missed
-			if (GPIO_PinInGet(USR4_PORT, USR4_BIT)) {
-				AcceleroIrq = true;
-				TD_WakeMainLoop();
-			}
 		} else if (!enable) {
-			TD_SENSOR_MonitorSwitchIrq(false, USR4_PORT, USR4_BIT, 0, 0, 0, 0, 0);
+			LIS3DH_DisableInterrupt();
 			TD_ACCELERO_PowerDown();
 			TD_LIS3DH_ClearIRQ();
 			TD_Accelero.monitoring = TD_ACCELERO_NO_MONITORING;
@@ -504,44 +760,15 @@ void TD_ACCELERO_MonitorData(bool enable, bool low_power, TD_ACCELERO_Rates_t ra
 
 /***************************************************************************//**
  * @brief
- *   Allow reading one register of the accelerometer.
- *
- * @param[in] address
- *  Register address to read the value from.
- *
- * @return[in] value
- *  Returns the read value.
+ *   Accelero process. Subset of operation used in MonitorData mode.
  ******************************************************************************/
-uint8_t TD_ACCELERO_ReadRegister(uint8_t address)
+void TD_ACCELERO_ProcessMonitorData(TD_ACCELERO_Data_t *data,uint8_t sz)
 {
-	uint8_t value = 0;
-
-	if (TD_SPI_Lock(ACCELERO_SPI_ID, NULL)) {
-		value = TD_LIS3DH_ReadRegister(address);
-		TD_SPI_UnLock(ACCELERO_SPI_ID);
-	} else {
-		TD_Trap(TRAP_SPI_NOT_AVAILABLE, __LINE__);
-	}
-	return value;
-}
-
-/***************************************************************************//**
- * @brief
- *   Allow writing to the accelerometer register
- *
- * @param[in] address
- *  Register address to write to.
- *
- * @param[in] value
- *  Value to write.
- ******************************************************************************/
-void TD_ACCELERO_WriteRegister(uint8_t address, uint8_t value)
-{
-	if (TD_SPI_Lock(ACCELERO_SPI_ID, NULL)) {
-		TD_LIS3DH_WriteRegister(address, value);
-		TD_SPI_UnLock(ACCELERO_SPI_ID);
-	} else {
-		TD_Trap(TRAP_SPI_NOT_AVAILABLE, __LINE__);
+	if (AcceleroIrq) {
+		AcceleroIrq = false;
+		if (TD_Accelero.monitoring == TD_ACCELERO_MONITOR_DATA) {
+			ProcessMonitorData(data, sz);
+		}
 	}
 }
 
@@ -554,16 +781,12 @@ void TD_ACCELERO_WriteRegister(uint8_t address, uint8_t value)
 void TD_ACCELERO_Process(void)
 {
 	TD_ACCELERO_Data_t data[ACCELERO_BUF_SIZE];
-	int count = 0;
-	bool overrun = false;
-	uint16_t x, y, z;
 	uint8_t source = 0;
-	uint8_t st;
+	uint8_t click_source = 0;
 
 	if (AcceleroIrq) {
 		AcceleroIrq = false;
 		if (TD_Accelero.monitoring == TD_ACCELERO_MONITOR_EVENT) {
-			//tfp_printf("ac irq pin checked %d %d\r\n",GPIO_PinInGet(USR4_PORT,USR4_BIT),source);
 			if (EventCallback != 0) {
 
 				// If there is no callback IRQ handling is made somewhere else
@@ -576,7 +799,20 @@ void TD_ACCELERO_Process(void)
 				} else {
 					TD_Trap(TRAP_SPI_NOT_AVAILABLE, __LINE__);
 				}
-				(*EventCallback)(source&TD_Accelero.event_config.event);
+				if (source & 64) {
+					(*EventCallback)(source & TD_Accelero.event_config.event);
+				}
+			}
+			if (ClickEventCallback != 0) {
+				if (TD_SPI_Lock(ACCELERO_SPI_ID, NULL)) {
+					click_source = TD_LIS3DH_GetClickEventSource();
+					TD_SPI_UnLock(ACCELERO_SPI_ID);
+				} else {
+					TD_Trap(TRAP_SPI_NOT_AVAILABLE, __LINE__);
+				}
+				if (click_source & 64) {
+					ClickEventCallback(click_source);
+				}
 			}
 			if (Filter) {
 				if (TD_SPI_Lock(ACCELERO_SPI_ID, NULL)) {
@@ -587,60 +823,7 @@ void TD_ACCELERO_Process(void)
 				}
 			}
 		} else if (TD_Accelero.monitoring == TD_ACCELERO_MONITOR_DATA) {
-			AcceleroIrq = false;
-			if (DataCallback != 0) {
-
-				// Empty FIFO by reading all data
-				if (TD_SPI_Lock(ACCELERO_SPI_ID, NULL)) {
-					overrun = TD_LIS3DH_GetFIFOStatus() & 40;
-
-					//Discards first -> output buffer is only changed when FIFO
-					// has new data so first value always contains same value
-					// as last sample of last reading.
-					TD_LIS3DH_GetXYZ(&x, &y, &z);
-
-					// While not empty
-					while (count < ACCELERO_BUF_SIZE) {
-						TD_LIS3DH_GetXYZ(&x, &y, &z);
-						data[count].x = ((short int) x) /** CurrentScale * 1000) >> 15*/;
-						data[count].y = ((short int) y) /** CurrentScale * 1000) >> 15*/;
-						data[count].z = ((short int) z) /** CurrentScale * 1000) >> 15*/;
-						count++;
-						st = TD_LIS3DH_GetFIFOStatus();
-
-						// If (!(TD_LIS3DH_GetFIFOStatus() & 0x20))
-						// As of 07/11/2013 Empty flag seem broken and sometimes appear when FIFO is not empty
-						// At 400Hz (slow read of FIFO : 22ms for full fifo) seem to appear after 10 to 30 s
-						// We must go below watermark
-						// If we absolutely want to make sure all samples are read, FIFO level can also be checked
-						// "Not Watermark" And "Empty"
-						if ((st & 0xA0) == 0x20) {
-							break;
-						}
-					}
-
-					// There are still samples but buffer overflows: need an other turn
-					if (GPIO_PinInGet(USR4_PORT, USR4_BIT) && count != 32) {
-						DEBUG_PRINTF("IT not clear CNT:%d st:0x%02X!!\r\n", count, st);
-					}
-					if (count >= ACCELERO_BUF_SIZE) {
-						AcceleroIrq = true;
-						TD_WakeMainLoop();
-					}
-
-					// If filter is activated
-					if (Filter) {
-						//TD_LIS3DH_SetFilterRef();
-						TD_ACCELERO_HighPassFilter(data, count);
-					}
-					TD_SPI_UnLock(ACCELERO_SPI_ID);
-
-					// Push all data to callback
-					(*DataCallback)(data, count, overrun);
-				} else {
-					TD_Trap(TRAP_SPI_NOT_AVAILABLE, __LINE__);
-				}
-			}
+			ProcessMonitorData(data, ACCELERO_BUF_SIZE);
 		}
 	}
 }

@@ -2,7 +2,7 @@
  * @file
  * @brief API for sending Raw frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.1.1
+ * @version 1.2.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -37,23 +37,73 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "sensor_send.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup SENSOR_RAW Sensor Raw
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
-	/*******************************************************************************
-	 *************************   PROTOTYPES   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	*************************   DEFINES   **************************************
+	***************************************************************************/
+
+	/** @addtogroup SENSOR_RAW_DEFINES Defines
+	 * @{ */
+
+	/** Maximum raw data size */
+#define TD_SENSOR_RAW_MAX_SIZE	10
+
+	/** @} */
+
+	/***************************************************************************
+	 *************************   PROTOTYPES   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup SENSOR_RAW_USER_FUNCTIONS User Functions
 	 * @{ */
-	bool TD_SENSOR_SendRaw(uint8_t *msg, uint8_t count);
-	void TD_SENSOR_SetRawTransmissionProfile(uint8_t count, uint32_t interval);
+
+	/***********************************************************************//**
+	 * @brief
+	 *   Send a RAW frame to Sensor.
+	 *
+	 * @param[in] data
+	 *   Pointer to the raw message data.
+	 *
+	 * @param[in] length
+	 *  Message length in bytes, must be <= 10 bytes.
+	 *
+	 * @return
+	 *   Returns true if the data has been sent over the SIGFOX network, false
+	 *   otherwise.
+	 **************************************************************************/
+	static bool __INLINE TD_SENSOR_SendRaw(uint8_t *data, uint8_t length)
+	{
+		TD_SENSOR_Frame_t frame;
+
+		memcpy(&frame.payload[0], data, length);
+		return TD_SENSOR_SendUDM(0, SRV_FRM_RAW, &frame, length);
+	}
+
+	/***********************************************************************//**
+	 * @brief
+	 *   Set a transmission profile for a raw frame type.
+	 *
+	 * @param[in] repetition
+	 *	Number of repetitions.
+	 *
+	 * @param[in] interval
+	 *	Interval between two repetitions in seconds.
+	 **************************************************************************/
+	static void __INLINE TD_SENSOR_SetRawTransmissionProfile(uint8_t repetition,
+		uint32_t interval)
+	{
+		TD_SENSOR_SetTransmissionProfile(SRV_FRM_RAW, repetition, interval);
+	}
 
 	/** @} */
 	/** @} (end addtogroup SENSOR_RAW) */

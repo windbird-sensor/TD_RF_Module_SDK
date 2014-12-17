@@ -2,10 +2,10 @@
  * @file
  * @brief GPS management
  * @author Telecom Design S.A.
- * @version 1.0.1
+ * @version 1.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -36,18 +36,34 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <td_config_ext.h>
+
+#include <ubx7.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-	/***************************************************************************//**
+	/***********************************************************************//**
 	 * @addtogroup TD_GEOLOC Geolocalization
 	 * @{
-	 ******************************************************************************/
+	 **************************************************************************/
 
-	/*******************************************************************************
-	 ***********************   ENUMERATIONS   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+ ***********************   DEFINES   *******************************************
+ ******************************************************************************/
+
+/** @addtogroup TD_GEOLOC_DEFINES Defines
+ * @{ */
+
+/** Maximum number of satellites */
+#define TD_GEOLOC_MAX_SATELLITES 16
+
+/** @} */
+
+/*******************************************************************************
+	 ***********************   ENUMERATIONS   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup TD_GEOLOC_ENUMERATIONS Enumerations
 	 * @{ */
@@ -59,7 +75,10 @@ extern "C" {
 		TD_GEOLOC_SOFT_BCKP = 2 ,
 		TD_GEOLOC_NAVIGATION = 3,
 		TD_GEOLOC_POWER_SAVE_MODE = 4,
-		TD_GEOLOC_NAVIGATION_COLD_START = 5
+		TD_GEOLOC_NAVIGATION_COLD_START = 5,	// Force cold start
+		TD_GEOLOC_NAVIGATION_WARM_START = 6,	// Force warm start
+		TD_GEOLOC_NAVIGATION_HOT_START = 7,		// Force hot start
+		TD_GEOLOC_NAVIGATION_IDLE = 8			// Stop GNSS receive
 	} TD_GEOLOC_PowerMode_t;
 
 	/** GPS fix structure types */
@@ -78,18 +97,27 @@ extern "C" {
 
 	/** @} */
 
-	/*******************************************************************************
-	 **************************  TYPEDEFS   ****************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 **************************  TYPEDEFS   ************************************
+	 **************************************************************************/
 
 	/** @addtogroup TD_GEOLOC_TYPEDEFS Typedefs
 	 * @{ */
 
 	/** Quality structure */
 	typedef struct {
-		uint8_t sat;					///< Number of satellites in view, maximum 20
 		uint16_t hdop;					///< Horizontal Degree Of Precision, 0 .. 20 * 100
+		uint16_t hAcc;					///< Horizontal estimated Accuracy in meters
+		uint8_t sat;					///< Number of satellites used for fix, maximum 20
 	} TD_GEOLOC_Quality_t;
+
+
+	/** Satellites structure */
+	typedef struct {
+		TD_UBX7_NAV_SVInfo_t sv_info; 	///< Sat info
+		uint8_t usabled;				///< Computed value of usable satellites (>30)
+		uint8_t used_autonomous;		///< Satellites used in solution based on autonomous
+	} TD_GEOLOC_Satellites_t;
 
 	/** Position structure, data stored as degrees, decimals minutes */
 	typedef struct {
@@ -108,22 +136,37 @@ extern "C" {
 
 	/** Date & Time structure */
 	typedef struct {
+		uint16_t year;					///< Year UTC
 		uint8_t seconds;				///< Seconds 0..59
 		uint8_t minutes;				///< Minutes 0..59
 		uint8_t hours;					///< Hours 0..23
 		uint8_t day;					///< Days 1.31
 		uint8_t month;					///< Month 1..12
-		uint8_t year;					///< Year 2014..
 	} TD_GEOLOC_DateTime_t;
+
+	/** Hardware Status structure */
+	typedef struct {
+		bool rtc_calibrated;			///< RTC calibrated flag
+	} TD_GEOLOC_HardwareStatus_t;
+
+	/** Autonomous Status structure */
+	typedef struct {
+		uint32_t sats;					///< Bitfield indicating which sats have auto data av.
+		bool idle;						///< Assist Now Autonomous idle flag
+		bool enabled;					///< Assist Now Autonomous enabled flag
+	} TD_GEOLOC_Autonomous_t;
 
 	/** Full structure containing all updated informations */
 	typedef struct {
-		uint32_t duration;				///< Fix duration in seconds
-		TD_GEOLOC_DateTime_t datetime;	///< Date & time information
-		TD_GEOLOC_Position_t position;	///< Position information
-		TD_GEOLOC_Speed_t speed;		///< Speed information
-		TD_GEOLOC_Quality_t quality;	///< Quality information
-		TD_GEOLOC_FixType_t type;		///< Type of fix information available
+		TD_GEOLOC_DateTime_t datetime;		///< Date & time information
+		TD_GEOLOC_Position_t position;		///< Position information
+		TD_GEOLOC_Speed_t speed;			///< Speed information
+		TD_GEOLOC_Quality_t quality;		///< Quality information
+		TD_GEOLOC_FixType_t type;			///< Type of fix information available
+		TD_GEOLOC_Satellites_t sats;		///< Satellites in view detailed and computed information
+		TD_GEOLOC_HardwareStatus_t hard;	///< Hardware status
+		TD_GEOLOC_Autonomous_t autonomous;	///< Autonomous
+		uint32_t duration;					///< Fix duration in seconds
 	} TD_GEOLOC_Fix_t;
 
 	/** Geoloc flash configuration */
@@ -137,14 +180,17 @@ extern "C" {
 		TD_GEOLOC_DateTime_t datetime;	///< Date & time information
 	} TD_GEOLOC_LogValue_t;
 
-	/** Pointer to logger function */
-	typedef void (*TD_GEOLOC_Log_t)(TD_GEOLOC_Fix_t *fix);
+	/** Geoloc ephemeris entries */
+	typedef struct {
+		TD_UBX7_AID_Eph_t *ephemeris;	///< Pointer towards ephemeris array
+		uint8_t count;					///< Valid ephemeris count
+	} TD_GEOLOC_AidingEphemeris_t;
 
 	/** @} */
 
-	/*******************************************************************************
-	 *************************   PROTOTYPES   **************************************
-	 ******************************************************************************/
+	/***************************************************************************
+	 *************************   PROTOTYPES   **********************************
+	 **************************************************************************/
 
 	/** @addtogroup TD_GEOLOC_GLOBAL_FUNCTIONS Global Functions
 	 * @{ */
@@ -157,19 +203,34 @@ extern "C" {
 	 * @{ */
 
 	void TD_GEOLOC_Init(void);
-	void TD_GEOLOC_Process(void);
-	void TD_GEOLOC_TryToFix(TD_GEOLOC_PowerMode_t mode, uint16_t timeout, void (*callback)(TD_GEOLOC_Fix_t *fix, bool timeout));
+	bool TD_GEOLOC_Process(void);
+	void TD_GEOLOC_TryToFix(TD_GEOLOC_PowerMode_t mode, uint16_t timeout,
+		void (*callback)(TD_GEOLOC_Fix_t *fix, bool timeout));
 	void TD_GEOLOC_StopFix(TD_GEOLOC_PowerMode_t end_mode);
 	void TD_GEOLOC_PrintfFix(TD_GEOLOC_Fix_t *fix);
 	void TD_GEOLOC_FixInit(TD_GEOLOC_Fix_t *fix);
-	void TD_GEOLOC_Log(TD_GEOLOC_Fix_t *fix);
+	DECLARE_DYNAMIC(void, TD_GEOLOC_Log, TD_GEOLOC_Fix_t *fix);
 	void TD_GEOLOC_SetLogger(bool enable);
 	void TD_GEOLOC_ResetLogger(void);
 	bool TD_GEOLOC_ReadLog(TD_GEOLOC_LogValue_t *log);
 	void TD_GEOLOC_PrintfFixLog(TD_GEOLOC_LogValue_t *log);
 	uint32_t TD_GEOLOC_PowerVoltageExtended(void);
-
+	void TD_GEOLOC_Dump(void);
+	void TD_GEOLOC_AddSecondsToDateTime(TD_GEOLOC_DateTime_t * time,
+		int32_t seconds);
+	uint8_t TD_GEOLOC_PollEphemeris(TD_UBX7_NAV_SVInfo_t *sv_info,
+		TD_UBX7_AID_Eph_t * ephemeris, uint8_t max);
+	void TD_GEOLOC_SendEphemeris(TD_UBX7_AID_Eph_t * ephemeris, uint8_t count);
+	bool TD_GEOLOC_EnableAutonomous(bool enable, uint8_t min_sv,
+		uint8_t min_cno, bool force_3d, uint16_t max_error);
+	uint8_t TD_GEOLOC_PollAutonomous(uint32_t sats,
+		TD_UBX7_AID_Aop_t *autonomous, uint8_t max);
+	void TD_GEOLOC_SendAutonomous(TD_UBX7_AID_Aop_t * autonomous,
+		uint8_t count);
+	void TD_GEOLOC_SendHui(uint8_t * data, uint32_t tow, uint16_t wno);
 	/** @} */
+
+/** @} */
 
 	/** @} (end addtogroup TD_GEOLOC) */
 
