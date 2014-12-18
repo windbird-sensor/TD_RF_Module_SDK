@@ -97,3 +97,11 @@
 ### SIGFOX: ###
 
   * Corrected a timing problem on first frame detected with new base station software upgrade
+
+# Version 4.0.1 #
+
+## Bug Fixes ##
+
+### SIGFOX: ###
+
+  * Corrected a problem causing loss of SIGFOX sequence number after un upgrade from previous SDKs
