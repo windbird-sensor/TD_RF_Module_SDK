@@ -71,12 +71,12 @@
 #elif MODULE_REVISION == REVISION_TD1208
 
 /** TD1208 Software release and version */
-#define SOFTWARE_RELEASE		1444
+#define SOFTWARE_RELEASE		1451
 
 #elif MODULE_REVISION == REVISION_TD1204
 
 /** TD1204 Software release and version */
-#define SOFTWARE_RELEASE		1442
+#define SOFTWARE_RELEASE		1450
 
 #elif MODULE_REVISION == REVISION_TD1205
 

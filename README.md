@@ -165,6 +165,19 @@ Similarly, to debug a firmware on the TD12xx board:
 Release Notes
 =============
 
+v5.0.1 (December 2014)
+-----------------
+
+  - This release is a minor update of TD RF Module SDK.
+
+### Release Notes ###
+
+#### Bug Fixes ####
+
+#### SIGFOX: ####
+
+  * Corrected a problem causing loss of SIGFOX sequence number after un upgrade from previous SDKs
+
 v5.0.0 (December 2014)
 -----------------
 
