@@ -89,8 +89,8 @@ static void GPSFix(TD_GEOLOC_Fix_t *fix, bool timeout)
 		} else {
 			latitude_direction = 'N';
 		}
-		latitude_int = latitude / 100000;
-		latitude_fract = latitude % 100000;
+		latitude_int = latitude / 10000000;
+		latitude_fract = latitude % 10000000;
 		longitude = fix->position.longitude;
 		if (longitude < 0) {
 			longitude_direction = 'W';
@@ -98,8 +98,8 @@ static void GPSFix(TD_GEOLOC_Fix_t *fix, bool timeout)
 		} else {
 			longitude_direction = 'E';
 		}
-		longitude_int = longitude / 100000;
-		longitude_fract = longitude % 100000;
+		longitude_int = longitude / 10000000;
+		longitude_fract = longitude % 10000000;
 		tfp_printf("Position: %4d.%03d°%c %5d.%03d°%c\r\nSpeed: %d km/h\r\n",
 			latitude_int,
 			latitude_fract,

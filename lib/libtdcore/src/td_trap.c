@@ -252,14 +252,14 @@ TD_TRAP_action_t TD_TRAP_Printf_Callback(TD_TRAP_t trap, uint32_t param)
 	time >>= 15;
 	t = time;
 	sec = t % 60;
-	time = t / 60;
+	t = t / 60;
 	min = t % 60;
-	time = t / 60;
+	t = t / 60;
 	hour = t % 24;
-	time = t / 24;
+	t = t / 24;
 
 	tfp_printf("[TRAP] Time:%d.%02d:%02d:%02d.%3d : ",
-		(uint32_t) time, hour, min, sec, (msec * 1000) >> 15);
+		(uint32_t) t, hour, min, sec, (msec * 1000) >> 15);
 	if (str) {
 		tfp_printf("%d:%s",(uint32_t) trap, (char *) str);
 	} else {

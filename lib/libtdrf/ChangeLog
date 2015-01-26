@@ -104,4 +104,12 @@
 
 ### SIGFOX: ###
 
-  * Corrected a problem causing loss of SIGFOX sequence number after un upgrade from previous SDKs
+  * Corrected a problem causing loss of SIGFOX sequence number after an upgrade from previous SDKs
+
+# Version 4.0.2 #
+
+## Bug Fixes ##
+
+### SIGFOX: ###
+
+  * Corrected a problem causing GPS to stop working after a downlink transmission
