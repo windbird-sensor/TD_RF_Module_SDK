@@ -8,6 +8,8 @@ and auto-generated API documentation to develop for the TD RF modules.
 
 Further details on the TD RF Module SDK can be found at <https://developers.insgroup.fr/>
 
+Please post all your questions on the dedicated forum: <http://community.td-next.com/> and only use the github ticket system to raise SDK issue.
+
 We hope you enjoy using the TD RF Module SDK!
 
 _The Telecom Design Team_
