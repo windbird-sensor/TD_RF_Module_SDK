@@ -22,9 +22,11 @@ ENTRY(__cs3_reset)
 
 MEMORY
 {
-  rom (rx) : ORIGIN = 0x00000000, LENGTH = 131072-1024
-  eeprom (rw) : ORIGIN = 131072-1024, LENGTH = 512
-  sequence (rw) : ORIGIN = 131072-512, LENGTH = 512
+  /* Declared size is maximum size available. For 128k version a dummy 128k layout is declared at top of flash memory*/
+  rom (rx) : ORIGIN = 0x00000000, LENGTH = 256k
+  /* Dummy section to let linker calculate size of flash_layout sections*/
+  _dummy_ (rw) : ORIGIN = LENGTH(rom), LENGTH = LENGTH(rom)
+
   ram (rwx) : ORIGIN = 0x20000040, LENGTH = 16384-64
 }
 
@@ -40,20 +42,14 @@ EXTERN(__cs3_reset)
 
 EXTERN(__cs3_interrupt_vector_em)
 EXTERN(__cs3_start_c main __cs3_stack __cs3_heap_end)
+EXTERN(__compiled_for_flash_size)
 
 /* Provide fall-back values */
 PROVIDE(__cs3_heap_start = _end);
 PROVIDE(__cs3_heap_end = __cs3_region_start_ram + __cs3_region_size_ram);
 PROVIDE(__cs3_region_num = (__cs3_regions_end - __cs3_regions) / 20);
 PROVIDE(__cs3_stack = __cs3_region_start_ram + __cs3_region_size_ram);
-
-PROVIDE(__userrom_size = 512);
-PROVIDE(__userrom_start = ORIGIN(eeprom));
 PROVIDE(__traceram_start = ORIGIN(ram)-64);
-
-
-PROVIDE(__usersequence_size = 512);
-PROVIDE(__usersequence_start = ORIGIN(sequence));
 
 SECTIONS
 {
@@ -148,9 +144,6 @@ SECTIONS
     *(.rom.b .bss.rom)
     _etext = .;
   } >rom
-  /* __cs3_region_end_rom is deprecated */
-  __cs3_region_end_rom = __cs3_region_start_rom + LENGTH(rom);
-  __cs3_region_size_rom = LENGTH(rom);
   .boot : ALIGN (4)
   {
 	 __cs3_start_boot = .;
@@ -171,6 +164,84 @@ SECTIONS
     . = ALIGN (8);
     _edata = .;
   } >ram AT>rom
+  /* __cs3_region_end_rom is deprecated */
+  __cs3_region_end_rom = __cs3_region_start_rom + LENGTH(rom);
+  __cs3_region_size_rom = .;
+
+  /* --------------------------------------------- */
+  /* Flash layout output                           */
+  /* -------------------                           */
+  /* Theses "USER" flash zone store                */
+  /*    - FlashVariables                           */
+  /*    - Sigfox UserSequence                      */
+  /*    - Syslog                                   */
+  /*    - ...                                      */
+  /* --------------------------------------------- */
+  /* Theses sections are stored descending from top of flash */
+  /* +------------+ -- Declared flash size */
+  /* | Flash_dummy|                 */
+  /* | Section0   |                 */
+  /* +------------+ -- Top of real flash */
+  /* | Section1   |                 */
+  /* -------------+                 */
+  /* | Section2   |                 */
+  /* -------------+                 */
+  /* | Section3   |                 */
+  /* -------------+                 */
+  /* | Section4   |                 */
+  /* -------------+                 */
+  /* | -- Gap --  |                 */
+  /* -------------+                 */
+  /* | Code,const |                 */
+  /* -------------+ -- 0            */
+  /* GCC Linker can't calculate size of sections, so we must have a "mirror" of all sections */
+  /* theses mirror are in a _dummy_ MEMORY layout - not physical nor real one                */
+  /* section content is not outputed on .bin file to not destroy actual value in flash       */
+  .flash_layout0i (NOLOAD) :
+  {
+    KEEP(*(.flash_layout0i))
+  } >_dummy_
+  .flash_layout1i (NOLOAD) :
+  {
+    KEEP(*(.flash_layout1i))
+  } >_dummy_
+  .flash_layout2i (NOLOAD) :
+  {
+    KEEP(*(.flash_layout2i))
+  } >_dummy_
+  .flash_layout3i (NOLOAD) :
+  {
+    KEEP(*(.flash_layout3i))
+  } >_dummy_
+  .flash_layout4i (NOLOAD) :
+  {
+    KEEP(*(.flash_layout4i))
+  } >_dummy_
+
+  .flash_layout4 LENGTH(rom) - SIZEOF(.flash_layout0i) - SIZEOF(.flash_layout1i) - SIZEOF(.flash_layout2i) - SIZEOF(.flash_layout3i) - SIZEOF(.flash_layout4i) (NOLOAD) :
+  {
+    KEEP(*(.flash_layout4))
+  } >rom
+  .flash_layout3 LENGTH(rom) - SIZEOF(.flash_layout0i) - SIZEOF(.flash_layout1i) - SIZEOF(.flash_layout2i) - SIZEOF(.flash_layout3i) (NOLOAD) :
+  {
+    KEEP(*(.flash_layout3))
+  } >rom
+  .flash_layout2 LENGTH(rom) - SIZEOF(.flash_layout0i) - SIZEOF(.flash_layout1i) - SIZEOF(.flash_layout2i) (NOLOAD) :
+  {
+    KEEP(*(.flash_layout2))
+  } >rom
+  .flash_layout1 LENGTH(rom) - SIZEOF(.flash_layout0i) - SIZEOF(.flash_layout1i) (NOLOAD) :
+  {
+    KEEP(*(.flash_layout1))
+  } >rom
+  .flash_layout0 LENGTH(rom) - SIZEOF(.flash_layout0i) (NOLOAD) :
+  {
+    KEEP(*(.flash_layout0))
+  } >rom
+	PROVIDE(__compiled_for_flash_size = LENGTH(rom) - SIZEOF(.flash_layout0i));
+  /* -------------------------------------- */
+
+
   .bss : ALIGN (8)
   {
     *(.bootvar .bootvar.*)
@@ -184,29 +255,12 @@ SECTIONS
     _end = .;
     __end = .;
   } >ram
-  .stack : ALIGN (8)
+  .stack (NOLOAD) : ALIGN (8)
   {
 	__cs3_end_bss = .;
     *(.stack .stack.*)
     . = ALIGN (8);
-    *(.stack.ram)
-    . = ALIGN (8);
-    _end = .;
-    __end = .;
   } >ram
-
-
-  .usersequence :
-  {
-     *(.usersequence)
-  } >sequence
-
-
-  .userrom :
-  {
-   *(.userrom)
-  } >eeprom
-
 
   /* __cs3_region_end_ram is deprecated */
   __cs3_region_end_ram = __cs3_region_start_ram + LENGTH(ram);

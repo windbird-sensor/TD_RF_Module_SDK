@@ -2,10 +2,10 @@
  * @file
  * @brief General Purpose IO (GPIO) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.1.0
+ * @version 2.3.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -58,6 +58,19 @@
 
 /** Callback array */
 TD_GPIO_callback_t TD_GPIO_CallbackInterrupts[16];
+
+	/** I/O mode for RF chip GPIO pin */
+	typedef enum {
+		TD_RF_GPIO_DISABLED = 0,
+		TD_RF_GPIO_INPUT,
+		TD_RF_GPIO_OUTPUT,
+		TD_RF_GPIO_CUSTOM,
+		TD_RF_GPIO_READ,
+	} TD_RF_gpio_mode_t;
+
+	/** Externa lreference to RF chip pin configuration function */
+	extern bool TD_RF_GPIO_PinConfigure(uint8_t pin, TD_RF_gpio_mode_t mode,
+		uint8_t *value);
 
 /** @} */
 
@@ -120,7 +133,7 @@ void GPIO_ODD_IRQHandler(void)
 	flag = (GPIO_IntGet() & TD_GPIO_ODD_MASK) & GPIO_IntGetEnabled();
 
 	// Acknowledge IRQ
-	// We acknowledge all IRQ read, for this IRQ (EVEN) and enabled
+	// We acknowledge all IRQ read, for this IRQ (ODD) and enabled
 	// even if theses IRQ are not used (otherwise, it will infinitely reenter in
 	// this IRQ)
 	GPIO_IntClear(flag);
@@ -157,6 +170,24 @@ void GPIO_EVEN_IRQHandler(void)
 #endif
 
 	InterruptDispatch(flag);
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Get a callback value for this interrupt
+ *
+ * @param bit
+ *  Bit value for input pin. Should be <= 15
+ *
+ * @return
+ *  return Callback to call on interrupt event.
+ ******************************************************************************/
+TD_GPIO_callback_t TD_GPIO_GetCallbackExtended(uint8_t bit)
+{
+	if (bit > 15) {
+		return 0;
+	}
+	return TD_GPIO_CallbackInterrupts[bit];
 }
 
 /***************************************************************************//**
@@ -215,12 +246,12 @@ void TD_GPIO_SetCallback(int type, TD_GPIO_callback_t callback, uint32_t mask)
 		start = 1;
 	}
 
-	// Set callback for all odd or even IOs
+	// Set callback for all odd or even I/Os
 	for (; start < 16; start += 2) {
 
 		// If set callback, only apply to masked interrupt
 		// If unset callback, remove all interrupt
-		if (callback == 0 || (callback != 0 && ((1 << start)& mask))) {
+		if (callback == 0 || (callback != 0 && ((1 << start) & mask))) {
 			TD_GPIO_SetCallbackExtended(start, callback);
 		}
 	}
@@ -245,7 +276,7 @@ void TD_GPIO_PinModeSet(TD_GPIO_Port_TypeDef port, unsigned int bit,
 			return;
 		}
 		value = out;
-		switch(mode) {
+		switch (mode) {
 		case gpioModeDisabled:
 			TD_RF_GPIO_PinConfigure(bit, TD_RF_GPIO_DISABLED, &value);
 			break;
@@ -305,32 +336,110 @@ void TD_GPIO_Init(void)
 void TD_GPIO_Dump(void)
 {
 	uint8_t i, j, md;
-	uint64_t mode;
+	uint64_t mode[6], extipsel;
 	uint32_t d;
+	uint16_t extirise, extifall, extien;
+	char irq;
 	static char const str[][6] = {
 		"DIS", "IN", "INP", "INPF", "OUT", "OUTD",
 		"WOR", "WORP", "WAN", "WANF", "WANP", "WANPF",
 		"WAND", "WANDF", "WANDP", "WADPF"
 	};
 	static char const str_drive[][6] = {
-		"STAND","LOWES"," HIGH"," LOW "
+		"STAND", "LOWES", " HIGH", " LOW "
 	};
+
+	// Get value without printing (do not interfere with radio debug setup)
+	for (i = 0; i < 6; i++) {
+		mode[i] = GPIO->P[i].MODEL;
+		mode[i] = mode[i] | (((uint64_t)GPIO->P[i].MODEH) << 32);
+	}
+	extien = GPIO->IEN;
+	extipsel = GPIO->EXTIPSELL;
+	extipsel |= ((uint64_t)GPIO->EXTIPSELH)<<32;
+	extirise = GPIO->EXTIRISE;
+	extifall = GPIO->EXTIFALL;
 	for (i = 0; i < 6; i++) {
 		tfp_printf("--Port%c Drive:%s--\r\n", 'A' + i,
 			str_drive[GPIO->P[i].CTRL&3]);
-		mode = GPIO->P[i].MODEL;
-		mode = mode | (((uint64_t)GPIO->P[i].MODEH) << 32);
 		d = GPIO->P[i].DOUT;
 		for (j = 0; j < 16; j++) {
-			md = mode & 0xF;
-			mode = mode >> 4;
-			tfp_printf("%01X)%6s:%d|  ", j, &str[md][0], d & 1);
+			md = mode[i] & 0xF;
+			mode[i] = mode[i] >> 4;
+			irq = ' ';
+
+			// This port is assigned for pin with this number
+			if ((((extipsel >> (j << 2)) & 0xF) == i) &&
+				(extien & (1 << j))) {
+				if (extirise&(1 << j)) {
+					irq = 'R';
+					if (extifall & (1 << j)) {
+						irq = 'B';
+					}
+				} else {
+					if (extifall & ( 1 << j)) {
+						irq = 'F';
+					}
+				}
+			}
+			if (md == 0 && (d & 1) == 0 && irq == ' ') {
+				tfp_printf("%01X)         |  ", j);
+			} else {
+				tfp_printf("%01X)%6s:%d%c|  ", j, &str[md][0], d & 1, irq);
+			}
 			d >>= 1;
 			if ((j & 3) == 3) {
 				tfp_printf("\r\n");
 			}
 		}
 	}
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Get the interrupt configuration for a pin.
+ *
+ * @param[in] pin
+ *   The pin number.
+ *
+ * @param[out] port
+ *   Pointer to the output port.
+ *
+ * @param[out] risingEdge
+ *   Pointer to the output rising edge configuration.
+ *
+ * @param[out] fallingEdge
+ *   Pointer to the output falling edge configuration.
+ *
+ * @param[out] enable
+ *   Pointer to the output state configuration.
+ ******************************************************************************/
+void TD_GPIO_GetIntConfig(unsigned int pin, GPIO_Port_TypeDef *port,
+		bool *risingEdge, bool *fallingEdge, bool *enable) {
+	uint32_t tmp;
+	if ( !GPIO_PIN_VALID(pin) ) {
+		TD_Trap(TRAP_ASSERT_EFM, __LINE__);
+	}
+
+	// Associated port for pin interrupt
+	if (pin < 8)
+	{
+		*port = ( GPIO->EXTIPSELL >> (4 * pin) )  & 0x07;
+	}
+	else
+	{
+		tmp             = pin - 8;
+		*port = ( GPIO->EXTIPSELH >> (4 * tmp) )  & 0x07;
+	}
+
+	// Enable/disable rising edge configuration
+	*risingEdge = BITBAND_PeripheralRead(&(GPIO->EXTIRISE), pin);
+
+	// Enable/disable falling edge configuration
+	*fallingEdge = BITBAND_PeripheralRead(&(GPIO->EXTIFALL), pin);
+
+	// Finally enable/disable interrupt configuration
+	*enable = BITBAND_PeripheralRead(&(GPIO->IEN), pin);
 }
 /** @} */
 

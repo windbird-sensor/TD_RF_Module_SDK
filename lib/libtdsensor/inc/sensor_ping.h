@@ -2,10 +2,10 @@
  * @file
  * @brief API for sending Ping frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -73,6 +73,9 @@ extern "C" {
 	}
 
 	bool TD_SENSOR_SendPing(bool custom, uint8_t custom_value);
+	bool TD_SENSOR_SendPingExtended(uint8_t id, uint32_t sigfox_id,
+		uint8_t release, uint16_t soft, uint16_t class, bool custom,
+		uint8_t custom_value);
 
 	/** @} */
 

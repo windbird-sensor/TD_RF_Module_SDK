@@ -2,10 +2,10 @@
  * @file
  * @brief Sensor Device Application example.
  * @author Telecom Design S.A.
- * @version 2.0.3
+ * @version 2.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -32,15 +32,18 @@
   ******************************************************************************/
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include <efm32.h>
 
 #include <td_core.h>
+#include <td_uart.h>
+#include <td_printf.h>
+#include <td_stream.h>
 #include <td_flash.h>
 #include <td_rtc.h>
-#include <td_printf.h>
-#include <td_uart.h>
 #include <td_scheduler.h>
+
 #include <td_sensor.h>
 #include <td_sensor_lan.h>
 #include <td_sensor_device.h>
@@ -186,12 +189,11 @@ static void RegistrationRetry(uint32_t argument, uint8_t repetition)
  ******************************************************************************/
 void TD_USER_Setup(void)
 {
+	TD_UART_Options_t options = {LEUART_DEVICE, LEUART_LOCATION, 9600, 8, 'N',
+		1, false};
 
-	// Initialize the UART console
-	init_printf(TD_UART_Init(9600, true, false),
-		TD_UART_Putc,
-		TD_UART_Start,
-		TD_UART_Stop);
+	// Open an I/O stream using LEUART0
+	TD_UART_Open(&options, TD_STREAM_RDWR);
 
 	// Changing the version will clear all flash content thus allowing
 	// resetting the device

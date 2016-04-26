@@ -5,3 +5,21 @@
 # Version 2.0.0 #
 
   * Added the UBlox 7 raw format parser
+
+# Version 3.0.0 #
+
+## Minor Updates ##
+
+  * None
+
+## Additions ##
+
+  * Added LIS3DH accelerometer
+  * Added UBX7 driver
+
+### BMP280: ###
+
+  * Added `BMP280_PRESSURE_RegToStr()`
+
+# Version 4.0.0 #
+  * Added the W25X40 Spi flash driver

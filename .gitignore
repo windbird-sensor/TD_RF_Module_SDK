@@ -8,3 +8,12 @@
 
 *.map
 
+
+/examples/ble/modem/.settings/*.prefs
+/lib/libtdble/.settings/*.prefs
+
+/examples/ble/modem/ble_fw.hex
+settings
+IAR_DBG_EZR
+Release
+Debug

@@ -1,13 +1,12 @@
-/** @cond TD_PRIVATE */
 /***************************************************************************//**
  * @file
  * @brief Driver definition for the LIS3DH accelerometer used in TD12xx RF
  * modules.
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.2.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -60,6 +59,9 @@ extern "C" {
 	/** LIS3DH accelerometer ID */
 #define LIS3DH_ID 0x33
 
+	/** LSM303C accelerometer ID */
+#define LSM303C_ID 0x41
+
 	// LIS3DH accelerometer IRQ sources
 #define LIS3DH_IRQ_OVERRUN		(1 << 1)	///< LIS3DH FIFO Overrun interrupt on INT1
 #define LIS3DH_IRQ_WTM			(1 << 2)	///< LIS3DH FIFO Watermark interrupt on INT1
@@ -87,6 +89,15 @@ extern "C" {
 #define LIS3DH_INT1_CFG_ZS		(1 << 4)	///< LIS3DH Enable interrupt single CLICK-CLICK on Z axis.
 #define LIS3DH_INT1_CFG_ZD		(1 << 5)	///< LIS3DH Enable interrupt double CLICK-CLICK on Z axis.
 
+// LIS3DH accelerometer INT1SRC status
+#define LIS3DH_INT1SRC_XL		(1 << 0)	///< LIS3DH X is under low value
+#define LIS3DH_INT1SRC_XH		(1 << 1)	///< LIS3DH X is over high value
+#define LIS3DH_INT1SRC_YL		(1 << 2)	///< LIS3DH Y is under low value
+#define LIS3DH_INT1SRC_YH		(1 << 3)	///< LIS3DH Y is over high value
+#define LIS3DH_INT1SRC_ZL		(1 << 4)	///< LIS3DH Z is under low value
+#define LIS3DH_INT1SRC_ZH		(1 << 5)	///< LIS3DH Z over high value
+#define LIS3DH_INT1SRC_IA		(1 << 6)	///< LIS3DH one or more X,Y,Z value is under/upper a level
+
 	/** LIS3DH accelerometer IRQ events for all 3 axis */
 #define LIS3DH_3D \
 	LIS3DH_INT1_CFG_XLIE | \
@@ -111,8 +122,12 @@ extern "C" {
 	void TD_LIS3DH_Configure(uint8_t mode, uint8_t rate, uint8_t axis,
 		uint8_t scale);
 	void TD_LIS3DH_SetFIFOMode(uint8_t mode, uint8_t watermak);
-	uint8_t TD_LIS3DH_GetFIFOStatus(void);
+	uint8_t TD_LIS3DH_GetFIFOStatus	(void);
+	uint8_t TD_LIS3DH_GetGlobalStatus(void);
 	void TD_LIS3DH_GetXYZ(uint16_t *x, uint16_t *y, uint16_t *z);
+	void TD_LIS3DH_GetXYZExt(uint16_t *buf, uint8_t n);
+	int16_t TD_LIS3DH_GetADC(uint8_t adc);
+	void TD_LIS3DH_ConfigureADC(bool adc, bool temp);
 	uint8_t TD_LIS3DH_GetEventSource(void);
 	void TD_LIS3DH_DebugReg(void);
 	uint8_t TD_LIS3DH_Status(void);
@@ -130,8 +145,8 @@ extern "C" {
 	void TD_LIS3DH_ConfigureClickEvent(uint8_t event, uint8_t threshold,
 		uint8_t duration);
 	void TD_LIS3DH_GetMagnetoXYZ(uint16_t *x, uint16_t *y, uint16_t *z);
-	void TD_LSM303E_GetMagnetoXYZ(uint16_t *x, uint16_t *y, uint16_t *z);
 	void TD_LIS3DH_Dump(void);
+	char const *TD_LIS3DH_RegToStr(uint8_t reg);
 
 	/** @} */
 
@@ -142,4 +157,3 @@ extern "C" {
 #endif
 
 #endif // __LIS3DH_H
-/** @endcond */

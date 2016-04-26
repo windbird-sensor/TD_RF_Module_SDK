@@ -2,10 +2,10 @@
  * @file
  * @brief Watchdog demonstration application for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.1
+ * @version 1.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2014-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -31,15 +31,18 @@
  *
   ******************************************************************************/
 
+#include <stdint.h>
+#include <stdbool.h>
+
 #include <efm32.h>
 
-#include <em_gpio.h>
-
-#include <td_sigfox.h>
 #include <td_core.h>
 #include <td_uart.h>
 #include <td_printf.h>
+#include <td_stream.h>
 #include <td_watchdog.h>
+
+#include <td_sigfox.h>
 
 /* This file declare all "dynamic" library data. It should be last included file
  * Standard size value can be override before including this file
@@ -58,11 +61,11 @@
  ******************************************************************************/
 void TD_USER_Setup(void)
 {
-	// Initialize the UART console
-	init_printf(TD_UART_Init(9600, true, false),
-		TD_UART_Putc,
-		TD_UART_Start,
-		TD_UART_Stop);
+	TD_UART_Options_t options = {LEUART_DEVICE, LEUART_LOCATION, 9600, 8, 'N',
+		1, false};
+
+	// Open an I/O stream using LEUART0
+	TD_UART_Open(&options, TD_STREAM_RDWR);
 
 	// Boot message
 	tfp_printf("Boot\r\n");

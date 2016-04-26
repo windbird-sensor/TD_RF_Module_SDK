@@ -3,10 +3,10 @@
  * @file
  * @brief Configuration file for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.5.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -58,6 +58,10 @@
 	extern function##_t const function; \
 	result function##__DYNAMIC(__VA_ARGS__);
 
+/** Macro to declare a link-time binding for a dynamic function */
+#define DECLARE_DYNAMIC_LIGHT(function) \
+	typedef void (*function##_t) (void);
+
 /** Macro to declare an alternate link-time binding for a dynamic function */
 #define DECLARE_DYNAMIC_ALT(result, function, function_alt, ...) \
 	extern function##_t const function_alt; \
@@ -88,13 +92,13 @@
  * See td_config.h documentation for more in depth informations
  */
 
-#define SIZEOF(x) ((char*)(&(x) + 1) - (char*)&(x))
+#define SIZEOF(x) ((char *)(&(x) + 1) - (char *) &(x))
 
 #ifndef NULL
-#define NULL ((void*)0)
+#define NULL ((void *) 0)
 #endif
 
-#define IS_EMPTY(x)		1-x-1==2
+#define IS_EMPTY(x)		1 - x - 1 == 2
 
 /* Product init data macros and define
  * This small command subsystem is used for initial pin setup during bootloading
@@ -106,6 +110,7 @@
 #define PRODUCT_DATA_INIT_HIGH		1
 #define PRODUCT_DATA_INIT_STRENGTH	2
 #define PRODUCT_DATA_INIT_ROUTE		3
+#define PRODUCT_DATA_INIT_PRS_ASYNC	4
 
 /* Product init data / IO setup mode */
 #define PI_DISABLED		0
@@ -118,8 +123,11 @@
 
 /* Product init data / macros */
 #define PIP(p,b,m,v) 	(((p) << 12) | ((b) << 8) | ((v) << 4) | (m))
-#define PIS(p,s) 		(((p) << 12) | ((s) <<8 ) | ((PRODUCT_DATA_INIT_STRENGTH) << 4))
+#define PIS(p,s) 		(((p) << 12) | ((s) << 8 ) | \
+	((PRODUCT_DATA_INIT_STRENGTH) << 4))
 #define PIR(s) 			(((s) << 8 ) | ((PRODUCT_DATA_INIT_ROUTE) << 4))
+#define PIA(c,src,sig)	(((src) >> 6) | ((sig & 0x6) << 7) | \
+	((PRODUCT_DATA_INIT_PRS_ASYNC) << 4) | ((sig & 0x1) << 3) | (c))
 #define PINULL 			(((0xF) << 4))
 
 /* Theses are global constants value that can be used in projects */
@@ -157,7 +165,6 @@
 #define TD_SCHEDULER_MaxTimer					CONFIG_TD_SCHEDULER_MAX_TIMER
 #define TD_SCHEDULER_MaxQueue					CONFIG_TD_SCHEDULER_MAX_QUEUE
 #define LanPeriod								CONFIG_LAN_PERIOD
-#define LanThreshold							CONFIG_LAN_THRESHOLD
 #define TD_BSP_GPS_CS_Port						CONFIG_GPS_CS_PORT
 #define TD_BSP_GPS_CS_Bit						CONFIG_GPS_CS_BIT
 #define TD_BSP_GPS_IRQ_Port						CONFIG_GPS_IRQ_PORT
@@ -196,24 +203,37 @@ extern char *CONFIG_SERIAL_NUMBER;
 /***************************
  *  Customer Board definition
  ****************************/
-extern char const CONFIG_PRODUCT_TYPE;
-extern char const CONFIG_PRODUCT_LED_POLARITY;
+extern int8_t const CONFIG_PRODUCT_TYPE;
+extern int8_t const CONFIG_PRODUCT_LED_POLARITY;
 extern GPIO_Port_TypeDef const CONFIG_PRODUCT_LED_PORT;
-extern char const CONFIG_PRODUCT_LED_BIT;
-extern char const CONFIG_PRODUCT_LED_BLINK;
-extern unsigned char const CONFIG_PRODUCT_BOOTLOADER_CHANNEL;
-extern unsigned char const CONFIG_PRODUCT_BOOTLOADER_SKIP;
-extern uint8_t const CONFIG_PRODUCT_UART_BOOTLOADER_SKIP;
-extern unsigned short const CONFIG_PRODUCT_INIT_DATA[];
-extern unsigned char const CONFIG_PRODUCT_INIT_DATA_SIZE;
+extern int8_t const CONFIG_PRODUCT_LED_BIT;
+extern int8_t const CONFIG_PRODUCT_LED_BLINK;
+extern GPIO_DriveMode_TypeDef const CONFIG_PRODUCT_LED_DRIVE;
+extern uint8_t const CONFIG_PRODUCT_BOOTLOADER_CHANNEL;
+extern uint16_t const CONFIG_PRODUCT_INIT_DATA[];
+extern uint8_t const CONFIG_PRODUCT_INIT_DATA_SIZE;
 extern uint8_t const ProductBootloaderP1[];
 extern uint32_t const CONFIG_LEUART_LOCATION;
+extern uint32_t const CONFIG_LEUART_SPEED;
+extern void * const CONFIG_LEUART_DEVICE;
 extern GPIO_Port_TypeDef const CONFIG_LEUART_TX_PORT;
 extern uint8_t	const CONFIG_LEUART_TX_BIT;
 extern GPIO_Port_TypeDef const CONFIG_LEUART_RX_PORT;
 extern uint8_t	const CONFIG_LEUART_RX_BIT;
 extern uint8_t const CONFIG_TD_UART_COUNT;
+extern uint8_t const CONFIG_TD_STREAM_COUNT;
+extern int const CONFIG_TD_STREAM_FIFOSIZE;
 extern uint8_t CONFIG_TD_UI_Id[];
+
+/* CAPSENSE application definitions on EFM32 */
+extern ACMP_TypeDef * const CONFIG_ACMP_CAPSENSE;
+extern uint8_t const CONFIG_ACMP_CAPSENSE_CHANNEL;
+extern uint32_t const CONFIG_ACMP_CAPSENSE_CLKEN;
+extern uint32_t const CONFIG_PRS_CH_CTRL_SOURCESEL_ACMP_CAPSENSE;
+extern uint32_t const CONFIG_PRS_CH_CTRL_SIGSEL_ACMPOUT_CAMPSENSE;
+extern int32_t const CONFIG_CAPSENSE_DELTA_CHANGE_THRESHOLD;
+extern uint8_t const CONFIG_CAPSENSE_HISTORY_DEPTH ;
+extern uint32_t * const TD_CAPSENSE_ValueHistory;
 
 /***************************
  *  SYSTEM and LIBRARY definition
@@ -224,7 +244,19 @@ extern uint8_t const CONFIG_TD_FLASH_MAX_DATA_POINTER;
 extern uint8_t const CONFIG_TD_FLASH_USER_PAGE;
 extern uint16_t const CONFIG_STACK_SIZE;
 extern uint16_t const CONFIG_AT_PERSIST_SIZE;
-
+extern bool const CONFIG_AT_LEUART_PERSIST;
+extern bool const CONFIG_AT_ARG_CASE_SENSITIVE;
+extern uint8_t const CONFIG_EFM_ASSERT_NOT_TRAPPED;
+extern uint32_t const CONFIG_FLASH_LAYOUT[];
+extern char* const CONFIG_FLASH_NAME_LAYOUT[];
+extern bool const CONFIG_ALLOW_LEUART_LOW_BAUDRATE_ON_HFRCO;
+extern uint32_t const CONFIG_LIMIT_FLASH_SIZE;
+extern bool const CONFIG_PROTECTED_LOADER_FLASH_SIZE;
+extern bool const CONFIG_PREVENT_FREE_BACKGROUND_CYCLE;
+extern const void * CONFIG_PRINTF_ULONG;
+extern const void * CONFIG_PRINTF_LONG;
+extern const uint8_t CONFIG_PRINTF_INT64_SUPPORT_ON;
+extern bool const CONFIG_RDEBUG_FULL_PKT;
 /* TD_SENSOR limits */
 extern uint8_t const CONFIG_TD_SENSOR_TRANSMITTER_MAX_TRANSMIT;
 extern uint8_t const CONFIG_TD_SENSOR_TRANSMITTER_MAX_RETRANSMIT;
@@ -235,9 +267,12 @@ extern uint8_t const CONFIG_TD_SENSOR_MAX_SWITCH_EVENT;
 extern uint8_t const CONFIG_TD_SCHEDULER_MAX_TIMER;
 extern uint8_t const CONFIG_TD_SCHEDULER_MAX_QUEUE;
 extern bool const CONFIG_TD_SCHEDULER_DONT_OVF_QUEUE;
-extern unsigned char CONFIG_LAN_THRESHOLD;
-extern unsigned long const CONFIG_LAN_PERIOD;
-extern unsigned char const CONFIG_LAN_ADDRESS_SIZE;
+extern uint8_t const CONFIG_LAN_THRESHOLD;
+extern uint8_t const CONFIG_LAN_THRESHOLD_RX;
+extern uint8_t const CONFIG_LAN_LBT_COUNT_MAX;
+extern uint32_t const CONFIG_LAN_PERIOD;
+extern uint8_t const CONFIG_LAN_ADDRESS_SIZE;
+extern uint32_t const CONFIG_LAN_CHECK_CALLBACK_TIME;
 
 /* TD_GEOLOC limits */
 extern bool const CONFIG_TD_GEOLOC_RAW_OUTPUT;
@@ -255,79 +290,145 @@ extern TD_GPIO_Port_TypeDef const CONFIG_GPS_VBCKP_PORT;
 extern uint8_t const CONFIG_GPS_VBCKP_BIT;
 extern TD_GPIO_Port_TypeDef const CONFIG_GPS_VIO_PORT;
 extern uint8_t const CONFIG_GPS_VIO_BIT;
+extern  uint8_t const CONFIG_GPS_SPI_BUS;
+extern void * const CONFIG_GPS_INTERFACE;
 
 /* ACCELERO Chip ports definitions on EFM32 */
+extern TD_GPIO_Port_TypeDef const CONFIG_ACCELERO_POWER_PORT;
+extern uint8_t const CONFIG_ACCELERO_POWER_BIT;
 extern TD_GPIO_Port_TypeDef const CONFIG_ACCELERO_CS_PORT;
 extern uint8_t const CONFIG_ACCELERO_CS_BIT;
 extern GPIO_Port_TypeDef const CONFIG_ACCELERO_IRQ_PORT;
 extern uint8_t const CONFIG_ACCELERO_IRQ_BIT;
 extern uint16_t const CONFIG_ACCELERO_SPI_MODE;
 extern uint8_t const CONFIG_ACCELERO_SPI_BUS;
+extern uint32_t const CONFIG_ACCELERO_SPI_SPEED;
+
+/* FLASH SPI Chip ports definitions on EFM32 */
+extern TD_GPIO_Port_TypeDef const CONFIG_FLASH_POWER_PORT;
+extern uint8_t const CONFIG_FLASH_POWER_BIT;
+extern TD_GPIO_Port_TypeDef const CONFIG_FLASH_CS_PORT;
+extern uint8_t const CONFIG_FLASH_CS_BIT;
+extern GPIO_Port_TypeDef const CONFIG_FLASH_IRQ_PORT;
+extern uint8_t const CONFIG_FLASH_IRQ_BIT;
+extern uint16_t const CONFIG_FLASH_SPI_MODE;
+extern uint8_t const CONFIG_FLASH_SPI_BUS;
 
 /* MAGNETO Chip ports definitions on EFM32 */
+extern TD_GPIO_Port_TypeDef const CONFIG_MAGNETO_POWER_PORT;
+extern uint8_t const CONFIG_MAGNETO_POWER_BIT;
 extern TD_GPIO_Port_TypeDef const CONFIG_MAGNETO_CS_PORT;
 extern uint8_t const CONFIG_MAGNETO_CS_BIT;
+extern TD_GPIO_Port_TypeDef const CONFIG_MAGNETO_IRQ_PORT;
+extern uint8_t const CONFIG_MAGNETO_IRQ_BIT;
 extern uint16_t const CONFIG_MAGNETO_SPI_MODE;
 extern uint8_t const CONFIG_MAGNETO_SPI_BUS;
 
 /* PRESSURE Chip ports definitions on EFM32 */
+extern TD_GPIO_Port_TypeDef const CONFIG_PRESSURE_POWER_PORT;
+extern uint8_t const CONFIG_PRESSURE_POWER_BIT;
 extern TD_GPIO_Port_TypeDef const CONFIG_PRESSURE_CS_PORT;
 extern uint8_t const CONFIG_PRESSURE_CS_BIT;
 extern uint16_t const CONFIG_PRESSURE_SPI_MODE;
 extern uint8_t const CONFIG_PRESSURE_SPI_BUS;
+extern uint32_t const CONFIG_PRESSURE_SPI_SPEED;
 
 /* RF chip port definitions on EFM32 CPU side */
 extern TD_GPIO_Port_TypeDef const CONFIG_POWER_CRYSTAL_PORT;
 extern uint8_t const CONFIG_POWER_CRYSTAL_BIT;
 extern TD_GPIO_Port_TypeDef const CONFIG_SHTD_PORT;
 extern uint8_t const CONFIG_SHTD_BIT;
-
-/* RF chip port definitions on RF Chip side */
-extern uint8_t const CONFIG_RADIO_INFO_PIN;
-
-/* RF chip ports behavior */
-extern uint8_t const CONFIG_FORCE_RADIO_RESET;
-extern uint8_t const CONFIG_RADIO_PA_POWER;
-extern unsigned char const CONFIG_RADIO_INIT_DATA[];
-extern uint8_t const CONFIG_RADIO_USE_TXCO;
 extern GPIO_Port_TypeDef const CONFIG_RADIO_INFO_PORT;
 extern uint8_t const CONFIG_RADIO_INFO_BIT;
 extern TD_GPIO_Port_TypeDef const CONFIG_RADIO_POWER_PORT;
 extern uint8_t const CONFIG_RADIO_POWER_BIT;
+extern GPIO_Port_TypeDef const CONFIG_RADIO_CS_PORT;
+extern uint8_t const CONFIG_RADIO_CS_BIT;
+extern GPIO_Port_TypeDef const CONFIG_RADIO_IRQ_PORT;
+extern uint8_t const CONFIG_RADIO_IRQ_BIT;
+extern TD_GPIO_Port_TypeDef const CONFIG_RADIO_INT_PA_TX_PORT;
+extern uint8_t const CONFIG_RADIO_INT_PA_TX_BIT;
+extern TD_GPIO_Port_TypeDef const CONFIG_RADIO_PA_TX_PORT;
+extern uint8_t const CONFIG_RADIO_PA_TX_BIT;
+extern TD_GPIO_Port_TypeDef const CONFIG_RADIO_PA_RX_LNA_PORT;
+extern uint8_t const CONFIG_RADIO_PA_RX_LNA_BIT;
+extern TD_GPIO_Port_TypeDef const CONFIG_RADIO_PA_ON_PORT;
+extern uint8_t const CONFIG_RADIO_PA_ON_BIT;
+
+/* RF chip port definitions on RF Chip side */
+extern uint8_t const CONFIG_RADIO_INFO_PIN;
+extern uint8_t const CONFIG_RADIO_INT_PA_TX_PIN;
+
+/* RF chip ports behavior */
+extern uint8_t const CONFIG_FORCE_RADIO_RESET;
+extern uint8_t const CONFIG_RADIO_PA_POWER;
+extern uint8_t const CONFIG_RADIO_PA_MAX;
+extern uint8_t const CONFIG_RADIO_XO_TUNE;
+extern unsigned char const CONFIG_RADIO_INIT_DATA[];
+extern uint8_t const CONFIG_RADIO_USE_TCXO;
+extern uint8_t const CONFIG_RADIO_BOOT_RF_SHUTDOWN;
+extern TIMER_TypeDef * const CONFIG_RADIO_POWER_TIMER;
+extern uint8_t const CONFIG_RADIO_POWER_TIMER_CC;
+extern uint8_t const *CONFIG_RADIO_PATCH_BLOB;
+extern int const CONFIG_RADIO_PATCH_SIZE;
+
+extern bool const CONFIG_USE_FREQUENCY_CAL;
+extern bool const CONFIG_ACCELERO_SKIP_INIT;
+extern bool const CONFIG_ACCELERO_POLLING_MODE;
+extern bool const CONFIG_CHIP_EZR;
+extern uint8_t const CONFIG_ITU_ISM_REGION;
+extern uint32_t const CONFIG_SIGFOX_FCC_MACRO_CHANNEL_BITMASK_MSB;
+extern uint32_t const CONFIG_SIGFOX_FCC_MACRO_CHANNEL_BITMASK_MID;
+extern uint32_t const CONFIG_SIGFOX_FCC_MACRO_CHANNEL_BITMASK_LSB;
+extern uint16_t const CONFIG_SIGFOX_FCC_DEFAULT_MACRO_CHANNEL;
 
 /* RF Proxy class config */
 extern uint8_t const CONFIG_TD_SIGFOX_PROXY_CLASS;
 
-/** I/O mode for RF chip GPIO pin */
-typedef enum {
-	TD_RF_GPIO_DISABLED = 0,
-	TD_RF_GPIO_INPUT,
-	TD_RF_GPIO_OUTPUT,
-	TD_RF_GPIO_CUSTOM,
-	TD_RF_GPIO_READ,
-} TD_RF_gpio_mode_t;
+extern uint32_t const CONFIG_LEUART_LOCATION;
 
-bool TD_RF_GPIO_PinConfigure(uint8_t pin, TD_RF_gpio_mode_t mode,
-	uint8_t *value);
+/* BLE config */
+extern TD_GPIO_Port_TypeDef const CONFIG_BLE_POWER_PORT;
+extern uint8_t const CONFIG_BLE_POWER_BIT;
+extern TD_GPIO_Port_TypeDef const CONFIG_BLE_RESET_PORT;
+extern uint8_t const CONFIG_BLE_RESET_BIT;
+extern uint8_t const CONFIG_BLE_UART_CONF;
+extern uint32_t const CONFIG_BLE_UART_SPEED;
+extern uint32_t const CONFIG_BLE_UART_PRELOAD_SPEED;
+extern void const *CONFIG_BLE_UART;
+
+
+// Gpio config values
 #define GPIO_NOP						0
 #define GPIO_TRISTATE					1
+#define GPIO_TX_DATA_CLK_OUT			16
 #define GPIO_RX_RAW_DATA_OUT			21
+#define GPIO_IN_TX_STATE				32
+#define GPIO_IN_RX_STATE				33
 #define GPIO_DRIVE0						2
 #define GPIO_DRIVE1						3
 
+typedef bool (*TD_SIGFOX_SendV1_t)(uint8_t mode,  bool value, uint8_t *message,
+	uint8_t size, uint8_t retry, bool ack, bool reserved);
+extern TD_SIGFOX_SendV1_t const CONFIG_TD_SIGFOX_SEND_V1;
 typedef void (*TD_MAIN_Init_t)(void);
 extern TD_MAIN_Init_t const CONFIG_EARLY_DEBUG;
+extern TD_MAIN_Init_t const CONFIG_EARLY_DEBUG_CUSTOM;
+extern const uint8_t CONFIG_TD_UI_COUNT;
 extern bool const CONFIG_PRODUCT_EARLY_DEBUG;
 void main_init();
 void main_init_debug();
 
 /* RF constant power calculation */
-typedef uint8_t (*RFPowerCalculation_t)(uint8_t level, uint32_t voltage);
+typedef uint8_t (*RFPowerCalculation_t)(int level, uint32_t voltage);
 extern RFPowerCalculation_t const CONFIG_TD_RF_POWER_CALCULATION;
 extern int8_t const CONFIG_TD_RF_POWER_CALCULATION_COEF[];
 
 /* Si4461 PA Mode */
 extern uint8_t const CONFIG_TD_RF_SI4461_CLASS_E;
+
+/* Custom PA Mode */
+extern uint8_t const CONFIG_TD_RF_PA_CUSTOM;
 
 #include <td_trap.h>
 

@@ -2,10 +2,10 @@
  * @file
  * @brief Capacitive sense peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
   ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -55,6 +55,7 @@ extern "C" {
 
 	bool TD_CAPSENSE_Sense(void);
 	void TD_CAPSENSE_Init(void);
+	uint32_t TD_CAPSENSE_GetValue(void);
 
 	/** @} */
 

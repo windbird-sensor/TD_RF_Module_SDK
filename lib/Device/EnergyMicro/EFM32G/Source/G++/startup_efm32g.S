@@ -41,7 +41,9 @@ __cs3_interrupt_vector_em:
     .long   Reserved7_Handler           /* Reserved                     */
     .long   Reserved8_Handler           /* Reserved                     */
     .long   Reserved9_Handler           /* Reserved                     */
-    .long   Reserved10_Handler          /* Reserved                     */
+/* small hack to store 'wanted' flash size on binary*/
+/* we are using 'unsed' handler (for now) that would have offset 0x28 in .bin output and can be retrieved by loader software*/
+    .long   __compiled_for_flash_size          /* Reserved                     */
     .long   SVC_Handler                 /* SVCall Handler               */
     .long   DebugMon_Handler            /* Debug Monitor Handler        */
     .long   Reserved13_Handler          /* Reserved                     */
@@ -101,11 +103,18 @@ __cs3_reset_em:
     .size   __cs3_reset_em,.-__cs3_reset_em
     .thumb
 
+    .globl  DefaultHandler
+    .type	DefaultHandler, %function
     .globl  _IRQHandlerinterrupt
     .type   _IRQHandlerinterrupt, %function
 _IRQHandlerinterrupt:
+    LDR r0, _addr_myOtherFunc
+  	STR r0, [sp,#4]
+  	POP {r0,pc}
+  	.align
+_addr_myOtherFunc:
+    .word DefaultHandler
     b .
-    .size   _IRQHandlerinterrupt, . - _IRQHandlerinterrupt
 
     .weak   NMI_Handler
     .globl  NMI_Handler

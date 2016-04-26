@@ -2,10 +2,10 @@
  * @file
  * @brief Real-Time Clock (RTC) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.2.0
+ * @version 2.3.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -43,6 +43,7 @@
 
 #include "td_core.h"
 #include "td_rtc.h"
+#include <td_boot.h>
 
 #if defined(_EFM32_GECKO_FAMILY)
 
@@ -57,13 +58,30 @@
 #define RTC_WAIT_BUSY(cmp)
 #endif
 
+//#define DEBUG_POWER_MODE
 //#define DEBUG_RTC_DELAY
 //#define DEBUG_RTC_DELAY_INFO
 //#define DEBUG_RTC_TRAP
 //#define DEBUG_RTC_DELAY_LOG
 //#define DEBUG_RTC_EXT_CALL
 //#define DEBUG_RTC_DELAY_IRQ
+//#define DEBUG_RTC_IRQ
 
+#ifdef DEBUG_RTC_IRQ
+/** Macro to print RTC IRQ debug information */
+	#define IRQ_PRINTF(...) tfp_printf(__VA_ARGS__);
+#else
+/** Macro to print RTC IRQ debug information */
+	#define IRQ_PRINTF(...)
+#endif
+
+#ifdef DEBUG_POWER_MODE
+/** Macro to debug power mode */
+	#define POWER_MODE_PRINTF(...) tfp_printf(__VA_ARGS__);
+#else
+/** Macro to debug power mode */
+	#define POWER_MODE_PRINTF(...)
+#endif
 /***************************************************************************//**
  * @addtogroup RTC
  * @brief Real-Time Clock (RTC) peripheral API for the TDxxxx RF modules
@@ -91,7 +109,7 @@
 #define TD_RTC_OVERFLOWED ((0x00FFFFFF + 1) % TD_RTC_TICKS_PER_SECOND)
 
 /** Use keepalive flag */
-#define TD1202_KEEPALIVE
+#define USE_KEEPALIVE
 
 /** @} */
 
@@ -102,7 +120,7 @@
 /** @addtogroup RTC_GLOBAL_VARIABLES Global Variables
  * @{ */
 
-#ifdef TD1202_KEEPALIVE
+#ifdef USE_KEEPALIVE
 /** Keep-alive flag */
 volatile bool TD_RTC_KeepAlive = false;
 #endif
@@ -146,7 +164,7 @@ static uint32_t TD_RTC_OverflowCounter = 0;
 
 static int TD_RTC_OffsetTime = 0;
 
-#ifdef TD1202_KEEPALIVE
+#ifdef USE_KEEPALIVE
 /** The user keep-alive interrupt handler */
 TD_RTC_handler_t TD_RTC_KeepAliveHandler = 0;
 
@@ -193,11 +211,14 @@ static uint8_t TD_RTC_EM1_Request = 0;
  ******************************************************************************/
 void PendSV_Handler(void)
 {
+	IRQ_PRINTF("PendSV IRQ enter\r\n");
+
 	// Clear flag
 	SCB->ICSR |= SCB_ICSR_PENDSVCLR_Msk;
 
 	// Call Handler
 	TD_RTC_SystemHandler();
+	IRQ_PRINTF("PendSV IRQ exit\r\n");
 }
 
 /***************************************************************************//**
@@ -212,11 +233,15 @@ void PendSV_Handler(void)
  ******************************************************************************/
 void SysTick_Handler(void)
 {
+	IRQ_PRINTF("SysTick IRQ enter 0x%08X\r\n", TD_RTC_UserHandler);
+
 	// Clear flag
 	SCB->ICSR |= SCB_ICSR_PENDSTCLR_Msk;
 
 	// Call Handler
 	TD_RTC_UserHandler();
+
+	IRQ_PRINTF("SysTick IRQ exit\r\n");
 }
 
 /***************************************************************************//**
@@ -233,6 +258,17 @@ void SysTick_Handler(void)
 #ifndef LIB_TDCORE_TINY
 void RTC_IRQHandler(void)
 {
+	IRQ_PRINTF("RTC IF :0x%08X\r\n", RTC->IF);
+	IRQ_PRINTF("RTC IRQ enter   SYS:%d USR:%d OF:%d\r\n",
+		!!(RTC->IF & RTC_IF_COMP0),
+		!!(RTC->IF & RTC_IF_COMP1),
+		!!(RTC->IF & RTC_IF_OF));
+	IRQ_PRINTF("RTC IRQ EN      SYS:%d USR:%d\r\n",
+		!!(RTC->IEN & RTC_IF_COMP0),
+		!!(RTC->IEN & RTC_IF_COMP1));
+	IRQ_PRINTF("RTC IRQ handler SYS:0x%08X USR:0x%08X\r\n",
+		TD_RTC_SystemHandler,
+		TD_RTC_UserHandler);
 	if (RTC->IF & RTC_IF_COMP0) {
 
 		// Clear interrupt source, first, to catch another interrupt ASAP if
@@ -271,8 +307,7 @@ void RTC_IRQHandler(void)
 			TD_RTC_OverflowHandler();
 		}
 
-#ifdef TD1202_KEEPALIVE
-
+#ifdef USE_KEEPALIVE
 		// Set Keep-alive flag if keep-alive period is fine
 		if ((RTC->IEN & RTC_IF_OF) && (TD_RTC_KeepAliveLimit != 0)) {
 			if (++TD_RTC_KeepAliveCounter >= (TD_RTC_KeepAliveLimit >> 9)) {
@@ -280,9 +315,10 @@ void RTC_IRQHandler(void)
 				TD_RTC_KeepAlive = true;
 			}
 		}
-	}
 #endif
 
+	}
+	IRQ_PRINTF("RTC IRQ exit\r\n");
 }
 #endif
 
@@ -322,7 +358,7 @@ void TD_RTC_Init(TD_RTC_handler_t function)
 
 	// Enable RTC overflow interrupt for keep-alive
 
-#ifdef TD1202_KEEPALIVE
+#ifdef USE_KEEPALIVE
 	TD_RTC_KeepAlive = false;
 
 #ifndef LIB_TDCORE_TINY
@@ -334,6 +370,15 @@ void TD_RTC_Init(TD_RTC_handler_t function)
 	RTC_IntEnable(RTC_IF_OF);
 #endif
 
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Abort delay in progress.
+ ******************************************************************************/
+void TD_RTC_DelayAbort(void)
+{
+	TD_RTC_AbortDelay = true;
 }
 
 /***************************************************************************//**
@@ -368,8 +413,20 @@ bool TD_RTC_Delay(uint32_t duration)
 	tfp_printf("d:%d\r\n", duration);
 #endif
 
-	/* Empty RTC delay must be throw away */
+	/* Empty RTC delay must be throw away. No RTC activated, no delay */
 	if (!duration) {
+		return true;
+	}
+	if (!(RTC->CTRL&RTC_CTRL_EN)) {
+		while (duration) {
+			volatile unsigned int count = 500;
+
+			// Required delay, do not remove!
+			while (count--) {
+				;
+			}
+			duration--;
+		}
 		return true;
 	}
 	TD_RTC_AbortDelay = false;
@@ -394,9 +451,9 @@ bool TD_RTC_Delay(uint32_t duration)
 	while (!end_delay && !TD_RTC_AbortDelay) {
 
 #ifdef DEBUG_RTC_DELAY_INFO
-		//tfp_printf("lp:%06X,%06X\r\n",RTC->CNT,RTC->COMP0);
-		//tfp_printf("l%d\r\n",RTC->COMP0);
-		//tfp_printf(".");
+		tfp_printf("lp:%06X,%06X\r\n", RTC->CNT, RTC->COMP0);
+		tfp_printf("l%d\r\n", RTC->COMP0);
+		tfp_printf(".");
 #endif
 
 		// At this point, if system handler is triggered, it has been called.
@@ -430,7 +487,7 @@ bool TD_RTC_Delay(uint32_t duration)
 		/* If COMP0 has triggered, we have delta_alarm at 0xFFFFFF and alarm
 		 * just triggered during WAIT_BUSY
 		 * Alarm is just NOW */
-		if (RTC->IF & RTC_IF_COMP0){
+		if (RTC->IF & RTC_IF_COMP0) {
 			delta_alarm = 0;
 		}
 
@@ -444,7 +501,7 @@ bool TD_RTC_Delay(uint32_t duration)
 		if (delta_delay <= 4) {
 
 #ifdef DEBUG_RTC_DELAY_INFO
-			uint32_t cd=RTC->CNT;
+			uint32_t cd = RTC->CNT;
 #endif
 
 			__set_PRIMASK(msk);
@@ -539,7 +596,9 @@ bool TD_RTC_Delay(uint32_t duration)
 #endif
 
 			// Fallback method to active wait ...
-			while (!(RTC->IF & RTC_IF_COMP0));
+			while (!(RTC->IF & RTC_IF_COMP0)) {
+				;
+			}
 		} else {
 
 #ifdef DEBUG_RTC_DELAY_INFO
@@ -565,7 +624,9 @@ bool TD_RTC_Delay(uint32_t duration)
 
 			if (!wait_delay && it_status && delta_alarm < 4) {
 				//tfp_printf("DELTA_ALARM!\r\n");
-				while (!(RTC->IF & RTC_IF_COMP0));
+				while (!(RTC->IF & RTC_IF_COMP0)) {
+					;
+				}
 			} else {
 
 				// Enter EM2. At this time RTC->CNT could be between rtc_now and
@@ -594,6 +655,10 @@ bool TD_RTC_Delay(uint32_t duration)
 		}
 		last_delta_delay = delta_delay;
 		last_delta_alarm = delta_alarm;
+
+#ifdef DEBUG_RTC_DELAY
+		tfp_printf("_\r\n");
+#endif
 
 		// Handle actual IRQ, we have a RTC IRQ, one we are waiting for
 		if (RTC->IF & RTC_IF_COMP0) {
@@ -653,6 +718,10 @@ bool TD_RTC_Delay(uint32_t duration)
 			// We have another IRQ. Be careful, RTC IRQ can appear at any time.
 			extra_check = true;
 		}
+
+#ifdef DEBUG_RTC_DELAY
+		tfp_printf("+%d %d\r\n", wait_delay, extra_check);
+#endif
 
 		// If we are waiting for an alarm, no problem, alarm will occur and
 		// standard handler will be called, no special processing required.
@@ -728,8 +797,16 @@ bool TD_RTC_Delay(uint32_t duration)
 			}
 		}
 
+#ifdef DEBUG_RTC_DELAY
+		tfp_printf("*\r\n");
+#endif
+
 		// Let IRQ go, if other IRQs are pending, they will execute here
 		__set_PRIMASK(msk);
+
+#ifdef DEBUG_RTC_DELAY
+		tfp_printf("/\r\n");
+#endif
 
 		// --- end time critical ---
 	}
@@ -886,7 +963,7 @@ void TD_RTC_UserAlarmAfter(int32_t delay)
 void TD_RTC_EnterPowerMode(void)
 {
 
-	switch(TD_RTC_PowerMode) {
+	switch (TD_RTC_PowerMode) {
 	case TD_RTC_EM0:
 		break;
 
@@ -919,9 +996,13 @@ void TD_RTC_EnterPowerMode(void)
  * @param[in] mode
  *   The TD_RTC_PowerMode_t power mode that wil be entered on next call to
  *   TD_RTC_EnterPowerMode().
+ *
+ * @param[in] line
+ *   The line number at which the power mode changed is set.
  ******************************************************************************/
-void TD_RTC_SetPowerMode(TD_RTC_PowerMode_t mode)
+void TD_RTC_SetPowerModeInternal(TD_RTC_PowerMode_t mode, uint32_t line)
 {
+	POWER_MODE_PRINTF("TD_RTC_SetPowerMode req:%d line:%d\r\n", mode, line);
 	if (mode == TD_RTC_EM1) {
 		TD_RTC_EM1_Request++;
 	}
@@ -944,11 +1025,13 @@ TD_RTC_PowerMode_t TD_RTC_GetPowerMode(void)
 /***************************************************************************//**
  * @brief
  *   Enter into sleep mode (default is EM2).
+ *
+ *   @note
+ *   If IRQ are pending (for example IRQ are masked), CPU will not go to sleep
+ *   and will immediatly wakeup
  ******************************************************************************/
 void TD_RTC_Sleep(void)
 {
-	RTC_IntClear(RTC_IFC_COMP0);
-	RTC_IntEnable(RTC_IF_COMP0);
 	TD_RTC_EnterPowerMode();
 }
 
@@ -997,7 +1080,7 @@ TD_RTC_handler_t TD_RTC_SetOverflowHandler(TD_RTC_handler_t function)
 	return old;
 }
 
-#ifdef TD1202_KEEPALIVE
+#ifdef USE_KEEPALIVE
 /***************************************************************************//**
  * @brief
  *   Set keep-alive interrupt handler.
@@ -1044,7 +1127,7 @@ void TD_RTC_CalibratedDelay(uint32_t udelay)
 /***************************************************************************//**
  * @brief
  *   Returns the difference between current time and a reference time.
- *   Maximum difference handled 0xFFFFFF ticks (about 511 s)
+ *   Maximum difference handled is 0xFFFFFF ticks (about 511 s)
  *
  * @param[in] reference
  *   The reference time to compare to.
@@ -1060,7 +1143,7 @@ uint32_t TD_RTC_TimeDiff(uint32_t reference)
 /***************************************************************************//**
  * @brief
  *   Returns the difference between current time and a reference time.
- *   Maximum difference handled 0xFFFFFF ticks (about 511 s)
+ *   Maximum difference handled is 0xFFFFFF ticks (about 511 s)
  *
  * @param[in] reference
  *   The reference time to compare to.
@@ -1146,7 +1229,7 @@ void TD_RTC_Process(void)
  *   Returns the current system time in seconds.
  *
  * @note
- *   it should return -1 if system time is not available, but it currently
+ *   It should return -1 if system time is not available, but it currently
  *   doesn't.
  *****************************************************************************/
 time_t __time32(time_t *timer)

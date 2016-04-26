@@ -2,10 +2,10 @@
  * @file
  * @brief Simple accelerometer data monitor application for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.1
+ * @version 1.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2014-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -41,9 +41,12 @@
 #include <td_core.h>
 #include <td_uart.h>
 #include <td_printf.h>
+#include <td_stream.h>
 #include <td_flash.h>
+
 #include <td_accelero.h>
 #include <td_geoloc.h>
+
 #include <td_sensor.h>
 
 #include <td_config.h>
@@ -85,11 +88,11 @@ static void DataCallback(TD_ACCELERO_Data_t data[32], uint8_t count, bool
  ******************************************************************************/
 void TD_USER_Setup(void)
 {
-	// Initialize the LEUART
-	init_printf(TD_UART_Init(9600, true, false),
-				TD_UART_Putc,
-				TD_UART_Start,
-				TD_UART_Stop);
+	TD_UART_Options_t options = {LEUART_DEVICE, LEUART_LOCATION, 9600, 8, 'N',
+		1, false};
+
+	// Open an I/O stream using LEUART0
+	TD_UART_Open(&options, TD_STREAM_RDWR);
 
 	// Set flash variables version
 	TD_FLASH_DeleteVariables();
@@ -104,14 +107,13 @@ void TD_USER_Setup(void)
 	// Monitor accelerometer event (movement)
 	TD_ACCELERO_MonitorData(true,	// Monitoring enabled
 		false,						// Low-power mode disabled
-		TD_ACCELERO_1HZ, 			// Sampling rate 1 Hz
+		TD_ACCELERO_10HZ, 			// Sampling rate 10 Hz
 		TD_ACCELERO_ALL_AXIS,		// Axis mask: all axis
 		TD_ACCELERO_2G,				// Scale 2 g
 		0,							// High-pass filter disabled
 		TD_ACCELERO_STREAM,			// FIFO stream mode
-		10,							// Update watermark disabled (32 max, 0 is real-time)
+		1,							// Update watermark enabled (32 max, 0 is real-time)
 		DataCallback);
-	TD_ACCELERO_Dump();
 }
 
 /***************************************************************************//**

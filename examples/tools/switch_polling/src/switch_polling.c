@@ -2,10 +2,10 @@
  * @file
  * @brief Switch polling demonstration application for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2014-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -37,6 +37,7 @@
 #include <td_rtc.h>
 #include <td_uart.h>
 #include <td_printf.h>
+#include <td_stream.h>
 #include <td_flash.h>
 
 #include <td_tools_switch.h>
@@ -54,13 +55,16 @@
 
 static uint8_t SwitchId;
 
+/**
+ * @brief  User setup function
+ **/
 void TD_USER_Setup(void)
 {
-	init_printf(TD_UART_Init(9600, true, false),
-		TD_UART_Putc,
-		TD_UART_Start,
-		TD_UART_Stop);
-	tfp_printf("Start\r\n");
+	TD_UART_Options_t options = {LEUART_DEVICE, LEUART_LOCATION, 9600, 8, 'N',
+		1, false};
+
+	// Open an I/O stream using LEUART0
+	TD_UART_Open(&options, TD_STREAM_RDWR);
 
 	// If using DB2/DB3
   	GPIO_DbgSWDIOEnable(false);
@@ -75,10 +79,10 @@ void TD_USER_Setup(void)
 	// false, 2, 5, 8);
 
 	// Interrupt handling
-	// TD_TOOLS_SWITCH_Start(SwitchId);
+	 TD_TOOLS_SWITCH_Start(SwitchId);
 
 	// 1 s period polling handling
-	TD_TOOLS_SWITCH_StartPolling(SwitchId, T1S);
+	//TD_TOOLS_SWITCH_StartPolling(SwitchId, T1S);
 }
 
 /**
@@ -96,7 +100,7 @@ void TD_USER_Loop(void)
 		tfp_printf("TD_TOOLS_SWITCH_OFF\r\n");
 		break;
 
-	case TD_TOOLS_SWITCH_STARTUP_PUSH:
+	case TD_TOOLS_SWITCH_STARTUP_PUSHED:
 		tfp_printf("TD_TOOLS_SWITCH_STARTUP_PUSH\r\n");
 		break;
 

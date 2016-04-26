@@ -2,10 +2,10 @@
  * @file
  * @brief Sensor Monitoring
  * @author Telecom Design S.A.
- * @version 1.2.0
+ * @version 1.3.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -376,11 +376,6 @@ static bool PrivateMonitorSwitch(bool enable, GPIO_Port_TypeDef port,
 	if (enable) {
 		if (Module.switch_count >= CONFIG_TD_SENSOR_MAX_SWITCH) {
 			return false;
-		} else if (Module.switch_count == 0) {
-
-			// Enable GPIO IRQs
-			NVIC_EnableIRQ(GPIO_EVEN_IRQn);
-			NVIC_EnableIRQ(GPIO_ODD_IRQn);
 		}
 		monitored = false;
 		index = -1;
@@ -632,18 +627,18 @@ void DYNAMIC(TD_SENSOR_SwitchEventProcess)(void)
 	uint32_t mask;
 	TD_SENSOR_SwitchState_t tmp;
 
-	while (TD_SENSOR_SwitchStateList_bottom != TD_SENSOR_SwitchStateList_top){
-		mask=__get_PRIMASK();
+	while (TD_SENSOR_SwitchStateList_bottom != TD_SENSOR_SwitchStateList_top) {
+		mask = __get_PRIMASK();
 		__set_PRIMASK(1);
 		tmp.param = TD_SENSOR_SwitchStateList[TD_SENSOR_SwitchStateList_bottom].param;
 		TD_SENSOR_SwitchStateList_bottom++;
-		if (TD_SENSOR_SwitchStateList_bottom >= CONFIG_TD_SENSOR_MAX_SWITCH_EVENT){
+		if (TD_SENSOR_SwitchStateList_bottom >= CONFIG_TD_SENSOR_MAX_SWITCH_EVENT) {
 			TD_SENSOR_SwitchStateList_bottom = 0;
 		}
 		__set_PRIMASK(mask);
 
 		// If event is 0xFF it was canceled
-		if (tmp.param != 0xFF){
+		if (tmp.param != 0xFF) {
 			if ((void *) TD_SENSOR_EventProcess != (void *) NULL) {
 				TD_SENSOR_EventProcess(SENSOR_SEND_SWITCH, tmp.param);
 			} else {
@@ -792,7 +787,6 @@ void TD_SENSOR_BatteryCallBack(bool monitor_lan_battery)
 				if (battery_level_mv >= Module.battery.level_ok) {
 					Module.battery.state = true;
 					SaveCurrentStateToFlash();
-
 					if ((void *) TD_SENSOR_EventProcess != (void *) NULL) {
 						TD_SENSOR_EventProcess(SENSOR_SEND_BATTERY, 0);
 					} else {
@@ -1189,7 +1183,75 @@ void TD_SENSOR_SetCustomBootCause(uint8_t cause)
 //TODO: Breaks API!!!
 bool TD_SENSOR_MonitorConnection(bool enable, uint32_t interval)
 {
-	return TD_SENSOR_MonitorConnectionExt(enable, interval, NULL);
+	if (Module.type == SENSOR_DEVICE || Module.type == SENSOR_GATEWAY) {
+		if (enable) {
+
+			// If not already enabled
+			if (!Module.connection.monitor) {
+
+				// Enable keep-alive monitoring even if the gateway does not
+				// reply!
+				Module.connection.timer = TD_SCHEDULER_Append(interval,
+					0,
+					0,
+					0xFF,
+					ConnectionCallBack,
+					0);
+				if (Module.connection.timer != 0xFF) {
+					if (Module.type == SENSOR_DEVICE) {
+							TD_SENSOR_DEVICE_KeepAlive(true,
+								interval,
+								Module.rssi.monitor,
+								Module.rssi.level_low,
+								Module.rssi.level_ok);
+					} else {
+						TD_SENSOR_GATEWAY_SendKeepAliveBroadcast(true,
+							interval,
+							0,
+							0);
+					}
+					Module.connection.monitor = enable;
+					Module.connection.interval = interval;
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+
+				// Just update the interval
+				TD_SCHEDULER_SetInterval(Module.connection.timer,
+					interval,
+					0,
+					0);
+				Module.connection.interval = interval;
+				return true;
+			}
+		} else if (!enable && Module.connection.monitor) {
+			if (Module.type == SENSOR_DEVICE) {
+				if (TD_SENSOR_DEVICE_KeepAlive(false, 0, false, 0, 0) ==
+					ACK_OK) {
+					TD_SCHEDULER_Remove(Module.connection.timer);
+					Module.connection.monitor = false;
+					Module.rssi.monitor = false;
+					Module.connection.interval = 0;
+					Module.connection.timer = 0xFF;
+					return true;
+				} else {
+					return false;
+				}
+			} else if (Module.type == SENSOR_GATEWAY) {
+				TD_SCHEDULER_Remove(Module.connection.timer);
+				Module.connection.monitor = false;
+				Module.rssi.monitor = false;
+				Module.connection.interval = 0;
+				Module.connection.timer = 0xFF;
+			} else {
+				return false;
+			}
+		}
+		return true;
+	}
+	return false;
 }
 
 /***************************************************************************//**
@@ -1247,18 +1309,7 @@ bool TD_SENSOR_MonitorConnectionExt(bool enable, uint32_t interval,
 					if (Module.type == SENSOR_DEVICE) {
 						if (Module.connection.user_callback != 0) {
 							(*Module.connection.user_callback)(enable);
-						} else {
-							TD_SENSOR_DEVICE_KeepAlive(true,
-								interval,
-								Module.rssi.monitor,
-								Module.rssi.level_low,
-								Module.rssi.level_ok);
 						}
-					} else {
-						TD_SENSOR_GATEWAY_SendKeepAliveBroadcast(true,
-							interval,
-							0,
-							0);
 					}
 					Module.connection.monitor = enable;
 					Module.connection.interval = interval;
@@ -1280,27 +1331,7 @@ bool TD_SENSOR_MonitorConnectionExt(bool enable, uint32_t interval,
 			if (Module.type == SENSOR_DEVICE) {
 				if (Module.connection.user_callback != 0) {
 					(*Module.connection.user_callback)(enable);
-				} else {
-					if (TD_SENSOR_DEVICE_KeepAlive(false, 0, false, 0, 0) ==
-						ACK_OK) {
-						TD_SCHEDULER_Remove(Module.connection.timer);
-						Module.connection.monitor = false;
-						Module.rssi.monitor = false;
-						Module.connection.interval = 0;
-						Module.connection.timer = 0xFF;
-						return true;
-					} else {
-						return false;
-					}
 				}
-			} else if (Module.type == SENSOR_GATEWAY) {
-				TD_SCHEDULER_Remove(Module.connection.timer);
-				Module.connection.monitor = false;
-				Module.rssi.monitor = false;
-				Module.connection.interval = 0;
-				Module.connection.timer = 0xFF;
-			} else {
-				return false;
 			}
 			Module.connection.user_callback = 0;
 		}
@@ -1691,16 +1722,20 @@ bool TD_SENSOR_Init(TD_SENSOR_ModuleType_t type, uint32_t lan_frequency,
  ******************************************************************************/
 void TD_SENSOR_InitExtended(void)
 {
-	ReadBootCause();
-	TD_SENSOR_InternalInit();
+	memset(&Module, 0, sizeof (TD_SENSOR_Configuration_t));
+
+	// Initialize states
+	Module.temperature.state = TEMPERATURE_OK;
+
+	// Initialize timers
+	Module.temperature.timer = 0xFF;
+	Module.connection.timer = 0xFF;
+	Module.keepalive.timer = 0xFF;
 
 	// Load current state which must be persistent (boot monitoring, battery
 	// state...) from Flash memory
 	LoadCurrentStateFromFlash();
-	if (!TD_FLASH_DeclareVariable((uint8_t *) &BrownOutReboot,
-		sizeof (BrownOutReboot), 0)) {
-		BrownOutReboot = 0;
-	}
+	TD_SENSOR_TRANSMITTER_Init();
 }
 
 /***************************************************************************//**

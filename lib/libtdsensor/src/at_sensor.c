@@ -2,7 +2,7 @@
  * @file
  * @brief AT Sensor
  * @author Telecom Design S.A.
- * @version 1.1.2
+ * @version 1.1.3
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -237,6 +237,7 @@ static uint8_t sensor_persist(bool write, uint8_t *buffer, uint8_t count)
 	int i;
 	TD_SENSOR_Configuration_t *temp;
 	TD_SENSOR_Configuration_t config;
+	uint16_t concat;
 
 	if (buffer != 0 && count != 0) {
 		if (write == true) {
@@ -256,6 +257,17 @@ static uint8_t sensor_persist(bool write, uint8_t *buffer, uint8_t count)
 			memcpy(buffer, (uint8_t *) temp, sizeof(TD_SENSOR_Configuration_t));
 			buffer += sizeof(TD_SENSOR_Configuration_t);
 
+			// Save switch configuration
+			for (i = 0; i < CONFIG_TD_SENSOR_MAX_SWITCH; i++) {
+				concat = 0xFFFF;
+				if (temp->switches[i].monitor) {
+					TD_SENSOR_SwitchConfiguration_t sw = temp->switches[i];
+					concat = (sw.port & 0x0007) | ((sw.bit & 0x0F) << 3) | (sw.falling << 7);
+					concat |= (sw.rising << 8) | (sw.pull << 9) | (sw.pull_state << 10);
+				}
+				*buffer++ = (concat >> 8) & 0xFF;
+				*buffer++ = concat & 0xFF;
+			}
 		} else {
 
 			// Profiles must be set before sensor is initialized as it might
@@ -278,10 +290,30 @@ static uint8_t sensor_persist(bool write, uint8_t *buffer, uint8_t count)
 			// Apply sensor configuration
 			TD_SENSOR_SetModuleConfiguration(&config);
 			buffer += sizeof(TD_SENSOR_Configuration_t);
+
+			// Restore switch configuration
+			for (i = 0; i < CONFIG_TD_SENSOR_MAX_SWITCH; i++) {
+				concat = (*buffer++) << 8;
+				concat |= (*buffer++);
+				if (concat != 0xFFFF) {
+					if (!TD_SENSOR_MonitorSwitch(
+						true,		//enable
+						(GPIO_Port_TypeDef) (concat&0x07),	//port
+						(concat>>3) & 0x0F,	//bit
+						(concat>>7) & 0x01,	//falling
+						(concat>>8) & 0x01,	//rising
+						(concat>>9) & 0x01,	//pull
+						(concat>>10) & 0x01,	//pull_state
+						0 ) ) {
+						// trap
+					}
+				}
+			}
 		}
 	}
 	return sizeof (TD_SENSOR_Configuration_t) +
-		(3 * AT_SENSOR_PROFILE_TYPE_COUNT);
+		(3 * AT_SENSOR_PROFILE_TYPE_COUNT) +
+		(CONFIG_TD_SENSOR_MAX_SWITCH * 2);
 }
 
 /***************************************************************************//**

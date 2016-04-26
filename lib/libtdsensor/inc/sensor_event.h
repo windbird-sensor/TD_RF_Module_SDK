@@ -2,10 +2,10 @@
  * @file
  * @brief API for sending Event frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.3.0
+ * @version 1.4.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -110,6 +110,18 @@ extern "C" {
 		EVENT_CUSTOM_23 = 150,
 		EVENT_CUSTOM_24 = 151,
 		EVENT_CUSTOM_25 = 152,
+		EVENT_CUSTOM_26 = 153,
+		EVENT_CUSTOM_27 = 154,
+		EVENT_CUSTOM_28 = 155,
+		EVENT_CUSTOM_29 = 156,
+		EVENT_CUSTOM_30 = 157,
+		EVENT_CUSTOM_31 = 158,
+		EVENT_CUSTOM_32 = 159,
+		EVENT_CUSTOM_33 = 160,
+		EVENT_CUSTOM_34 = 161,
+		EVENT_CUSTOM_35 = 162,
+		EVENT_CUSTOM_36 = 163,
+		EVENT_CUSTOM_37 = 164,
 	}
 	TD_SENSOR_EVENT_Types_t;
 

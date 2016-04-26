@@ -2,10 +2,10 @@
  * @file
  * @brief TD LAN/SGIFOX gateway example for TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.2
+ * @version 2.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -33,13 +33,16 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
 #include <efm32.h>
-#include <em_gpio.h>
+
 #include <td_core.h>
 #include <td_uart.h>
 #include <td_printf.h>
+#include <td_stream.h>
 #include <td_rtc.h>
 #include <td_gpio.h>
+
 #include <td_lan.h>
 #include <td_sigfox.h>
 
@@ -65,8 +68,11 @@
  ******************************  CONSTANTS  ************************************
  ******************************************************************************/
 
-#define FREQUENCY		869000000			/**< Channel frequency */
-#define POWER_LEVEL		14					/**< Transmit power level */
+#define FREQUENCY_ETSI		869000000			/**< Channel frequency */
+#define POWER_LEVEL_ETSI    14					/**< Transmit power level */
+
+#define FREQUENCY_FCC		905000000			/**< Channel frequency */
+#define POWER_LEVEL_FCC	    -2					/**< Transmit power level */
 
 /*******************************************************************************
  **************************   PUBLIC FUNCTIONS   *******************************
@@ -78,14 +84,13 @@
  ******************************************************************************/
 void TD_USER_Setup(void)
 {
+	TD_UART_Options_t options = {LEUART_DEVICE, LEUART_LOCATION, 9600, 8, 'N',
+		1, false};
     int i, j, delay;
     TD_LAN_frame_t RX, TX;
 
-    // Initialize the LEUART
-    init_printf(TD_UART_Init(9600, true, false),
-		TD_UART_Putc,
-		TD_UART_Start,
-		TD_UART_Stop);
+	// Open an I/O stream using LEUART0
+	TD_UART_Open(&options, TD_STREAM_RDWR);
 
     // Initialize the LAN
     if (TD_LAN_Init(true, (NODE_ADDRESS | NODE_NETWORK), NODE_MASK) == false) {
@@ -93,9 +98,20 @@ void TD_USER_Setup(void)
 	}
 
     // Set the operating frequency and power level
-    if (TD_LAN_SetFrequencyLevel(FREQUENCY, POWER_LEVEL) == false) {
-    	printf("Problem while setting frequency/level\r\n");
+    if (CONFIG_ITU_ISM_REGION == 1) {
+    	if (TD_LAN_SetFrequencyLevel(FREQUENCY_ETSI, POWER_LEVEL_ETSI) == false) {
+    		printf("Problem while setting frequency/level\r\n");
+    	}
+    } else if (CONFIG_ITU_ISM_REGION == 2) {
+    	if (TD_LAN_SetFrequencyLevel(FREQUENCY_FCC, POWER_LEVEL_FCC) == false) {
+    		printf("Problem while setting frequency/level\r\n");
+    	}
+    } else {
+    	printf("ERROR with CONFIG_ITU_ISM_REGION.\r\n"
+    			"Must be equal to 1 (ETSI) or 2 (FCC).\r\n");
+    	return;
     }
+
     for (i = 1; i < 1000000; i++) {
     	if (TD_LAN_ReceiveFrameSync(&RX)) {
     		tfp_dump("FRAME=", (uint8_t *) &RX, TD_LAN_FRAME_SIZE);

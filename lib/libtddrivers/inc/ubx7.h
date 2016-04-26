@@ -1,4 +1,3 @@
-/** @cond TD_PRIVATE */
 /***************************************************************************//**
  * @file
  * @brief Driver definition for the UBlox 7 GPS used in TD12xx RF modules.
@@ -6,7 +5,7 @@
  * @version 1.0.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -48,6 +47,18 @@ extern "C" {
 	 * @brief UBlox 7 GPS driver.
 	 * @{
 	 **************************************************************************/
+
+	/***************************************************************************
+	 **************************  DEFINES   *************************************
+	 **************************************************************************/
+
+	/** @addtogroup TD_UBX7_DEFINES Defines
+	 * @{ */
+
+	/** Maximum number of UBlox 7 SV info channels */
+#define TD_UBX7_NAV_SVINFO_MAX_CHANNEL 16
+
+	/** @} */
 
 	/***************************************************************************
 	 **************************  TYPEDEFS   ************************************
@@ -95,8 +106,6 @@ extern "C" {
 		uint16_t tmCfg; 			///< Time mark configuration
 		uint16_t wnoOrDate;			///< Actual week number or yearSince2000/Month (YYMM), depending on flags below
 	}  TD_UBX7_AidIni_t;
-
-#define TD_UBX7_NAV_SVINFO_MAX_CHANNEL 16
 
 	/** NAV-SVINFO channel structure */
 	typedef struct {
@@ -350,4 +359,3 @@ extern "C" {
 #endif
 
 #endif // __UBX7_H
-/** @endcond */

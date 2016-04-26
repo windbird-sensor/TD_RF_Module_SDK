@@ -2,10 +2,10 @@
  * @file
  * @brief LED API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2014-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -31,15 +31,21 @@
  *
  ******************************************************************************/
 
+#include <em_cmu.h>
+#include <em_letimer.h>
+
 #include <td_module.h>
 #include <td_gpio.h>
 #include <td_scheduler.h>
 #include <td_core.h>
 #include <td_printf.h>
+#include <td_rtc.h>
+#include <td_measure.h>
 
 #include "td_tools_led.h"
 
 //#define LED_DEBUG
+//#define LED_DEBUG_COMP
 
 #ifdef LED_DEBUG
 /** Turn on trace mode if tfp_printf not commented */
@@ -48,6 +54,17 @@
 /** Turn on trace mode if tfp_printf not commented */
 #define DEBUG_PRINTF(...)
 #endif
+
+#ifdef LED_DEBUG_COMP
+/** Turn on trace mode if tfp_printf not commented */
+#define DEBUG_PRINTF_COMP(...) tfp_printf(__VA_ARGS__)
+#else
+/** Turn on trace mode if tfp_printf not commented */
+#define DEBUG_PRINTF_COMP(...)
+#endif
+
+/** Tick compensation duration in ms */
+#define TICK_COMPENS	TMS(30)
 
 /***************************************************************************//**
  * @addtogroup LED
@@ -76,15 +93,25 @@
 
 /** LED structure */
 typedef struct {
+	uint16_t pwm_route;
 	TD_GPIO_Port_TypeDef port;
 	GPIO_DriveMode_TypeDef drive;
+	LETIMER_TypeDef *letimer;
+	TD_GPIO_Port_TypeDef port_aux;
+	GPIO_DriveMode_TypeDef drive_aux;
+	uint8_t timer_compens;
+	volatile uint8_t timer;
 	uint8_t bit;
+	uint8_t bit_aux;
 	uint8_t inverted;
+	uint8_t pwm_value;
+	uint8_t pwm_period;
 	bool faint;
-	uint8_t timer;
 	volatile bool state;
 	bool polarity;
+	bool vcomp;
 } Led_t;
+
 
 /** @} */
 
@@ -112,6 +139,56 @@ static Led_t Leds[MAX_LED];
 
 /***************************************************************************//**
  * @brief
+ *  Compens timer callback function.
+ *
+ * @param[in] id
+ *   The callback argument containing the LED id.
+ *
+ * @param[in] repeats
+ *   The number of repeats left, unused.
+ ******************************************************************************/
+static void TimerCompens(uint32_t arg, uint8_t repetition)
+{
+	int32_t compens;
+	Led_t *p = &Leds[arg];
+#ifdef LED_DEBUG_COMP
+	uint32_t rtc = RTC->CNT;
+#endif
+	int mv = TD_MEASURE_VoltageRepeat();
+
+	DEBUG_PRINTF_COMP("CLK:%d rtc:%d arg:%d letimer:0x%08X\r\n",
+		((CMU->HFPERCLKEN0 >> _CMU_HFPERCLKEN0_ADC0_SHIFT)),
+		RTC->CNT - rtc, arg, p->letimer);
+	if (mv > 3300) {
+		mv = 3300;
+	}
+	if (p->port_aux != TD_GPIO_PortNull) {
+		compens = (((uint32_t) p->pwm_period) * (3300 - mv)) >> 10;
+		if (mv < 2600) {
+			compens -= ((uint32_t) p->pwm_period * (2600 - mv)) >> 11;
+		} else {
+			compens -= ((uint32_t) p->pwm_period * (mv - 2600)) >> 11;
+		}
+	} else {
+		compens = (((uint32_t) p->pwm_value) *
+			((4 << 10) + (3300 - mv) * 8)) >> 12;
+	}
+	if (compens > 254) {
+		compens = 254;
+	}
+	if (compens < 1){
+		compens = 1;
+	}
+	DEBUG_PRINTF_COMP("mv:%d csgne:%d, out:%d\r\n",
+		mv, p->pwm_value, compens);
+	//LETIMER_CompareSet(p->letimer, 1, compens);
+
+	// Size optimization
+	p->letimer->COMP1 = compens;
+}
+
+/***************************************************************************//**
+ * @brief
  *  Set a LED state.
  *
  * @param[in] id
@@ -124,18 +201,47 @@ static void SetState(uint8_t id, bool state)
 {
 	Led_t *p = &Leds[id];
 
-	DEBUG_PRINTF("SetState: id:%d, state:%d\r\n",id,state);
+	DEBUG_PRINTF("SetState: id:%d, state:%d p->letimer:%d p->vcomp:%d\r\n",
+		id, state, p->letimer, p->vcomp);
 	if (state) {
-		TD_GPIO_PinModeSet(p->port,	p->bit,	gpioModePushPullDrive,
-			p->polarity ? 1 : 0);
+		TD_GPIO_DriveModeSet(p->port, p->drive);
+		TD_GPIO_PinModeSet(p->port,	p->bit,	gpioModePushPullDrive, p->polarity);
 		if (p->inverted != 0xFF) {
 			TD_GPIO_PinModeSet(Leds[p->inverted].port,Leds[p->inverted].bit,
 					gpioModePushPullDrive, Leds[p->inverted].polarity ? 0 : 1);
 			Leds[p->inverted].state = false;
 		}
+		if (p->letimer){
+			p->letimer->ROUTE=p->pwm_route;
+			TD_GPIO_DriveModeSet(p->port_aux, p->drive_aux);
+			TD_GPIO_PinModeSet(p->port_aux,	p->bit_aux,	gpioModePushPullDrive,
+				p->polarity ? 1 : 0);
+			TD_TOOLS_LED_SetPWM(id,p->pwm_period,p->pwm_value);
+			LETIMER_Enable(p->letimer, true);
+			if (p->vcomp && p->timer_compens==0xFF) {
+				p->timer_compens = TD_SCHEDULER_AppendIrq(
+				0, TICK_COMPENS, 0, 0xFF, TimerCompens, id);
+			}
+		}
 	} else {
-		TD_GPIO_PinModeSet(p->port,p->bit, gpioModeDisabled,
-			p->polarity ? 0 : 1);
+		if (p->letimer) {
+			LETIMER_Enable(p->letimer, false);
+			p->letimer->ROUTE = 0;
+			if (p->timer_compens != 0xFF) {
+				TD_SCHEDULER_Remove(p->timer_compens);
+				p->timer_compens = 0xFF;
+				CMU_ClockEnable(cmuClock_ADC0, false);
+			}
+		}
+
+		 // Floating
+		 TD_GPIO_PinModeSet(p->port,p->bit, gpioModeDisabled, 0);
+		TD_GPIO_PinModeSet(p->port_aux,	p->bit_aux,	gpioModeDisabled, 0);
+		if (p->inverted != 0xFF) {
+			TD_GPIO_PinModeSet(Leds[p->inverted].port,Leds[p->inverted].bit,
+					gpioModeDisabled, Leds[p->inverted].polarity ? 0 : 1);
+			Leds[p->inverted].state = false;
+		}
 	}
 	p->state = state;
 }
@@ -194,10 +300,10 @@ static void TimerToggle(uint32_t arg, uint8_t repetition)
  *   The GPIO drive mode to use.
  *
  * @param[in] polarity
- *   Flag set to true if the GPIO is active high, false otherwise.
+ *   Flag set to true if the led is on when pin is high, false otherwise.
  *
  * @return
- *   Returns the switch ID if OK, -1 if there is no more switch available.
+ *   Returns the led ID if OK, -1 if there is no more led available.
  ******************************************************************************/
 // Polarity, true is ON when pin at VCC
 int TD_TOOLS_LED_Init(TD_GPIO_Port_TypeDef port, uint8_t bit,
@@ -212,20 +318,214 @@ int TD_TOOLS_LED_Init(TD_GPIO_Port_TypeDef port, uint8_t bit,
 		return -1;
 	}
 	p->port = port;
-	p->bit = bit;
 	p->drive = drive;
+	p->bit = bit;
 	p->polarity = polarity;
 	p->inverted = 0xFF;
-	if (drive != gpioDriveModeStandard) {
-		TD_GPIO_DriveModeSet(port, drive);
-	}
 
 	// Initialize timer
 	p->timer = 0xFF;
 
+	// PWM
+	p->timer_compens = 0xFF;
+
+	// PWM aux
+	p->port_aux = TD_GPIO_PortNull;
 	// Switch off and set state
 	SetState(LedCount, false);
 	return LedCount++;
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Initialize LED processing on a GPIO with LETIMER.
+ *
+ * @param[in] port_pump
+ *   The GPIO port to use.
+ *
+ * @param[in] bit_pump
+ *   The GPIO bit to use
+ *
+ * @param[in] drive_pump
+ *   The GPIO drive mode to use.
+ *
+ * @param[in] polarity
+ *   Flag set to true if the led is on when pin is high, false otherwise.
+ *
+ * @param[in] letimerId
+ *   LETIMERx associated with led pin
+ *
+ * @param[in] period
+ *   PWM period
+ *
+ * @param[in] value
+ *   PWM value
+ *
+ * @param[in] vcomp
+ *   Enable power voltage compensation
+ *
+ * @param[in] port
+ *   The GPIO port to use.
+ *
+ * @param[in] bit
+ *   The GPIO bit to use
+ *
+ * @param[in] drive
+ *   The GPIO drive mode to use.
+ *
+ * @return
+ *   Returns the Led ID if OK, -1 if there is no more led available.
+ ******************************************************************************/
+// Polarity, true is ON when pin at VCC
+int TD_TOOLS_LED_InitPWM_Pump(TD_GPIO_Port_TypeDef port_pump, uint8_t bit_pump,
+	GPIO_DriveMode_TypeDef drive_pump, bool polarity,uint8_t letimerId,
+	uint8_t period, uint8_t value, uint8_t vcomp, TD_GPIO_Port_TypeDef port,
+	uint8_t bit, GPIO_DriveMode_TypeDef drive)
+{
+	static const LETIMER_Init_TypeDef init = {
+		false, true, false, false, true, false, true, true,
+		letimerUFOAPwm, letimerUFOAPwm, letimerRepeatFree};
+	int handle;
+	Led_t *p;
+	uint32_t loc = 0;
+	CMU_Clock_TypeDef clk;
+
+	handle = TD_TOOLS_LED_Init(port_pump, bit_pump, drive_pump, polarity);
+	p = &Leds[handle];
+	DEBUG_PRINTF("LedInitPWM: port:%c bit:%d drive:%d polarity:%d TIMER:%d out:%d loc:%d ==> %d\r\n",
+		port_pump + 'A',
+		bit_pump,
+		drive_pump,
+		polarity,
+		letimerId & 0x3,
+		((letimerId >> 2) & 0x1),
+		letimerId >> 3,
+		handle);
+	switch (letimerId & 0x3) {
+	case 0:
+		clk = cmuClock_LETIMER0;
+		p->letimer = LETIMER0;
+		break;
+
+	default:
+		TD_Trap(TRAP_TIMER_CONFIG, letimerId);
+		break;
+	}
+	CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
+	CMU_ClockEnable(clk, true);
+	//LETIMER_Reset(p->letimer);
+	LETIMER_Init(p->letimer, &init);
+	switch ((letimerId >> 3) & 0x7) {
+	case LED_LOCATION0:
+		loc = LETIMER_ROUTE_LOCATION_LOC0;
+		break;
+
+	case LED_LOCATION1:
+		loc = LETIMER_ROUTE_LOCATION_LOC1;
+		break;
+
+	//case LED_LOCATION2:
+		//loc = LETIMER_ROUTE_LOCATION_LOC2;
+		//break;
+
+	//case LED_LOCATION3:
+		//loc = LETIMER_ROUTE_LOCATION_LOC3;
+		//break;
+
+	default:
+		TD_Trap(TRAP_TIMER_CONFIG, letimerId);
+		break;
+	}
+	p->pwm_route = (((letimerId >> 2) & 0x1) ?
+		LETIMER_ROUTE_OUT1PEN : LETIMER_ROUTE_OUT0PEN) | loc;
+	p->vcomp = vcomp;
+	p->port_aux = port;
+	p->bit_aux = bit;
+	p->drive_aux = drive;
+	LETIMER_RepeatSet(p->letimer, 0, 0x01);
+	LETIMER_RepeatSet(p->letimer, 1, 0x01);
+	if (!TD_TOOLS_LED_SetPWM(handle, period, value)) {
+		return -1;
+	}
+	DEBUG_PRINTF("LedInitPWM_pump: port:%c bit:%d drive:%d ==> %d\r\n",
+		port_pump + 'A', bit_pump, drive_pump, handle);
+	return handle;
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Re-init LETIMER for LED PWM operation
+ *
+ * @param[in] id
+ *   LED id.
+ *
+ * @param[in] period
+ *   PWM period (0 : do not change actual value)
+ *
+ * @param[in] value
+ *   PWM value
+ *
+ * @return
+ *   Returns false if an id is invalid, true otherwise.
+ ******************************************************************************/
+void TD_TOOLS_LED_ReinitPWM (uint8_t id, uint8_t period, uint8_t value)
+{
+	Led_t *p;
+	p = &Leds[id];
+	static const LETIMER_Init_TypeDef init = {
+		false,
+		true,
+		false,
+		false,
+		true,
+		false,
+		true,
+		true,
+		letimerUFOAPwm,
+		letimerUFOAPwm,
+		letimerRepeatFree
+	};
+
+	CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
+	CMU_ClockEnable(cmuClock_LETIMER0, true);
+	LETIMER_Init(p->letimer, &init);
+	LETIMER_RepeatSet(p->letimer, 0, 0x01);
+	LETIMER_RepeatSet(p->letimer, 1, 0x01);
+	TD_TOOLS_LED_SetPWM(id, period, value);
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Set PWM period/value for led (do not light on or off a led, just set period)
+ *
+ * @param[in] id
+ *   LED id.
+ *
+ * @param[in] period
+ *   PWM period (0 : do not change actual value)
+ *
+ * @param[in] value
+ *   PWM value
+ *
+ * @return
+ *   Returns false if an id is invalid, true otherwise.
+ ******************************************************************************/
+int TD_TOOLS_LED_SetPWM(uint8_t id,uint8_t period, uint8_t value)
+{
+	Led_t *p;
+
+	DEBUG_PRINTF("LedSetPWM: id:%d => %d/%d\r\n", id, value, period);
+	p = &Leds[id];
+	if (id >= LedCount) {
+		return false;
+	}
+	if (period) {
+		p->pwm_period = period;
+		LETIMER_CompareSet(p->letimer, 0, period);
+	}
+	p->pwm_value = value;
+	LETIMER_CompareSet(p->letimer, 1, value);
+	return true;
 }
 
 /***************************************************************************//**
@@ -245,7 +545,7 @@ int TD_TOOLS_LED_Init(TD_GPIO_Port_TypeDef port, uint8_t bit,
 // When one will be switch on the other will be switched off
 bool TD_TOOLS_LED_InitInverted(uint8_t id1, uint8_t id2)
 {
-	if (id1 >= LedCount ||id2 >= LedCount) {
+	if (id1 >= LedCount || id2 >= LedCount) {
 		return false;
 	}
 	Leds[id1].inverted = id2;
@@ -272,6 +572,35 @@ bool TD_TOOLS_LED_Set(uint8_t id, bool state)
 		return false;
 	}
 	SetState(id, state);
+	return true;
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Set a PUSH PULL state.
+ *
+ * @param[in] id
+ *   The PUSH PULL id.
+ *
+ * @param[in] state
+ *   The state to set.
+  *
+ * @return
+ *   Returns false if id is invalid, true otherwise.
+ ******************************************************************************/
+bool TD_TOOLS_PUSHPULL_Set(uint8_t id, bool state)
+{
+	Led_t *p;
+
+	if (id >= LedCount) {
+		return false;
+	}
+	p = &Leds[id];
+	if (state) {
+		GPIO_PinOutSet((GPIO_Port_TypeDef) p->port, p->bit);
+	} else {
+		GPIO_PinOutClear((GPIO_Port_TypeDef) p->port, p->bit);
+	}
 	return true;
 }
 
@@ -315,7 +644,7 @@ bool TD_TOOLS_LED_Toggle(uint8_t id)
  *   Returns false if id is invalid, true otherwise.
  ******************************************************************************/
 bool TD_TOOLS_LED_StartBlink(uint8_t id, uint8_t seconds, uint16_t ticks,
-  uint8_t repeats)
+	uint8_t repeats)
 {
 	Led_t *p = &Leds[id];
 
@@ -323,18 +652,27 @@ bool TD_TOOLS_LED_StartBlink(uint8_t id, uint8_t seconds, uint16_t ticks,
 		return false;
 	}
 
+	// Up to 127 blinks
+	if (repeats < 255 && repeats > 128) {
+		return false;
+	}
+
 	// If timer not already started
 	if (p->timer == 0xFF) {
+		SetState(id, true);
 		p->timer = TD_SCHEDULER_AppendIrq(
 			seconds,
 			ticks,
 			0,
-			repeats,
+			repeats == 0xff ? 0xFF : (repeats * 2) - 1,
 			TimerToggle,
 			id);
-		}
-		return true;
+	} else {
+		return false;
 	}
+	return true;
+}
+
 
 /***************************************************************************//**
  * @brief
@@ -385,7 +723,6 @@ bool TD_TOOLS_LED_StopBlink(uint8_t id, bool nice_stop)
 	if (id >= LedCount) {
 		return false;
 	}
-
 	if (p->timer != 0xFF) {
 
 		// Wait until led is off for nice stop

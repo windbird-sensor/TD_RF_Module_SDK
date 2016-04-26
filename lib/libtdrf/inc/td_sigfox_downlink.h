@@ -2,10 +2,10 @@
  * @file
  * @brief SIGFOX down-link API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.0.2
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -65,8 +65,14 @@ extern "C" {
 	/** SIGFOX down-link startup delay */
 #define TD_SIGFOX_DOWNLINK_DELAY			20
 
+	/** SIGFOX down-link sensitivity test startup delay */
+#define TD_SIGFOX_DOWNLINK_SENSI_DELAY		0
+
 	/** SIGFOX down-link duration */
 #define TD_SIGFOX_DOWNLINK_DURATION			25
+
+	/** SIGFOX down-link sensitivity test duration */
+#define TD_SIGFOX_DOWNLINK_SENSI_DURATION	6
 
 	/** Received down-link payload size */
 #define TD_SIGFOX_DOWNLINK_PAYLOAD_SIZE		8
@@ -120,13 +126,6 @@ extern "C" {
 	typedef int (*TD_SIGFOX_DOWNLINK_callback_t)(uint8_t *rx_frame,
 		uint8_t length);
 
-	/** SIGFOX down-link configuration structure */
-	typedef struct {
-		uint32_t frequency;		///< Down-link frequency in Hz
-		uint16_t delay;			///< Delay before receiving in seconds
-		uint16_t duration;		///< Down-link receive duration in seconds
-	} TD_SIGFOX_DOWNLINK_config_t;
-
 	#pragma pack(1)
 	/** SIGFOX down-link OOB acknowledge frame */
 	typedef struct {
@@ -163,17 +162,18 @@ extern "C" {
 
 	DECLARE_DYNAMIC(bool,TD_SIGFOX_DOWNLINK_DirectProcess, void);
 	DECLARE_DYNAMIC(bool, TD_SIGFOX_DOWNLINK_ReceiveTest, uint32_t sequence,
-		uint16_t frequency, uint16_t duration);
-	void TD_SIGFOX_DOWNLINK_Configure(TD_SIGFOX_DOWNLINK_config_t *config);
-	bool TD_SIGFOX_DOWNLINK_Receive(uint32_t sequence, uint16_t frequency,
-		uint32_t central_frequency, uint32_t elapsed, uint32_t id);
-	TD_SIGFOX_DOWNLINK_config_t *TD_SIGFOX_DOWNLINK_GetConfig(void);
+		uint16_t channel, uint16_t duration);
+	bool TD_SIGFOX_DOWNLINK_Receive(uint32_t sequence, uint16_t channel,
+		uint32_t elapsed, uint32_t id);
 	bool TD_SIGFOX_DOWNLINK_CheckSignature(uint8_t *buffer, uint16_t signature,
 		uint32_t sequence);
 	void TD_SIGFOX_DOWNLINK_SetRSSI(int rssi);
 	void TD_SIGFOX_DOWNLINK_SetBuffer(uint8_t *buffer, uint16_t length,
 		uint8_t *count);
 	bool TD_SIGFOX_DOWNLINK_SendAck(void);
+	void TD_SIGFOX_DOWNLINK_SetPublicKey(bool public_id, const uint8_t *key);
+	void TD_SIGFOX_DOWNLINK_SetTestSensi(bool enable, uint16_t delay);
+	bool TD_SIGFOX_DOWNLINK_SendTestFrame(uint16_t channel, int16_t freq_offset);
 
 	/** @} */
 

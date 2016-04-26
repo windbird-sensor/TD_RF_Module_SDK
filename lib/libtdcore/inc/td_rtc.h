@@ -2,10 +2,10 @@
  * @file
  * @brief Real-Time Clock (RTC) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.2.0
+ * @version 2.3.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -83,7 +83,7 @@ extern "C" {
 #define  T700MICROS        ((32768 * 7 ) / 10000)		/**< 700 탎 */
 #define  T800MICROS        ((32768 * 8 ) / 10000)		/**< 800 탎 */
 #define  T900MICROS        ((32768 * 9 ) / 10000)		/**< 900 탎 */
-#define  TMS(x)            ((32768 * (x)) / 1000)		/**< x 탎 */
+#define  TMS(x)            ((32768 * (x)) / 1000)		/**< x ms */
 #define  T1MS              ((32768 * 10) / 10000)		/**< 1 ms */
 #define  T1_25MS           ((32768 * 125) / 100000)		/**< 1.25 ms */
 #define  T1_6MS            ((32768 * 160) / 100000)		/**< 1.6 ms */
@@ -107,20 +107,26 @@ extern "C" {
 #define  T20_2MS           ((32768 * 202) / 10000)		/**< 20 ms */
 #define  T24MS             ((32768 * 240) / 10000)		/**< 24 ms */
 #define  T24_5MS           ((32768 * 245) / 10000)		/**< 24 ms */
+#define  T26MS			   ((32768 * 260) / 10000)		/**< 26 ms */
 #define  T26_6MS           ((32768 * 266) / 10000)		/**< 26.6 ms */
 #define  T26_7MS           ((32768 * 267) / 10000)		/**< 26.7 ms */
 #define  T27_6MS           ((32768 * 276) / 10000)		/**< 27.6 ms */
 #define  T38MS             ((32768 * 380) / 10000)		/**< 38 ms */
+#define  T40MS             ((32768 * 400) / 10000)		/**< 40 ms */
 #define  T44MS             ((32768 * 440) / 10000)		/**< 44 ms */
 #define  T50MS             ((32768 * 500) / 10000)		/**< 50 ms */
+#define  T60MS             ((32768 * 600) / 10000)		/**< 60 ms */
 #define  T70MS             ((32768 * 700) / 10000)		/**< 70 ms */
 #define  T100MS            ((32768 * 1000) / 10000)		/**< 100 ms */
+#define  T160MS            ((32768 * 1600) / 10000)		/**< 160 ms */
 #define  T200MS            ((32768 * 2000) / 10000)		/**< 200 ms */
 #define  T250MS            ((32768 * 2500) / 10000)		/**< 250 ms */
 #define  T300MS            ((32768 * 3000) / 10000)		/**< 300 ms */
 #define  T350MS            ((32768 * 3500) / 10000)		/**< 350 ms */
 #define  T400MS            ((32768 * 4000) / 10000)		/**< 400 ms */
 #define  T500MS            ((32768 * 5000) / 10000)		/**< 500 ms */
+#define  T600MS            ((32768 * 6000) / 10000)		/**< 600 ms */
+#define  T700MS            ((32768 * 7000) / 10000)		/**< 700 ms */
 #define  T800MS            ((32768 * 8000) / 10000)		/**< 800 ms */
 #define  T900MS            ((32768 * 9000) / 10000)		/**< 900 ms */
 #define  T950MS            ((32768 * 9500) / 10000)		/**< 950 ms */
@@ -135,6 +141,8 @@ extern "C" {
 #define  T5S               (T1S * 5)					/**< 5 s */
 #define  T8S               (T1S * 8)					/**< 8 s */
 #define  T10S              (T1S * 10)					/**< 10 s */
+#define  T15S              (T1S * 15)					/**< 15 s */
+#define  T17S              (T1S * 17)					/**< 17 s */
 #define  T20S              (T1S * 20)					/**< 20 s */
 #define  T30S              (T1S * 30)					/**< 30 s */
 #define  T1MN              (T1S * 60)					/**< 1 min */
@@ -172,6 +180,10 @@ extern "C" {
 	BackgroundRoundWanted = true; \
 }
 #endif
+
+	/** Overloaded version of TD_RTC_SetPowerMode() which adds mode and line number */
+#define TD_RTC_SetPowerMode(mode) TD_RTC_SetPowerModeInternal(mode,__LINE__)
+
 	/** @} */
 
 	/***************************************************************************
@@ -224,17 +236,17 @@ extern "C" {
 	 * @{ */
 
 	/***********************************************************************//**
-	  * @brief
-	  *   Program an absolute alarm.
-	  *
-	  * @param[in] count
-	  *   Absolute count in 1/32768 s ticks at which the alarm will occur.
-	  *   If count is less than 2 unit more than actual count, timer will wait a
-	  *   full loop (0xFFFFFF)
-	  *   If count is between 2 and 4 unit more than actual count, behavior is
-	  *   not defined (full loop or immediate)
-	  *   Alarm will only trigger handler set TD_RTC_SetSystemHandler.
-	  *************************************************************************/
+	 * @brief
+	 *   Program an absolute alarm.
+	 *
+	 * @param[in] count
+	 *   Absolute count in 1/32768 s ticks at which the alarm will occur.
+	 *   If count is less than 2 unit more than actual count, timer will wait a
+	 *   full loop (0xFFFFFF)
+	 *   If count is between 2 and 4 unit more than actual count, behavior is
+	 *   not defined (full loop or immediate)
+	 *   Alarm will only trigger handler set TD_RTC_SetSystemHandler.
+	 *************************************************************************/
 	static __INLINE void TD_RTC_AlarmAt(uint32_t count)
 	{
 		RTC_CompareSet(TD_RTC_SYSTEM, count & 0xFFFFFF);
@@ -329,8 +341,9 @@ extern "C" {
 	void TD_RTC_UserAlarmAfter(int32_t delay);
 	int32_t TD_RTC_SignedTimeDiff(uint32_t reference);
 	time_t __time32(time_t *timer);
-	void TD_RTC_SetPowerMode(TD_RTC_PowerMode_t mode);
+	void TD_RTC_SetPowerModeInternal(TD_RTC_PowerMode_t mode, uint32_t line);
 	void TD_RTC_EnterPowerMode(void);
+	void TD_RTC_DelayAbort(void);
 
 	/** @} */
 

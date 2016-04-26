@@ -32,7 +32,7 @@ PROJECT_NAME = "libtdcore"
 # This could be handy for archiving the generated documentation or
 # if some version control system is used.
 
-PROJECT_NUMBER = 4.0.0
+PROJECT_NUMBER = 6.2.0
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer
@@ -333,7 +333,7 @@ TYPEDEF_HIDES_STRUCT = NO
 # 2^(16+SYMBOL_CACHE_SIZE). The valid range is 0..9, the default is 0,
 # corresponding to a cache size of 2^16 = 65536 symbols.
 
-SYMBOL_CACHE_SIZE = 0
+#SYMBOL_CACHE_SIZE = 0
 
 # Similar to the SYMBOL_CACHE_SIZE the size of the symbol lookup cache can be
 # set using LOOKUP_CACHE_SIZE. This cache is used to resolve symbols given
@@ -557,7 +557,7 @@ SHOW_USED_FILES = YES
 # then setting the SHOW_DIRECTORIES tag to YES will show the directory hierarchy
 # in the documentation. The default is NO.
 
-SHOW_DIRECTORIES = NO
+#SHOW_DIRECTORIES = NO
 
 # Set the SHOW_FILES tag to NO to disable the generation of the Files page.
 # This will remove the Files entry from the Quick Index and from the
@@ -951,7 +951,7 @@ HTML_TIMESTAMP = YES
 # files or namespaces will be aligned in HTML using tables. If set to
 # NO a bullet list will be used.
 
-HTML_ALIGN_MEMBERS = YES
+#HTML_ALIGN_MEMBERS = YES
 
 # If the HTML_DYNAMIC_SECTIONS tag is set to YES then the generated HTML
 # documentation will contain sections that can be hidden and shown after the
@@ -1017,7 +1017,7 @@ CHM_FILE = "libtdcore.chm"
 # the HTML help compiler (hhc.exe). If non-empty doxygen will try to run
 # the HTML help compiler on the generated index.hhp.
 
-HHC_LOCATION = "C:\Program Files\HTML Help Workshop\hhc.exe"
+HHC_LOCATION = "C:\Program Files (x86)\HTML Help Workshop\hhc.exe"
 
 # If the GENERATE_HTMLHELP tag is set to YES, the GENERATE_CHI flag
 # controls if a separate .chi index file is generated (YES) or that
@@ -1142,7 +1142,7 @@ ENUM_VALUES_PER_LINE = 4
 # By enabling USE_INLINE_TREES, doxygen will generate the Groups, Directories,
 # and Class Hierarchy pages using a tree view instead of an ordered list.
 
-USE_INLINE_TREES = NO
+#USE_INLINE_TREES = NO
 
 # If the treeview is enabled (see GENERATE_TREEVIEW) then this tag can be
 # used to set the initial width (in pixels) of the frame in which the tree
@@ -1406,13 +1406,13 @@ XML_OUTPUT = xml
 # which can be used by a validating XML parser to check the
 # syntax of the XML files.
 
-XML_SCHEMA = 
+#XML_SCHEMA = 
 
 # The XML_DTD tag can be used to specify an XML DTD,
 # which can be used by a validating XML parser to check the
 # syntax of the XML files.
 
-XML_DTD = 
+#XML_DTD = 
 
 # If the XML_PROGRAMLISTING tag is set to YES Doxygen will
 # dump the program listings (including syntax highlighting

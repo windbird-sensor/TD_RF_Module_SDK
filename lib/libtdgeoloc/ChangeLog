@@ -47,3 +47,27 @@
   * Fixed a bug in AT$AR= (read accelerometer register)
   * Initialized the first byte in Sensor position data frame
   * Fixed non-volatile accelerometer IRQ flag
+
+# Version 3.0.0 #
+
+  * Not released publicly
+
+# Version 4.0.0 #
+
+## Minor Updates ##
+
+  * Accelerometer now works either in interrupt or polling mode
+
+## Changes ##
+
+### ACCELEROMETER: ###
+
+  * Added `TD_ACCELERO_GetDrift')`
+  * Added `TD_ACCELERO_SampleGetXYZ()`
+  * Added `TD_ACCELERO_RawGetXYZ()`
+  * Added `TD_ACCELERO_RawSampleXYZ()`
+  * Added `TD_ACCELERO_SetBatch()`
+  * Added `TD_ACCELERO_PauseMonitor()`
+  * Added `TD_ACCELERO_PauseScheduler()`
+  * Added `TD_ACCELERO_ResumeMonitor()`
+  * Added `TD_ACCELERO_ResumeScheduler()`

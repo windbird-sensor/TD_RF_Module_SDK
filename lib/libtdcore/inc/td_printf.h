@@ -2,11 +2,11 @@
  * @file
  * @brief printf utility  for the TDxxxx RF modules.
  * @author Kustaa Nyholm
- * @version 2.0.3
+ * @version 2.1.0
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2004  Kustaa Nyholm</b>
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  *******************************************************************************
  *
  * This library is free software; you can redistribute it and/or
@@ -176,14 +176,16 @@ extern "C" {
 
 	void init_printf(void *putp, void (*putf)(void *, char),
 		void (*start)(void *), void (*stop)(void *));
-	void tfp_printf(char *fmt, ...);
-	void tfp_vprintf(char *fmt, va_list va);
-	void tfp_sprintf(char *s, char *fmt, ...);
+	void init_printf_stream(void *stream);
+	void tfp_printf_stream(void *stream, const char *fmt, ...);
+	void tfp_printf(const char *fmt, ...);
+	void tfp_vprintf(const char *fmt, va_list va);
+	void tfp_sprintf(char *s, const char *fmt, ...);
 	void tfp_dump(char *text, unsigned char *s, unsigned char sz);
-	void tfp_format(void *putp, void (*putf)(void *, char), char *fmt,
+	void tfp_format(void *putp, void (*putf)(void *, char), const char *fmt,
 		va_list va);
 	void tfp_print_buf(char *buf, int len);
-	void get_printf(void **lst);
+	void *get_printf(void);
 
 	/** @} */
 

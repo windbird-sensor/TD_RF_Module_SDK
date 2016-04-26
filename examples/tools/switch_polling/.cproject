@@ -1,19 +1,444 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
-		<cconfiguration id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.884607313.1030387481.185212809">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.884607313.1030387481.185212809" moduleId="org.eclipse.cdt.core.settings" name="TD1208 Release">
+		<cconfiguration id="iar.arm.toolchain.project.exe.configuration.debug.v5.4.0.1914464558.1990563401.297814257.402206755.2137549860">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="iar.arm.toolchain.project.exe.configuration.debug.v5.4.0.1914464558.1990563401.297814257.402206755.2137549860" moduleId="org.eclipse.cdt.core.settings" name="TD1202 Debug">
 				<externalSettings/>
 				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.autotools.core.ErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" description="" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.884607313.1030387481.185212809" name="TD1208 Release" parent="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release" postbuildStep="arm-none-eabi-objcopy -O binary ${ProjName}.elf ${ProjName}.bin;arm-none-eabi-size --format=sysv -x  ${ProjName}.elf">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="rm -rf" description="EFM32TG210F32" id="iar.arm.toolchain.project.exe.configuration.debug.v5.4.0.1914464558.1990563401.297814257.402206755.2137549860" name="TD1202 Debug" parent="iar.arm.toolchain.project.exe.configuration.debug.v5.4.0.1914464558.1990563401.297814257.402206755.2137549860">
+					<folderInfo id="iar.arm.toolchain.project.exe.configuration.debug.v5.4.0.1914464558.1990563401.297814257.402206755.2137549860." name="/" resourcePath="">
+						<toolChain id="iar.arm.toolchain.project.exe.configuration.debug.toolchain.v5.4.0.502220148" name="IAR Toolchain for ARM - 6.x">
+							<option id="iar.arm.toolchain.option.cpuCore.v5.4.0.478311154" name="Processor core:" superClass="iar.arm.toolchain.option.cpuCore.v5.4.0" value="iar.arm.toolchain.option.cpuCore.Cortex-M3.v5.4.0" valueType="enumerated"/>
+							<option id="iar.arm.toolchain.option.endianMode.v5.4.0.523900865" name="Endian mode:" superClass="iar.arm.toolchain.option.endianMode.v5.4.0"/>
+							<option id="iar.arm.toolchain.option.bigEndianFormat.v5.4.0.1798640422" name="Big-endian format:" superClass="iar.arm.toolchain.option.bigEndianFormat.v5.4.0"/>
+							<option id="iar.arm.toolchain.option.printfFormatter.v5.4.0.1474002078" name="Printf formatter:" superClass="iar.arm.toolchain.option.printfFormatter.v5.4.0"/>
+							<option id="iar.arm.toolchain.option.scanfFormatter.v5.4.0.773427141" name="Scanf formatter:" superClass="iar.arm.toolchain.option.scanfFormatter.v5.4.0"/>
+							<option id="iar.arm.toolchain.option.bufferedOutput.v6.1.0.1004691506" name="Buffered terminal output" superClass="iar.arm.toolchain.option.bufferedOutput.v6.1.0"/>
+							<option id="iar.arm.toolchain.option.mfc.v5.5.2.1921182241" name="Enable multi-file compilation" superClass="iar.arm.toolchain.option.mfc.v5.5.2"/>
+							<option id="iar.arm.toolchain.option.useCMSIS.v6.2.2.1628227622" name="Use CMSIS" superClass="iar.arm.toolchain.option.useCMSIS.v6.2.2" value="true" valueType="boolean"/>
+							<option id="iar.arm.toolchain.option.fpu.v5.4.0.2085994711" name="FPU:" superClass="iar.arm.toolchain.option.fpu.v5.4.0"/>
+							<option id="iar.arm.toolchain.option.libraryConfig.v5.4.0.797486082" name="Library:" superClass="iar.arm.toolchain.option.libraryConfig.v5.4.0"/>
+							<option id="iar.arm.toolchain.option.misra-c.enable.1819278747" name="Enable MISRA-C" superClass="iar.arm.toolchain.option.misra-c.enable"/>
+							<option id="iar.arm.toolchain.option.deviceInfo.v5.4.3.1346307822" name="Device info storage option" superClass="iar.arm.toolchain.option.deviceInfo.v5.4.3" value="config/devices/EnergyMicro/EFM32TG/EFM32TG210F32.menu" valueType="string"/>
+							<option id="iar.arm.toolchain.option.deviceName.v5.5.0.752682697" name="Device (change with Project &gt; Select Device...)" superClass="iar.arm.toolchain.option.deviceName.v5.5.0" value="EnergyMicro EFM32TG210F32" valueType="string"/>
+							<option id="iar.arm.toolchain.option.deviceTag.v6.3.1.1008032138" name="Device tag storage option" superClass="iar.arm.toolchain.option.deviceTag.v6.3.1" value="EFM32TG210F32" valueType="string"/>
+							<option id="iar.arm.toolchain.option.useDSPLibrary.v6.2.2.1496619438" name="DSP Library" superClass="iar.arm.toolchain.option.useDSPLibrary.v6.2.2"/>
+							<option id="iar.arm.toolchain.option.semihosted.v5.4.0.1692022788" name="Include semihosting interface" superClass="iar.arm.toolchain.option.semihosted.v5.4.0"/>
+							<option id="iar.arm.toolchain.option.lowLevelInterfaceCortex.v5.4.0.337421711" name="Library low-level&#10;interface implementation&#10;(Cortex-M cores):" superClass="iar.arm.toolchain.option.lowLevelInterfaceCortex.v5.4.0"/>
+							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF" id="iar.arm.toolchain.targetPlatform.v5.4.0.873331599" isAbstract="false" name="IAR Target platform for ARM (ELF)" osList="win32,linux"/>
+							<builder buildPath="${workspace_loc:/blink-IAR/Debug}" id="iar.arm.toolchain.builder.2.1811994141" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder"/>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="Device;iar.arm.toolchain.project.library.configuration.debug.v5.4.0.1820574718" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/Device-IAR"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/Device"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/Device-IAR/Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/Device/IAR Debug"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="Device-IAR" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="Device" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="emlib;iar.arm.toolchain.project.library.configuration.debug.v5.4.0.872161341" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/emlib-IAR"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/emlib-IAR/Debug"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="emlib-IAR" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="libtdrf;iar.arm.toolchain.project.library.configuration.debug.v5.4.0.133491925.583666232.355635148" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/libtdrf"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/libtdrf/IAR Debug"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="libtdrf" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="libtddrivers;iar.arm.toolchain.project.library.configuration.debug.v5.4.0.133491925.602364429.1798058079" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/libtddrivers"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/libtddrivers/IAR Debug"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="libtddrivers" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="libtdtools;iar.arm.toolchain.project.library.configuration.debug.v5.4.0.133491925.602364429" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/libtdsensor"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/libtdtools"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/libtdsensor/IAR Debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/libtdtools/IAR Debug"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="libtdsensor" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="libtdtools" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+			</storageModule>
+		</cconfiguration>
+		<cconfiguration id="iar.arm.toolchain.project.exe.configuration.release.v5.4.0.906220437.1061650086.239798615.1655237169.1883996944">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="iar.arm.toolchain.project.exe.configuration.release.v5.4.0.906220437.1061650086.239798615.1655237169.1883996944" moduleId="org.eclipse.cdt.core.settings" name="TD1202 Release">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.autotools.core.ErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="rm -rf" description="EFM32TG210F32" id="iar.arm.toolchain.project.exe.configuration.release.v5.4.0.906220437.1061650086.239798615.1655237169.1883996944" name="TD1202 Release" parent="iar.arm.toolchain.project.exe.configuration.release.v5.4.0.906220437.1061650086.239798615.1655237169.1883996944">
+					<folderInfo id="iar.arm.toolchain.project.exe.configuration.release.v5.4.0.906220437.1061650086.239798615.1655237169.1883996944." name="/" resourcePath="">
+						<toolChain id="iar.arm.toolchain.project.exe.configuration.release.toolchain.v5.4.0.1244885815" name="IAR Toolchain for ARM - 6.x">
+							<option id="iar.arm.toolchain.option.cpuCore.v5.4.0.2032646310" name="Processor core:" superClass="iar.arm.toolchain.option.cpuCore.v5.4.0" value="iar.arm.toolchain.option.cpuCore.Cortex-M3.v5.4.0" valueType="enumerated"/>
+							<option id="iar.arm.toolchain.option.endianMode.v5.4.0.1309384536" name="Endian mode:" superClass="iar.arm.toolchain.option.endianMode.v5.4.0"/>
+							<option id="iar.arm.toolchain.option.bigEndianFormat.v5.4.0.594217765" name="Big-endian format:" superClass="iar.arm.toolchain.option.bigEndianFormat.v5.4.0"/>
+							<option id="iar.arm.toolchain.option.printfFormatter.v5.4.0.1427123717" name="Printf formatter:" superClass="iar.arm.toolchain.option.printfFormatter.v5.4.0"/>
+							<option id="iar.arm.toolchain.option.scanfFormatter.v5.4.0.36865259" name="Scanf formatter:" superClass="iar.arm.toolchain.option.scanfFormatter.v5.4.0"/>
+							<option id="iar.arm.toolchain.option.bufferedOutput.v6.1.0.29437652" name="Buffered terminal output" superClass="iar.arm.toolchain.option.bufferedOutput.v6.1.0"/>
+							<option id="iar.arm.toolchain.option.mfc.v5.5.2.1767469618" name="Enable multi-file compilation" superClass="iar.arm.toolchain.option.mfc.v5.5.2"/>
+							<option id="iar.arm.toolchain.option.deviceInfo.v5.4.3.1173560923" name="Device info storage option" superClass="iar.arm.toolchain.option.deviceInfo.v5.4.3" value="config/devices/EnergyMicro/EFM32TG/EFM32TG210F32.menu" valueType="string"/>
+							<option id="iar.arm.toolchain.option.deviceName.v5.5.0.1463686065" name="Device (change with Project &gt; Select Device...)" superClass="iar.arm.toolchain.option.deviceName.v5.5.0" value="EnergyMicro EFM32TG210F32" valueType="string"/>
+							<option id="iar.arm.toolchain.option.deviceTag.v6.3.1.1533306606" name="Device tag storage option" superClass="iar.arm.toolchain.option.deviceTag.v6.3.1" value="EFM32TG210F32" valueType="string"/>
+							<option id="iar.arm.toolchain.option.useCMSIS.v6.2.2.2026140586" name="Use CMSIS" superClass="iar.arm.toolchain.option.useCMSIS.v6.2.2" value="true" valueType="boolean"/>
+							<option id="iar.arm.toolchain.option.fpu.v5.4.0.1071411598" name="FPU:" superClass="iar.arm.toolchain.option.fpu.v5.4.0"/>
+							<option id="iar.arm.toolchain.option.libraryConfig.v5.4.0.363321910" name="Library:" superClass="iar.arm.toolchain.option.libraryConfig.v5.4.0"/>
+							<option id="iar.arm.toolchain.option.misra-c.enable.149051957" name="Enable MISRA-C" superClass="iar.arm.toolchain.option.misra-c.enable"/>
+							<option id="iar.arm.toolchain.option.useDSPLibrary.v6.2.2.965047105" name="DSP Library" superClass="iar.arm.toolchain.option.useDSPLibrary.v6.2.2"/>
+							<option id="iar.arm.toolchain.option.semihosted.v5.4.0.1190008459" name="Include semihosting interface" superClass="iar.arm.toolchain.option.semihosted.v5.4.0"/>
+							<option id="iar.arm.toolchain.option.lowLevelInterfaceCortex.v5.4.0.1406488102" name="Library low-level&#10;interface implementation&#10;(Cortex-M cores):" superClass="iar.arm.toolchain.option.lowLevelInterfaceCortex.v5.4.0"/>
+							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF" id="iar.arm.toolchain.targetPlatform.v5.4.0.2048848968" isAbstract="false" name="IAR Target platform for ARM (ELF)" osList="win32,linux"/>
+							<builder buildPath="${workspace_loc:/blink-IAR/Release}" id="iar.arm.toolchain.builder.2.2040474838" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder"/>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="Device;iar.arm.toolchain.project.library.configuration.release.v5.4.0.2019096550" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/Device-IAR"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/Device"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/Device-IAR/Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/Device/IAR Release"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="Device-IAR" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="Device" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="emlib;iar.arm.toolchain.project.library.configuration.release.v5.4.0.552853568" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/emlib-IAR"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/emlib-IAR/Release"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="emlib-IAR" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="libtdcore;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1266702257.28093770.2138595547.707365066" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/libtdcore"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/libtdcore/IAR Release"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="libtdcore" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="libtdrf;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1266702257.28093770.739953675" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/libtdrf"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/libtdrf/IAR Release"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="libtdrf" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="libtddrivers;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1266702257.1753994578.506738900" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/libtddrivers"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/libtddrivers/IAR Release"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="libtddrivers" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<externalSettings containerId="libtdtools;iar.arm.toolchain.project.library.configuration.release.v5.4.0.1266702257.1753994578" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/libtdsensor"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/libtdtools"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/libtdsensor/IAR Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/libtdtools/IAR Release"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="libtdsensor" srcPrefixMapping="" srcRootPath=""/>
+						<entry flags="RESOLVED" kind="libraryFile" name="libtdtools" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+			</storageModule>
+		</cconfiguration>
+		<cconfiguration id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.26689420.1883718680.799387239">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.26689420.1883718680.799387239" moduleId="org.eclipse.cdt.core.settings" name="TD1205 Release">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" description="EFM32G210F128" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.26689420.1883718680.799387239" name="TD1205 Release" parent="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release" postbuildStep="arm-none-eabi-objcopy -O binary ${ProjName}.elf ${ProjName}.bin;arm-none-eabi-size --format=sysv -x  ${ProjName}.elf">
+					<folderInfo id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.26689420.1883718680.799387239." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.release.946536468" name="ARM Windows GCC (Sourcery G++ Lite)" nonInternalBuilderId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.builder.release" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.release">
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level.180740597" name="Debug level" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.debugging.level.none" valueType="enumerated"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor.383491465" name="Processor" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor" value="org.eclipse.cdt.cross.arm.gnu.base.option.mcpu.cortex-m3" valueType="enumerated"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createflash.482672412" name="Create Flash Image" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createflash" value="false" valueType="boolean"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createlisting.1669949027" name="Create Extended Listing" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createlisting" value="false" valueType="boolean"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.printsize.1608474523" name="Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.printsize" value="false" valueType="boolean"/>
+							<targetPlatform id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.platform.release.1755275754" isAbstract="false" name="Windows Platform" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.platform.release"/>
+							<builder autoBuildTarget="all" buildPath="${workspace_loc:/blink/Release}" cleanBuildTarget="clean" command="cs-make" id="org.eclipse.cdt.build.core.internal.builder.753877444" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.release.624330716" name="ARM Sourcery Windows GCC Assembler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def.2051083218" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="NDEBUG"/>
+									<listOptionValue builtIn="false" value="EFM32G210F128"/>
+									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_TD1205"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths.755166318" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32G/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.misc.lstfilename.1929890325" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.misc.lstfilename" value="" valueType="string"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.1532078404" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release.1197998769" name="ARM Sourcery Windows GCC C Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level.945791888" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.size" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def.1964975340" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="NDEBUG"/>
+									<listOptionValue builtIn="false" value="EFM32G210F128"/>
+									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_TD1205"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths.1433278130" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32G/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.other.otherflags.1052276439" name="Other flags" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.other.otherflags" value="-c -fmessage-length=0" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename.1604391438" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename" value="" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections.1359209836" name="Function sections (-ffunction-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections" value="true" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections.167914031" name="Data sections (-fdata-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections" value="true" valueType="boolean"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.1772619860" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.release.93327247" name="ARM Sourcery Windows GCC C++ Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level.1565748142" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.size" valueType="enumerated"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.linker.release.133294750" name="ARM Sourcery Windows GCC C Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.linker.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.libs.1861581772" name="Libraries (-l)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="tdtools"/>
+									<listOptionValue builtIn="false" value="tdgeoloc"/>
+									<listOptionValue builtIn="false" value="tdsensor"/>
+									<listOptionValue builtIn="false" value="tdrf"/>
+									<listOptionValue builtIn="false" value="tdcore"/>
+									<listOptionValue builtIn="false" value="tdrf"/>
+									<listOptionValue builtIn="false" value="tdcore"/>
+									<listOptionValue builtIn="false" value="emlib"/>
+									<listOptionValue builtIn="false" value="Device"/>
+									<listOptionValue builtIn="false" value="gcc"/>
+									<listOptionValue builtIn="false" value="c"/>
+									<listOptionValue builtIn="false" value="cs3"/>
+									<listOptionValue builtIn="false" value="cs3unhosted"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths.1976083861" name="Library search path (-L)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/GCC Release}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/GCC Release}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/GCC Release}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/GCC Release}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/GCC Release}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/GCC Release}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/GCC Release}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile.342532829" name="Script file (-T)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile" value="..\..\Device\EnergyMicro\EFM32G\Source\G++\efm32g.ld" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart.1419420702" name="Do not use standard start files (-nostartfiles)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart" value="false" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections.1889145087" name="Remove unused sections (-Xlinker --gc-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections" value="true" valueType="boolean"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.c.linker.input.679272206" superClass="org.eclipse.cdt.cross.arm.gnu.c.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.linker.release.20047329" name="ARM Sourcery Windows GCC C++ Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.linker.release"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.archiver.base.1105771865" name="ARM Sourcery Windows GCC Archiver" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.archiver.base"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createflash.release.1981243268" name="ARM Sourcery Windows GNU Create Flash Image" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createflash.release"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createlisting.release.450908975" name="ARM Sourcery Windows GNU Create Listing" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createlisting.release"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.printsize.release.289268838" name="ARM Sourcery Windows GNU Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.printsize.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.printsize.general.format.970392199" name="Size Format" superClass="org.eclipse.cdt.cross.arm.gnu.printsize.general.format" value="org.eclipse.cdt.cross.arm.printsize.size.general.format.sysv" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.printsize.general.hex.1024777552" name="Hex" superClass="org.eclipse.cdt.cross.arm.gnu.printsize.general.hex" value="true" valueType="boolean"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="Device;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.878147372.279295855.1048868787" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="emlib;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.1472287705.1884496659.1639202683" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdcore;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.86103437.802703146.1248360277" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdrf;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.86103437.253698458" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+			</storageModule>
+		</cconfiguration>
+		<cconfiguration id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.26689420.1883718680.1316293001.221458141">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.26689420.1883718680.1316293001.221458141" moduleId="org.eclipse.cdt.core.settings" name="TD1205 Debug">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" description="EFM32G210F128" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.26689420.1883718680.1316293001.221458141" name="TD1205 Debug" parent="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release" postbuildStep="arm-none-eabi-objcopy -O binary ${ProjName}.elf ${ProjName}.bin;arm-none-eabi-size --format=sysv -x  ${ProjName}.elf">
+					<folderInfo id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.26689420.1883718680.1316293001.221458141." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.release.1376686038" name="ARM Windows GCC (Sourcery G++ Lite)" nonInternalBuilderId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.builder.release" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.release">
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level.1439577455" name="Debug level" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.debugging.level.max" valueType="enumerated"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor.915775945" name="Processor" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor" value="org.eclipse.cdt.cross.arm.gnu.base.option.mcpu.cortex-m3" valueType="enumerated"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createflash.657647562" name="Create Flash Image" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createflash" value="false" valueType="boolean"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createlisting.495109768" name="Create Extended Listing" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createlisting" value="false" valueType="boolean"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.printsize.860229862" name="Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.printsize" value="false" valueType="boolean"/>
+							<targetPlatform id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.platform.release.250788588" isAbstract="false" name="Windows Platform" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.platform.release"/>
+							<builder autoBuildTarget="all" buildPath="${workspace_loc:/blink/Release}" cleanBuildTarget="clean" command="cs-make" id="org.eclipse.cdt.build.core.internal.builder.150000666" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.release.2083193497" name="ARM Sourcery Windows GCC Assembler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def.1512695366" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="NDEBUG"/>
+									<listOptionValue builtIn="false" value="EFM32G210F128"/>
+									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_TD1205"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths.1691547922" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32G/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.misc.lstfilename.963193866" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.misc.lstfilename" value="" valueType="string"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.1592627822" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release.1228238309" name="ARM Sourcery Windows GCC C Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level.122354977" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.size" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def.1627052608" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="NDEBUG"/>
+									<listOptionValue builtIn="false" value="EFM32G210F128"/>
+									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_TD1205"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths.652014146" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32G/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.other.otherflags.2001635477" name="Other flags" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.other.otherflags" value="-c -fmessage-length=0" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename.766833431" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename" value="" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections.1079079695" name="Function sections (-ffunction-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections" value="true" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections.2132446307" name="Data sections (-fdata-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections" value="true" valueType="boolean"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.1179627327" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.release.34017434" name="ARM Sourcery Windows GCC C++ Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level.1321301855" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.size" valueType="enumerated"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.linker.release.985124814" name="ARM Sourcery Windows GCC C Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.linker.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.libs.1958212077" name="Libraries (-l)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="tdtools"/>
+									<listOptionValue builtIn="false" value="tdgeoloc"/>
+									<listOptionValue builtIn="false" value="tdsensor"/>
+									<listOptionValue builtIn="false" value="tdrf"/>
+									<listOptionValue builtIn="false" value="tdcore"/>
+									<listOptionValue builtIn="false" value="tdrf"/>
+									<listOptionValue builtIn="false" value="tdcore"/>
+									<listOptionValue builtIn="false" value="emlib"/>
+									<listOptionValue builtIn="false" value="Device"/>
+									<listOptionValue builtIn="false" value="gcc"/>
+									<listOptionValue builtIn="false" value="c"/>
+									<listOptionValue builtIn="false" value="cs3"/>
+									<listOptionValue builtIn="false" value="cs3unhosted"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths.1343733601" name="Library search path (-L)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/GCC Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/GCC Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/GCC Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/GCC Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/GCC Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/GCC Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/GCC Debug}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile.532080533" name="Script file (-T)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile" value="..\..\Device\EnergyMicro\EFM32G\Source\G++\efm32g.ld" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart.359143944" name="Do not use standard start files (-nostartfiles)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart" value="false" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections.1083528787" name="Remove unused sections (-Xlinker --gc-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections" value="true" valueType="boolean"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.c.linker.input.1195548064" superClass="org.eclipse.cdt.cross.arm.gnu.c.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.linker.release.338813049" name="ARM Sourcery Windows GCC C++ Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.linker.release"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.archiver.base.2026005973" name="ARM Sourcery Windows GCC Archiver" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.archiver.base"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createflash.release.636690605" name="ARM Sourcery Windows GNU Create Flash Image" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createflash.release"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createlisting.release.978151586" name="ARM Sourcery Windows GNU Create Listing" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createlisting.release"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.printsize.release.406311181" name="ARM Sourcery Windows GNU Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.printsize.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.printsize.general.format.1064422161" name="Size Format" superClass="org.eclipse.cdt.cross.arm.gnu.printsize.general.format" value="org.eclipse.cdt.cross.arm.printsize.size.general.format.sysv" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.printsize.general.hex.1234000982" name="Hex" superClass="org.eclipse.cdt.cross.arm.gnu.printsize.general.hex" value="true" valueType="boolean"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="Device;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2140231312.184050707.213805513" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="emlib;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.1309782928.108768970.1644477002" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdcore;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.615468483.1265862379.1436657556" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdrf;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.615468483.463640573" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtddrivers;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.1666513988" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdgeoloc;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.1666513988" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdsensor;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.2017434799" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdtools;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.2017434799" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+			</storageModule>
+		</cconfiguration>
+		<cconfiguration id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.884607313.1030387481.185212809">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.884607313.1030387481.185212809" moduleId="org.eclipse.cdt.core.settings" name="TD1208 Release">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" description="EFM32G210F128" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.884607313.1030387481.185212809" name="TD1208 Release" parent="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release" postbuildStep="arm-none-eabi-objcopy -O binary ${ProjName}.elf ${ProjName}.bin;arm-none-eabi-size --format=sysv -x  ${ProjName}.elf">
 					<folderInfo id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.884607313.1030387481.185212809." name="/" resourcePath="">
 						<toolChain id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.release.639511236" name="ARM Windows GCC (Sourcery G++ Lite)" nonInternalBuilderId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.builder.release" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.release">
 							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level.155289972" name="Debug level" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.debugging.level.none" valueType="enumerated"/>
@@ -125,15 +550,15 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.1274450708.1604297353.1281214822.908696441.565618949.1603026788" moduleId="org.eclipse.cdt.core.settings" name="TD1208 Debug">
 				<externalSettings/>
 				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" description="" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.1274450708.1604297353.1281214822.908696441.565618949.1603026788" name="TD1208 Debug" parent="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug" postbuildStep="arm-none-eabi-objcopy -O binary ${ProjName}.elf ${ProjName}.bin;arm-none-eabi-size --format=sysv -x  ${ProjName}.elf">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" description="EFM32G210F128" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.1274450708.1604297353.1281214822.908696441.565618949.1603026788" name="TD1208 Debug" parent="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug" postbuildStep="arm-none-eabi-objcopy -O binary ${ProjName}.elf ${ProjName}.bin;arm-none-eabi-size --format=sysv -x  ${ProjName}.elf">
 					<folderInfo id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.1274450708.1604297353.1281214822.908696441.565618949.1603026788." name="/" resourcePath="">
 						<toolChain id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.debug.217175976" name="ARM Windows GCC (Sourcery G++ Lite)" nonInternalBuilderId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.builder.debug" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.debug">
 							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level.427240375" name="Debug level" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.debugging.level.max" valueType="enumerated"/>
@@ -250,15 +675,15 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.1761944901.1030058693" moduleId="org.eclipse.cdt.core.settings" name="TD1204 Debug">
 				<externalSettings/>
 				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" description="" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.1761944901.1030058693" name="TD1204 Debug" parent="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug" postbuildStep="arm-none-eabi-objcopy -O binary ${ProjName}.elf ${ProjName}.bin;arm-none-eabi-size --format=sysv -x  ${ProjName}.elf">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" description="EFM32G210F128" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.1761944901.1030058693" name="TD1204 Debug" parent="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug" postbuildStep="arm-none-eabi-objcopy -O binary ${ProjName}.elf ${ProjName}.bin;arm-none-eabi-size --format=sysv -x  ${ProjName}.elf">
 					<folderInfo id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.1761944901.1030058693." name="/" resourcePath="">
 						<toolChain id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.debug.1425611373" name="ARM Windows GCC (Sourcery G++ Lite)" nonInternalBuilderId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.builder.debug" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.debug">
 							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level.664185631" name="Debug level" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.debugging.level.max" valueType="enumerated"/>
@@ -375,15 +800,15 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.376117288.223400090" moduleId="org.eclipse.cdt.core.settings" name="TD1204 Release">
 				<externalSettings/>
 				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" description="" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.376117288.223400090" name="TD1204 Release" parent="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release" postbuildStep="arm-none-eabi-objcopy -O binary ${ProjName}.elf ${ProjName}.bin;arm-none-eabi-size --format=sysv -x  ${ProjName}.elf">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" description="EFM32G210F128" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.376117288.223400090" name="TD1204 Release" parent="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release" postbuildStep="arm-none-eabi-objcopy -O binary ${ProjName}.elf ${ProjName}.bin;arm-none-eabi-size --format=sysv -x  ${ProjName}.elf">
 					<folderInfo id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.376117288.223400090." name="/" resourcePath="">
 						<toolChain id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.release.1601514406" name="ARM Windows GCC (Sourcery G++ Lite)" nonInternalBuilderId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.builder.release" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.release">
 							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level.764537408" name="Debug level" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.debugging.level.none" valueType="enumerated"/>
@@ -492,6 +917,761 @@
 				<externalSettings containerId="libtdrf;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.86103437.253698458" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
 			</storageModule>
 		</cconfiguration>
+		<cconfiguration id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.335464900">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.335464900" moduleId="org.eclipse.cdt.core.settings" name="TD1508 Debug">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" description="EZR32LG230F128" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.335464900" name="TD1508 Debug" parent="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug" postbuildStep="arm-none-eabi-objcopy -O binary ${ProjName}.elf ${ProjName}.bin;arm-none-eabi-size --format=sysv -x  ${ProjName}.elf">
+					<folderInfo id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.335464900." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.debug.551727771" name="ARM Windows GCC (Sourcery G++ Lite)" nonInternalBuilderId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.builder.debug" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.debug">
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level.9664900" name="Debug level" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.debugging.level.max" valueType="enumerated"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor.759184434" name="Processor" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor" value="org.eclipse.cdt.cross.arm.gnu.base.option.mcpu.cortex-m3" valueType="enumerated"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createflash.534474654" name="Create Flash Image" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createflash" value="false" valueType="boolean"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createlisting.1755960519" name="Create Extended Listing" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createlisting" value="false" valueType="boolean"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.printsize.1480539003" name="Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.printsize" value="false" valueType="boolean"/>
+							<targetPlatform id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.platform.debug.111151381" isAbstract="false" name="Windows Platform" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.platform.debug"/>
+							<builder autoBuildTarget="all" buildPath="${workspace_loc:/blink/Debug}" cleanBuildTarget="clean" command="cs-make" id="org.eclipse.cdt.build.core.internal.builder.665587958" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.debug.1808964257" name="ARM Sourcery Windows GCC Assembler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def.869740502" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="DEBUG"/>
+									<listOptionValue builtIn="false" value="DEBUG_EFM"/>
+									<listOptionValue builtIn="false" value="EZR32LG230F128"/>
+									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_TD1508"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths.1768141995" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32LG/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.misc.lstfilename.1081729787" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.misc.lstfilename" value="" valueType="string"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.228005200" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.debug.611497510" name="ARM Sourcery Windows GCC C Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level.1465393001" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.none" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def.1310851378" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="DEBUG"/>
+									<listOptionValue builtIn="false" value="DEBUG_EFM"/>
+									<listOptionValue builtIn="false" value="EZR32LG230F128"/>
+									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_TD1508"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths.1181632319" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32LG/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename.1018725746" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename" value="" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections.782346449" name="Function sections (-ffunction-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections" value="true" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections.1991015842" name="Data sections (-fdata-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections" value="true" valueType="boolean"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.1561777801" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.debug.1238572037" name="ARM Sourcery Windows GCC C++ Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level.1380808930" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.none" valueType="enumerated"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.linker.debug.1500054002" name="ARM Sourcery Windows GCC C Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.linker.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.libs.89088844" name="Libraries (-l)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="tdtools"/>
+									<listOptionValue builtIn="false" value="tdgeoloc"/>
+									<listOptionValue builtIn="false" value="tdsensor"/>
+									<listOptionValue builtIn="false" value="tdrf"/>
+									<listOptionValue builtIn="false" value="tdcore"/>
+									<listOptionValue builtIn="false" value="tdrf"/>
+									<listOptionValue builtIn="false" value="tddrivers"/>
+									<listOptionValue builtIn="false" value="tdcore"/>
+									<listOptionValue builtIn="false" value="emlib"/>
+									<listOptionValue builtIn="false" value="Device"/>
+									<listOptionValue builtIn="false" value="gcc"/>
+									<listOptionValue builtIn="false" value="c"/>
+									<listOptionValue builtIn="false" value="cs3"/>
+									<listOptionValue builtIn="false" value="cs3unhosted"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths.1946897433" name="Library search path (-L)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/GCC Debug EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/GCC Debug EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/GCC Debug EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/GCC Debug EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers/GCC Debug EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/GCC Debug EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/GCC Debug EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/GCC Debug EZR}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile.1504083097" name="Script file (-T)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile" value="..\..\Device\EnergyMicro\EFM32LG\Source\G++\efm32lg.ld" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart.1505514259" name="Do not use standard start files (-nostartfiles)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart" value="false" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections.725423147" name="Remove unused sections (-Xlinker --gc-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections" value="true" valueType="boolean"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.c.linker.input.1697473316" superClass="org.eclipse.cdt.cross.arm.gnu.c.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.linker.debug.436232425" name="ARM Sourcery Windows GCC C++ Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.linker.debug"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.archiver.base.1626642515" name="ARM Sourcery Windows GCC Archiver" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.archiver.base"/>
+							<tool command="arm-none-eabi-objcopy" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createflash.debug.198372023" name="ARM Sourcery Windows GNU Create Flash Image" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createflash.debug"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createlisting.debug.1609057765" name="ARM Sourcery Windows GNU Create Listing" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createlisting.debug"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.printsize.debug.957706862" name="ARM Sourcery Windows GNU Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.printsize.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.printsize.general.format.1452267341" name="Size Format" superClass="org.eclipse.cdt.cross.arm.gnu.printsize.general.format" value="org.eclipse.cdt.cross.arm.printsize.size.general.format.sysv" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.printsize.general.hex.1354153917" name="Hex" superClass="org.eclipse.cdt.cross.arm.gnu.printsize.general.hex" value="true" valueType="boolean"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="Device;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2140231312.184050707.213805513.857930142" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="emlib;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.1309782928.108768970.1644477002.1942064470" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdcore;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.615468483.1265862379.1436657556.667045257" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdrf;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.615468483.463640573.1686683803" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtddrivers;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.1666513988.307598557" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdgeoloc;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.1666513988.583235120" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdsensor;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.2017434799.637070350" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+			</storageModule>
+		</cconfiguration>
+		<cconfiguration id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.873628118">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.873628118" moduleId="org.eclipse.cdt.core.settings" name="TD1508 Release">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" description="EZR32LG230F128" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.873628118" name="TD1508 Release" parent="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release" postbuildStep="arm-none-eabi-objcopy -O binary ${ProjName}.elf ${ProjName}.bin;arm-none-eabi-size --format=sysv -x  ${ProjName}.elf">
+					<folderInfo id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.873628118." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.release.384209011" name="ARM Windows GCC (Sourcery G++ Lite)" nonInternalBuilderId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.builder.release" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.release">
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level.1403343144" name="Debug level" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.debugging.level.none" valueType="enumerated"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor.334622564" name="Processor" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor" value="org.eclipse.cdt.cross.arm.gnu.base.option.mcpu.cortex-m3" valueType="enumerated"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createflash.1334952307" name="Create Flash Image" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createflash" value="false" valueType="boolean"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createlisting.1204497146" name="Create Extended Listing" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createlisting" value="false" valueType="boolean"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.printsize.942081891" name="Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.printsize" value="false" valueType="boolean"/>
+							<targetPlatform id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.platform.release.1407646576" isAbstract="false" name="Windows Platform" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.platform.release"/>
+							<builder autoBuildTarget="all" buildPath="${workspace_loc:/blink/Release}" cleanBuildTarget="clean" command="cs-make" id="org.eclipse.cdt.build.core.internal.builder.901089551" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.release.1398633403" name="ARM Sourcery Windows GCC Assembler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def.259500454" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="NDEBUG"/>
+									<listOptionValue builtIn="false" value="EZR32LG230F128"/>
+									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_TD1508"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths.1760705677" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32LG/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.misc.lstfilename.825050386" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.misc.lstfilename" value="" valueType="string"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.583364317" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release.1276963855" name="ARM Sourcery Windows GCC C Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level.1393645097" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.size" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def.308219372" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="NDEBUG"/>
+									<listOptionValue builtIn="false" value="EZR32LG230F128"/>
+									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_TD1208"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths.656279206" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32LG/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename.465002323" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename" value="" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections.1800450390" name="Function sections (-ffunction-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections" value="true" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections.1447036364" name="Data sections (-fdata-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections" value="true" valueType="boolean"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.1691205479" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.release.854436300" name="ARM Sourcery Windows GCC C++ Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level.232805346" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.size" valueType="enumerated"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.linker.release.510357752" name="ARM Sourcery Windows GCC C Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.linker.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.libs.2093994043" name="Libraries (-l)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="tdtools"/>
+									<listOptionValue builtIn="false" value="tdgeoloc"/>
+									<listOptionValue builtIn="false" value="tdsensor"/>
+									<listOptionValue builtIn="false" value="tdrf"/>
+									<listOptionValue builtIn="false" value="tdcore"/>
+									<listOptionValue builtIn="false" value="tdrf"/>
+									<listOptionValue builtIn="false" value="tddrivers"/>
+									<listOptionValue builtIn="false" value="tdcore"/>
+									<listOptionValue builtIn="false" value="emlib"/>
+									<listOptionValue builtIn="false" value="Device"/>
+									<listOptionValue builtIn="false" value="gcc"/>
+									<listOptionValue builtIn="false" value="c"/>
+									<listOptionValue builtIn="false" value="cs3"/>
+									<listOptionValue builtIn="false" value="cs3unhosted"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths.1064771194" name="Library search path (-L)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/GCC Release EZR}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile.671993582" name="Script file (-T)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile" value="..\..\Device\EnergyMicro\EFM32LG\Source\G++\efm32lg.ld" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart.1784033895" name="Do not use standard start files (-nostartfiles)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart" value="false" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections.1041745829" name="Remove unused sections (-Xlinker --gc-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections" value="true" valueType="boolean"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.c.linker.input.1865579267" superClass="org.eclipse.cdt.cross.arm.gnu.c.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.linker.release.2106409498" name="ARM Sourcery Windows GCC C++ Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.linker.release"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.archiver.base.1295051607" name="ARM Sourcery Windows GCC Archiver" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.archiver.base"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createflash.release.1703180418" name="ARM Sourcery Windows GNU Create Flash Image" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createflash.release"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createlisting.release.1574699514" name="ARM Sourcery Windows GNU Create Listing" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createlisting.release"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.printsize.release.850089369" name="ARM Sourcery Windows GNU Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.printsize.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.printsize.general.format.2099553984" name="Size Format" superClass="org.eclipse.cdt.cross.arm.gnu.printsize.general.format" value="org.eclipse.cdt.cross.arm.printsize.size.general.format.sysv" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.printsize.general.hex.1611491943" name="Hex" superClass="org.eclipse.cdt.cross.arm.gnu.printsize.general.hex" value="true" valueType="boolean"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="Device;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.878147372.279295855.1048868787.109061794" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="emlib;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.1472287705.1884496659.1639202683.401447898" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdcore;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.86103437.802703146.1248360277.279535262" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdrf;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.86103437.253698458.1743820319" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtddrivers;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.1371762102.665148952" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdgeoloc;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.1371762102.2015745606" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdsensor;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.1033211399.828837204" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+			</storageModule>
+		</cconfiguration>
+		<cconfiguration id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.578287768.728495171.853984003">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.578287768.728495171.853984003" moduleId="org.eclipse.cdt.core.settings" name="Ref Design ETSI Debug">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" description="EZR32LG230F128" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.578287768.728495171.853984003" name="Ref Design ETSI Debug" parent="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug" postbuildStep="arm-none-eabi-objcopy -O binary ${ProjName}.elf ${ProjName}.bin;arm-none-eabi-size --format=sysv -x  ${ProjName}.elf">
+					<folderInfo id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.578287768.728495171.853984003." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.debug.1496720627" name="ARM Windows GCC (Sourcery G++ Lite)" nonInternalBuilderId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.builder.debug" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.debug">
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level.1863156873" name="Debug level" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.debugging.level.max" valueType="enumerated"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor.85962287" name="Processor" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor" value="org.eclipse.cdt.cross.arm.gnu.base.option.mcpu.cortex-m3" valueType="enumerated"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createflash.1527034385" name="Create Flash Image" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createflash" value="false" valueType="boolean"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createlisting.833670235" name="Create Extended Listing" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createlisting" value="false" valueType="boolean"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.printsize.1437841050" name="Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.printsize" value="false" valueType="boolean"/>
+							<targetPlatform id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.platform.debug.2017489965" isAbstract="false" name="Windows Platform" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.platform.debug"/>
+							<builder autoBuildTarget="all" buildPath="${workspace_loc:/blink/Debug}" cleanBuildTarget="clean" command="cs-make" id="org.eclipse.cdt.build.core.internal.builder.1406775490" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.debug.5032359" name="ARM Sourcery Windows GCC Assembler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def.649760411" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="DEBUG"/>
+									<listOptionValue builtIn="false" value="DEBUG_EFM"/>
+									<listOptionValue builtIn="false" value="EZR32LG230F128"/>
+									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_REF_DESIGN_ETSI"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths.1849803541" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32LG/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.misc.lstfilename.973262349" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.misc.lstfilename" value="" valueType="string"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.1707012826" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.debug.1192349437" name="ARM Sourcery Windows GCC C Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level.1262215291" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.none" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def.2043794809" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="DEBUG"/>
+									<listOptionValue builtIn="false" value="DEBUG_EFM"/>
+									<listOptionValue builtIn="false" value="EZR32LG230F128"/>
+									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_REF_DESIGN_ETSI"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths.32986722" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32LG/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename.1507122940" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename" value="" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections.670098082" name="Function sections (-ffunction-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections" value="true" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections.160253838" name="Data sections (-fdata-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections" value="true" valueType="boolean"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.1256561843" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.debug.1219416795" name="ARM Sourcery Windows GCC C++ Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level.1954632668" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.none" valueType="enumerated"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.linker.debug.2146191641" name="ARM Sourcery Windows GCC C Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.linker.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.libs.146057449" name="Libraries (-l)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="tdtools"/>
+									<listOptionValue builtIn="false" value="tdsensor"/>
+									<listOptionValue builtIn="false" value="tdrf"/>
+									<listOptionValue builtIn="false" value="tdcore"/>
+									<listOptionValue builtIn="false" value="tdrf"/>
+									<listOptionValue builtIn="false" value="tdcore"/>
+									<listOptionValue builtIn="false" value="emlib"/>
+									<listOptionValue builtIn="false" value="Device"/>
+									<listOptionValue builtIn="false" value="gcc"/>
+									<listOptionValue builtIn="false" value="c"/>
+									<listOptionValue builtIn="false" value="cs3"/>
+									<listOptionValue builtIn="false" value="cs3unhosted"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths.221439792" name="Library search path (-L)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/GCC Debug EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/GCC Debug EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/GCC Debug EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/GCC Debug EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/GCC Debug EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/GCC Debug EZR}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile.1620295102" name="Script file (-T)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile" value="..\..\Device\EnergyMicro\EFM32LG\Source\G++\efm32lg.ld" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart.2127313191" name="Do not use standard start files (-nostartfiles)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart" value="false" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections.1052171870" name="Remove unused sections (-Xlinker --gc-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections" value="true" valueType="boolean"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.c.linker.input.352849605" superClass="org.eclipse.cdt.cross.arm.gnu.c.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.linker.debug.443720498" name="ARM Sourcery Windows GCC C++ Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.linker.debug"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.archiver.base.685598972" name="ARM Sourcery Windows GCC Archiver" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.archiver.base"/>
+							<tool command="arm-none-eabi-objcopy" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createflash.debug.833184290" name="ARM Sourcery Windows GNU Create Flash Image" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createflash.debug"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createlisting.debug.736149838" name="ARM Sourcery Windows GNU Create Listing" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createlisting.debug"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.printsize.debug.269493646" name="ARM Sourcery Windows GNU Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.printsize.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.printsize.general.format.805963295" name="Size Format" superClass="org.eclipse.cdt.cross.arm.gnu.printsize.general.format" value="org.eclipse.cdt.cross.arm.printsize.size.general.format.sysv" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.printsize.general.hex.970503993" name="Hex" superClass="org.eclipse.cdt.cross.arm.gnu.printsize.general.hex" value="true" valueType="boolean"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="Device;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2140231312.184050707.213805513.857930142" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="emlib;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.1309782928.108768970.1644477002.1942064470.2041379577" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdcore;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.615468483.1265862379.1436657556.667045257.52699056" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdrf;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.615468483.463640573.1686683803.338032124" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtddrivers;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.1666513988.307598557.1228806112" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdgeoloc;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.1666513988.583235120.1993133992" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdsensor;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.2017434799.637070350.1881342572" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+			</storageModule>
+		</cconfiguration>
+		<cconfiguration id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.376117288.52005950.1204278230.668965043.1379906283.2139884080">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.376117288.52005950.1204278230.668965043.1379906283.2139884080" moduleId="org.eclipse.cdt.core.settings" name="Ref Design ETSI Release">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" description="EZR32LG230F128" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.376117288.52005950.1204278230.668965043.1379906283.2139884080" name="Ref Design ETSI Release" parent="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release" postbuildStep="arm-none-eabi-objcopy -O binary ${ProjName}.elf ${ProjName}.bin;arm-none-eabi-size --format=sysv -x  ${ProjName}.elf">
+					<folderInfo id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.376117288.52005950.1204278230.668965043.1379906283.2139884080." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.release.701344623" name="ARM Windows GCC (Sourcery G++ Lite)" nonInternalBuilderId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.builder.release" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.release">
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level.1877840711" name="Debug level" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.debugging.level.none" valueType="enumerated"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor.1791671806" name="Processor" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor" value="org.eclipse.cdt.cross.arm.gnu.base.option.mcpu.cortex-m3" valueType="enumerated"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createflash.784138552" name="Create Flash Image" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createflash" value="false" valueType="boolean"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createlisting.2039036842" name="Create Extended Listing" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createlisting" value="false" valueType="boolean"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.printsize.1054655255" name="Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.printsize" value="false" valueType="boolean"/>
+							<targetPlatform id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.platform.release.380844858" isAbstract="false" name="Windows Platform" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.platform.release"/>
+							<builder autoBuildTarget="all" buildPath="${workspace_loc:/td12xx_modem}/TD1204 Release" cleanBuildTarget="clean" command="cs-make" enableCleanBuild="true" id="org.eclipse.cdt.build.core.internal.builder.861925067" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.release.1238474147" name="ARM Sourcery Windows GCC Assembler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def.917223701" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="NDEBUG"/>
+									<listOptionValue builtIn="false" value="EZR32LG230F128"/>
+									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_REF_DESIGN_ETSI"/>
+									<listOptionValue builtIn="false" value="SIGFOX_V1=1"/>
+									<listOptionValue builtIn="false" value="SIGFOX_DOWNLINK=1"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths.1051011604" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32LG/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.misc.lstfilename.982556717" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.misc.lstfilename" value="" valueType="string"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.272121037" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release.405769490" name="ARM Sourcery Windows GCC C Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level.2066427329" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.size" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def.1736371596" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="NDEBUG"/>
+									<listOptionValue builtIn="false" value="EZR32LG230F128"/>
+									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_REF_DESIGN_ETSI"/>
+									<listOptionValue builtIn="false" value="SIGFOX_V1=1"/>
+									<listOptionValue builtIn="false" value="SIGFOX_DOWNLINK=1"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths.1955333715" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32LG/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.other.otherflags.1005280622" name="Other flags" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.other.otherflags" value="-c -fmessage-length=0 -Wno-packed-bitfield-compat" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename.1769048318" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename" value="" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections.1054819117" name="Function sections (-ffunction-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections" value="true" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections.136823932" name="Data sections (-fdata-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections" value="true" valueType="boolean"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.1635359598" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.release.1041983490" name="ARM Sourcery Windows GCC C++ Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level.13114021" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.size" valueType="enumerated"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.linker.release.203443088" name="ARM Sourcery Windows GCC C Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.linker.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.libs.1970721843" name="Libraries (-l)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="tdtools"/>
+									<listOptionValue builtIn="false" value="tdgeoloc"/>
+									<listOptionValue builtIn="false" value="tdsensor"/>
+									<listOptionValue builtIn="false" value="tdrf"/>
+									<listOptionValue builtIn="false" value="tdcore"/>
+									<listOptionValue builtIn="false" value="tdrf"/>
+									<listOptionValue builtIn="false" value="tdcore"/>
+									<listOptionValue builtIn="false" value="emlib"/>
+									<listOptionValue builtIn="false" value="Device"/>
+									<listOptionValue builtIn="false" value="gcc"/>
+									<listOptionValue builtIn="false" value="c"/>
+									<listOptionValue builtIn="false" value="cs3"/>
+									<listOptionValue builtIn="false" value="cs3unhosted"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths.121105325" name="Library search path (-L)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/GCC Release} EZR&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile.127382542" name="Script file (-T)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile" value="..\..\Device\EnergyMicro\EFM32LG\Source\G++\efm32lg.ld" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart.553157649" name="Do not use standard start files (-nostartfiles)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart" value="false" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections.1074929230" name="Remove unused sections (-Xlinker --gc-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections" value="true" valueType="boolean"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.c.linker.input.1850738486" superClass="org.eclipse.cdt.cross.arm.gnu.c.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.linker.release.863117201" name="ARM Sourcery Windows GCC C++ Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.linker.release"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.archiver.base.1015815623" name="ARM Sourcery Windows GCC Archiver" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.archiver.base"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createflash.release.1249228568" name="ARM Sourcery Windows GNU Create Flash Image" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createflash.release"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createlisting.release.508537370" name="ARM Sourcery Windows GNU Create Listing" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createlisting.release"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.printsize.release.1488755493" name="ARM Sourcery Windows GNU Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.printsize.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.printsize.general.format.1622370219" name="Size Format" superClass="org.eclipse.cdt.cross.arm.gnu.printsize.general.format" value="org.eclipse.cdt.cross.arm.printsize.size.general.format.sysv" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.printsize.general.hex.947746391" name="Hex" superClass="org.eclipse.cdt.cross.arm.gnu.printsize.general.hex" value="true" valueType="boolean"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="Device;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.878147372.279295855.1048868787.109061794" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="emlib;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.1472287705.1884496659.1639202683.401447898.1943738969" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdcore;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.86103437.802703146.1248360277.279535262.1581354707" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdgeoloc;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.1371762102.2015745606.6408174" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdrf;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.86103437.253698458.1743820319.1921148862" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdsensor;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.1033211399.828837204.224370160" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtddrivers;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.1371762102.665148952.1968061114" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+			</storageModule>
+		</cconfiguration>
+		<cconfiguration id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.335464900.689535700">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.335464900.689535700" moduleId="org.eclipse.cdt.core.settings" name="Ref Design FCC Debug">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" description="EZR32LG230F128" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.335464900.689535700" name="Ref Design FCC Debug" parent="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug" postbuildStep="arm-none-eabi-objcopy -O binary ${ProjName}.elf ${ProjName}.bin;arm-none-eabi-size --format=sysv -x  ${ProjName}.elf">
+					<folderInfo id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.335464900.689535700." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.debug.1292785517" name="ARM Windows GCC (Sourcery G++ Lite)" nonInternalBuilderId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.builder.debug" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.debug">
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level.204624202" name="Debug level" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.debugging.level.max" valueType="enumerated"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor.1791708103" name="Processor" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor" value="org.eclipse.cdt.cross.arm.gnu.base.option.mcpu.cortex-m3" valueType="enumerated"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createflash.453648040" name="Create Flash Image" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createflash" value="false" valueType="boolean"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createlisting.24190877" name="Create Extended Listing" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createlisting" value="false" valueType="boolean"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.printsize.1096649798" name="Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.printsize" value="false" valueType="boolean"/>
+							<targetPlatform id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.platform.debug.1253722332" isAbstract="false" name="Windows Platform" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.platform.debug"/>
+							<builder autoBuildTarget="all" buildPath="${workspace_loc:/blink/Debug}" cleanBuildTarget="clean" command="cs-make" id="org.eclipse.cdt.build.core.internal.builder.509863317" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.debug.218317426" name="ARM Sourcery Windows GCC Assembler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def.849085411" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="DEBUG"/>
+									<listOptionValue builtIn="false" value="DEBUG_EFM"/>
+									<listOptionValue builtIn="false" value="EZR32LG230F128"/>
+									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_REF_DESIGN_FCC"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths.148392831" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32LG/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.misc.lstfilename.1533397543" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.misc.lstfilename" value="" valueType="string"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.1297011274" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.debug.641815459" name="ARM Sourcery Windows GCC C Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level.248217711" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.none" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def.2026007899" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="DEBUG"/>
+									<listOptionValue builtIn="false" value="DEBUG_EFM"/>
+									<listOptionValue builtIn="false" value="EZR32LG230F128"/>
+									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_REF_DESIGN_FCC"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths.1360193213" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32LG/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename.1921714190" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename" value="" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections.858738616" name="Function sections (-ffunction-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections" value="true" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections.1009048634" name="Data sections (-fdata-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections" value="true" valueType="boolean"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.28524440" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.debug.774750232" name="ARM Sourcery Windows GCC C++ Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level.1476238222" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.none" valueType="enumerated"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.linker.debug.42224057" name="ARM Sourcery Windows GCC C Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.linker.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.libs.1821418198" name="Libraries (-l)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="tdtools"/>
+									<listOptionValue builtIn="false" value="tdgeoloc"/>
+									<listOptionValue builtIn="false" value="tdsensor"/>
+									<listOptionValue builtIn="false" value="tdrf"/>
+									<listOptionValue builtIn="false" value="tdcore"/>
+									<listOptionValue builtIn="false" value="tdrf"/>
+									<listOptionValue builtIn="false" value="tddrivers"/>
+									<listOptionValue builtIn="false" value="tdcore"/>
+									<listOptionValue builtIn="false" value="emlib"/>
+									<listOptionValue builtIn="false" value="Device"/>
+									<listOptionValue builtIn="false" value="gcc"/>
+									<listOptionValue builtIn="false" value="c"/>
+									<listOptionValue builtIn="false" value="cs3"/>
+									<listOptionValue builtIn="false" value="cs3unhosted"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths.522223686" name="Library search path (-L)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/GCC Debug EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/GCC Debug EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/GCC Debug EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/GCC Debug EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers/GCC Debug EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/GCC Debug EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/GCC Debug EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/GCC Debug EZR}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile.408983096" name="Script file (-T)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile" value="..\..\Device\EnergyMicro\EFM32LG\Source\G++\efm32lg.ld" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart.1304642874" name="Do not use standard start files (-nostartfiles)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart" value="false" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections.1493818566" name="Remove unused sections (-Xlinker --gc-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections" value="true" valueType="boolean"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.c.linker.input.908561982" superClass="org.eclipse.cdt.cross.arm.gnu.c.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.linker.debug.747133384" name="ARM Sourcery Windows GCC C++ Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.linker.debug"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.archiver.base.1024061237" name="ARM Sourcery Windows GCC Archiver" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.archiver.base"/>
+							<tool command="arm-none-eabi-objcopy" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createflash.debug.132597129" name="ARM Sourcery Windows GNU Create Flash Image" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createflash.debug"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createlisting.debug.1525909187" name="ARM Sourcery Windows GNU Create Listing" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createlisting.debug"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.printsize.debug.997700026" name="ARM Sourcery Windows GNU Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.printsize.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.printsize.general.format.1853979615" name="Size Format" superClass="org.eclipse.cdt.cross.arm.gnu.printsize.general.format" value="org.eclipse.cdt.cross.arm.printsize.size.general.format.sysv" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.printsize.general.hex.2141066147" name="Hex" superClass="org.eclipse.cdt.cross.arm.gnu.printsize.general.hex" value="true" valueType="boolean"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="Device;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2140231312.184050707.213805513.857930142" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="emlib;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.1309782928.108768970.1644477002.1942064470" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdcore;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.615468483.1265862379.1436657556.667045257" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdrf;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.615468483.463640573.1686683803" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtddrivers;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.1666513988.307598557" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdgeoloc;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.1666513988.583235120" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdsensor;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.2017434799.637070350" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+			</storageModule>
+		</cconfiguration>
+		<cconfiguration id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.873628118.1933353046">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.873628118.1933353046" moduleId="org.eclipse.cdt.core.settings" name="Ref Design FCC Release">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" description="EZR32LG230F128" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.873628118.1933353046" name="Ref Design FCC Release" parent="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release" postbuildStep="arm-none-eabi-objcopy -O binary ${ProjName}.elf ${ProjName}.bin;arm-none-eabi-size --format=sysv -x  ${ProjName}.elf">
+					<folderInfo id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.873628118.1933353046." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.release.2026894619" name="ARM Windows GCC (Sourcery G++ Lite)" nonInternalBuilderId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.builder.release" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.release">
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level.916140481" name="Debug level" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.debugging.level.none" valueType="enumerated"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor.975855969" name="Processor" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor" value="org.eclipse.cdt.cross.arm.gnu.base.option.mcpu.cortex-m3" valueType="enumerated"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createflash.154080797" name="Create Flash Image" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createflash" value="false" valueType="boolean"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createlisting.1735144759" name="Create Extended Listing" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.createlisting" value="false" valueType="boolean"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.printsize.1063433995" name="Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.addtools.printsize" value="false" valueType="boolean"/>
+							<targetPlatform id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.platform.release.1490779301" isAbstract="false" name="Windows Platform" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.platform.release"/>
+							<builder autoBuildTarget="all" buildPath="${workspace_loc:/blink/Release}" cleanBuildTarget="clean" command="cs-make" id="org.eclipse.cdt.build.core.internal.builder.857744456" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.release.564460365" name="ARM Sourcery Windows GCC Assembler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def.161332602" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="NDEBUG"/>
+									<listOptionValue builtIn="false" value="EZR32LG230F128"/>
+									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_REF_DESIGN_FCC"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths.1364895396" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32LG/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.misc.lstfilename.1851712046" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.misc.lstfilename" value="" valueType="string"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.1665985975" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release.152069556" name="ARM Sourcery Windows GCC C Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level.1023468587" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.size" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def.713497769" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="NDEBUG"/>
+									<listOptionValue builtIn="false" value="EZR32LG230F128"/>
+									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_REF_DESIGN_FCC"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths.1903938984" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/EnergyMicro/EFM32LG/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CMSIS/Include}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename.1482657526" name="Assembler Listing" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.lstfilename" value="" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections.2062411331" name="Function sections (-ffunction-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections" value="true" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections.1862013974" name="Data sections (-fdata-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections" value="true" valueType="boolean"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.460581549" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.release.1750584899" name="ARM Sourcery Windows GCC C++ Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level.2138589463" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.size" valueType="enumerated"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.linker.release.1610915466" name="ARM Sourcery Windows GCC C Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.linker.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.libs.224276832" name="Libraries (-l)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="tdtools"/>
+									<listOptionValue builtIn="false" value="tdgeoloc"/>
+									<listOptionValue builtIn="false" value="tdsensor"/>
+									<listOptionValue builtIn="false" value="tdrf"/>
+									<listOptionValue builtIn="false" value="tdcore"/>
+									<listOptionValue builtIn="false" value="tdrf"/>
+									<listOptionValue builtIn="false" value="tddrivers"/>
+									<listOptionValue builtIn="false" value="tdcore"/>
+									<listOptionValue builtIn="false" value="emlib"/>
+									<listOptionValue builtIn="false" value="Device"/>
+									<listOptionValue builtIn="false" value="gcc"/>
+									<listOptionValue builtIn="false" value="c"/>
+									<listOptionValue builtIn="false" value="cs3"/>
+									<listOptionValue builtIn="false" value="cs3unhosted"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths.1464383629" name="Library search path (-L)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdtools/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdgeoloc/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdsensor/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdrf/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtddrivers/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libtdcore/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/emlib/GCC Release EZR}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Device/GCC Release EZR}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile.915278147" name="Script file (-T)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile" value="..\..\Device\EnergyMicro\EFM32LG\Source\G++\efm32lg.ld" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart.911315202" name="Do not use standard start files (-nostartfiles)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.nostart" value="false" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections.119039427" name="Remove unused sections (-Xlinker --gc-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.gcsections" value="true" valueType="boolean"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.c.linker.input.704042148" superClass="org.eclipse.cdt.cross.arm.gnu.c.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.linker.release.1820996488" name="ARM Sourcery Windows GCC C++ Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.linker.release"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.archiver.base.1069912297" name="ARM Sourcery Windows GCC Archiver" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.archiver.base"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createflash.release.94972485" name="ARM Sourcery Windows GNU Create Flash Image" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createflash.release"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createlisting.release.1220338431" name="ARM Sourcery Windows GNU Create Listing" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createlisting.release"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.printsize.release.1945878183" name="ARM Sourcery Windows GNU Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.printsize.release">
+								<option id="org.eclipse.cdt.cross.arm.gnu.printsize.general.format.730657386" name="Size Format" superClass="org.eclipse.cdt.cross.arm.gnu.printsize.general.format" value="org.eclipse.cdt.cross.arm.printsize.size.general.format.sysv" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.printsize.general.hex.2132402516" name="Hex" superClass="org.eclipse.cdt.cross.arm.gnu.printsize.general.hex" value="true" valueType="boolean"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="Device;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.878147372.279295855.1048868787.109061794" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="emlib;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.1472287705.1884496659.1639202683.401447898" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdcore;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.86103437.802703146.1248360277.279535262" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdrf;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.86103437.253698458.1743820319" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtddrivers;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.1371762102.665148952" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdgeoloc;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.1371762102.2015745606" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdsensor;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.1033211399.828837204" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+			</storageModule>
+		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="blink.org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.1277095450" name="ARM Cross Target Application"/>
@@ -499,23 +1679,28 @@
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
 		<configuration configurationName="TD1208 Release">
-			<resource resourceType="PROJECT" workspacePath="/lan_fastbroadcast"/>
-		</configuration>
-		<configuration configurationName="TD1208 Debug"/>
-		<configuration configurationName="Multiple configurations">
-			<resource resourceType="PROJECT" workspacePath="/blink"/>
-		</configuration>
-		<configuration configurationName="IAR Release Gecko">
-			<resource resourceType="PROJECT" workspacePath="/td1202"/>
+			<resource resourceType="PROJECT" workspacePath="/switch_polling"/>
 		</configuration>
 		<configuration configurationName="IAR Debug">
 			<resource resourceType="PROJECT" workspacePath="/td1202"/>
 		</configuration>
+		<configuration configurationName="IAR Release Gecko">
+			<resource resourceType="PROJECT" workspacePath="/td1202"/>
+		</configuration>
+		<configuration configurationName="Multiple configurations">
+			<resource resourceType="PROJECT" workspacePath="/blink"/>
+		</configuration>
+		<configuration configurationName="TD1208 Debug">
+			<resource resourceType="PROJECT" workspacePath="/switch_polling"/>
+		</configuration>
 		<configuration configurationName="IAR Debug Gecko">
 			<resource resourceType="PROJECT" workspacePath="/td1202"/>
 		</configuration>
+		<configuration configurationName="Ref Design FCC Release">
+			<resource resourceType="PROJECT" workspacePath="/switch_polling"/>
+		</configuration>
 		<configuration configurationName="TD1202 Release">
-			<resource resourceType="PROJECT" workspacePath="/td1202_modem"/>
+			<resource resourceType="PROJECT" workspacePath="/switch_polling"/>
 		</configuration>
 		<configuration configurationName="GCC Debug Gecko">
 			<resource resourceType="PROJECT" workspacePath="/td1202"/>
@@ -529,8 +1714,11 @@
 		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/td1202"/>
 		</configuration>
+		<configuration configurationName="Ref Design FCC Debug">
+			<resource resourceType="PROJECT" workspacePath="/switch_polling"/>
+		</configuration>
 		<configuration configurationName="TD1205 Release">
-			<resource resourceType="PROJECT" workspacePath="/lan_fastbroadcast"/>
+			<resource resourceType="PROJECT" workspacePath="/switch_polling"/>
 		</configuration>
 		<configuration configurationName="Release">
 			<resource resourceType="PROJECT" workspacePath="/td1202"/>
@@ -538,11 +1726,29 @@
 		<configuration configurationName="GCC Release">
 			<resource resourceType="PROJECT" workspacePath="/td1202"/>
 		</configuration>
-		<configuration configurationName="TD1204 Release"/>
-		<configuration configurationName="TD1204 Debug"/>
-		<configuration configurationName="TD1205 Debug"/>
+		<configuration configurationName="TD1204 Release">
+			<resource resourceType="PROJECT" workspacePath="/switch_polling"/>
+		</configuration>
+		<configuration configurationName="TD1204 Debug">
+			<resource resourceType="PROJECT" workspacePath="/switch_polling"/>
+		</configuration>
+		<configuration configurationName="TD1508 Release">
+			<resource resourceType="PROJECT" workspacePath="/switch_polling"/>
+		</configuration>
+		<configuration configurationName="TD1205 Debug">
+			<resource resourceType="PROJECT" workspacePath="/switch_polling"/>
+		</configuration>
+		<configuration configurationName="Ref Design ETSI Release">
+			<resource resourceType="PROJECT" workspacePath="/switch_polling"/>
+		</configuration>
+		<configuration configurationName="Ref Design ETSI Debug">
+			<resource resourceType="PROJECT" workspacePath="/switch_polling"/>
+		</configuration>
 		<configuration configurationName="TD1202 Debug">
-			<resource resourceType="PROJECT" workspacePath="/td1202_modem"/>
+			<resource resourceType="PROJECT" workspacePath="/switch_polling"/>
+		</configuration>
+		<configuration configurationName="TD1508 Debug">
+			<resource resourceType="PROJECT" workspacePath="/switch_polling"/>
 		</configuration>
 		<configuration configurationName="GCC Release Gecko">
 			<resource resourceType="PROJECT" workspacePath="/td1202"/>

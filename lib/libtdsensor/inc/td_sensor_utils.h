@@ -2,10 +2,10 @@
  * @file
  * @brief Sensor Utils
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.2.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -138,6 +138,8 @@ extern "C" {
 
 	void TD_SENSOR_UTILS_BitConcat(uint8_t *data,  uint8_t *len,
 		uint8_t *data_append, uint8_t len_append);
+	uint32_t TD_SENSOR_UTILS_ReadBits(uint8_t *data, uint8_t *start_bit,
+		uint8_t *last_byte, uint8_t bit_to_read);
 
 	/** @} */
 

@@ -2,10 +2,10 @@
  * @file
  * @brief Sensor Transmitter Application Example
  * @author Telecom Design S.A.
- * @version 1.0.2
+ * @version 1.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -44,8 +44,7 @@
 #include <td_flash.h>
 #include <td_core.h>
 #include <td_printf.h>
-#include <td_module.h>
-#include <td_gpio.h>
+#include <td_stream.h>
 
 #include <td_sensor.h>
 #include <sensor_event.h>
@@ -190,12 +189,12 @@ bool SwitchCallback(GPIO_Port_TypeDef port, unsigned int bit, bool state)
  ******************************************************************************/
 void TD_USER_Setup(void)
 {
+	TD_UART_Options_t options = {LEUART_DEVICE, LEUART_LOCATION, 9600, 8, 'N',
+		1, false};
 
-	// Initialize the UART console
-	init_printf(TD_UART_Init(9600, true, false),
-		TD_UART_Putc,
-		TD_UART_Start,
-		TD_UART_Stop);
+	// Open an I/O stream using LEUART0
+	TD_UART_Open(&options, TD_STREAM_RDWR);
+
 	tfp_printf("Transmitter Start-up\r\n");
 
 	// Initialize the LED GPIO

@@ -2,10 +2,10 @@
  * @file
  * @brief AT parser API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.3
+ * @version 2.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -82,8 +82,7 @@ extern "C" {
 		AT_A = 0,				///< Got an 'A'
 		AT_AT,					///< Got 'AT'
 		AT_COMMAND				///< Got a command
-	}
-	AT_states;
+	} AT_states;
 
 	/** Basic AT command tokens */
 	typedef enum AT_tokens {
@@ -200,12 +199,15 @@ extern "C" {
 	/** @addtogroup AT_PROTOTYPES Prototypes
 	 * @{ */
 
+	void AT_SavePersistBuffer(void);
 	uint8_t AT_Tokenize(char c, int *extension);
-	void AT_printf(char *fmt, ...);
+	void AT_printf(const char *fmt, ...);
 	void AT_PrintResult(int8_t result);
 	bool AT_AddExtension(AT_extension_t *extension);
 	void AT_Init(void);
+	void AT_Echo(bool state);
 	void AT_Parse(char c);
+	void AT_FactoryExec(void);
 	long long AT_atoll(const char *s);
 
 	/** @} */

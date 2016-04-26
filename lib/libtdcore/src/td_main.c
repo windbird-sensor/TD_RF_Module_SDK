@@ -2,10 +2,10 @@
  * @file
  * @brief Main program for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.2.0
+ * @version 2.3.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -35,6 +35,7 @@
 #include <stdbool.h>
 
 #include <em_chip.h>
+#include <em_cmu.h>
 
 #include "td_rtc.h"
 #include "td_scheduler.h"
@@ -104,6 +105,8 @@ int main(void)
 	// Workarounds for chip errata
 	CHIP_Init();
 
+	// For Custom Monitor Loader/App before main code
+	__set_PRIMASK(0);
 	// All initialization are done in MAIN_INIT macro above
 	// Don't worry, it is the same as before, just with '\' decoration
 	// [Needed for runtime early debug]
@@ -115,6 +118,11 @@ int main(void)
 		// Prevent Exception and Interrupt from calling handler
 		__set_PRIMASK(1);
 
+		// Now IRQ are masked. IRQ stay pending, but IRQ handler are not called
+		// If we get an IRQ RTC (or other), they will stay pending and
+		// EMU_EnterEMxxx (aka sleep processor) will not sleep processor but
+		// wakeup immediately, go primask(0) and call IRQ handler
+
 		// Here:
 		//  with "while" : while no background task should be called
 		//                 all IRQs (or main loop) function that wanted main
@@ -125,6 +133,16 @@ int main(void)
 		//				   processing MUST call TD_WakeMainLoop();
 		if (!BackgroundRoundWanted) {
 
+			// We need to include TD_RTC_Sleep in PRIMASK(1) to correctly handle
+			// case:
+			//  -BackgroundRoundWanted is false
+			//  -we enter in this "if" case
+			//  -here an IRQ occurs, if we are not masked, we can enter in IRQ
+			//   handler
+			//  -this IRQ handler set BackgroundRoundWanted
+			//  -we go in TD_RTC_Sleep() and sleep ...
+			//  -BackgroundRound(Wanted) will ony be executed at next event
+
 			// Go into EM2 sleep mode until an event occurs, exception/interrupt
 			// are masked
 			TD_RTC_Sleep();
@@ -133,7 +151,9 @@ int main(void)
 			__set_PRIMASK(0);
 
 			// Interrupt execution will take place at this stage
-
+			if (CONFIG_PREVENT_FREE_BACKGROUND_CYCLE && !BackgroundRoundWanted) {
+				continue;
+			}
 			// Now Prevent Exception and Interrupt from calling handler
 			__set_PRIMASK(1);
 		}

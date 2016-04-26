@@ -6,9 +6,9 @@
 		<project>Device</project>
 		<project>emlib</project>
 		<project>libtdcore</project>
-		<project>libtdrf</project>
 		<project>libtddrivers</project>
 		<project>libtdgeoloc</project>
+		<project>libtdrf</project>
 		<project>libtdsensor</project>
 	</projects>
 	<buildSpec>

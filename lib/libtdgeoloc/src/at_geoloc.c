@@ -2,10 +2,10 @@
  * @file
  * @brief Geolocalization AT command extension for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.1
+ * @version 1.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -149,11 +149,14 @@ static uint16_t FixTimeout;
  ******************************************************************************/
 static void GPSCallback(TD_GEOLOC_Fix_t *fix, bool timeout)
 {
+	bool condition;
 	memcpy(&LastPosition,fix,sizeof(TD_GEOLOC_Fix_t));
-	if ((fix->type >= TD_GEOLOC_2D_FIX
+
+	condition = (fix->type >= TD_GEOLOC_2D_FIX
 			&& fix->quality.sat >= RequiredQuality.sat
-			&& fix->quality.hdop <= RequiredQuality.hdop) || timeout) {
-		if (PrintPosition) {
+			&& fix->quality.hdop <= RequiredQuality.hdop && fix->hard.rtc_calibrated);
+	if (condition || timeout) {
+		if (PrintPosition && condition) {
 			TD_GEOLOC_PrintfFix(fix);
 		}
 

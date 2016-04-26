@@ -2,10 +2,10 @@
  * @file
  * @brief Flash controller (MSC) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.1.1
+ * @version 2.2.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -58,6 +58,7 @@
 
 //#define FLASH_DEBUG_READ
 //#define FLASH_DEBUG_WRITE
+//#define FLASH_LAYOUT_DEBUG
 
 #ifdef FLASH_DEBUG_READ
 /** Turn on trace mode if tfp_printf not commented */
@@ -66,6 +67,14 @@
 
 /** Macro to debug Flash reads */
 #define DEBUG_PRINTF_READ(...)
+#endif
+
+#ifdef FLASH_LAYOUT_DEBUG
+/** Macro to debug Flash layout */
+#define FLASH_LAYOUT_PRINTF(...) tfp_printf(__VA_ARGS__)
+#else
+/** Macro to debug Flash layout */
+#define FLASH_LAYOUT_PRINTF(...)
 #endif
 
 #ifdef FLASH_DEBUG_WRITE
@@ -83,26 +92,28 @@
 #endif
 
 #ifdef __ICCARM__
-/** Special user config page (512 bytes) */
+/** Special user config page (512 bytes on 32k devices) */
 #define E2P_USER       (uint32_t) __segment_begin("USER_ROM_CONFIG")
 #define CODE_END       ((uint32_t) __segment_begin("USER_ROM_CONFIG") - 513)
 
 #else
 
 /** Beginning of user in Flash memory from linker script */
-extern const char __userrom_start;
 
 /** End of code in Flash memory from linker script */
 extern const char __cs3_regions_end;
 
-/** Special user configuration page (512 bytes) */
-#define E2P_USER   (uint32_t) &__userrom_start
+/** Special user configuration page (512 bytes on TG,G | 2048 bytes on LG)	 */
+/* Here we get address of First Variable page (topmost page !)				 */
+/* others pages (lower), configured TD_FLASH_PAGE_COUNT, will be avaible lower*/
+//#define E2P_USER   (uint32_t) &__userrom_start
+#define E2P_USER   flash_eeprom_user_add
 
 /** End of code address */
 #define CODE_END   (uint32_t) &__cs3_regions_end
 #endif
 
-/** Special factory page (512 bytes) */
+/** Special factory page (512 bytes on TG,G | 2048 bytes on LG) */
 #define E2P_FACTORY     0x0FE00000
 
 /** DWORD size */
@@ -155,6 +166,10 @@ static TD_FLASH_logger_t FlashLogger;
 /** Flash dirty flag, data is not valid */
 static bool FlashVariableDirty = false;
 
+#ifndef __ICCARM__
+static uint32_t flash_eeprom_user_add = 0;
+#endif
+
 /** @} */
 
 /*******************************************************************************
@@ -163,6 +178,31 @@ static bool FlashVariableDirty = false;
 
 /** @addtogroup FLASH_LOCAL_FUNCTIONS Local Functions
  * @{ */
+
+/***************************************************************************//**
+ * @brief
+ *   This function will return base address of a layout section (and size)
+ ******************************************************************************/
+uint32_t TD_FLASH_GetLayoutBase(uint8_t idx, uint32_t *size)
+{
+	uint32_t base_add;
+	uint16_t *flash_size = (uint16_t *) 0x0FE081F8;
+	uint8_t i;
+
+	base_add = *flash_size << 10;
+	for (i = 0; i < idx; i++) {
+		if (!CONFIG_FLASH_LAYOUT[i]) {
+			TD_Trap(TRAP_FLASH_LAYOUT, i);
+		}
+		base_add -= CONFIG_FLASH_LAYOUT[i];
+		if (size) {
+			*size = CONFIG_FLASH_LAYOUT[i];
+		}
+	}
+	FLASH_LAYOUT_PRINTF("GetLayoutBase:%d:%s:0x%08X\r\n", idx,
+		CONFIG_FLASH_NAME_LAYOUT[idx - 1], base_add);
+	return base_add;
+}
 
 /***************************************************************************//**
  * @brief
@@ -466,40 +506,70 @@ static void TD_FLASH_WriteRegion(uint32_t start, void *buffer, uint32_t count,
 * @return
 *   Returns true upon success, false if a checksum error has been detected
 ******************************************************************************/
-static bool TD_FLASH_ReadRegion(uint32_t *start, void *buffer, uint32_t count,
-	void *extended_buffer, uint32_t extended_count)
+static bool TD_FLASH_ReadRegion(uint32_t *start, void *buffer,
+	uint32_t count_in, void *extended_buffer, uint32_t extended_count_in)
 {
 	uint32_t *flash_pointer = start;
-	uint32_t crc;
+	uint32_t crc, crc2, count, extended_count;
 	TD_DEVICE *device = (TD_DEVICE *) buffer;
 	TD_DEVICE_EXT device_ext;
 	bool crc_ok = false;
+	bool crc_ok2 = false;
 
 	// Round counts to DWORD
-	count = (count + DWORDSZ - 1) / DWORDSZ;
-	extended_count = (extended_count + DWORDSZ - 1) / DWORDSZ;
+	count = (count_in + DWORDSZ - 1) / DWORDSZ;
+	extended_count = (extended_count_in + DWORDSZ - 1) / DWORDSZ;
 
 	// Read the base CRC and data at the beginning of the Flash region
 	crc = *flash_pointer++;
-	memcpy(buffer, flash_pointer, count << 2);
+	memcpy(buffer, flash_pointer, count_in);
 	flash_pointer += count;
-	if (crc == TD_FLASH_CRC32(buffer, count)) {
+	if (buffer && crc == TD_FLASH_CRC32(buffer, count)) {
 		crc_ok = true;
 	}
+	crc2 = *(start + FLASH_PAGE_SIZE / DWORDSZ - 1);
+	crc_ok2 = ((TD_FLASH_CRC32((uint32_t *) start, FLASH_PAGE_SIZE / DWORDSZ - 1)) == crc2);
 	if (start == (uint32_t *) E2P_FACTORY) {
 
 		// Reading from the Factory region, try to read the extended device
 		// descriptor
 		memcpy(&device_ext, flash_pointer, sizeof (TD_DEVICE_EXT));
-		crc = *(start + FLASH_PAGE_SIZE / DWORDSZ - 1);
-		if (crc == TD_FLASH_CRC32((uint32_t *) start, FLASH_PAGE_SIZE / DWORDSZ
-			- 1) &&
-			device_ext.DeviceVersion == 2) {
 
-			/* In device descriptor version 2, there is no more base descriptor
-			 * stored in Flash memory, recreate it from the extended descriptor.
+		// If we have a version number, save it first, else we are V1 legacy
+		if (crc_ok2) {
+			device_ext.DeviceVersionRead = device_ext.DeviceVersion;
+		} else {
+			device_ext.DeviceVersionRead = 1;
+		}
+
+		// V1 / legacy
+		if (crc_ok && !crc_ok2) {
+			memset(&device_ext, 0, sizeof (TD_DEVICE_EXT));
+			device_ext.Serial = device->Serial;
+			device_ext.ModResult = device->ModResult;
+			device_ext.ProdResult = device->ProdResult;
+			device_ext.DeviceVersion = 2;
+			memset(&device_ext.TDSerial, '?', 12);
+			crc_ok2 = true;
+		}
+
+		// V2
+		if (crc_ok2 && device_ext.DeviceVersion == 2) {
+
+			// Convert from v2 to v3, init all new fields to zero
+			memset(&device_ext.QuartzCal[0], 0, sizeof (TD_DEVICE_EXT) -
+				((uint8_t *) &device_ext.QuartzCal[0] - (uint8_t *) &device_ext));
+			device_ext.DeviceVersion = 3;
+		}
+
+		// Generate backward compatible structure
+		if (crc_ok2 && device_ext.DeviceVersion == 3) {
+
+			/* In device descriptor version 2 and higher, there is no more base
+			 * descriptor stored in Flash memory, recreate it from the extended
+			 * descriptor.
 			 */
-			memset(device, count, 0);
+			memset(device, 0, count);
 			device->Serial = device_ext.Serial;
 			device->ModResult = device_ext.ModResult;
 			device->ProdResult = device_ext.ProdResult;
@@ -512,12 +582,10 @@ static bool TD_FLASH_ReadRegion(uint32_t *start, void *buffer, uint32_t count,
 	if (extended_buffer != 0 && extended_count != 0) {
 
 		// Copy Flash into extended buffer if present
-		memcpy(extended_buffer, flash_pointer, extended_count << 2);
+		memcpy(extended_buffer, &device_ext, extended_count_in);
 
 		// Read the CRC covering the whole region in its last word
-		crc = *(start + FLASH_PAGE_SIZE / DWORDSZ - 1);
-		if (crc != TD_FLASH_CRC32((uint32_t *) start, FLASH_PAGE_SIZE / DWORDSZ
-			- 1)) {
+		if (!crc_ok2) {
 			return false;
 		}
 	}
@@ -608,7 +676,7 @@ void TD_FLASH_WriteVariables(void)
 		temp = (crc << 24) | (TD_FLASH_DataList[i].data_size & 0xFFFF) << 8 | (i);
 
 		// Write first byte
-		DEBUG_PRINTF_WRITE("WH %08x %08X\r\n",p,temp);
+		DEBUG_PRINTF_WRITE("WH %08x %08X\r\n", p, temp);
 		TD_FLASH_WriteWord(p++, temp);
 
 		// Change page
@@ -680,7 +748,7 @@ bool TD_FLASH_DeclareVariable(uint8_t *variable, uint16_t size, uint8_t *index)
 
 	// Make sure that there are not too many variables declared
 	if (FlashDataCount >= CONFIG_TD_FLASH_MAX_DATA_POINTER) {
-		TD_Trap(TRAP_FLASH_POINTER_OVF , FlashDataCount);
+		TD_Trap(TRAP_FLASH_POINTER_OVF, FlashDataCount);
 		return false;
 	} else {
 
@@ -701,7 +769,7 @@ bool TD_FLASH_DeclareVariable(uint8_t *variable, uint16_t size, uint8_t *index)
 
 		// Make sure there is enough room for this variable
 		if (FlashDataSize + size + 4 >
-			FLASH_PAGE_SIZE * CONFIG_TD_FLASH_USER_PAGE ) {
+			FLASH_PAGE_SIZE * CONFIG_TD_FLASH_USER_PAGE) {
 			TD_Trap(TRAP_FLASH_VAR_FULL, FlashDataSize << 16 | size);
 			return false;
 		} else {
@@ -768,7 +836,7 @@ uint16_t TD_FLASH_ReadVariable(uint8_t index, uint8_t *buffer)
 	count = (TD_FLASH_DataList[index].data_size + DWORDSZ - 1) / DWORDSZ;
 	temp = *pr++;
 	crc = (temp >> 24) & 0xFF;
-	DEBUG_PRINTF_READ("RH %08x %08X\r\n",pr - 1, temp);
+	DEBUG_PRINTF_READ("RH %08x %08X\r\n", pr - 1, temp);
 	if (pr - page >= FLASH_PAGE_SIZE / 4) {
 		DEBUG_PRINTF_READ("CP %08x %08x\r\n", pr, page);
 		page -= FLASH_PAGE_SIZE / 4;
@@ -828,6 +896,18 @@ uint16_t TD_FLASH_ReadVariable(uint8_t index, uint8_t *buffer)
 void TD_FLASH_SetVariablesVersion(uint32_t version)
 {
 	uint8_t code_page;
+	extern uint8_t const CONFIG_FLASH_LAYOUT_EEPROM;
+
+#ifdef __ICCARM__
+	flash_eeprom_user_add = E2P_USER;
+#else
+	// First get address of eeprom layout
+	flash_eeprom_user_add = TD_FLASH_GetLayoutBase(CONFIG_FLASH_LAYOUT_EEPROM, NULL);
+
+	// Address must be set to last block of variable
+	flash_eeprom_user_add += CONFIG_FLASH_LAYOUT[CONFIG_FLASH_LAYOUT_EEPROM-1]
+		- FLASH_PAGE_SIZE;
+#endif
 
 	// Compute code pages usage in Flash memory
 	code_page = CODE_END / FLASH_PAGE_SIZE;
@@ -848,6 +928,21 @@ void TD_FLASH_SetVariablesVersion(uint32_t version)
 		FlashVariablesVersion != version) {
 		FlashVariablesVersion = version;
 		FlashVariableDirty = true;
+	}
+}
+
+/***************************************************************************//**
+* @brief
+* Check real flash size is more or equal to one declared for compiling
+*
+******************************************************************************/
+void TD_FLASH_CheckSize(void)
+{
+	uint16_t *flash_size = (uint16_t *) 0x0FE081F8;
+	uint32_t size = (uint32_t) (*flash_size) << 10;
+
+	if (size < CONFIG_LIMIT_FLASH_SIZE) {
+		TD_Trap(TRAP_FLASH_LAYOUT, 100);
 	}
 }
 
@@ -1106,6 +1201,68 @@ bool TD_FLASH_DeviceReadExtended(TD_DEVICE *device, TD_DEVICE_EXT *device_ext)
 {
 	return TD_FLASH_ReadRegion((uint32_t *) E2P_FACTORY, device,
 		sizeof (TD_DEVICE), device_ext, sizeof (TD_DEVICE_EXT));
+}
+
+/***************************************************************************//**
+* @brief
+*   Reads a buffer from AppData Factory Flash memory.
+*
+* @param[in] buffer
+*   Pointer to the destination buffer.
+*
+* @param[in] offset
+*   Offset in AppData
+*
+* @param[in] count
+*   Bytes to read from AppData
+*
+* @return
+*   Returns true upon success, false if a checksum error has been detected or
+*   out of buffer
+******************************************************************************/
+bool TD_FLASH_DeviceReadAppData(uint8_t *buffer, uint16_t offset, uint16_t count)
+{
+	TD_DEVICE device;
+	TD_DEVICE_EXT device_ext;
+
+	if (offset + count > sizeof (device_ext.AppData)) {
+		return false;
+	}
+	if (!TD_FLASH_ReadRegion((uint32_t *) E2P_FACTORY, &device, sizeof (TD_DEVICE),
+		&device_ext, sizeof (TD_DEVICE_EXT))){
+		return false;
+	}
+	memcpy(buffer, &device_ext.AppData[offset], count);
+	return true;
+}
+
+/***************************************************************************//**
+* @brief
+*   Dump the Flash memory layout.
+******************************************************************************/
+void TD_FLASH_DumpLayout(void)
+{
+#if defined(__GNUC__)
+	uint8_t i = 0;
+	uint16_t *flash_size = (uint16_t *) 0x0FE081F8;
+	uint32_t add = (*flash_size) << 10;
+
+	tfp_printf("==FLASH LAYOUT==\r\n");
+	tfp_printf("0x%08X:-Top of flash-\r\n", add);
+	while (1) {
+		if (!CONFIG_FLASH_LAYOUT[i]) {
+			break;
+		}
+		add -= CONFIG_FLASH_LAYOUT[i];
+		tfp_printf("0x%08X:%10s:0x%04X (%d o.)\r\n", add,
+			CONFIG_FLASH_NAME_LAYOUT[i], CONFIG_FLASH_LAYOUT[i],
+			CONFIG_FLASH_LAYOUT[i]);
+		i++;
+	}
+	tfp_printf("E2P_USER:0x%08X\r\n", flash_eeprom_user_add);
+#else
+	tfp_printf("TD_FLASH_DumpLayout not defined in IAR\r\n");
+#endif
 }
 
 /** @} */

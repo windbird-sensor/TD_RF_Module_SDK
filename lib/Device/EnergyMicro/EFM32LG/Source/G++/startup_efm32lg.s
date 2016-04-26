@@ -110,12 +110,20 @@ __cs3_reset_em:
     .size   __cs3_reset_em,.-__cs3_reset_em
     .thumb
 
+    .globl  DefaultHandler
+    .type	DefaultHandler, %function
     .globl  _IRQHandlerinterrupt
     .type   _IRQHandlerinterrupt, %function
 _IRQHandlerinterrupt:
+    LDR r0, _addr_myOtherFunc
+  	STR r0, [sp,#4]
+  	POP {r0,pc}
+  	.align
+_addr_myOtherFunc:
+    .word DefaultHandler
     b .
-    .size   _IRQHandlerinterrupt, . - _IRQHandlerinterrupt
 
+    .size   _IRQHandlerinterrupt, . - _IRQHandlerinterrupt
     .weak   NMI_Handler
     .globl  NMI_Handler
     .set    NMI_Handler, _IRQHandlerinterrupt
@@ -142,7 +150,9 @@ _IRQHandlerinterrupt:
     .set    Reserved9_Handler, _IRQHandlerinterrupt
     .weak   Reserved10_Handler
     .globl  Reserved10_Handler
-    .set    Reserved10_Handler, _IRQHandlerinterrupt
+/* small hack to store 'wanted' flash size on binary*/
+/* we are using 'unsed' handler (for now) that would have offset 0x28 in .bin output and can be retrieved by loader software*/
+    .set    Reserved10_Handler, __compiled_for_flash_size
     .weak   SVC_Handler
     .globl  SVC_Handler
     .set    SVC_Handler, _IRQHandlerinterrupt

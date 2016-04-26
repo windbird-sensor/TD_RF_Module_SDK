@@ -2,10 +2,10 @@
  * @file
  * @brief Utility functions for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.2.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -61,10 +61,14 @@ extern "C" {
 #define TRAP_MAGIC_TRACE		0xA90B0B00
 
 /** Maximum number of RAM TRAP traces */
-#define TRAP_MAX_TRACE			19
+#define TRAP_MAX_TRACE			18
 
 /** Maximum number of user variables in RAM TRAP traces */
+#ifdef EZR32LG230F256
+#define TRAP_MAX_USER 			201
+#else
 #define TRAP_MAX_USER 			9
+#endif
 
 /** Flag for global oversize detection in RAM TRAP traces */
 #define TRACE_MAGIC_OVERSIZE	(1 << 0)
@@ -77,6 +81,12 @@ extern "C" {
 
 /** Flag for trap detection */
 #define TRACE_MAGIC_TRAP		(1 << 7)
+
+/** Flag for first custom trap handler */
+#define TRAP_CUST_HANDLER1		1
+
+/** Flag for second custom trap handler */
+#define TRAP_CUST_HANDLER2		2
 
 /** Integrated detection of re-entrance TD_CHECK_REENTRENCY_IN /
  * TD_CHECK_REENTRENCY_OUT */
@@ -110,7 +120,7 @@ extern "C" {
 		TRAP_LINE,					/**< 1-Trap at specific line */
 		TRAP_SPI_MAX_LOCK,			/**< 2-Trap add a callback next to an SPI locked access */
 		TRAP_SPI_INVALID_UNLOCK,	/**< 3-Trap unlock a non-locked SPI bus */
-		TRAP_SPI_NOT_AVAILABLE,		/**< 4-Trap SPI can't be unavailable here */
+		TRAP_SPI_NOT_AVAILABLE,		/**< 4-Trap SPI can't be available here */
 		TRAP_SPI_INVALID_ID,		/**< 5-Trap SPI ID out of range */
 		TRAP_SPI_INVALID_BUS,		/**< 6-Trap SPI BUS out of range */
 		TRAP_SPI_NI,				/**< 7-Trap SPI not implemented */
@@ -147,9 +157,19 @@ extern "C" {
 		TRAP_POWER_CONTEXT_UNHANDLED,/**< 38-Unknown radio power context  */
 		TRAP_FREQ_OUT_RANGE,		/**< 39-Frequency out of range  */
 		TRAP_CUSTOM_FUNC,			/**< 40-call func in param  */
-		TRAP_LAN_ADDRESS_SIZE		/**< 41- Trying to use lan adress or mask longer than av. bits */
-	}
-	TD_TRAP_t;
+		TRAP_LAN_ADDRESS_SIZE,		/**< 41-Trying to use lan adress or mask longer than av. bits */
+		TRAP_UART_CONFIG,			/**< 42-Invalid uart configuration */
+		TRAP_TIMER_CONFIG,			/**< 43-Invalid timer configuration */
+		TRAP_MOD_OUT_RANGE,			/**< 44-Modulation out of range  */
+		TRAP_UNHANDLED_IRQ,			/**< 45-IRQ vector unhandled */
+		TRAP_TRACERAM_SIZE_INVALID,	/**< 46-Trace ram size invalid */
+		TRAP_ACCELERO_MODE,			/**< 47-Accelero mode transition invalid */
+		TRAP_SCHEDULER_OVERRUN,		/**< 48-Scheduler manager overrun */
+		TRAP_BLE,					/**< 49-Bluetooth error */
+		TRAP_ASSERT_EFM,			/**< 50-emlib assertion error (only activated if DEBUG_EFM_USER is defined when compiling emlib)*/
+		TRAP_FLASH_LAYOUT,			/**< 51-invalid flash layout*/
+		TRAP_SIGFOX_CHANNEL,		/**< 52-Bad SIGFOX channel */
+	} TD_TRAP_t;
 
 	/** SYSTEM dumps */
 	typedef enum {
@@ -186,6 +206,7 @@ extern "C" {
 	typedef struct {
 		uint32_t magic;				///< Magic trace
 		TD_TRAP_t trap;          	///< Trap
+		uint16_t user_trap;			///< User defined trap
 		uint32_t param;				///< Param
 		uint16_t trace_cnt;			///< Trace count number
 		uint16_t trace[TRAP_MAX_TRACE];	///< Trace data
@@ -232,23 +253,30 @@ extern "C" {
 	 * @{ */
 
 	void TD_TRAP_Set(TD_TRAP_callback_t trap);
+	TD_TRAP_callback_t TD_TRAP_Get(void);
 	void TD_Trap(TD_TRAP_t trap, uint32_t param);
 	bool TD_TRAP_DirectToFlash(TD_TRAP_t *trap, uint32_t *param);
 	TD_TRAP_action_t TD_TRAP_Reset_Callback(TD_TRAP_t trap, uint32_t param);
 	TD_TRAP_action_t TD_TRAP_Mini_Callback(TD_TRAP_t trap, uint32_t param);
 	TD_TRAP_action_t TD_TRAP_Flash_Callback(TD_TRAP_t trap, uint32_t param);
 	TD_TRAP_action_t TD_TRAP_Printf_Callback(TD_TRAP_t trap, uint32_t param);
+	void TD_TRAP_VectorTableDump(void);
 	void TD_TrapHere(void);
 	bool TD_NopHere(void);
 	void TD_TRAP_TraceDump(bool force);
-	void TD_TRAP_TraceStore(TD_TRAP_t trap, uint32_t param);
+	void TD_TRAP_TraceStore(TD_TRAP_t trap, uint32_t param, uint16_t user_trap);
 	void TD_TRAP_TraceDumpSigfox(uint8_t retry);
 	bool TD_TRAP_TraceUserSet(uint8_t entry, uint32_t val);
 	void TD_TRAP_StackProtect(uint8_t enable);
 	void TD_TRAP_StackTrace(void);
 	bool TD_TRAP_StackCheck(void);
+	void TD_TRAP_DumpSystemId(void);
 	DECLARE_DYNAMIC(void, TD_SystemDump, TD_Dump_t dump);
-
+#if defined(__GNUC__)
+	uint8_t *TD_TRAP_TraceUserGetRaw(uint16_t *sz);
+#endif
+	bool TD_TRAP_TraceGet(TD_TRAP_t *trap, uint32_t *param, uint16_t *user_trap);
+	uint8_t TD_TRAP_EFM_ASSERT_Get(uint16_t *buf);
 	/** @} */
 
 	/** @} (end addtogroup TRAP) */

@@ -2,10 +2,10 @@
  * @file
  * @brief Temperature/Supply Voltage measure API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.2.0
+ * @version 2.3.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -59,8 +59,10 @@ extern "C" {
 
 	uint8_t TD_MEASURE_VoltageTemperature(bool mode);
 	int32_t TD_MEASURE_VoltageTemperatureExtended(bool mode);
+	int32_t TD_MEASURE_VoltageRepeat(void);
 	uint32_t TD_MEASURE_SingleVoltage(ADC_SingleInput_TypeDef input,
 		ADC_Ref_TypeDef ref);
+	uint8_t TD_MEASURE_VoltageConvert(uint32_t measure);
 
 	/***********************************************************************//**
 	 * @brief

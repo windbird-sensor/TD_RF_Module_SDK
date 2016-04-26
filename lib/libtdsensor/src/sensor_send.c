@@ -2,10 +2,10 @@
  * @file
  * @brief API for sending frames to Sensor
  * @author Telecom Design S.A.
- * @version 1.3.0
+ * @version 1.3.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -96,7 +96,6 @@
 /** @addtogroup SENSOR_SEND_PRIVATE_VARIABLES Private Variables
  * @{ */
 
-
 /** User callback to execute before and after lan transmission */
 static bool (*UserCallback)(uint8_t *payload, uint8_t count, uint8_t repetition, uint32_t interval) = 0;
 
@@ -168,7 +167,7 @@ bool TD_SENSOR_SendUDM(uint8_t id, TD_SENSOR_FrameType_t frame_type,
 		TD_SENSOR_DEVICE_GetTxSkipLan()) {
 		ok = TD_SENSOR_TRANSMITTER_SendSigfox((uint8_t *) frame,
 			2 + count,
-        	id,
+			id,
 			&TD_SENSOR_TransmitConfig[frame_type].profile);
 
 		// Check battery status
@@ -183,17 +182,17 @@ bool TD_SENSOR_SendUDM(uint8_t id, TD_SENSOR_FrameType_t frame_type,
 				TD_SENSOR_TransmitConfig[frame_type].profile.interval);
 		} else {
 
-		// Try to send via LAN in synchronous or asynchronous mode
-		code = TD_SENSOR_DEVICE_Forward((uint8_t *) frame,
-			2 + count,
-			TD_SENSOR_TransmitConfig[frame_type].profile.repetition,
-			TD_SENSOR_TransmitConfig[frame_type].profile.interval);
-		if (code == ACK_OK || code == SENSOR_LAN_QUEUED) {
-			ok = true;
-		} else {
-			ok = false;
+			// Try to send via LAN in synchronous or asynchronous mode
+			code = TD_SENSOR_DEVICE_Forward((uint8_t *) frame,
+				2 + count,
+				TD_SENSOR_TransmitConfig[frame_type].profile.repetition,
+				TD_SENSOR_TransmitConfig[frame_type].profile.interval);
+			if (code == ACK_OK || code == SENSOR_LAN_QUEUED) {
+				ok = true;
+			} else {
+				ok = false;
+			}
 		}
-	}
 	}
 	return ok;
 }
@@ -234,8 +233,8 @@ bool TD_SENSOR_Send(TD_SENSOR_TransmitProfile_t *profile,
 	if (count > 10) {
 		return false;
 	}
-    frame.header[0] = frame_type & 0x0f;
-    frame.header[1] = (stamp & 0x07) << 4;
+	frame.header[0] = frame_type & 0x0f;
+	frame.header[1] = (stamp & 0x07) << 4;
 	for (i = 0; i < count; i++) {
 		frame.payload[i] = payload[i];
 	}

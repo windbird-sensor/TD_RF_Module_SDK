@@ -2,10 +2,10 @@
  * @file
  * @brief Timer peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.3
+ * @version 2.0.4
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,

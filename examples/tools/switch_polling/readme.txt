@@ -5,7 +5,7 @@ libttdcore utility library and the libtdsensor library monitoring capabilities
 to provide a skeleton Sensor Transmitter application template.
 
 This example registers the Transmitter to the Sensor backend, then start
-monitoring battery, temperature and switch events while sending periodic
+monitoring battery, temperature and witch events while sending periodic
 keepalive messages every 24 hours.
 
 

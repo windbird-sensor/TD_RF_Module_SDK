@@ -3,10 +3,10 @@
  * @brief Serial Peripheral Interface (SPI) peripheral API for the TDxxxx RF
  * modules.
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.3.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -88,6 +88,7 @@
 //#define SPI_DEBUG
 //#define SPI_DEBUG_INFO
 //#define SPI_DEBUG_STAMP
+//#define SPI_DEBUG_LOCK_LINE
 
 #ifdef SPI_DEBUG
 
@@ -124,6 +125,9 @@
  */
 #define MAX_LOCKED_CALLBACK 3
 
+/** Maximum number of locked lines */
+#define MAX_LOCKED_LINE 	10
+
 /** Callback SPI */
 typedef struct {
 	uint8_t top;           				///< Top of queue
@@ -136,11 +140,19 @@ typedef struct {
 	USART_ClockMode_TypeDef	mode;		///< Current mode
 	TD_SPI_LockedCallback cb[MAX_LOCKED_CALLBACK]; 	///< Callback queue
 	uint8_t flush_in_progress;			///< Currently flushing callback queue
+	uint8_t location;					///< Pin location
 
 #ifdef SPI_DEBUG_STAMP
 	uint32_t lock_stamp[MAX_LOCKED_CALLBACK]; 	///< Lock timestamp
 #endif
-
+#ifdef SPI_DEBUG_LOCK_LINE
+	uint8_t lock_line_cnt;						///< Lock counter
+	uint8_t lock_line_cnt_mem;					///< Lock counter
+	uint16_t lock_line[MAX_LOCKED_LINE];
+	uint8_t lock_failed;						///< Lock counter
+	uint8_t lock_failed_mem;					///< Lock counter
+	uint16_t lock_line_failed[MAX_LOCKED_LINE];
+#endif
 } TD_SPI_t;
 
 /** Array of all SPI buses */
@@ -180,7 +192,6 @@ void TD_SPI_SimpleInit(uint32_t freq, USART_ClockMode_TypeDef mode)
 
 	// Enabling clock to USART
 	CMU_ClockEnable(cmuClock_HFPER, true);
-	USART->IRCTRL |= USART_CTRL_TXBIL;
 
 	// Enabling pins and setting location, SPI CS not enable
 	USART->ROUTE = USART_ROUTE_TXPEN |
@@ -227,7 +238,11 @@ USART_TypeDef *TD_SPI_GetUsart(uint8_t bus)
 	case 1:
 		return USART1;
 		break;
-
+#ifdef USART2
+	case 2:
+		return USART2;
+		break;
+#endif
 	default:
 		TD_Trap(TRAP_SPI_INVALID_BUS, bus);
 		break;
@@ -241,14 +256,17 @@ USART_TypeDef *TD_SPI_GetUsart(uint8_t bus)
  *
  * @param[in] bus
  *   The bus number to search for.
+ *
+ * @param[in] loc
+ *   The location number to search for.
  ******************************************************************************/
-void TD_SPI_InitBus(uint8_t bus)
+void TD_SPI_InitBusExt(uint8_t bus, uint8_t loc)
 {
-	uint32_t loc = 0;
 	GPIO_Port_TypeDef sdi_port = gpioPortA, sdo_port = gpioPortA,
 		sclk_port = gpioPortA;
 	uint8_t sdo_bit = 0, sdi_bit = 0, sclk_bit = 0;
 	USART_TypeDef *usart;
+	uint32_t location = 0;
 
 	DEBUG_PRINTF("SPI init bus:%d\r\n", bus);
 	if (SPI[bus].inited) {
@@ -259,9 +277,14 @@ void TD_SPI_InitBus(uint8_t bus)
 	switch (bus) {
 	case 0:
 		CMU_ClockEnable(cmuClock_USART0, true);
-		loc = USART_ROUTE_LOCATION_LOC0;
+
+		// Compatibility with old applications
+		if (loc == 0xFF) {
+			loc = USART_ROUTE_LOCATION_LOC0;
+		}
 		switch (loc) {
-		case USART_ROUTE_LOCATION_LOC0:
+		case 0:
+			location = USART_ROUTE_LOCATION_LOC0;
 			sdi_port = SDI_RF_PORT;
 			sdi_bit = SDI_RF_BIT;
 			sdo_port = SDO_RF_PORT;
@@ -278,9 +301,23 @@ void TD_SPI_InitBus(uint8_t bus)
 
 	case 1:
 		CMU_ClockEnable(cmuClock_USART1, true);
-		loc = USART_ROUTE_LOCATION_LOC2;
+
+		// Compatibility with old applications
+		if (loc == 0xFF) {
+			loc = 2;
+		}
 		switch (loc) {
-		case USART_ROUTE_LOCATION_LOC2:
+		case 1:
+			location = USART_ROUTE_LOCATION_LOC1;
+			sdi_port = gpioPortD;
+			sdi_bit = 0;
+			sdo_port = gpioPortD;
+			sdo_bit = 1;
+			sclk_port = gpioPortD;
+			sclk_bit = 2;
+			break;
+		case 2:
+			location = USART_ROUTE_LOCATION_LOC2;
 			sdi_port = gpioPortD;
 			sdi_bit = 7;
 			sdo_port = gpioPortD;
@@ -301,13 +338,12 @@ void TD_SPI_InitBus(uint8_t bus)
 
 	// Enabling clock to USART
 	CMU_ClockEnable(cmuClock_HFPER, true);
-	usart->IRCTRL |= USART_CTRL_TXBIL;
 
 	// Enabling pins and setting location, SPI CS not enable
 	usart->ROUTE = USART_ROUTE_TXPEN |
 		USART_ROUTE_RXPEN |
 		USART_ROUTE_CLKPEN |
-		loc;
+		location;
 
 	// Set required GPIOs to SPI mode
 	GPIO_PinModeSet(sdi_port, sdi_bit, gpioModePushPull, 0);
@@ -325,6 +361,18 @@ void TD_SPI_InitBus(uint8_t bus)
 
 /***************************************************************************//**
  * @brief
+ *   Initialize the SPI module.
+ *
+ * @param[in] bus
+ *   The bus number to search for.
+ ******************************************************************************/
+void TD_SPI_InitBus(uint8_t bus)
+{
+	TD_SPI_InitBusExt(bus, 0xFF);
+}
+
+/***************************************************************************//**
+ * @brief
  *   Update the SPI peripheral with baudrate and mode from global TD_SPI_Conf
  *   structure.
  *
@@ -335,8 +383,9 @@ void TD_SPI_UpdateConf(uint8_t id)
 {
 	uint8_t bus = TD_SPI_Conf[id].bus;
 
-	if (!SPI[bus].inited) {
-		TD_SPI_InitBus(bus);
+	if (!SPI[bus].inited || TD_SPI_Conf[id].location != SPI[bus].location) {
+		TD_SPI_InitBusExt(bus, TD_SPI_Conf[id].location);
+		SPI[bus].location = TD_SPI_Conf[id].location;
 	}
 	if (SPI[bus].freq != TD_SPI_Conf[id].freq) {
 		SPI[bus].freq = TD_SPI_Conf[id].freq;
@@ -367,6 +416,17 @@ void TD_SPI_LockDump(void)
 			SPI[bus].lock_id, SPI[bus].lock, SPI[bus].lock_context);
 		tfp_printf("SPI Lock Dump, bus:%d bottom:%d top:%d\r\n",
 			bus, SPI[bus].bottom, SPI[bus].top);
+#ifdef SPI_DEBUG_LOCK_LINE
+		if (!SPI[bus].lock_line_cnt_mem) {
+			SPI[bus].lock_line_cnt_mem = SPI[bus].lock_line_cnt;
+		}
+		for (i = 0; i < SPI[bus].lock_line_cnt_mem; i++) {
+			tfp_printf("Line%d:%d \r\n", i, SPI[bus].lock_line[i]);
+		}
+		for (i = 0; i < SPI[bus].lock_failed_mem; i++) {
+			tfp_printf("LineFailed%d:%d \r\n", i, SPI[bus].lock_line_failed[i]);
+		}
+#endif
 		for (i = 0; i < MAX_LOCKED_CALLBACK; i++) {
 
 #ifdef SPI_DEBUG_STAMP
@@ -375,7 +435,6 @@ void TD_SPI_LockDump(void)
 #else
 			tfp_printf("Bus CB %d:0x%08X \r\n", i, SPI[bus].cb[i]);
 #endif
-
 		}
 	}
 }
@@ -388,12 +447,12 @@ void TD_SPI_LockDump(void)
  *   The bus ID to convert.
  *
  * @return
- *   Returns a string corresponding to the us ID.
+ *   Returns a string corresponding to the bus ID.
  ******************************************************************************/
 char *TD_SPI_IdToStr(uint8_t id)
 {
 	if (id <= MAX_SYSTEM_SPI_ID) {
-		switch (id){
+		switch (id) {
 		case RF_SPI_ID:
 			return "SYS:RF";
 
@@ -424,13 +483,13 @@ char *TD_SPI_IdToStr(uint8_t id)
  *   Convert an SPI bus mode to string.
  *
  * @param[in] mode
- *   The bus ID to convert.
+ *   The bus mode to convert.
  *
  * @param[out] string
  *   A pointer to the buffer tht will receive the converted mode.
  *
  * @return
- *   Returns a string corresponding to the us ID.
+ *   Returns a string corresponding to the bus mode.
  ******************************************************************************/
 char *TD_SPI_ModeToStr(uint32_t mode, char *string)
 {
@@ -438,7 +497,7 @@ char *TD_SPI_ModeToStr(uint32_t mode, char *string)
 	strcat(string, mode & _USART_CTRL_CLKPOL_MASK ? "IDLE_HIGH" : "IDLE_LOW");
 	strcat(string, "|");
 	strcat(string, mode & _USART_CTRL_CLKPHA_MASK ? "RISING" : "FALLING");
-	if (mode & USART_CTRL_LOOPBK){
+	if (mode & USART_CTRL_LOOPBK) {
 		strcat(string, "|3 wire");
 	}
 	return string;
@@ -446,24 +505,26 @@ char *TD_SPI_ModeToStr(uint32_t mode, char *string)
 
 /***************************************************************************//**
  * @brief
- *   Dump SPI configuration
+ *   Dump the SPI configuration
  ******************************************************************************/
 void TD_SPI_ConfDump(void)
 {
 	uint8_t i;
 	char mode[32];
+
 	tfp_printf("%d sys conf, %d user conf\r\n",
 		MAX_SYSTEM_SPI_ID, CONFIG_MAX_SPI_ID - MAX_SYSTEM_SPI_ID);
 	for (i = 0; i < CONFIG_MAX_SPI_ID + 1; i++) {
 		if (!TD_SPI_Conf[i].freq) {
 			continue;
 		}
-		tfp_printf("ID:%d:%-20s bus:%d freq:%2d MHz mode:%-32s CS Port:%c%d\r\n",
+		tfp_printf("ID:%d:%-20s bus:%d freq:%2d MHz mode:%-32s CS Port:%c%d loc:%d\r\n",
 			i, TD_SPI_IdToStr(i), TD_SPI_Conf[i].bus,
 			TD_SPI_Conf[i].freq / 1000000,
-			TD_SPI_ModeToStr(TD_SPI_Conf[i].mode,mode),
+			TD_SPI_ModeToStr(TD_SPI_Conf[i].mode, mode),
 			'A' + TD_SPI_Conf[i].csPort,
-			TD_SPI_Conf[i].csBit);
+			TD_SPI_Conf[i].csBit,
+			TD_SPI_Conf[i].location);
 		}
 }
 
@@ -481,10 +542,14 @@ void TD_SPI_ConfDump(void)
  * @param[in] line
  *   The source line number at which the lock occurs.
  *
+ * @param[in] context
+ *   The lock context, non null for IRQ context.
+ *
  * @return
  * 	 true if bus was successfully locked, false otherwise
  ******************************************************************************/
-bool TD_SPI_Lock_(uint8_t id, TD_SPI_LockedCallback callback, uint16_t line)
+bool TD_SPI_Lock_(uint8_t id, TD_SPI_LockedCallback callback, uint16_t line,
+    uint8_t context)
 {
 	uint8_t msk, ret, top, bus;
 
@@ -492,8 +557,8 @@ bool TD_SPI_Lock_(uint8_t id, TD_SPI_LockedCallback callback, uint16_t line)
 	EFM_ASSERT(id <= CONFIG_MAX_SPI_ID);
 
 	// We can always lock an unconfigured SPI ...
-	if (!TD_SPI_Conf[id].freq){
-		return true;
+	if (!TD_SPI_Conf[id].freq) {
+		return false;
 	}
 	bus = TD_SPI_Conf[id].bus;
 	EFM_ASSERT(bus < MAX_SPI_BUS);
@@ -503,19 +568,31 @@ bool TD_SPI_Lock_(uint8_t id, TD_SPI_LockedCallback callback, uint16_t line)
 
 	// We have already locked this bus for this usage, just increment lock count
 	if (SPI[bus].lock && (SPI[bus].lock_id == id) &&
-		(SPI[bus].lock_context == __get_IPSR())) {
+		(SPI[bus].lock_context == context)) {
+#ifdef SPI_DEBUG_LOCK_LINE
+		if (SPI[bus].lock_line_cnt<MAX_LOCKED_LINE) {
+			SPI[bus].lock_line[SPI[bus].lock_line_cnt++] = line;
+		}
+#endif
 		SPI[bus].lock++;
 		ret = true;
 
 		// Bus is not actually locked, lock it
-	} else if (!SPI[bus].lock){
-		SPI[bus].lock_context = __get_IPSR();
+	} else if (!SPI[bus].lock) {
+		SPI[bus].lock_context = context;
 		SPI[bus].lock_id = id;
+#ifdef SPI_DEBUG_LOCK_LINE
+		SPI[bus].lock_line[0] = line;
+		SPI[bus].lock_line_cnt = 1;
+#endif
 		SPI[bus].lock = 1;
 		TD_SPI_UpdateConf(id);
 		ret = true;
 	} else {
 
+#ifdef SPI_DEBUG_LOCK_LINE
+		SPI[bus].lock_line_failed[SPI[bus].lock_failed++] = line;
+#endif
 		// Bus is locked, but for another usage
 		if (callback) {
 
@@ -535,7 +612,8 @@ bool TD_SPI_Lock_(uint8_t id, TD_SPI_LockedCallback callback, uint16_t line)
 
 				SPI[bus].top = top;
 			} else {
-				TD_Trap(TRAP_SPI_MAX_LOCK, (bus << 8) | id);
+				TD_Trap(TRAP_SPI_MAX_LOCK, (((uint32_t) line) << 16) |
+					(bus << 8) | id);
 			}
 			DEBUG_PRINTF("Lock add 0x%08X, lbyid:%d cnt:%d\r\n",
 				callback, SPI[bus].lock_id, SPI[bus].lock);
@@ -553,8 +631,14 @@ bool TD_SPI_Lock_(uint8_t id, TD_SPI_LockedCallback callback, uint16_t line)
  *
  * @param[in] id
  *   The unique ID used for SPI bus locking.
+ *
+ * @param[in] line
+ *   The source line number at which the unlock occurs.
+ *
+ * @param[in] context
+ *   The lock context, non null for IRQ context.
  ******************************************************************************/
-void TD_SPI_UnLock_(uint8_t id)
+void TD_SPI_UnLock_(uint8_t id, uint16_t line, uint8_t context)
 {
 	TD_SPI_LockedCallback temp;
 	uint32_t msk;
@@ -563,18 +647,18 @@ void TD_SPI_UnLock_(uint8_t id)
 	EFM_ASSERT(id <= CONFIG_MAX_SPI_ID);
 
 	// We can always unlock an unconfigured SPI ...
-	if (!TD_SPI_Conf[id].freq){
+	if (!TD_SPI_Conf[id].freq) {
 		return;
 	}
 	bus = TD_SPI_Conf[id].bus;
 	EFM_ASSERT(bus < MAX_SPI_BUS);
 	EFM_ASSERT(SPI[bus].lock && SPI[bus].lock_id == id);
-	DEBUG_PRINTF("%s%d\r\n", __get_IPSR() ? "UNL" : "UnL", id);
+	DEBUG_PRINTF("%s%d\r\n", context ? "UNL" : "UnL", id);
 	DEBUG_PRINTF_INFO("Cnt%d\r\n", SPI[bus].lock);
 	msk = __get_PRIMASK();
 	__set_PRIMASK(1);
 	if (SPI[bus].lock && (SPI[bus].lock_id == id) &&
-		(SPI[bus].lock_context == __get_IPSR())) {
+		(SPI[bus].lock_context == context)) {
 
 		// Bus not locked, and no flushing of queue in callstack
 		if ((--SPI[bus].lock) == 0 && !SPI[bus].flush_in_progress) {
@@ -604,8 +688,12 @@ void TD_SPI_UnLock_(uint8_t id)
 			SPI[bus].flush_in_progress = false;
 		}
 	} else {
-		TD_Trap(TRAP_SPI_INVALID_UNLOCK, (bus << 8) | id);
+		TD_Trap(TRAP_SPI_INVALID_UNLOCK, (((uint32_t) line) << 16) |
+			(bus << 8) | id);
 	}
+#ifdef SPI_DEBUG_LOCK_LINE
+	SPI[bus].lock_failed = 0;
+#endif
 	__set_PRIMASK(msk);
 }
 
@@ -622,6 +710,11 @@ void TD_SPI_UnLockForce(uint8_t id)
 
 	EFM_ASSERT(id <= CONFIG_MAX_SPI_ID);
 	bus = TD_SPI_Conf[id].bus;
+#ifdef SPI_DEBUG_LOCK_LINE
+	SPI[bus].lock_failed_mem = SPI[bus].lock_failed;
+	SPI[bus].lock_line_cnt_mem = SPI[bus].lock_line_cnt;
+	SPI[bus].lock_line_cnt = 0;
+#endif
 	SPI[bus].lock = 0;
 }
 
@@ -653,14 +746,17 @@ void TD_SPI_Register_(uint8_t id, uint8_t friend_id, uint8_t bus, uint32_t freq,
 	if (id > CONFIG_MAX_SPI_ID) {
 		TD_Trap(TRAP_SPI_INVALID_ID, id);
 	}
-	if (bus >= MAX_SPI_BUS) {
+	if ((bus & 0xF) >= MAX_SPI_BUS) {
 		TD_Trap(TRAP_SPI_INVALID_BUS, id);
 	}
-	TD_SPI_Conf[id].bus = bus;
+	TD_SPI_Conf[id].bus = bus & 0xF;
 	TD_SPI_Conf[id].freq = freq;
 	ReferenceFrequency = CMU_ClockFreqGet(cmuClock_HFPER);
 	TD_SPI_Conf[id].mode = mode;
-	TD_SPI_Conf[id].usart = TD_SPI_GetUsart(bus);
+	TD_SPI_Conf[id].usart = TD_SPI_GetUsart(bus & 0xF);
+
+	// In old applications, lead to 0xFF
+	TD_SPI_Conf[id].location = (bus >> 4) - 1;
 }
 #endif
 
@@ -713,10 +809,16 @@ void TD_SPI_CS(uint8_t id, bool on)
  *
  * @param[in] value
  *   The value to write.
+ *
+ * @note
+ *   Works with 3-wire SPI.
  ******************************************************************************/
 void TD_SPI_FullWriteRegister(uint8_t id, uint8_t register_address,
 	uint8_t value)
 {
+	if (!TD_SPI_Conf[id].freq) {
+		return;
+	}
 	TD_GPIO_PinModeSet(TD_SPI_Conf[id].csPort, TD_SPI_Conf[id].csBit,
 		gpioModePushPull, 0);
 	TD_SPI_WriteByte(id, register_address);
@@ -739,6 +841,9 @@ void TD_SPI_FullWriteRegister(uint8_t id, uint8_t register_address,
  *
  * @result
  *   Returns the read value.
+ *
+ * @note
+ *   Works with 3-wire SPI.
  ******************************************************************************/
 uint8_t TD_SPI_FullReadRegister(uint8_t id, uint8_t register_address)
 {
@@ -750,7 +855,7 @@ uint8_t TD_SPI_FullReadRegister(uint8_t id, uint8_t register_address)
 
 /***************************************************************************//**
  * @brief
- *   Read multiple values int oa buffer from an 8 bits register like an SPI
+ *   Read multiple values into a buffer from an 8 bits register like an SPI
  *   peripheral, including Chip Select handling.
  *
  * @param[in] id
@@ -764,16 +869,68 @@ uint8_t TD_SPI_FullReadRegister(uint8_t id, uint8_t register_address)
  *
  * @param[in] count
  *   The count of bytes to read.
+ *
+ * @note
+ *   Works with 3-wire SPI.
  ******************************************************************************/
 void TD_SPI_FullReadBuffer(uint8_t id, uint8_t register_address,
 	uint8_t *buffer, uint8_t count)
 {
+	if (!TD_SPI_Conf[id].freq) {
+		return;
+	}
 	TD_GPIO_PinModeSet(TD_SPI_Conf[id].csPort, TD_SPI_Conf[id].csBit,
 		gpioModePushPull, 0);
 	TD_SPI_WriteReadByte(id, register_address | 0x80, true);
 	TD_SPI_ReadBuffer(id, count, buffer);
 	TD_GPIO_PinModeSet(TD_SPI_Conf[id].csPort, TD_SPI_Conf[id].csBit,
 		gpioModePushPull, 1);
+
+	// If 3 wire, enable SDO output. MUST NOT renable before, as chip can sustain
+	// SDO output
+	if (TD_SPI_Conf[id].mode & USART_CTRL_LOOPBK) {
+		USART->CMD = USART_CMD_TXTRIDIS;
+	}
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Write multiple values into a buffer from an 8 bits register like an SPI
+ *   peripheral, including Chip Select handling.
+ *
+ * @param[in] id
+ *   The peripheral id to read to.
+ *
+ * @param[in] register_address
+ *   The register address to read from.
+ *
+ * @param[out] buffer
+ *   Pointer to the buffer to send.
+ *
+ * @param[in] count
+ *   The count of bytes to write.
+ *
+ * @note
+ *   SPI 3 wires OK
+ ******************************************************************************/
+void TD_SPI_FullWriteBuffer(uint8_t id, uint8_t register_address,
+	uint8_t *buffer, uint8_t count)
+{
+	if (!TD_SPI_Conf[id].freq) {
+		return;
+	}
+	TD_GPIO_PinModeSet(TD_SPI_Conf[id].csPort, TD_SPI_Conf[id].csBit,
+		gpioModePushPull, 0);
+	TD_SPI_WriteReadByte(id, register_address, true);
+	TD_SPI_WriteBuffer(id, count, buffer);
+	TD_GPIO_PinModeSet(TD_SPI_Conf[id].csPort, TD_SPI_Conf[id].csBit,
+		gpioModePushPull, 1);
+
+	// If 3 wire, enable SDO output. MUST NOT renable before, as chip can sustain
+	// SDO output
+	if (TD_SPI_Conf[id].mode & USART_CTRL_LOOPBK) {
+		USART->CMD = USART_CMD_TXTRIDIS;
+	}
 }
 
 /***************************************************************************//**
@@ -791,6 +948,9 @@ void TD_SPI_FullReadBuffer(uint8_t id, uint8_t register_address,
  *
  * @param[in] buffer
  *   Pointer to the buffer to write to.
+ *
+ * @note
+ *   Works with 3-wire SPI.
  ******************************************************************************/
 void TD_SPI_WriteBuffer(uint8_t id, uint8_t count, uint8_t *buffer)
 {
@@ -860,6 +1020,9 @@ static uint16_t TD_SPI_PN9_Next(uint16_t pn9, uint8_t *br)
 
  * @param[in] reset
  *   Reset seed generator
+ *
+ * @note
+ *   Works with 3-wire SPI.
  ******************************************************************************/
 void TD_SPI_WriteBuffer_PN9(uint8_t id, uint8_t count, uint8_t *buffer,
 	bool reset)
@@ -898,10 +1061,16 @@ void TD_SPI_WriteBuffer_PN9(uint8_t id, uint8_t count, uint8_t *buffer,
  *
  * @param[out] buffer
  *   Pointer to the buffer to read the data into.
+ *
+ * @note
+ *   Works with 3-wire SPI. Be careful to reenable SDO, outside of this function
+ *   after rising CS
  ******************************************************************************/
 void TD_SPI_ReadBuffer(uint8_t id, uint8_t count, uint8_t *buffer)
 {
-	USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
+	// If 3 wire, disable SDO output, else do nothing
+	USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX |
+		((TD_SPI_Conf[id].mode & USART_CTRL_LOOPBK) ? USART_CMD_TXTRIEN : 0);
 
 	// Wait buffer empty
 	while (!(USART->STATUS & USART_STATUS_TXBL)) {
@@ -932,16 +1101,16 @@ void TD_SPI_ReadBuffer(uint8_t id, uint8_t count, uint8_t *buffer)
  * @param[in] c
  *   The byte to write.
  *
+ * @note
+ *   Works with 3-wire SPI.
  ******************************************************************************/
 void TD_SPI_WriteByte(uint8_t id, uint8_t c)
 {
-	USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX | USART_CMD_TXTRIDIS;
+	// Do not disable SPI port here, no read in progress
+	USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
 	USART->TXDATA = c;
 	while (!(USART->STATUS & USART_STATUS_TXC)) {
 		;
-	}
-	if (TD_SPI_Conf[id].mode & USART_CTRL_LOOPBK) {
-		USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX | USART_CMD_TXTRIEN;
 	}
 }
 
@@ -964,17 +1133,20 @@ void TD_SPI_WriteByte(uint8_t id, uint8_t c)
  * @return
  *   Byte read during write
  *
+ * @note
+ *   SPI 3 wires OK. Be careful to reenable SDO, outside of this function after
+ *   rising CS
  ******************************************************************************/
 uint8_t TD_SPI_WriteReadByte(uint8_t id, uint8_t c, bool write)
 {
+	// If 3 wire and write, disable SDO output, else do nothing
 	USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX |
-		(write ? USART_CMD_TXTRIDIS : 0);
+	(((TD_SPI_Conf[id].mode & USART_CTRL_LOOPBK) && (!write)) ?
+	USART_CMD_TXTRIEN : 0);
+
 	USART->TXDATA = c;
 	while (!(USART->STATUS & USART_STATUS_TXC)) {
 		;
-	}
-	if (TD_SPI_Conf[id].mode & USART_CTRL_LOOPBK) {
-		USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX | USART_CMD_TXTRIEN;
 	}
 	return USART->RXDATA;
 }
@@ -992,14 +1164,19 @@ uint8_t TD_SPI_WriteReadByte(uint8_t id, uint8_t c, bool write)
  * @param[in] value
  *   The value to write
  *
+ * @note
+ * 	 This function must not be used with 3 wires access
+ *
  * @return
  *   The value read
+ *
+ * @note
+ *   N.A. for 3-wire SPI.
  ******************************************************************************/
 uint32_t TD_SPI_WriteReadDouble(uint8_t id, uint32_t value)
 {
 	uint32_t read;
 
-	USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
 	USART->TXDOUBLE = value;
 	while (!(USART->STATUS & USART_STATUS_TXC)) {
 		;
@@ -1020,10 +1197,12 @@ uint32_t TD_SPI_WriteReadDouble(uint8_t id, uint32_t value)
  *
  * @param[in] value
  *  The value to write
+ *
+ * @note
+ *   Works with 3-wire SPI.
  ******************************************************************************/
 void TD_SPI_WriteDouble(uint8_t id, uint32_t value)
 {
-	USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
 	USART->TXDOUBLE = value;
 	while (!(USART->STATUS & USART_STATUS_TXC)) {
 		;
@@ -1048,8 +1227,14 @@ void TD_SPI_WriteDouble(uint8_t id, uint32_t value)
  * @param[in] count
  *   The count of bytes to write/read.
  *
+ * @note
+ * 	 This function must not be used with 3 wires access
+ *
  * @return
  *   Count of byte read.
+ *
+ * @note
+ *   N.A. with 3-wire SPI.
  ******************************************************************************/
 uint16_t TD_SPI_BackToBack(uint8_t id, uint8_t *write, uint8_t *read,
 	uint16_t count)
@@ -1079,6 +1264,12 @@ uint16_t TD_SPI_BackToBack(uint8_t id, uint8_t *write, uint8_t *read,
  *
  * @param[in] id
  *   The unique ID used for SPI bus locking.
+ *
+ * @note
+ * 	 This function must not be used with 3 wires access
+ *
+ * @note
+ *   N.A. with 3-wire SPI.
  ******************************************************************************/
 void TD_SPI_StartBackToBack(uint8_t id)
 {
@@ -1094,9 +1285,67 @@ void TD_SPI_StartBackToBack(uint8_t id)
   *
  * @param[in] id
  *   The unique ID used for SPI bus locking.
+ *
+ * @note
+ * 	 This function must not be used with 3 wires access
+ *
+ * @note
+ *   N.A. with 3-wire SPI.
  ******************************************************************************/
 void TD_SPI_EndBackToBack(uint8_t id)
 {
+}
+
+/***************************************************************************//**
+ * @brief
+ *   TD_SPI_FullGenericReadWrite.
+ *
+ * @param[in] id
+ *   The unique ID used for SPI bus locking.
+ *
+ * @param[out] write
+ *  Pointer to the buffer to write to the device. If buffer is NULL, will send 0
+ *
+ * @param[out] read
+ *   Pointer to the buffer to read from the device, buffer updated only if data
+ *   different from 0xFF.
+ *
+ * @param[in] count
+ *   The count of bytes to write/read.
+ *
+ * @note
+ * 	 This function must not be used with 3 wires access
+ *
+ * @return
+ *   Count of byte read.
+ *
+ * @todo
+ *   MUST BE corrected to work in SPI 3 wires
+ ******************************************************************************/
+uint16_t TD_SPI_FullGenericReadWrite(uint8_t id, uint8_t *write, uint8_t *read,
+	uint16_t count)
+{
+	uint8_t *rd_base = read;
+
+	if (!TD_SPI_Conf[id].freq) {
+		return 0;
+	}
+	TD_GPIO_PinModeSet(TD_SPI_Conf[id].csPort, TD_SPI_Conf[id].csBit,
+		gpioModePushPull, 0);
+	USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
+	while (count--) {
+		while (!(USART->STATUS & USART_STATUS_TXBL)) {
+			;
+		}
+		USART->TXDATA = write ? (*write++) : 0;
+		while (!(USART->STATUS & USART_STATUS_RXDATAV)) {
+			;
+		}
+		*read++ = USART->RXDATA;
+	}
+	TD_GPIO_PinModeSet(TD_SPI_Conf[id].csPort, TD_SPI_Conf[id].csBit,
+		gpioModePushPull, 1);
+	return read - rd_base;
 }
 
 /** @} */

@@ -2,11 +2,11 @@
  * @file
  * @brief printf utility for the TDxxxx RF modules.
  * @author Kustaa Nyholm
- * @version 2.0.3
+ * @version 2.1.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2004 Kustaa Nyholm</b>
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  *******************************************************************************
  *
  * This library is free software; you can redistribute it and/or
@@ -30,6 +30,10 @@
 #include "td_utils.h"
 #include "td_printf.h"
 
+/** Flag to get explicit TD stream structure pointers */
+#define TD_STREAM_EXPLICIT
+#include "td_stream.h"
+
 /***************************************************************************//**
  * @addtogroup PRINTF
  * @brief printf utility for the TDxxxx RF modules
@@ -43,8 +47,6 @@
 /** @addtogroup PRINTF_DEFINES Defines
  * @{ */
 
-/** Definition for long support in printf */
-#define PRINTF_LONG_SUPPORT
 
 /** @} */
 
@@ -58,12 +60,6 @@
 /** Pointer to function for flushing characters out */
 typedef void (*putcf)(void *, char);
 
-/** Pointer to function for starting to use the output stream */
-typedef void (*start)(void *);
-
-/** Pointer to function for stopping to use the output stream */
-typedef void (*stop)(void *);
-
 /** @} */
 
 /*******************************************************************************
@@ -73,17 +69,8 @@ typedef void (*stop)(void *);
 /** @addtogroup PRINTF_LOCAL_VARIABLES Local Variables
  * @{ */
 
-/** Pointer to opaque context for outputting characters */
-static __BOOTVARIABLE void *stdout_putp  = NULL;
-
-/** Pointer to function for flushing characters out */
-static __BOOTVARIABLE putcf stdout_putf  = NULL;
-
-/** Pointer to function for starting to use the output stream */
-static __BOOTVARIABLE start stdout_start = NULL;
-
-/** Pointer to function for stopping to use the output stream */
-static __BOOTVARIABLE stop stdout_stop  = NULL;
+/** Pointer to current stream */
+static TD_STREAM_t *Stream = 0;
 
 /** @} */
 
@@ -120,8 +107,8 @@ static void putchw(void *putp, putcf putf, int n, char z, char *bf)
 	char *p = bf;
 	bool end = false;
 
-	// If pad size neg, pad at end
-	if (n < 0){
+	// If pad size is negative, pad at end
+	if (n < 0) {
 		n = -n;
 		end = true;
 	}
@@ -206,13 +193,16 @@ static void putcs(void *putp, putcf putf, char *bf)
  * @param[in] va
  *   Variable list of arguments according to the format string.
  ******************************************************************************/
-void tfp_format(void *putp, putcf putf, char *fmt, va_list va)
+void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
 {
-	char bf[12];
+	char bf[25];
 
 	char ch;
 	char neg = 0;
 
+	if (!putf) {
+		return;
+	}
 	while ((ch = *(fmt++))) {
 		if (ch != '%') {
 			neg = 0;
@@ -228,12 +218,12 @@ void tfp_format(void *putp, putcf putf, char *fmt, va_list va)
 				ch = *(fmt++);
 				lz = 1;
 			}
-			if (ch == '-'){
+			if (ch == '-') {
 				ch = *(fmt++);
 				neg = 1;
 			}
 			if (ch >= '0' && ch <= '9') {
-				ch = a2i(ch, &fmt, 10, &w);
+				ch = a2i(ch, (char **) & fmt, 10, &w);
 				if (neg) {
 					w = -w;
 				}
@@ -250,7 +240,12 @@ void tfp_format(void *putp, putcf putf, char *fmt, va_list va)
 			case 'u': {
 #ifdef PRINTF_LONG_SUPPORT
 				if (lng) {
-					uli2a(va_arg(va, unsigned long int), 10, 0, bf);
+					if (CONFIG_PRINTF_INT64_SUPPORT_ON) {
+						((void (*)(uint64_t num, unsigned int base, int uc, char *bf))CONFIG_PRINTF_ULONG)(va_arg(va, uint64_t), 10, 0, bf);
+					}
+					else{
+						((void (*)(unsigned long int num, unsigned int base, int uc, char *bf))CONFIG_PRINTF_ULONG)(va_arg(va, unsigned long), 10, 0, bf);
+					}
 				} else
 #endif
 					ui2a(va_arg(va, unsigned int), 10, 0, bf);
@@ -260,7 +255,12 @@ void tfp_format(void *putp, putcf putf, char *fmt, va_list va)
 			case 'd': {
 #ifdef PRINTF_LONG_SUPPORT
 				if (lng) {
-					li2a(va_arg(va, unsigned long int), bf);
+					if (CONFIG_PRINTF_INT64_SUPPORT_ON) {
+						((void (*)(int64_t num, char *bf))CONFIG_PRINTF_LONG)(va_arg(va, int64_t), bf);
+					}
+					else{
+						((void (*)(long int num, char *bf))CONFIG_PRINTF_LONG)(va_arg(va, long int), bf);
+					}
 				} else
 #endif
 					i2a(va_arg(va, int), bf);
@@ -271,7 +271,12 @@ void tfp_format(void *putp, putcf putf, char *fmt, va_list va)
 			case 'X':
 #ifdef PRINTF_LONG_SUPPORT
 				if (lng) {
-					uli2a(va_arg(va, unsigned long int), 16, (ch == 'X'), bf);
+					if (CONFIG_PRINTF_INT64_SUPPORT_ON) {
+						((void (*)(uint64_t num, unsigned int base, int uc, char *bf))CONFIG_PRINTF_ULONG)(va_arg(va, uint64_t), 16, (ch == 'X'), bf);
+					}
+					else{
+						((void (*)(unsigned long int num, unsigned int base, int uc, char *bf))CONFIG_PRINTF_ULONG)(va_arg(va, unsigned long), 16, (ch == 'X'), bf);
+					}
 				} else
 #endif
 					ui2a(va_arg(va, unsigned int), 16, (ch == 'X'), bf);
@@ -314,26 +319,71 @@ abort:
 void init_printf(void *putp, tfp_putf_t putf, tfp_start_stop_t start,
 	tfp_start_stop_t stop)
 {
-	stdout_putp = putp;
-	stdout_putf = putf;
-	stdout_start = start;
-	stdout_stop = stop;
+	if (putp != 0) {
+		Stream = (TD_STREAM_t *) putp;
+	}
+	if (Stream == 0) {
+		return;
+	}
+	Stream->write = (bool (*) (TD_STREAM_t *, char)) putf;
+	Stream->start = (bool (*) (TD_STREAM_t *)) start;
+	Stream->stop = (void (*) (TD_STREAM_t *)) stop;
 }
 
 /***************************************************************************//**
  * @brief
- *   Get Printf initialization function.
+ *   Set this stream as system stream (for printf)
  *
- * @param[in] list
- *   Pointer to character output function.
+ * @param[in] stream
+ *   Pointer to the stream.
  *
  ******************************************************************************/
-void get_printf(void **list)
+void init_printf_stream(void *stream)
 {
-	list[0] = stdout_putp;
-	list[1] = (void **) stdout_putf;
-	list[2] = (void **) stdout_start;
-	list[3] = (void **) stdout_stop;
+	Stream = stream;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Get Printf stream
+ *
+ * @return System stream for printf
+ ******************************************************************************/
+void *get_printf(void)
+{
+	return Stream;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Output a string according to a format.
+ *
+ * @param[in] stream
+ *   Pointer to stream to use
+ *
+ * @param[in] fmt
+ *   Pointer to format string in printf format.
+ *
+ * @param[in] ...
+ *   Number and types of arguments according to the format string.
+ ******************************************************************************/
+void tfp_printf_stream(void *stream, const char *fmt, ...)
+{
+	va_list va;
+
+	if (stream == 0) {
+		return;
+	}
+	va_start(va, fmt);
+	if (((TD_STREAM_t *)stream)->start) {
+		((TD_STREAM_t *)stream)->start(stream);
+	}
+	tfp_format(((TD_STREAM_t *)stream),
+		(void (*)(void *, char)) ((TD_STREAM_t *) stream)->write, fmt, va);
+	if (((TD_STREAM_t *)stream)->stop) {
+		((TD_STREAM_t *)stream)->stop(stream);
+	}
+	va_end(va);
 }
 
 /***************************************************************************//**
@@ -346,19 +396,21 @@ void get_printf(void **list)
  * @param[in] ...
  *   Number and types of arguments according to the format string.
  ******************************************************************************/
-void tfp_printf(char *fmt, ...)
+void tfp_printf(const char *fmt, ...)
 {
 	va_list va;
 
+	if (Stream == 0) {
+		return;
+	}
 	va_start(va, fmt);
-	if (stdout_start) {
-		stdout_start(stdout_putp);
+	if (((TD_STREAM_t *)Stream)->start) {
+		((TD_STREAM_t *)Stream)->start(Stream);
 	}
-	if (stdout_putf) {
-		tfp_format(stdout_putp, stdout_putf, fmt, va);
-	}
-	if (stdout_stop) {
-		stdout_stop(stdout_putp);
+	tfp_format(((TD_STREAM_t *)Stream),
+		(void (*)(void *, char)) ((TD_STREAM_t *) Stream)->write, fmt, va);
+	if (((TD_STREAM_t *)Stream)->stop) {
+		((TD_STREAM_t *)Stream)->stop(Stream);
 	}
 	va_end(va);
 }
@@ -376,17 +428,9 @@ void tfp_printf(char *fmt, ...)
  ******************************************************************************/
 void tfp_print_buf(char *buf, int len)
 {
-	if (stdout_start) {
-		stdout_start(stdout_putp);
-	}
-	if (stdout_putf) {
-		while (len--){
-			stdout_putf(stdout_putp,*buf++);
-		}
-	}
-	if (stdout_stop) {
-		stdout_stop(stdout_putp);
-	}
+	Stream->start(Stream);
+	Stream->write_buffer(Stream, buf, len);
+	Stream->stop(Stream);
 }
 
 /***************************************************************************//**
@@ -399,17 +443,11 @@ void tfp_print_buf(char *buf, int len)
  * @param[in] va
  *   Variable list of arguments according to the format string.
  ******************************************************************************/
-void tfp_vprintf(char *fmt, va_list va)
+void tfp_vprintf(const char *fmt, va_list va)
 {
-	if (stdout_start) {
-		stdout_start(stdout_putp);
-	}
-	if (stdout_putf) {
-		tfp_format(stdout_putp, stdout_putf, fmt, va);
-	}
-	if (stdout_stop) {
-		stdout_stop(stdout_putp);
-	}
+	Stream->start(Stream);
+	tfp_format(Stream, (void (*)(void *, char)) Stream->write, fmt, va);
+	Stream->stop(Stream);
 }
 
 /***************************************************************************//**
@@ -425,7 +463,7 @@ void tfp_vprintf(char *fmt, va_list va)
  * @param[in] ...
  *   Variable list of arguments according to the format string.
  ******************************************************************************/
-void tfp_sprintf(char *s, char *fmt, ...)
+void tfp_sprintf(char *s, const char *fmt, ...)
 {
 	va_list va;
 
@@ -454,11 +492,9 @@ void tfp_dump(char *prompt, unsigned char *buffer, unsigned char length)
 	unsigned char i, j, k;
 	char hex[4];
 
-	if (stdout_start) {
-		stdout_start(stdout_putp);
-	}
+	Stream->start(Stream);
 	if (prompt) {
-		putcs(stdout_putp, stdout_putf, prompt);
+		putcs(Stream, (void (*)(void *, char)) Stream->write, prompt);
 	}
 	for (i = 0, k = 0; i < length; i++) {
 		tfp_sprintf(hex, "%02x ", buffer[i]);
@@ -469,7 +505,7 @@ void tfp_dump(char *prompt, unsigned char *buffer, unsigned char length)
 			dump[k++] = '\r';
 			dump[k++] = '\n';
 			dump[k] = '\0';
-			putcs(stdout_putp, stdout_putf, dump);
+			putcs(Stream, (void (*)(void *, char)) Stream->write, dump);
 			k = 0;
 		}
 	}
@@ -477,11 +513,9 @@ void tfp_dump(char *prompt, unsigned char *buffer, unsigned char length)
 		dump[k++] = '\r';
 		dump[k++] = '\n';
 		dump[k] = '\0';
-		putcs(stdout_putp, stdout_putf, dump);
+		putcs(Stream, (void (*)(void *, char)) Stream->write, dump);
 	}
-	if (stdout_stop) {
-		stdout_stop(stdout_putp);
-	}
+	Stream->stop(Stream);
 }
 
 /** @} */

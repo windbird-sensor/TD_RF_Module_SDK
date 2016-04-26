@@ -2,10 +2,10 @@
  * @file
  * @brief Tools API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2014-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -57,6 +57,12 @@ extern "C" {
 	/** Flag for inverted LED polarity */
 #define TD_TOOLS_LED_INVERTED			false
 
+	/** Do power voltage compensation */
+#define TD_TOOLS_LED_VCOMPENS			true
+
+	/** No power voltage compensation */
+#define TD_TOOLS_LED_NO_VCOMPENS		false
+
 	/** Flag for active high switch polarity */
 #define TD_TOOLS_SWITCH_ON_HIGH			false
 
@@ -84,17 +90,42 @@ extern "C" {
 	/** UI switch type */
 #define PRODUCT_UI_SWITCH				2
 
+	/** UI direct LED type with PWM control */
+#define PRODUCT_UI_LED_PWM				3
+
+	/** UI direct LED type with PWM control and charge pump*/
+#define PRODUCT_UI_LED_PWM_PUMP			4
+
+	/** UI push pull type */
+#define PRODUCT_UI_PUSH_PULL			5
+
 	/** Macro to pack direct LED flags */
 #define PUI_LED(id, port, bit, drive, direct) \
-	(id << 2) | PRODUCT_UI_LED, port | (bit << 3) | (direct << 7), drive
+	(id << 3) | PRODUCT_UI_LED, port | (bit << 3) | (direct << 7), drive, port
+
+	/** Macro to pack direct push pull flags */
+#define PUI_PP(id, port, bit, drive, direct) \
+(id << 3) | PRODUCT_UI_PUSH_PULL, port | (bit << 3) | (direct << 7), drive, port
 
 	/** Macro to pack inverted LED flags */
 #define PUI_LED_INV(id1, id2) \
-	(id1 << 2) | PRODUCT_UI_LED_INV, id2
+	(id1 << 3) | PRODUCT_UI_LED_INV, id2
+
+	/** Macro to pack direct LED flags */
+#define PUI_LED_PWM(id, port, bit, drive, direct, out, period, value, vcomp) \
+	(id << 3) | PRODUCT_UI_LED_PWM, port | (bit << 3) | (direct << 7), \
+	drive, port, out | (vcomp<<6), period, value
+
+	/** Macro to pack direct LED flags */
+#define PUI_LED_PWM_PUMP(id, port_pump, bit_pump, drive_pump, direct, out, \
+	period, value, vcomp, port, bit, drive) (id << 3) | \
+	PRODUCT_UI_LED_PWM_PUMP, port_pump | (bit_pump << 3) | (direct << 7), \
+	drive_pump, port_pump, out | (vcomp<<6), period, value,drive | (bit << 2), \
+	port
 
 	/** Macro to pack switch flags */
 #define PUI_SWITCH(id, port, bit, drive, direct, push_button) \
-	(id << 2) | PRODUCT_UI_SWITCH, port | (bit << 3) | (direct << 7), \
+	(id << 3) | PRODUCT_UI_SWITCH, port | (bit << 3) | (direct << 7), \
 	drive | (push_button << 4)
 
 	/** @} */

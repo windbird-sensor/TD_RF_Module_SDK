@@ -2,10 +2,10 @@
  * @file
  * @brief Sensor Device
  * @author Telecom Design S.A.
- * @version 1.3.0
+ * @version 1.3.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -63,8 +63,8 @@
 /** @addtogroup TD_SENSOR_DEVICE_DEFINES Defines
  * @{ */
 
-//#define DEBUG_PRINTF
-#ifdef DEBUG_PRINTF
+//#define DEBUG_SENSOR_DEVICE
+#ifdef DEBUG_PRINTF_DEVICE
 
 /** Conditional printf macro */
 #define DEBUG_PRINTF(...) tfp_printf(__VA_ARGS__)
@@ -278,7 +278,7 @@ static void TD_SENSOR_DEVICE_WaitForGateway(void)
  *   Returns the acknowledge result.
  ******************************************************************************/
 static TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_SendFrame(
-		TD_SENSOR_LAN_FrameType_t type, uint8_t *payload, uint8_t count,
+	TD_SENSOR_LAN_FrameType_t type, uint8_t *payload, uint8_t count,
 	uint8_t *data_rx)
 {
 	TD_SENSOR_LAN_AckCode_t ack;
@@ -343,7 +343,6 @@ static TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_SendFrame(
 
 	// Check battery status
 	TD_SENSOR_BatteryCallBack(true);
-
 	return ack;
 }
 
@@ -597,7 +596,7 @@ TD_SENSOR_LAN_AckCode_t TD_SENSOR_DEVICE_KeepAlive(bool keepalive,
 
 	// Build keepalive
 	*pPayload = keepalive;
-	pPayload += sizeof(keepalive);
+	pPayload += sizeof (keepalive);
 
 	// Build rssi
 	*pPayload = rssi;
@@ -724,7 +723,7 @@ int DYNAMIC(TD_SENSOR_DEVICE_FrameReceived)(TD_LAN_frame_t *tx_frame,
 
 	if (AckExpected == true) {
 
-		//We don't want to handle acknowledgments here
+		// We don't want to handle acknowledgments here
 		if (GET_ACK(rx_frame->header)) {
 			return 1;
 		} else {
@@ -732,7 +731,8 @@ int DYNAMIC(TD_SENSOR_DEVICE_FrameReceived)(TD_LAN_frame_t *tx_frame,
 		}
 	}
 	address = GET_ADDRESS(rx_frame->header);
-	DEBUG_PRINTF("\r\nReceived message for address = %08X, i am address = %08X\r\n", address, DeviceAddress);
+	DEBUG_PRINTF("\r\nReceived message for address = %08X, i am address = %08X\r\n",
+		address, DeviceAddress);
 
 	if (ListenBroadcast | ListenNetwork) {
 		if (address == (DeviceAddress | 0xFF)) {
@@ -748,7 +748,8 @@ int DYNAMIC(TD_SENSOR_DEVICE_FrameReceived)(TD_LAN_frame_t *tx_frame,
 			}
 			return 1;
 		} else {
-			DEBUG_PRINTF("\r\nReceived wanted message, address = %08X, BroadcastMask = %08X\r\n", address, BroadcastMask);
+			DEBUG_PRINTF("\r\nReceived wanted message, address = %08X, BroadcastMask = %08X\r\n",
+				address, BroadcastMask);
 		}
 	}
 	frame = (TD_SENSOR_LAN_Frame_t *) rx_frame->payload;
@@ -824,7 +825,7 @@ int DYNAMIC(TD_SENSOR_DEVICE_FrameReceived)(TD_LAN_frame_t *tx_frame,
  *   acknowledgment reply, or < 0 to not send an acknowledgment reply.
  ******************************************************************************/
 void TD_SENSOR_DEVICE_SetDataCallback(int8_t (*user_data_callback)(
-		bool broadcast, uint32_t address, uint8_t *data, uint8_t len,
+	bool broadcast, uint32_t address, uint8_t *data, uint8_t len,
 	uint8_t *reply))
 {
 	DataCallback = user_data_callback;
@@ -848,7 +849,7 @@ void TD_SENSOR_DEVICE_SetDataCallback(int8_t (*user_data_callback)(
  *   acknowledgment reply, or < 0 to not send an acknowledgment reply.
  ******************************************************************************/
 void TD_SENSOR_DEVICE_SetKeepAliveCallback(int8_t (*user_keepalive_callback)(
-		bool broadcast, uint32_t address, uint32_t interval, int8_t rssi,
+	bool broadcast, uint32_t address, uint32_t interval, int8_t rssi,
 	uint8_t *data, uint8_t length, uint8_t *reply))
 {
 	KeepaliveCallback = user_keepalive_callback;
@@ -864,11 +865,9 @@ void TD_SENSOR_DEVICE_StartReception(void)
 	TD_LAN_SetUserCallback(TD_SENSOR_DEVICE_FrameReceived);
 	ReceptionEnabled = true;
 	TD_SENSOR_LAN_setLanAddress(DeviceAddress, BROADCAST_MASK);
-
 	if (RxPeriod == 0) {
 		RxPeriod = CONFIG_LAN_PERIOD;
 	}
-
 	TD_LAN_ReceiveFrame(RxPeriod, 0, &device_RX);
 }
 
@@ -896,7 +895,6 @@ void TD_SENSOR_DEVICE_StartBroadcastReception(uint32_t mask)
 	TD_LAN_SetUserCallback(TD_SENSOR_DEVICE_FrameReceived);
 	ReceptionEnabled = true;
 	TD_SENSOR_LAN_setLanAddress(DeviceAddress | 0xFF, 0xFFFFFF);
-
 	if (RxPeriod == 0) {
 		RxPeriod = CONFIG_LAN_PERIOD;
 	}

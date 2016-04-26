@@ -2,10 +2,10 @@
  * @file
  * @brief Sensor LAN
  * @author Telecom Design S.A.
- * @version 1.2.0
+ * @version 1.3.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -239,7 +239,8 @@ static TD_SENSOR_LAN_AckCode_t TD_SENSOR_LAN_SendFramePrivate(uint8_t *data,
 		// Restart gateway reception
 		GatewayAddress = (TD_SENSOR_LAN_ComputeAddressTo16bits(SigfoxID)) << 8;
 		TD_SENSOR_LAN_setLanAddress(GatewayAddress, NETWORK_MASK);
-		DEBUG_PRINTF("I'm a GATEWAY and I start reception, GatewayAddres = %08X, Mask = %08X\r\n", GatewayAddress, NETWORK_MASK);
+		DEBUG_PRINTF("I'm a GATEWAY and I start reception, GatewayAddres = %08X, Mask = %08X\r\n",
+			GatewayAddress, NETWORK_MASK);
 		TD_SENSOR_GATEWAY_StartReception();
 	} else if (type == SENSOR_DEVICE) {
 
@@ -330,6 +331,9 @@ uint8_t TD_SENSOR_LAN_ComputeAddressTo8bits(uint32_t address)
 	for (i = 0; i < 4; i++) {
 		xor ^= (address >> (8 * i));
 	}
+	if (xor == 0) {
+		xor = 1;
+	}
 	return xor;
 }
 
@@ -350,6 +354,7 @@ bool TD_SENSOR_LAN_setLanAddress(uint32_t address, uint32_t mask)
 {
 	LanConfig.address = address;
 	LanConfig.mask = mask;
+
 	return TD_LAN_Init(false, LanConfig.address, LanConfig.mask);
 }
 

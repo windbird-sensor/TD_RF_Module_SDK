@@ -195,9 +195,9 @@ bool TD_SENSOR_SendEventBattery(bool state, uint32_t battery_level)
 		data = 0;
 	}
 	return TD_SENSOR_SendEvent(
-			state ? EVENT_BATTERY_OK : EVENT_BATTERY_LOW,
-			&data,
-			1);
+		state ? EVENT_BATTERY_OK : EVENT_BATTERY_LOW,
+		&data,
+		1);
 }
 
 /***************************************************************************//**

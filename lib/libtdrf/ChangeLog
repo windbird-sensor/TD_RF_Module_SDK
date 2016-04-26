@@ -104,7 +104,7 @@
 
 ### SIGFOX: ###
 
-  * Corrected a problem causing loss of SIGFOX sequence number after an upgrade from previous SDKs
+  * Corrected a problem causing loss of SIGFOX sequence number after un upgrade from previous SDKs
 
 # Version 4.0.2 #
 
@@ -113,3 +113,77 @@
 ### SIGFOX: ###
 
   * Corrected a problem causing GPS to stop working after a downlink transmission
+
+# Version 5.0.0 #
+
+  * Not released publicly
+
+# Version 6.0.0 #
+
+## Major Updates ##
+
+  * Added support for Sigfox and LAN FCC operation
+  * Added support for TD1508 (FCC)
+  * Added support for ETSI and FCC reference design
+
+## Changes ##
+
+### LAN: ###
+
+  * Added `TD_LAN_GetMinMaxPower()`
+
+### RDEBUG: ###
+
+  * Added `TD_RDEBUG_GetResetLastFrequencyOffset()`
+  * Added `TD_RDEBUG_GetCount()`
+  * Added `TD_RDEBUG_ResetCount()`
+
+### SIGFOX: ###
+
+  * Changed Sigfox configuration to handle ITU ISM regions
+  * Removed `TD_SIGFOX_DOWNLINK_Configure()`
+  * Removed `TD_SIGFOX_DOWNLINK_GetConfig()`
+  * Removed `TD_SIGFOX_SetCountry()`
+  * Removed `TD_SIGFOX_GetCountry()`
+  * Added `TD_SIGFOX_SetRegion()`
+  * Added `TD_SIGFOX_GetRegion()`
+  * Added `TD_SIGFOX_SetMacroChannel()`
+  * Added `TD_SIGFOX_GetMacroChannel()`
+  * Added `TD_SIGFOX_GetValidPower()`
+  * Added `TD_SIGFOX_GetDefaultPower()`
+
+## Bug Fixes ##
+
+### SIGFOX: ###
+
+  * Corrected a bug that may crash the device after 21285 Sigfox transmissions
+
+
+# Version 7.0.0 #
+
+## Major Updates ##
+
+### LAN: ###
+  * Added `TD_LAN_SetThreshold()`
+  
+### SIGFOX: ###
+  * Added RampUp and RampDown Sigfox modulation
+  
+## Bug Fixes ##
+
+  * Corrected a bug that overconsumption at the beginning and the end of Sigfox transmission
+  * Corrected a bug that may reduce the number of synchronization bit
+  * Corrected of spectral quality in EZR ETSI configuration
+  
+# Version 8.0.0 #
+
+## Major Updates ##
+  
+### SIGFOX: ###
+  * Corrected of spectral quality in EZR FCC configuration
+  * Add generic Sigfox test mode
+  * Add CW test mode
+  * Add macro channel bitmask
+  * Macro channels Harmonization according to Sigfox requirement.
+  * Library certified by SIGFOX
+

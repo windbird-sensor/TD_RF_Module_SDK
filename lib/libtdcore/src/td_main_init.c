@@ -2,10 +2,10 @@
  * @file
  * @brief Main program initialization for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -42,7 +42,9 @@
 #include "td_uart.h"
 #include "td_core.h"
 #include "td_printf.h"
+#include "td_stream.h"
 #include "td_scheduler.h"
+
 #include "td_config_ext.h"
 
 /***************************************************************************//**
@@ -97,6 +99,7 @@ extern void TD_USER_Setup(void);
 	if (TD_BOOT_Handler) {\
 		TD_BOOT_Handler(CONFIG_PRODUCT_LED_POLARITY, CONFIG_PRODUCT_TYPE);\
 	}\
+	EARLY_DEBUG_CUSTOM_INIT;\
 	/* Initialize the clock Management Unit*/\
 	EARLY_DEBUG_PRINTF("TD_CMU_Init\r\n");\
 	TD_CMU_Init(true);\
@@ -114,7 +117,7 @@ extern void TD_USER_Setup(void);
 	TD_FLASH_SetVariablesVersion(CONFIG_TD_FLASH_VARIABLES_VERSION);\
 	\
 	/* Initialize SigFox (can be bypassed by : TD_SIGFOX_REMOVE_CODE) */\
-	EARLY_DEBUG_PRINTF("TD_SIGFOX_Init:0x%08X\r\n",TD_SIGFOX_Init);\
+	EARLY_DEBUG_PRINTF("TD_SIGFOX_Init:0x%08X\r\n", TD_SIGFOX_Init);\
 	TD_SIGFOX_Init(true);\
 	/* Initialize Scheduler */\
 	EARLY_DEBUG_PRINTF("TD_SCHEDULER_Init\r\n");\
@@ -130,6 +133,9 @@ extern void TD_USER_Setup(void);
 	 can be nopped by : TD_SIGFOX_PROXY_REMOVE_CODE*/\
 	EARLY_DEBUG_PRINTF("TD_SIGFOX_CompleteInit\r\n");\
 	TD_SIGFOX_PROXY_CompleteInit();\
+	/* Check flash size*/\
+	EARLY_DEBUG_PRINTF("Check flash size\r\n");\
+	TD_FLASH_CheckSize();\
 	\
 	EARLY_DEBUG_PRINTF("Entering Main Loop ...\r\n");
 
@@ -150,6 +156,10 @@ extern void TD_USER_Setup(void);
 
 /** Null early debug initialization */
 #define EARLY_DEBUG_INIT
+
+/** Null early custom debug initialization */
+#define EARLY_DEBUG_CUSTOM_INIT
+
 /***************************************************************************//**
  * @brief
  *   Main Init (without early_debug) function for the TDxxxx RF modules.
@@ -164,24 +174,20 @@ void main_init(void)
 
 #undef EARLY_DEBUG_PRINTF
 #undef EARLY_DEBUG_INIT
+#undef EARLY_DEBUG_CUSTOM_INIT
 
 /** Early debug print macro */
 #define EARLY_DEBUG_PRINTF(...) tfp_printf(__VA_ARGS__)
 
+/** Early custom debug print macro */
+#define EARLY_DEBUG_CUSTOM_INIT CONFIG_EARLY_DEBUG_CUSTOM()
+
 /** Early debug initialization */
 #define EARLY_DEBUG_INIT\
-	BITBAND_Peripheral(&(CMU ->HFPERCLKDIV), \
-		(cmuClock_HFPER >> CMU_EN_BIT_POS) & CMU_EN_BIT_MASK, 1);\
-	BITBAND_Peripheral(&(CMU ->HFPERCLKEN0), \
-		((cmuClock_GPIO) >> CMU_EN_BIT_POS) & CMU_EN_BIT_MASK, 1);\
-	CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_CORELEDIV2);\
-	CMU_ClockDivSet(cmuClock_LEUART0, cmuClkDiv_4);\
-	/* Enable the LEUART0 clock*/\
-	CMU_ClockEnable(cmuClock_LEUART0, true);\
-	init_printf(TD_UART_Init(115200, true, false),\
-		TD_UART_Putc,\
-		TD_UART_Start,\
-		TD_UART_Stop);\
+	CMU_ClockEnable(cmuClock_HFPER, true);\
+	CMU_ClockEnable(cmuClock_GPIO, true);\
+	TD_UART_Options_t options = {CONFIG_LEUART_DEVICE, CONFIG_LEUART_LOCATION, 115200, 8, 'N', 1, false, COM_STD, 0, 0}; \
+	TD_UART_Open(&options, TD_STREAM_RDWR); \
 	tfp_printf("--BOOT %s--\r\n", __TIME__);
 /** printf function used for early debug purposes */
 

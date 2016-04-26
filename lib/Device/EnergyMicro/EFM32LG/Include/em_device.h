@@ -222,6 +222,11 @@
 #elif defined(EFM32LG995F64)
 #include "efm32lg995f64.h"
 
+#elif defined(EZR32LG230F128)
+#include "ezr32lg230f128.h"
+
+#elif defined(EZR32LG230F256)
+#include "ezr32lg230f256.h"
 
 #else
 #error "em_device.h: PART NUMBER undefined"

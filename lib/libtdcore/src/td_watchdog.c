@@ -2,10 +2,10 @@
  * @file
  * @brief Watchdog peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.1
+ * @version 1.0.2
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2014-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -45,7 +45,7 @@
 
 /***************************************************************************//**
  * @addtogroup WATCHDOG
- * @brief Watchdog peripheral API for the TD RF modules
+ * @brief Watchdog peripheral API for the TDxxxx RF modules.
  * @{
  ******************************************************************************/
 
@@ -189,8 +189,9 @@ bool TD_WATCHDOG_Enable(bool enable, bool automatic)
 		// If not already activated and we want activation
 		if (enable && !TD_Watchdog_Enabled) {
 
-			DEBUG_PRINTF("Enable watchdog, auto:%d\r\n",automatic);
+			DEBUG_PRINTF("Enable watchdog, auto:%d\r\n", automatic);
 			TD_Watchdog_Enabled = true;
+
 			// Force a wake-up every period to allow feeding watchdog in time
 			//(before RTC overflow)
 			TD_Watchdog_Timer = TD_SCHEDULER_Append(TD_WATCHDOG_Interval,
@@ -219,6 +220,7 @@ bool TD_WATCHDOG_Enable(bool enable, bool automatic)
 			return true;
 		} else if (enable && automatic && (TD_Watchdog_Timer == 0xFF)) {
 			DEBUG_PRINTF("set auto:%d\r\n", automatic);
+
 			// If activate + auto + auto not activated, start auto
 			TD_Watchdog_Timer = TD_SCHEDULER_Append(TD_WATCHDOG_Interval,
 				0,
@@ -228,7 +230,7 @@ bool TD_WATCHDOG_Enable(bool enable, bool automatic)
 				0);
 			return true;
 		} else if (enable && !automatic && TD_Watchdog_Timer != 0xFF) {
-			DEBUG_PRINTF("set auto:%d\r\n",automatic);
+			DEBUG_PRINTF("set auto:%d\r\n", automatic);
 
 			// If activate + !auto + auto activated, stop auto
 			TD_SCHEDULER_Remove(TD_Watchdog_Timer);
@@ -253,4 +255,5 @@ void TD_WATCHDOG_Feed(void)
 }
 
 /** @} */
+
 /** @} (end addtogroup WATCHDOG) */

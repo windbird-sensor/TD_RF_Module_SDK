@@ -2,10 +2,10 @@
  * @file
  * @brief General Purpose IO (GPIO) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.1.0
+ * @version 2.3.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -130,6 +130,7 @@ extern "C" {
 	void TD_GPIO_Dump(void);
 	TD_GPIO_callback_t TD_GPIO_SetCallbackExtended(uint8_t bit,
 		TD_GPIO_callback_t callback);
+	TD_GPIO_callback_t TD_GPIO_GetCallbackExtended(uint8_t bit);
 	void TD_GPIO_PinModeSet(TD_GPIO_Port_TypeDef port, unsigned int bit,
 		GPIO_Mode_TypeDef mode, unsigned int out);
 	void TD_GPIO_DriveModeSet(TD_GPIO_Port_TypeDef port,
@@ -138,6 +139,9 @@ extern "C" {
 	// Depreciated
 	void TD_GPIO_SetCallback(int type, TD_GPIO_callback_t callback,
 		uint32_t mask);
+	void TD_GPIO_GetIntConfig(unsigned int pin, GPIO_Port_TypeDef *port,
+		bool *risingEdge, bool *fallingEdge, bool *enable);
+
 	/** @} */
 	/** @} */
 

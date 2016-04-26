@@ -2,10 +2,10 @@
  * @file
  * @brief Utility functions for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.3
+ * @version 2.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -54,6 +54,8 @@ extern "C" {
 
 	/** @addtogroup UTILS_DEFINES Defines
 	 * @{ */
+/** Definition for long support in printf */
+#define PRINTF_LONG_SUPPORT
 
 	/** Macro to get a bit field */
 #define GET_BITFIELD(b, f) \
@@ -93,8 +95,10 @@ extern "C" {
 	int a2d(char ch);
 	void i2a(int num, char *bf);
 	void ui2a(unsigned int num, unsigned int base, int uc, char *bf);
+	void ulli2a(uint64_t num, unsigned int base, int uc, char *bf);
+	void lli2a(int64_t num, char *bf);
+	void uli2a(unsigned long num, unsigned int base, int uc, char *bf);
 	void li2a(long int num, char *bf);
-	void uli2a(unsigned long int num, unsigned int base, int uc, char *bf);
 
 #ifndef __ICCARM__
 	void *memset(void *s, int c, size_t n);

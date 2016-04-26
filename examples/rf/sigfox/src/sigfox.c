@@ -45,7 +45,7 @@
 /* This file declare all "dynamic" library data. It should be last included file
  * Standard size value can be override before including this file
  */
-#define RADIO_USE_TCXO 1
+
 #define TD_SENSOR_USE_CODE 0
 #define TD_GEOLOC_USE_CODE 0
 #include <td_config.h>

@@ -2,10 +2,10 @@
  * @file
  * @brief Core AT command extension for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.1
+ * @version 1.0.2
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2014-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -38,6 +38,8 @@
 
 #include "at_core.h"
 #include "td_watchdog.h"
+#include "td_uart.h"
+#include "td_printf.h"
 #include "td_scheduler.h"
 
 /***************************************************************************//**
@@ -64,7 +66,12 @@ typedef enum core_tokens_t {
 	AT_CORE_GET_WATCHDOG,				///< ATS250?
 	AT_CORE_SCHEDULER_DUMP,				///< AT$SCD
 	AT_CORE_GPIO_DUMP,					///< AT$IOD
-	AT_CORE_IRQ_DUMP					///< AT$IRQD
+	AT_CORE_IRQ_DUMP,					///< AT$IRQD
+	AT_CORE_GetBaudrate,				///< AT+IPR=?
+	AT_CORE_GetBaudrate_LIST,			///< AT+IPR?
+	AT_CORE_SET_BAUDRATE,				///< AT+IPR=
+	AT_CORE_SET_BAUDRATES,				///< AT$IPR=
+	AT_CORE_SWITCH_HALF_FULL_DUPLEX,	///< ATF
 } core_tokens;
 
 /** @} */
@@ -78,6 +85,7 @@ typedef enum core_tokens_t {
 
 /** AT core command set */
 static AT_command_t const core_commands[] = {
+	{"ATF", AT_CORE_SWITCH_HALF_FULL_DUPLEX},
 	{"AT$GIO=", AT_CORE_GET_IO},
 	{"AT$SIO=", AT_CORE_SET_IO},
 	{"AT$SDM=", AT_CORE_SET_DRIVE_MODE},
@@ -87,6 +95,10 @@ static AT_command_t const core_commands[] = {
 	{"ATS250=?", AT_CORE_QUERY_WATCHDOG},
 	{"ATS250=", AT_CORE_SET_WATCHDOG},
 	{"ATS250?", AT_CORE_GET_WATCHDOG},
+	{"AT+IPR?", AT_CORE_GetBaudrate},
+	{"AT+IPR=?", AT_CORE_GetBaudrate_LIST},
+	{"AT+IPR=", AT_CORE_SET_BAUDRATE},
+	{"AT$IPR=", AT_CORE_SET_BAUDRATES},
 	{0, 0}
 };
 
@@ -105,6 +117,11 @@ static bool WatchdogEnabled = false;
 /** Watchdog interval in seconds */
 static uint16_t WatchdogInterval = 0;
 
+static Baudrate_t Baudrate;
+
+static bool FullDuplex_Mode;
+
+
 /** @} */
 
 /*******************************************************************************
@@ -113,6 +130,50 @@ static uint16_t WatchdogInterval = 0;
 
 /** @addtogroup AT_CORE_LOCAL_FUNCTIONS Local Functions
  * @{ */
+
+static int GetBaudrate(Baudrate_t Baudrate)
+{
+	switch (Baudrate) {
+	case B1200:
+		return 1200;
+		break;
+
+	case B2400:
+		return 2400;
+		break;
+
+	case B4800:
+		return 4800;
+		break;
+
+	case B9600:
+		return 9600;
+		break;
+
+	case B19200:
+		return 19200;
+		break;
+
+	case B38400:
+		return 38400;
+		break;
+
+	case B57600:
+		return 57600;
+		break;
+
+	case B115200:
+		return 115200;
+		break;
+	}
+	return 0;
+}
+
+static void core_init(void)
+{
+	Baudrate = B115200;
+	FullDuplex_Mode = true;
+}
 
 /***************************************************************************//**
  * @brief
@@ -146,17 +207,58 @@ static uint8_t core_persist(bool write, uint8_t *buffer, uint8_t count)
 			temp <<= 4;
 			temp |= WatchdogEnabled ? 1 : 0;
 			*(buffer++) = temp;
+			*buffer++ = (Baudrate) & 0xFF;
+			*(buffer++) = FullDuplex_Mode & 0xFF;
 		} else {
-			temp =  *buffer++ ;
+			temp = *buffer++ ;
+			Baudrate = (Baudrate_t) (*buffer++);
+			FullDuplex_Mode = *buffer++;
 			WatchdogEnabled = (temp & 0x01) ? true : false;
 			WatchdogInterval = 1 << (temp >> 4);
 			if (WatchdogEnabled) {
 				TD_WATCHDOG_Init(WatchdogInterval);
 				TD_WATCHDOG_Enable(true, true);
 			}
+			if (CONFIG_AT_LEUART_PERSIST) {
+				if (FullDuplex_Mode) {
+					TD_UART_port_t *uart = ((TD_STREAM_cast_t *) get_printf())->io_handle;
+					init_printf(TD_UART_InitGlobal(
+							CONFIG_LEUART_DEVICE,
+							CONFIG_LEUART_LOCATION,
+							GetBaudrate(Baudrate),
+							true,
+							false,
+							0xFF,
+							0xFF,
+							0xFF,
+							COM_RS485_FULL,
+							uart->rs485_port,
+							uart->rs485_bit),
+						TD_UART_Putc,
+						TD_UART_Start,
+						TD_UART_Stop);
+				} else {
+					TD_UART_port_t *uart = ((TD_STREAM_cast_t *) get_printf())->io_handle;
+					init_printf(TD_UART_InitGlobal(
+							CONFIG_LEUART_DEVICE,
+							CONFIG_LEUART_LOCATION,
+							GetBaudrate(Baudrate),
+							true,
+							false,
+							0xFF,
+							0xFF,
+							0xFF,
+							COM_STD,
+							uart->rs485_port,
+							uart->rs485_bit),
+						TD_UART_Putc,
+						TD_UART_Start,
+						TD_UART_Stop);
+				}
+			}
 		}
 	}
-	return 1;
+	return 4;
 }
 
 /***************************************************************************//**
@@ -176,6 +278,55 @@ static int8_t core_parse(uint8_t token)
 	int watchdog_interval;
 
 	switch (token) {
+	case AT_CORE_SWITCH_HALF_FULL_DUPLEX:
+		if (AT_argc == 1) {
+			mode = AT_atoll(AT_argv[0]);
+			if (mode == 1) {
+				TD_UART_Flush();
+				TD_UART_port_t *uart = ((TD_STREAM_cast_t *) get_printf())->io_handle;
+				init_printf(TD_UART_InitGlobal(
+						CONFIG_LEUART_DEVICE,
+						CONFIG_LEUART_LOCATION,
+						GetBaudrate(Baudrate),
+						true,
+						false,
+						0xFF,
+						0xFF,
+						0xFF,
+						COM_RS485_FULL,
+						uart->rs485_port,
+						uart->rs485_bit),
+					TD_UART_Putc,
+					TD_UART_Start,
+					TD_UART_Stop);
+				FullDuplex_Mode = true;
+			} else if (mode == 0) {
+				TD_UART_port_t *uart = ((TD_STREAM_cast_t *) get_printf())->io_handle;
+				init_printf(TD_UART_InitGlobal(
+						CONFIG_LEUART_DEVICE,
+						CONFIG_LEUART_LOCATION,
+						GetBaudrate(Baudrate),
+						true,
+						false,
+						0xFF,
+						0xFF,
+						0xFF,
+						COM_STD,
+						uart->rs485_port,
+						uart->rs485_bit),
+					TD_UART_Putc,
+					TD_UART_Start,
+					TD_UART_Stop);
+				TD_UART_Flush();
+				FullDuplex_Mode = false;
+			} else {
+				result = AT_ERROR;
+			}
+		} else {
+			result = AT_ERROR;
+		}
+		break;
+
 	case AT_CORE_GET_IO:
 		if (AT_argc == 2) {
 			port = AT_atoll(AT_argv[0]);
@@ -225,7 +376,7 @@ static int8_t core_parse(uint8_t token)
 		if (AT_argc != 0) {
 			result = AT_ERROR;
 		} else {
-			AT_printf("0..1,0|8|16|32|64|128|256\r\n");
+			AT_printf(LGC("0..1,0|8|16|32|64|128|256\r\n"));
 		}
 		break;
 
@@ -275,6 +426,91 @@ static int8_t core_parse(uint8_t token)
 		TD_SystemDump(DUMP_IRQ);
 		break;
 
+	case AT_CORE_GetBaudrate_LIST:
+		if (AT_argc == 0) {
+			AT_printf(LGC("+IPR:1200,2400,4800,9600,19200,38400,57600,115200"));
+		} else {
+			result = AT_ERROR;
+		}
+		break;
+
+	case AT_CORE_GetBaudrate:
+		if (AT_argc == 0) {
+			AT_printf("%d", GetBaudrate(Baudrate));
+		} else {
+			result = AT_ERROR;
+		}
+		break;
+
+	case AT_CORE_SET_BAUDRATE:
+	case AT_CORE_SET_BAUDRATES:
+		if (AT_argc == 1) {
+			port = AT_atoll(AT_argv[0]);
+			if (port == 1200 || port == 2400 || port == 4800 || port == 9600 ||
+				port == 19200 || port == 38400 || port == 57600 || port == 115200) {
+
+				// Will result in getting OK at current baudrate and OK at next baudrate.rth
+				// startup baudrate not affected yet
+				switch (port) {
+				case 1200:
+					Baudrate = B1200;
+					break;
+
+				case 2400:
+					Baudrate = B2400;
+					break;
+
+				case 4800:
+					Baudrate = B4800;
+					break;
+
+				case 9600:
+					Baudrate = B9600;
+					break;
+
+				case 19200:
+					Baudrate = B19200;
+					break;
+
+				case 38400:
+					Baudrate = B38400;
+					break;
+
+				case 57600:
+					Baudrate = B57600;
+					break;
+
+				case 115200:
+					Baudrate = B115200;
+					break;
+				}
+				if (token == AT_CORE_SET_BAUDRATE) {
+					tfp_printf("OK\r\n");
+					TD_UART_port_t *uart = ((TD_STREAM_cast_t *) get_printf())->io_handle;
+				init_printf(TD_UART_InitGlobal(
+						CONFIG_LEUART_DEVICE,
+						CONFIG_LEUART_LOCATION,
+						GetBaudrate(Baudrate),
+						true,
+						false,
+						0xFF,
+						0xFF,
+						0xFF,
+						(Comm_Mode_t) TD_UART_GetModeComm(),
+						uart->rs485_port,
+						uart->rs485_bit),
+					TD_UART_Putc,
+					TD_UART_Start,
+					TD_UART_Stop);
+				}
+			} else {
+				result = AT_ERROR;
+			}
+		} else {
+			result = AT_ERROR;
+		}
+		break;
+
 	default:
 		result = AT_NOTHING;
 		break;
@@ -293,6 +529,7 @@ static int8_t core_parse(uint8_t token)
 
 /** Core AT extension */
 AT_extension_t core_extension = {
+	.init = core_init,				//< Pointer to the extension init function
 	.commands = core_commands,		///< Pointer to the list of extension commands
 	.parse = core_parse,			//< Pointer to the extension parse function
 	.persist = core_persist			///< Pointer to the extension persistence function

@@ -2,10 +2,10 @@
  * @file
  * @brief Flash controller (MSC) peripheral API for the TDxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.1.1
+ * @version 3.0.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -99,11 +99,15 @@ extern "C" {
 	/** TDxxxx RF module extended device descriptor */
 	typedef struct _TD_DEVICE_EXT {
 		uint16_t	DeviceVersion;		/**< Device descriptor version */
-		uint8_t		TDSerial[12];		/**< Descriptor version 1 or 2 Serial number (Standard TD ID). */
-		uint8_t		PK[16];				/**< Descriptor version 2 SIGFOX 128-bit private key */
-		uint32_t    Serial;            	/**< Descriptor version 2 serial number (SIGFOX ID). */
-		uint8_t     ModResult;			/**< Descriptor version 2 module manufacturing test result. */
-		uint8_t     ProdResult;			/**< Descriptor version 2 final product manufacturing test result. */
+		uint8_t		TDSerial[12];		/**< Descriptor version 3 or 2 or 1 Serial number (Standard TD ID). */
+		uint8_t		PK[16];				/**< Descriptor version 3 or 2 SIGFOX 128-bit private key */
+		uint32_t    Serial;            	/**< Descriptor version 3 or 2 serial number (SIGFOX ID). */
+		uint8_t     ModResult;			/**< Descriptor version 3 or 2 module manufacturing test result. */
+		uint8_t     ProdResult;			/**< Descriptor version 3 or 2 final product manufacturing test result. */
+		uint16_t	DeviceVersionRead;	/**< Device descriptor version (read on flash)*/
+		int32_t     QuartzCal[2];		/**< Descriptor version 3 quartz calibration value. */
+		uint8_t     BLEMAC[6];			/**< Descriptor version 3 BLE MAC address. */
+		uint8_t     AppData[128];		/**< Descriptor version 3 User specific Application Data. */
 	} TD_DEVICE_EXT;
 
 	/**
@@ -135,6 +139,7 @@ extern "C" {
 	uint16_t TD_FLASH_ReadVariable(uint8_t index, uint8_t *buffer);
 	bool TD_FLASH_DeclareVariable(uint8_t *variable, uint16_t size,
 		uint8_t *index);
+	uint32_t TD_FLASH_GetLayoutBase(uint8_t idx, uint32_t *size);
 	void TD_FLASH_WriteVariables(void);
 	void TD_FLASH_DeleteVariables(void);
 	void TD_FLASH_SetVariablesVersion(uint32_t version);
@@ -149,7 +154,10 @@ extern "C" {
 	void TD_FLASH_LoggerWrite(uint8_t id, uint32_t *data);
 	void TD_FLASH_LoggerResetRead(uint8_t id);
 	bool TD_FLASH_LoggerReadNext(uint8_t id, uint32_t *data);
-
+	bool TD_FLASH_DeviceReadAppData(uint8_t *buffer, uint16_t offset,
+		uint16_t count);
+	void TD_FLASH_DumpLayout(void);
+	void TD_FLASH_CheckSize(void);
 	/** @} */
 
 	/** @} (end addtogroup FLASH) */

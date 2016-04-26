@@ -2,10 +2,10 @@
  * @file
  * @brief Watchdog peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.1
+ * @version 1.0.2
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2014-2106 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -59,7 +59,7 @@ extern "C" {
 	void TD_WATCHDOG_Feed(void);
 
 	/** @} */
-	/** @} */
+	/** @} (end addtogroup WATCHDOG) */
 
 #ifdef __cplusplus
 }

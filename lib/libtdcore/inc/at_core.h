@@ -2,10 +2,10 @@
  * @file
  * @brief Core AT command extension for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.1
+ * @version 1.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -69,6 +69,18 @@ extern "C" {
 
 	/** The core AT extension structure */
 	extern AT_extension_t core_extension;
+
+	/** AT parser baudrates */
+	typedef enum {
+		B1200 = 0,
+		B2400 = 1,
+		B4800 = 2,
+		B9600 = 3,
+		B19200 = 4,
+		B38400 = 5,
+		B57600 = 6,
+		B115200 = 7,
+	} Baudrate_t;
 
 	/** @} */
 	/** @} */

@@ -1,23 +1,17 @@
-Welcome to TD RF Module SDK (powered by Telecom Design)
+Welcome to TD RF Module SDK (powered by TD next, a division of Telecom Design)
 =======================================================
 
-The TD RF Module SDK provides a complete Rapid Embedded Development Environment for the TD RF modules.
+The TD RF Module SDK provides a complete Rapid Embedded Development Environment for the TD RF modules and reference
+designs.
 
 The TD RF Module SDK contains all the Eclipse projects, static libraries, examples with source codes
-and auto-generated API documentation to develop for the TD RF modules.
+and auto-generated API documentation to develop for the TD RF modules and reference designs.
 
-Further details on the TD RF Module SDK can be found at <https://developers.insgroup.fr/>
-
-Please post all your questions on the dedicated forum: <http://community.td-next.com/> and only use the github ticket system to raise SDK issue.
+Further details on the TD RF Module SDK can be found at <http://rfmodules.td-next.com/>
 
 We hope you enjoy using the TD RF Module SDK!
 
-_The Telecom Design Team_
-
-UPDATE:
-=======
-
-We strongly recommend to update the SDK from previous 4.0.0 version to the newest 4.1.0 version for TD1202 RF modules and to 5.0.0 version for TD1204 and TD1208 modules as soon as possible and regenerate the firmwares for all devices produced, as this version contains a modification that will ensure the best performance with the latest SIGFOX network updates.
+_The TD next Team_
 
 Getting the Sources
 ===================
@@ -25,7 +19,7 @@ Getting the Sources
 The SDK source code and examples are no longer distributed with the TD RF Module SDK Tools zip file but
 are available through the <https://github.com/Telecom-Design/TD_RF_Module_SDK> Github repository
 once you register your Telecom Design Evaluation Board (EVB) by following the steps described on
-<https://developers.insgroup.fr/>.
+<http://rfmodules.td-next.com/sdk/>.
 
 The stand-alone Eclipse Package which should be used to compile the source can be found here:
 <https://developers.insgroup.fr/releases/2014/02/25/sdk-400-version-available/index.html>
@@ -33,7 +27,7 @@ The stand-alone Eclipse Package which should be used to compile the source can b
 The following steps detail how to download the source code and import all projects into the Eclipse
 environment.
 
-  1. Navigate to the `"C:\TD\TD_RF_Module_SDK-v4.0.0\eclipse"` folder and double-click on the
+  1. Navigate to the `"C:\TD\TD_RF_Module_SDK-v6.0.0\eclipse"` folder and double-click on the
      `"eclipse.exe"` icon
   2. Open the `"File"` menu and select the `"Import..."` item.
   3. In the `"Import"` dialog, unfold the `"Git"` folder by clicking on the `"+"` sign left to it,
@@ -44,7 +38,7 @@ environment.
   6. Enter your Github username and password in the `"User:"` and `"Password:"` fields,
      respectively and click on the `"Next >"` button
   7. Check the `"Master"` branch box and click on the `"Next >"` button
-  8. Enter `"C:\TD\TD_RF_Module_SDK-v4.0.0\Github\TD_RF_Module_SDK"` in the `"Directory:"` field and
+  8. Enter `"C:\TD\TD_RF_Module_SDK-v6.0.0\Github\TD_RF_Module_SDK"` in the `"Directory:"` field and
      click on the `"Next >"` button
   9. Check the `"Import existing projects"` radio button and click on the `"Next >"` button
   10. Click on the `"Finish"` button. The Git import will take place, this may take a while
@@ -60,13 +54,13 @@ except that they are sorted alphabetically.
 In order to have a more logical organization, we must import an Eclipse "Working Set" that will
 provide a grouping of projects by categories.
 
-To do so, launch Eclipse by navigating to the `"C:\TD\TD_RF_Module_SDK-v4.0.0\eclipse"` folder and
+To do so, launch Eclipse by navigating to the `"C:\TD\TD_RF_Module_SDK-v6.0.0\eclipse"` folder and
 double-click on the `"eclipse.exe"` icon (if not already done) and:
 
   1. Open the `"File"` menu and select the `"Import..."` item.
   2. In the `"Import"` dialog, unfold the `"General"` folder by clicking on the `"+"` sign left to
      it, select the `"Working Sets"` item and click on the `"Next >"` button
-  3. Enter `"C:\TD\TD_RF_Module_SDK-v4.0.0\Github\TD_RF_Module_SDK\TD_RF_Module_SDK.wst"` in the
+  3. Enter `"C:\TD\TD_RF_Module_SDK-v6.0.0\Github\TD_RF_Module_SDK\TD_RF_Module_SDK.wst"` in the
      `"Browse..."` field, check all working sets and click on the `"Finish"` button
   4. Click on the small downwards arrow in the top-right corner of the `"Project Explorer"` panel
      and select the `"Select Working Sets..."` item
@@ -81,13 +75,12 @@ Compiling the Sources
 
 With the exception of the binary-only static libraries in the `"libtddrivers"` and `"libtdrf"`
 projects, all deliverables are presented in source form only, and must be compiled to obtain an
-executable firmware. To compile properly you must add the gcc path into your environment variables
-by opening: Configuration Panel -> Sytem -> Advanced System Parameters -> System Variables -> Path
+executable firmware. To compile properly you must add the gcc path into your Eclipse environment variables
+by opening: Window -> Preferences -> C/C++ -> Environment -> Add...
 
-Please add the following line:
+Please add the PATH variable with the following value:
 
-C:\TD\TD_RF_Module_SDK-v4.0.0\gnu\bin;
-
+C:\TD\TD_RF_Module_SDK-v6.0.0\gnu\bin
 
 Then if we take the `"blink"` project as an example, here are the steps required to compile it:
 
@@ -96,9 +89,9 @@ Then if we take the `"blink"` project as an example, here are the steps required
      Project Explorer panel on the left side, then select all the projects by clicking on the first one
      in the list, pressing the `"SHIFT"`key, then clicking on the last one in the list
   2. Click on the small downwards arrow right next to the `"Hammer"` icon in the top menu bar and
-     select the right build configuration corresponding to your board: `"TD1202"`, `"TD1204"` or
-     `"TD128"`, and `"Debug"` for building an executable firmware with integrated symbols suitable for
-     source code debugging, or `"Release"` for a stripped down firmware
+     select the right build configuration corresponding to your board: `"TD1204"` , `"TD1205"`
+     `"TD1208"` or `"TD1508"`, and `"Debug"` for building an executable firmware with integrated symbols
+     suitable for source code debugging, or `"Release"` for a stripped down firmware
   3. Unfold the `"Core_Examples"` working set in the Project Explorer panel on the left side, then
      select the `"blink"` project
   4. Click again on the small downwards arrow right next to the `"Hammer"` icon in the top menu bar and
@@ -119,7 +112,7 @@ Fortunately, these Flash/Debug `"Launchers"` can be imported or duplicated to ot
   1. Open the `"File"` menu and select the `"Import..."` item.
   2. In the `"Import"` dialog, unfold the `"Run/Debug"` folder by clicking on the `"+"` sign left to it,
      select the `"Launch Configurations"` item and click on the `"Next >"` button
-  3. Enter `"C:/TD/TD_RF_Module_SDK-v4.0.0/Github/TD_RF_Module_SDK/Eclipse Launchers"` in the `"Browse..."`
+  3. Enter `"C:/TD/TD_RF_Module_SDK-v6.0.0/Github/TD_RF_Module_SDK/Eclipse Launchers"` in the `"Browse..."`
      field, check the box in front of the `"Eclipse Launchers"` item and click on the `"Finish"` button
   4. All the default Flash/Debug `"Launchers"` will be added to the top menu `"Bug"` and `"Green Circle
      with With Right Arrow and Briefcase"` icons
@@ -130,7 +123,7 @@ Fortunately, these Flash/Debug `"Launchers"` can be imported or duplicated to ot
      `"Apply"` and `"Close"` buttons, or you an duplicate it by right-clicking on it and selecting the
      `"Duplicate"` entry in the contextual menu that pops up
 
-Then, to flash a firmware to the TD12xx board:
+Then, to flash a firmware to the TD12xx/TD15xx board:
 
   1. Select the desired project in the Project Explorer panel on the left side
   2. Right-click on the project and select the `"Build Configurations > Set Active >"` and the desired
@@ -139,7 +132,7 @@ Then, to flash a firmware to the TD12xx board:
   4. Click on the  the small downwards arrow right next to the `"Green Circle with With Right Arrow and
      Briefcase"` icon and select `"Flash Selected Project"` in the contextual menu
 
-Similarly, to debug a firmware on the TD12xx board:
+Similarly, to debug a firmware on the TD12xx/TD15xx board:
 
   1. Select the desired project in the Project Explorer panel on the left side
   2. Right-click on the project and select the `"Build Configurations > Set Active >"` and the desired
@@ -152,20 +145,86 @@ Similarly, to debug a firmware on the TD12xx board:
      buttons, or you an duplicate an existing one by right-clicking on it and selecting the `"Duplicate"`
      entry in the contextual menu that pops up, then changing these same values
   5. Click on the  the small downwards arrow right next to the `"Bug"` icon and select the
-     `"Debug TD12xx"` entry in the contextual menu that corresponds to your board
+     `"Debug TD12xx"` or `"Debug TD15xx"` entry in the contextual menu that corresponds to your board
   6. The first time you launch a debug session, Eclipse will prompt you if you want to switch to a new
      `"Debug Perspective"` (a window panel organization purposed for debugging): click on `"Yes"`
   7. The firmware will optionally be built and flashed to the module, the execution will stop early in
      the program execution, giving you an opportunity to single-step, continue, explore variables as
       expected from a source-level debugger
   8. When finished, you can cleanly disconnect from the running application by right-clicking on the
-     `"Debug TD12xx"` entry in the tree under the "Debug" panel, select the `"Terminate/Disconnect All"`
-     entry in the contextual menu, clicking on the `"XX"` icon at the top of this panel, then clinking
-     on the `"C/C++"` button located at the top right of the main window to return to the normal C/C++
-     edit panel organization
+     `"Debug TD12xx"` or `"Debug TD15xx"` entry in the tree under the "Debug" panel, select the
+     `"Terminate/Disconnect All"` entry in the contextual menu, clicking on the `"XX"` icon at the top
+     of this panel, then clinking on the `"C/C++"` button located at the top right of the main window
+     to return to the normal C/C++ edit panel organization
 
 Release Notes
 =============
+v6.3.2 (April 2016)
+-------------------
+### Release Notes ###
+
+#### Major Updates ####
+
+#### **libtdcore** ####
+  * Added Td_HallEffect module
+  * Up AT___PERSIST_SIZE to 220 bytes
+  * Added sigfox channel managment error
+
+#### SIGFOX: ####
+  * Corrected of spectral quality in EZR FCC configuration
+  * Add generic Sigfox test mode
+  * Add CW test mode
+  * Add macro channel bitmask
+  * Macro channels Harmonization according to Sigfox requirement.
+  * Library certified by SIGFOX
+
+v6.2.0 (February 2016)
+-------------------
+Bug Fixes
+#### SIGFOX: ####
+  - Corrected a bug that may create an irregular ramp down duration
+  - Corrected a bug that may not set LAN frequency after a Sigfox transmission
+  - Corrected a bug that may disable GPIO interrupts after a Sigfox transmission
+
+v6.1.0 (January 2016)
+-------------------
+  - This version is a major update of TD RF Module SDK.
+
+### Release Notes ###
+
+#### Bug Fixes ####
+
+#### SIGFOX: ####
+
+v6.0.0 (December 2015)
+-----------------
+  - This version is a major update of TD RF Module SDK.
+
+### Release Notes ###
+
+#### Bug Fixes ####
+
+#### SIGFOX: ####
+
+  * Corrected a bug that may crash the device after 21285 Sigfox transmissions
+
+#### **libtdcore** ####
+
+  * Corrected drift in voltage measurement
+
+#### Major Updates ####
+
+#### **libtdcore** ####
+
+  * Split link time configuration into multiple files
+  * Added a link-time Flash layout mechanism
+  * Added stream support
+  * Added long long support
+
+#### **libtdrf** ####
+
+  * Added support for TD1508 (FCC)
+  * Added support for reference design (both ETSI and FCC)
 
 v5.0.1 (December 2014)
 -----------------

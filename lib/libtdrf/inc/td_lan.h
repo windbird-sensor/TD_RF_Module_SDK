@@ -2,10 +2,10 @@
  * @file
  * @brief Local RF for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 3.0.0
+ * @version 3.2.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -91,6 +91,34 @@ extern "C" {
 	/** Positive acknowledgment */
 #define TD_LAN_ACK				1U
 
+	/** Do LBT send, send default transmit count frame, go to receive mode
+	 * (LBT = Listen Before Talk) */
+#define TD_LAN_CNT_TRANSCEIVER	-1
+
+	/** Do LBT send, send default transmit count frame */
+#define TD_LAN_CNT_TRANSMITTER	0xFF
+
+	/** Send one frame, go to receive mode */
+#define TD_LAN_CNT_TRANSCEIVER_FAST	0xFE
+
+	/** Do LBT ACK, send one frame */
+#define TD_LAN_CNT_ACK			1
+
+/** Infinite TD LAN receive mode */
+#define TD_LAN_INFINITE		0xFFFFFFFF
+
+/** Autoamtic TD LAN receive mode */
+#define TD_LAN_AUTOMATIC		0
+
+/** Set ACK mode*/
+#define TD_LAN_ACK_SET			1
+
+/** Reset ACK mode */
+#define TD_LAN_ACK_RESET		2
+
+/** Automatic ACK mode */
+#define TD_LAN_ACK_AUTO			0
+
 	/** @} */
 
 	/***************************************************************************
@@ -104,13 +132,14 @@ extern "C" {
 	typedef enum {
 		MODE_SLEEP,					/**< Idle mode */
 		MODE_RECEIVER,				/**< Periodic windowed receive mode */
-		MODE_TRANSCEIVER,			/**< Transmit mode, then switch to immediate receive mode */
-		MODE_ACK,					/**< Immediate receive mode */
+		MODE_TRANSCEIVER,			/**< LBT, Transmit mode, then switch to immediate receive mode */
+		MODE_ACK,					/**< Immediate receive mode (no Windowing) */
 		MODE_TRANSMITTER,			/**< Transmit mode */
 		MODE_NOT_USED,				/**< Reserved mode */
-		MODE_TRANSCEIVER_FAST,		/**< Fast Transmit mode (first emission normal then ping-pong) */
+		MODE_TRANSCEIVER_FAST,		/**< Fast Transceive mode (no LBT) */
 		MODE_TRANSMITTER_CUSTOM,	/**< Custom Transmit mode (user callback write into fifo)*/
-		MODE_RECEIVER_CUSTOM		/**< Custom Receive mode (user callback write from fifo and stop rx)*/
+		MODE_RECEIVER_CUSTOM,		/**< Custom Receive mode (user callback write from fifo and stop rx)*/
+		MODE_TRANSMITTER_FAST		/**< Fast Transmit mode (no LBT) */
 	} TD_LAN_mode_t;
 
 	/** LAN result states */
@@ -192,6 +221,7 @@ extern "C" {
 
 	/** LAN configuration structure */
 	typedef struct {
+		uint32_t RxDelay; 					///< Delay before receive
 		uint32_t RxPeriod; 					///< RF receive window period
 		TD_LAN_UserCallbacks_t Callbacks;	///< User callbacks
 		uint32_t Address; 					///< Local RF Address
@@ -206,7 +236,25 @@ extern "C" {
 		uint32_t Baudrate;					///< Baudrate
 		bool LanActive; 					///< LAN Status flag
 		bool LanSessionOpen;				///< LAN Session opened
+		bool AbortRTCDelayOnRx;				///< Abort RTC Delay if packet received
 	} TD_LAN_Configuration_t;
+
+	/** LAN bidirectional exchange structure */
+	typedef struct{
+		TD_LAN_mode_t Mode;					///< Transfer mode type (LAN_Task state machine parameter)
+		bool Synchronous;					///< If true, activate synchronous mode (wait TimeLimit max)
+		uint32_t RxPeriod;					///< Time between reception attempt. If > 0 we are in window mode
+		TD_LAN_frame_t *TxFrame;			///< Pointer to frame to transmit
+		TD_LAN_frame_t *RxFrame;			///< Pointer to frame to receive
+		bool Retry;							///< This transmission is a retry. Wait random time before beginning
+		uint16_t TxCount;					///< Force specific Frame Count to transmit (0 : automatic - based on RxPeriod)
+		uint32_t TimeLimit;					///< In synchronous mode, global timeout for reception (can be set to TD_LAN_INFINITE or TD_LAN_AUTOMATIC(default) = based on RxPeriod)
+		uint8_t AckMode;					///< TD_LAN_ACK_SET (force ack mode), TD_LAN_ACK_RESET (reset ack mode), TD_LAN_ACK_AUTO (legacy mode, based on frame count)
+		uint8_t MaxTxCount;					///< 0 : automatic, 0xFF : set MaxTxCount to 0, other : force MaxTxCount to value.
+		uint32_t MaxTxListen;				///< 0 : automatic, other : force MaxTxListen.
+		uint32_t DelayRx;					///< 0 : automatic, other : force delay before RX in transceiver mode.
+		bool AbortRTCDelayOnRx;				///< 0 : standard, 1 : force a RTC delay abort on packet RX.
+	} TD_LAN_ExchangeParam_t;
 
 	/** @} */
 
@@ -216,18 +264,22 @@ extern "C" {
 
 	/** @addtogroup LAN_USER_FUNCTIONS User Functions
 	 * @{ */
-
+	void TD_LAN_FastAck(TD_LAN_mode_t mode);
+	bool TD_LAN_Exchange(TD_LAN_ExchangeParam_t *param);
+	char *TD_LAN_ErrorToStr(TD_LAN_error_t error);
 	bool TD_LAN_Init(bool init, uint32_t address, uint32_t mask);
+	bool TD_LAN_InitExt(bool init, uint32_t address, uint32_t mask, uint32_t match);
 	bool TD_LAN_Release(void);
 	bool TD_LAN_Process(void);
 	void TD_LAN_Abort(void);
 	bool TD_LAN_SetFrequencyLevel(uint32_t frequency, int16_t level);
 	bool TD_LAN_SetPeriod(uint32_t period);
 	uint32_t TD_LAN_GetFrequency(void);
+	int TD_LAN_ReadAFCFrequencyOffset(void);
 	int16_t TD_LAN_GetPowerLevel(void);
 	bool TD_LAN_isActive(void);
 	uint32_t TD_LAN_PowerVoltageExtended(void);
-	void TD_LAN_SetRFConfig(uint8_t *config, uint32_t baudrate);
+	void TD_LAN_SetRFConfig(const uint8_t * config, uint32_t baudrate);
 	void TD_LAN_SaveCurrentConfiguration(TD_LAN_Configuration_t *config);
 	void TD_LAN_ApplyConfiguration(TD_LAN_Configuration_t *config);
 	void TD_LAN_SetUserCallback(TD_LAN_callback_t callback);
@@ -247,6 +299,7 @@ extern "C" {
 	bool TD_LAN_ReceiveFrameContinuousSync(TD_LAN_frame_t *rx_frame);
 	int TD_LAN_ReadLatchedRSSI(void);
 	TD_LAN_error_t TD_LAN_LastError(void);
+	void TD_LAN_GetMinMaxPower(int16_t *min_power, int16_t *max_power);
 
 	/** @} */
 
@@ -264,7 +317,8 @@ extern "C" {
 	bool TD_LAN_SendFrameAsync(TD_LAN_frame_t *tx_frame, TD_LAN_frame_t *rx_frame);
 	uint32_t TD_LAN_GetCallBackStartTime(void);
 	void TD_LAN_Block(bool block);
-
+	const uint8_t *TD_LAN_GetConfig9600(void);
+	void TD_LAN_SetThreshold(int value);
 	/** @} */
 
 	/** @} (end addtogroup TD_LAN) */

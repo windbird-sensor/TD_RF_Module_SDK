@@ -2,10 +2,10 @@
  * @file
  * @brief API for sending Data frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.3.0
+ * @version 1.4.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -256,20 +256,6 @@ bool TD_SENSOR_EncodeLocalVoltage(uint32_t voltage, uint8_t *data,
 bool TD_SENSOR_EncodeLocalTemperature(int32_t temperature, uint8_t *data,
 	uint8_t *length)
 {
-	// Round to half degrees
-	int modulo = temperature % 5;
-
-	switch (modulo) {
-	case 1:
-	case 2:
-		temperature -= modulo;
-		break;
-
-	case 3:
-	case 4:
-		temperature += modulo;
-		break;
-	}
 	if (temperature >= -300 && temperature <= 975) {
 		*data = (temperature + 300) / 5;
 		if (length != NULL) {

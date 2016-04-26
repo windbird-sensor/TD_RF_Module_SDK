@@ -2,10 +2,10 @@
  * @file
  * @brief GPS management for TD12xx RF modules.
  * @author Telecom Design S.A.
- * @version 1.1.0
+ * @version 1.2.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -268,7 +268,8 @@ static bool FixUpdate(void)
 					CurrentFix.sats.used_autonomous++;
 				}
 			}
-			if(CurrentFix.sats.sv_info.channels[i].level > 30) {
+			TD_UBX7_NAV_SVInfo_Channel_t *p = &CurrentFix.sats.sv_info.channels[i];
+			if ((p->quality > 4) || ((p->quality == 4) && (p->flags&8))) {
 				CurrentFix.sats.usabled++;
 			}
 		}
@@ -421,6 +422,7 @@ static void SetPowerMode(TD_GEOLOC_PowerMode_t mode)
 		case TD_GEOLOC_NAVIGATION_HOT_START:
 		case TD_GEOLOC_NAVIGATION_IDLE:
 			if (!TD_UBX7_PowerUp(mode == TD_GEOLOC_POWER_SAVE_MODE, false)) {
+				DEBUG_PRINTF("TD_UBX7_PowerUp 1 failed\r\n");
 				TD_Trap(TRAP_GPS_HARD_ERR, 0);
 			}
 			if (mode == TD_GEOLOC_NAVIGATION_COLD_START) {
@@ -440,7 +442,6 @@ static void SetPowerMode(TD_GEOLOC_PowerMode_t mode)
 				//TODO:
 				//send aiding
 				//send ephemeris
-
 			}
 			break;
 		}

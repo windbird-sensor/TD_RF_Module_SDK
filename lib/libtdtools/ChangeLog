@@ -1,2 +1,12 @@
-= Version 1.0.0 =
+# Version 1.0.0 #
+
   * Initial revision
+
+# Version 2.0.0 #
+
+  * Not released publicly
+
+# Version 3.0.0 #
+
+  * Added `TD_TOOLS_SWITCH_ConfigureMultipleClick()`
+  * Added `TD_TOOLS_SWITCH_CountIrq()`

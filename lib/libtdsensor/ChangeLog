@@ -134,3 +134,10 @@
 
   * Do not set encoded voltage length if no length pointer provided to `TD_SENSOR_EncodeLocalVoltage()` or `TD_SENSOR_EncodeLocalTemperature()`
 
+# Version 4.0.0 #
+
+  * Not released publicly
+
+# Version 5.0.0 #
+
+  * Only cosmetic changes

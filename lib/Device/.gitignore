@@ -2,3 +2,9 @@
 /GCC Debug
 /GCC Release
 /IAR Debug
+/GCC Release EZR
+/GCC Debug EZR
+/GCC Release
+/GCC Release 128K EZR
+/GCC Debug 128K EZR
+/GCC Release

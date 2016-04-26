@@ -2,10 +2,10 @@
  * @file
  * @brief Utility functions for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.3
+ * @version 2.0.4
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -73,10 +73,46 @@
  * @param[out] bf
  *   Pointer to output character buffer.
  ******************************************************************************/
-void uli2a(unsigned long int num, unsigned int base, int uc, char *bf)
+void ulli2a(uint64_t num, unsigned int base, int uc, char *bf)
 {
 	int n = 0;
-	unsigned int d = 1;
+	uint64_t d = 1;
+
+	while (num / d >= base) {
+		d *= base;
+	}
+	while (d != 0) {
+		int dgt = num / d;
+		num %= d;
+		d /= base;
+		if (n || dgt > 0 || d == 0) {
+			*bf++ = dgt + (dgt < 10 ? '0' : (uc ? 'A' : 'a') - 10);
+			++n;
+		}
+	}
+	*bf = 0;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Convert an unsigned long (32 bits) to ASCII.
+ *
+ * @param[in] num
+ *   Number to convert.
+ *
+ * @param[in] base
+ *   Arithmetic base to convert to.
+ *
+ * @param[in] uc
+ *   Convert digits to uppercase if base > 10 and uc is different from 0.
+ *
+ * @param[out] bf
+ *   Pointer to output character buffer.
+ ******************************************************************************/
+void uli2a(unsigned long num, unsigned int base, int uc, char *bf)
+{
+	int n = 0;
+	unsigned long d = 1;
 
 	while (num / d >= base) {
 		d *= base;
@@ -96,6 +132,25 @@ void uli2a(unsigned long int num, unsigned int base, int uc, char *bf)
 /***************************************************************************//**
  * @brief
  *   Convert a long long (64 bits) to ASCII.
+ *
+ * @param[in] num
+ *   Number to convert.
+ *
+ * @param[out] bf
+ *   Pointer to output character buffer.
+ ******************************************************************************/
+void lli2a(int64_t num, char *bf)
+{
+	if (num < 0) {
+		num = -num;
+		*bf++ = '-';
+	}
+	ulli2a(num, 10, 0, bf);
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Convert a  long (32 bits) to ASCII.
  *
  * @param[in] num
  *   Number to convert.
@@ -256,7 +311,6 @@ long long atolli(char *instr, char ignore)
 	}
 	for (; *instr && ((*instr >= '0' && *instr <= '9') || (*instr == ignore));
 		instr++) {
-
 		if (*instr != ignore) {
 			retval = (10 * retval) + (*instr - '0');
 		}
@@ -404,7 +458,6 @@ int memcmp(const void *s1, const void *s2, size_t n)
 
 #endif
 
-
 /***************************************************************************//**
  * @brief
  *   Copy a string into an other
@@ -513,14 +566,32 @@ void TD_IRQ_Dump(void)
 			i, TD_GPIO_CallbackInterrupts[i]);
 	}
 	irq = NVIC->ISER[0];
-#ifdef EFM32G210F128
-	tfp_printf("IRQ enabled:0x%08X ",irq);
-	const char *irq_list[]={"DMA", "GPIO_EVEN", "TIMER0", "USART0_RX",
-			"USART0_TX", "ACMP0", "ADC0", "DAC0", "I2C0", "GPIO_ODD", "TIMER1",
-			"!", "USART1_RX", "USART1_TX", "!", "!", "!", "!", "LEUART0", "!",
-			"LETIMER0","PCNT0", "!", "!", "RTC", "CMU", "VCMP", "!", "MSC",
-			"AES", "!", "!"};
-	for (i = 0; i < sizeof (irq_list) / sizeof (char*); i++) {
+	tfp_printf("IRQ enabled:0x%08X ", irq);
+#if defined(EFM32G210F128)
+	const char *irq_list[] = {
+		"DMA", "GPIO_EVEN", "TIMER0", "USART0_RX",
+		"USART0_TX", "ACMP0", "ADC0", "DAC0", "I2C0", "GPIO_ODD", "TIMER1",
+		"!", "USART1_RX", "USART1_TX", "!", "!", "!", "!", "LEUART0", "!",
+		"LETIMER0", "PCNT0", "!", "!", "RTC", "CMU", "VCMP", "!", "MSC",
+		"AES", "!", "!"
+	};
+#endif
+#if defined(EZR32LG230F256)
+	const char *irq_list[] = {
+		"DMA", "GPIO_EVEN", "TIMER0", "USART0_RX",
+		"USART0_TX", "USB", "ACMP0/1", "ADC0", "DAC0", "I2C0", "I2C1",
+		"GPIO_ODD", "TIMER1",
+		"TIMER2", "TIMER3", "USART1_RX", "USART1_TX", "LESENSE", "USART2_RX",
+		"USART2_TX", "UART0_RX", "UART0_TX",
+		"UART1_RX", "UART1_TX",
+		"LEUART0", "LEUART1",
+		"LETIMER0", "PCNT0", "PCNT1", "PCNT2", "RTC", "BURTC" "CMU", "VCMP",
+		"LCD", "MSC",
+		"AES", "EBI", "EMU"
+	};
+#endif
+#if defined(EFM32G210F128) || defined(EZR32LG230F256)
+	for (i = 0; i < sizeof (irq_list) / sizeof (char *); i++) {
 		if (irq & 1) {
 			tfp_printf("%s ", irq_list[i]);
 		}

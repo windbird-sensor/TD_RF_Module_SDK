@@ -2,10 +2,10 @@
  * @file
  * @brief Switch API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.0
+ * @version 1.1.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2014-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -86,9 +86,6 @@
  /** Stable delay before giving up in ms */
 #define GIVEUP_MSEC 40
 
-/** How much push-time spaced up and down to trigger multiple push even in ms */
-#define MULTIPLE_CLICK_MAX_INTERVAL (350 << 15) / 1000 // 350ms
-
 /** @} */
 
 /*******************************************************************************
@@ -101,6 +98,8 @@
 /** Switch structure */
 typedef struct {
 	uint32_t last_push;								///< Tick count of last push
+	uint32_t push_event_time;						///< RTC time at push
+	uint32_t push_event_duration;					///< push duration in ticks
 	TD_TOOLS_SWITCH_Events_t switch_event;			///< Current switch event
 	TD_TOOLS_SWITCH_Events_t switch_pending_event;	///< Last switch event
 	GPIO_Port_TypeDef port;							///< Switch GPIO port
@@ -108,9 +107,12 @@ typedef struct {
 	uint8_t giveup_count;							///< Count after which we give up
 	uint8_t check_count;							///< Number of check to perform
 	uint8_t push_count;								///< Number of button presses
+	uint8_t	count;									///< Memorized number of button presses
 	uint8_t bit;									///< Switch GPIO bit
 	uint8_t last_push_count;						///< Last number of button presses
 	uint8_t long_push_timer;						///< Timer ID for long push detection
+	uint8_t	multiple_timer;							///< Timer ID for multiple click detection
+	uint8_t multiple_interval;						///< Multiple click interval, 0 is disable
 	int8_t long_push_time;							///< Duration of long push in ms
 	int8_t very_long_push_time;						///< Duration of very long push in ms
 	int8_t extra_long_push_time;					///< Duration of extra long push in ms
@@ -119,6 +121,7 @@ typedef struct {
 	bool enable;									///< Switch enable flag
 	bool polarity;									///< Switch on state
 	bool pushbutton;								///< Simple pushbutton flag
+	bool timeout;									///< Timeout flag for multiple clicks
 } Switch_t;
 
 /** @} */
@@ -136,6 +139,9 @@ static uint8_t SwitchCount = 0;
 /** Switch table */
 static Switch_t Switch[MAX_SWITCH];
 
+/** Switch IRQ coutner */
+static int switchIRQcnt = 0;
+
 /** @} */
 
 /*******************************************************************************
@@ -144,7 +150,13 @@ static Switch_t Switch[MAX_SWITCH];
 
 /** @addtogroup SWITCH_LOCAL_FUNCTIONS Local Functions
  * @{ */
+static void TD_TOOLS_SWITCH_MultpleTO(uint32_t arg, uint8_t repeats)
+{
+	Switch_t *p = &Switch[arg];
 
+	p->timeout = true;
+	TD_WakeMainLoop();
+}
 /***************************************************************************//**
  * @brief
  *  Debounce function called every CHECK_MSEC after interrupt until debounce
@@ -212,7 +224,7 @@ static void Debounce(uint32_t arg, uint8_t repeats)
 
 			// Fast multiple push
 			if (TD_RTC_TimeDiff(p->last_push) <
-				MULTIPLE_CLICK_MAX_INTERVAL) {
+				TMS(p->multiple_interval*2)) {
 
 				// Count
 				p->push_count++;
@@ -236,6 +248,8 @@ static void Debounce(uint32_t arg, uint8_t repeats)
 static void ButtonIrq(uint32_t mask)
 {
 	int i;
+
+	switchIRQcnt++;
 
 	// Find right switch in list (could have several)
 	for (i = 0; i < SwitchCount; i++) {
@@ -289,7 +303,7 @@ static void PollingCallback(uint32_t arg, uint8_t repeats)
 	}
 
 	// Fast multiple push
-	if (TD_RTC_TimeDiff(p->last_push) < MULTIPLE_CLICK_MAX_INTERVAL) {
+	if (TD_RTC_TimeDiff(p->last_push) < TMS(p->multiple_interval * 2)) {
 
 		// Count
 		p->push_count++;
@@ -353,6 +367,32 @@ static void LongPushEvent(uint32_t arg, uint8_t repeats)
 
 /***************************************************************************//**
  * @brief
+ *  Startup long push timer callback function.
+ *
+ * @param[in] arg
+ *   The callback argument containing the switch id.
+ *
+ * @param[in] repeats
+ *   The number of repeats left, unused.
+ *
+ * @note
+ *   Called from IRQ.
+ ******************************************************************************/
+static void StartupLongPushEvent(uint32_t arg, uint8_t repeats)
+{
+	Switch_t *p = &Switch[arg];
+
+	if (p->switch_pending_event == TD_TOOLS_SWITCH_STARTUP_PUSHED) {
+		p->switch_pending_event = TD_TOOLS_SWITCH_STARTUP_LONG_PUSHED;
+		p->switch_event = TD_TOOLS_SWITCH_STARTUP_LONG_PUSHED;
+		p->long_push_timer = 0xFF;
+	} else {
+		p->long_push_timer = 0xFF;
+	}
+}
+
+/***************************************************************************//**
+ * @brief
  *  Internal processing function.
  *
  * @param[in] id
@@ -360,16 +400,32 @@ static void LongPushEvent(uint32_t arg, uint8_t repeats)
  ******************************************************************************/
 static void Process(uint8_t id)
 {
-	uint8_t count;
 	Switch_t *p = &Switch[id];
 
-	if (p->debounced) {
+	if (p->switch_pending_event == TD_TOOLS_SWITCH_STARTUP_PUSHED) {
+		if (p->long_push_timer == 0xFF) {
+					p->long_push_timer = TD_SCHEDULER_Append(
+							p->long_push_time,
+							0,
+							0,
+							1,
+							StartupLongPushEvent,
+							id);
+				}
+			}
+	if (p->debounced || p->timeout) {
 		p->debounced = false;
 
 		// On push start timer
 		if (p->debounced_switch_state != p->polarity) {
 			if (p->pushbutton) {
-				p->switch_event = TD_TOOLS_SWITCH_SHORT_PUSHED;
+				if (p->push_count == 8) {
+					p->switch_event = TD_TOOLS_SWITCH_FIVE_CLICK_PUSH;
+				}
+				else if (p->push_count == 0){
+					p->switch_event = TD_TOOLS_SWITCH_SHORT_PUSHED;
+				}
+				p->push_event_time = RTC->CNT;
 				if (p->long_push_time != -1) {
 					if (p->long_push_timer == 0xFF) {
 						p->long_push_timer = TD_SCHEDULER_Append(
@@ -382,45 +438,73 @@ static void Process(uint8_t id)
 					}
 				}
 			} else {
-				p->switch_event = TD_TOOLS_SWITCH_ON;
+					p->switch_event = TD_TOOLS_SWITCH_ON;
 			}
 		} else {
 
 			// On release
-			if (p->pushbutton) {
+			if (p->pushbutton || p->timeout) {
+				p->push_event_duration = TD_RTC_TimeDiff(Switch[id].push_event_time);
 
 				// If still no pending event
 				if (p->switch_pending_event == TD_TOOLS_SWITCH_NO_EVENT) {
-					count = p->push_count;
-
+//					p->count = p->push_count;
 					// Wait in case another push happens
 					// Could be improved by actually computing real time for
 					// going to push validated to here
-					TD_RTC_Delay(MULTIPLE_CLICK_MAX_INTERVAL);
+					if(p->multiple_interval) {
+//						TD_RTC_Delay(TMS(p->multiple_interval*2));
+						if(p->multiple_timer == 0xFF) {
+//							tfp_printf("Set timer %d\r\n", p->multiple_interval);
+//							p->count = p->push_count;
+							p->timeout = false;
+							p->multiple_timer = TD_SCHEDULER_Append(0,
+								TMS(p->multiple_interval * 2),
+								0,
+								0xFF,
+								TD_TOOLS_SWITCH_MultpleTO,
+								id);
+						}
+					}
 
 					// No change ? done
-					if (count == p->push_count) {
-
-						// No push count++ ? short
-						if (count <= 1) {
-							p->switch_event = TD_TOOLS_SWITCH_SHORT_RELEASED;
-						} else {
-
-							// Two or more
-							if (count == 3) {
-								p->switch_event = TD_TOOLS_SWITCH_DOUBLE_CLICK;
-							} else if (count == 5) {
-								p->switch_event = TD_TOOLS_SWITCH_TRIPLE_CLICK;
-							} else {
-								p->switch_event =
-									TD_TOOLS_SWITCH_MULTIPLE_CLICK_DONE;
+					if (p->timeout) {
+						if (p->count == p->push_count) {
+//							tfp_printf("r %d\r\n", p->count);
+							if (p->multiple_interval) {
+								if (p->multiple_timer != 0xFF) {
+									TD_SCHEDULER_Remove(p->multiple_timer);
+									p->multiple_timer = 0xFF;
+								}
 							}
-							p->last_push_count = (count + 1) / 2;
-							p->push_count = 0;
+
+							// No push count++ ? short
+							if (p->count <= 1) {
+								p->switch_event = TD_TOOLS_SWITCH_SHORT_RELEASED;
+							} else {
+
+								// Two or more
+								if (p->count == 3) {
+									p->switch_event = TD_TOOLS_SWITCH_DOUBLE_CLICK;
+								} else if (p->count == 5) {
+									p->switch_event = TD_TOOLS_SWITCH_TRIPLE_CLICK;
+								} else if (p->count == 9) {
+									p->switch_event = TD_TOOLS_SWITCH_FIVE_CLICK;
+								} else {
+									p->switch_event =
+											TD_TOOLS_SWITCH_MULTIPLE_CLICK_DONE;
+								}
+								p->last_push_count = (p->count + 1) / 2;
+								p->push_count = 0;
+							}
+						} else {
+//							tfp_printf("p %d %d\r\n", p->count, p->push_count);
+							p->last_push_count = (p->count + 1) / 2;
+							p->count = p->push_count;
+							p->switch_event = TD_TOOLS_SWITCH_MULTIPLE_CLICK_PENDING;
 						}
-					} else {
-						p->last_push_count = (count + 1) / 2;
-						p->switch_event = TD_TOOLS_SWITCH_MULTIPLE_CLICK_PENDING;
+//						tfp_printf("f %d %d\r\n", p->count, p->push_count);
+						p->timeout = false;
 					}
 				} else {
 					if (p->switch_pending_event == TD_TOOLS_SWITCH_LONG_PUSHED) {
@@ -431,6 +515,12 @@ static void Process(uint8_t id)
 					} else if(p->switch_pending_event ==
 						TD_TOOLS_SWITCH_EXTRA_LONG_PUSHED) {
 						p->switch_event = TD_TOOLS_SWITCH_EXTRA_LONG_RELEASED;
+					}else if(p->switch_pending_event ==
+							TD_TOOLS_SWITCH_STARTUP_LONG_PUSHED) {
+							p->switch_event = TD_TOOLS_SWITCH_STARTUP_LONG_RELEASED;
+					}else if(p->switch_pending_event ==
+							TD_TOOLS_SWITCH_STARTUP_PUSHED) {
+						p->switch_event = TD_TOOLS_SWITCH_STARTUP_PUSHED;
 					} else {
 						p->switch_event = p->switch_pending_event;
 					}
@@ -481,10 +571,10 @@ static void StopSwitch(uint8_t id)
 static void StartSwitch(uint8_t id)
 {
 	Switch_t *p = &Switch[id];
-
 	p->enable = true;
+
 	if ((bool) GPIO_PinInGet(p->port, p->bit) != p->polarity) {
-		p->switch_pending_event = TD_TOOLS_SWITCH_STARTUP_PUSH;
+		p->switch_pending_event = TD_TOOLS_SWITCH_STARTUP_PUSHED;
 		p->debounced_switch_state = true;
 		p->check_count = RELEASE_MSEC / CHECK_MSEC;
 	} else {
@@ -566,6 +656,7 @@ int TD_TOOLS_SWITCH_Init(GPIO_Port_TypeDef port, uint8_t bit,
 	// Timer
 	p->debounce_timer = 0xFF;
 	p->long_push_timer = 0xFF;
+	p->multiple_timer = 0xFF;
 
 	// Debounce
 	p->debounced = false;
@@ -575,12 +666,16 @@ int TD_TOOLS_SWITCH_Init(GPIO_Port_TypeDef port, uint8_t bit,
 	p->switch_pending_event = TD_TOOLS_SWITCH_NO_EVENT;
 
 	// Counter
+	p->count = 0;
 	p->push_count = 0;
 	p->last_push = 0;
 	p->last_push_count = 0;
 
 	// Enable
 	p->enable = true;
+
+	// Default is 350ms
+	p->multiple_interval = 175;
 	return SwitchCount++;
 }
 
@@ -633,6 +728,33 @@ bool TD_TOOLS_SWITCH_Start(uint8_t id)
 
 	// Enable interrupt
 	GPIO_IntConfig(p->port, p->bit, true, true, true);
+	return true;
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Allow to configure multiple click interval.
+ *
+ *  If >0 button push will generate a interval*2ms delay inside TD_TOOLS_Process.
+ *  If 0 multiple click is not used and no delay is used.
+ *
+ * @param[in] id
+ *   The switch id.
+ *
+ * @param[in] interval in *2ms
+ *   ex: 175 -> 350ms ; 0-> disabled
+ *
+ * @return
+ *   Returns false if id is invalid, true otherwise.
+ ******************************************************************************/
+bool TD_TOOLS_SWITCH_ConfigureMultipleClick(uint8_t id, uint8_t interval)
+{
+	Switch_t *p = &Switch[id];
+
+	if (id >= SwitchCount) {
+		return false;
+	}
+	p->multiple_interval = interval;
 	return true;
 }
 
@@ -771,6 +893,23 @@ uint8_t TD_TOOLS_SWITCH_GetMultipleClickCount(uint8_t id)
 
 /***************************************************************************//**
  * @brief
+ *  Get the exact push time in ticks
+ *
+ * @param[in] id
+ *   The switch id.
+ *
+ * @return
+ *   Returns the push time in tick
+ ******************************************************************************/
+uint32_t TD_TOOLS_SWITCH_GetPushTime(uint8_t id)
+{
+	uint32_t temp = Switch[id].push_event_duration;
+	Switch[id].push_event_duration = 0;
+	return temp;
+}
+
+/***************************************************************************//**
+ * @brief
  *  Simulate a switch event for debug purposes.
  *
  * @param[in] id
@@ -789,6 +928,35 @@ bool TD_TOOLS_SWITCH_Simulate(uint8_t id, TD_TOOLS_SWITCH_Events_t event)
 	}
 	Switch[id].switch_event = event;
 	return true;
+}
+
+/***************************************************************************//**
+ * @brief
+ *  return switch state
+ *
+ * @param[in] id
+ *   The switch id.
+ *
+ * @ return
+ *   Returns true if the switch is on.
+ ******************************************************************************/
+bool TD_TOOLS_SWITCH_IsOn(uint8_t id)
+{
+	Switch_t *p = &Switch[id];
+
+	return (GPIO_PinInGet(p->port, p->bit)^ p->polarity) ? true : false;
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Get the count of switch IRQ
+ ******************************************************************************/
+uint8_t TD_TOOLS_SWITCH_CountIrq (void)
+{
+	uint8_t ret = switchIRQcnt;
+
+	switchIRQcnt = 0;
+	return ret;
 }
 
 /** @} */

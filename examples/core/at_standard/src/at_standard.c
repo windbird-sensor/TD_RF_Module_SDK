@@ -2,10 +2,10 @@
  * @file
  * @brief Standard AT interpreter-based application for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 2.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -33,11 +33,15 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
 #include <efm32.h>
+
 #include <td_core.h>
 #include <td_uart.h>
 #include <td_printf.h>
+#include <td_stream.h>
 #include <at_parse.h>
+
 #include <at_radio.h>
 #include <at_sigfox.h>
 
@@ -87,11 +91,11 @@
  **/
 void TD_USER_Setup(void)
 {
-    // Initialize printf() to work with the LEUART
-    init_printf(TD_UART_Init(9600, true, false),
-    		TD_UART_Putc,
-    		TD_UART_Start,
-    		TD_UART_Stop);
+	TD_UART_Options_t options = {LEUART_DEVICE, LEUART_LOCATION, 9600, 8, 'N',
+		1, false};
+
+	// Open an I/O stream using LEUART0
+	TD_UART_Open(&options, TD_STREAM_RDWR);
 
     // Add the RF information AT extension
 	AT_AddExtension(&radio_extension);
@@ -109,6 +113,8 @@ void TD_USER_Setup(void)
 void TD_USER_Loop(void)
 {
 	int c;
+
+	TD_SIGFOX_DOWNLINK_Process();
 
 	// While there are characters
 	while ((c = TD_UART_GetChar()) >= 0) {

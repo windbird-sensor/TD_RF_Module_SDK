@@ -245,3 +245,123 @@
 ### Utils: ###
 
   * Corrected `TD_STACK_Usage()`
+
+# Version 5.0.0 #
+
+  * Not released publicly.
+
+# Version 6.0.0 #
+
+## Minor Updates ##
+
+  * None
+
+## Additions ##
+
+  * Added support for TD1508 (FCC)
+  * Added support for reference design (both ETSI and FCC)
+
+### AT Core: ###
+
+  * Added variable baudrate and full/half duplex modes
+
+## Changes ##
+
+### AT Parser: ###
+
+  * Added `AT_Echo()`
+  * Added `AT_FactoryExec()` to perform a factory reset with C API
+
+### CAPSENSE: ###
+
+  * Added `TD_CAPSENSE_GetValue()`
+  * share TIMER and PRS resources by re-initializing them for each measure
+
+### Config: ###
+
+  * Split link time configuration into multiple files
+
+### FLASH: ###
+
+  * Added a link-time Flash layout mechanism
+  * Added `TD_FLASH_DumpLayout()`
+  * Added `TD_FLASH_CheckSize()`
+
+### GPIO: ###
+
+### MEASURE: ###
+
+  * Added `TD_MEASURE_VoltageConvert()`
+
+### PRINTF: ###
+
+  * Added stream support
+  * Added long long support
+  * Added `init_printf_stream()`
+  * Added `tfp_printf_stream()`
+
+### RTC: ###
+
+  * Renamed `TD_RTC_SetPowerMode()` into `TD_RTC_SetPowerModeInternal()`
+
+### Scheduler: ###
+
+  * Added `TD_TimeDiff()`
+
+### SPI: ###
+
+  * Added a context for locking the SPI bus
+  * Added `TD_SPI_FullWriteBuffer()` for multiple writes
+
+### TRAP: ###
+
+  * Added `TD_TRAP_EFM_ASSERT_Get()` to handle assertion failures using a trap
+
+### UART: ###
+
+  * Major changes in order to support streams
+
+### stdlib: ###
+
+  * Added support for long long integers using `ulli2a()` and `lli2a()`
+
+## Bug Fixes ##
+
+### MEASURE: ###
+
+  * Corrected drift in voltage measurement
+
+# Version 6.1.0 #
+
+## Additions ##
+  * Added TD1205P, RefDesign ETSI and RefDesign FCC configurations
+  * Added the Capsense configuration module
+
+## Changes ##
+
+### SPI: ###
+
+  * Change protype of `TD_SPI_FullGenericReadWrite` function
+
+### TRAP: ###
+
+  * Added `EZR32LG230F128` chip managment
+
+### UART: ###
+  * Added `TD_UART_WaitForPendingTx` function
+  * Added synchronisation for all pending uart when changing baud rate
+  
+# Version 6.2.0 #
+
+## Additions ##
+  * Added Td_HallEffect module
+
+## Changes ##
+    
+### PARSER: ###
+
+  * Up AT_PERSIST_SIZE to 220 bytes
+
+### TRAP: ###
+
+  * Added sigfox channel managment error

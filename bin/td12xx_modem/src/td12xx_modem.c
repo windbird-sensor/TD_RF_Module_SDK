@@ -1,11 +1,11 @@
 /******************************************************************************
  * @file
- * @brief User Application implementation for TD12xx RF module.
+ * @brief User Application implementation for TD12xx/TD15xx RF module.
  * @author Telecom Design S.A.
- * @version 2.0.1
+ * @version 2.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -40,6 +40,7 @@
 #include <td_flash.h>
 #include <td_uart.h>
 #include <td_printf.h>
+#include <td_stream.h>
 #include <at_parse.h>
 
 #if AT_CORE
@@ -100,23 +101,23 @@
 #include <td_config.h>
 
 /*******************************************************************************
- **************************   GLOBAL FUNCTIONS   *******************************
+ **************************   PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
-/**
- * @brief  User setup function
- **/
+/***************************************************************************//**
+ * @brief
+ *   User setup function.
+ ******************************************************************************/
 void TD_USER_Setup(void)
 {
-	// Initialize the LEUART
-	init_printf(TD_UART_Init(9600, true, false),
-		TD_UART_Putc,
-		TD_UART_Start,
-		TD_UART_Stop);
+	TD_UART_Options_t options = {LEUART_DEVICE, LEUART_LOCATION, 9600, 8, 'N',
+		1, false};
+
+	// Open an I/O stream using LEUART0
+	TD_UART_Open(&options, TD_STREAM_RDWR);
 
 	// Define variables version to avoid wrong flash init
 	TD_FLASH_SetVariablesVersion(FLASH_VARIABLES_VERSION);
-
 #if AT_CORE
 	AT_AddExtension(&core_extension);
 #endif
@@ -138,7 +139,6 @@ void TD_USER_Setup(void)
 	AT_AddExtension(&sensor_lan_extension);
 	AT_AddExtension(&sensor_send_extension);
 #endif
-
 #if AT_GEOLOC
 	AT_AddExtension(&geoloc_extension);
 	AT_AddExtension(&accelero_extension);
@@ -146,7 +146,6 @@ void TD_USER_Setup(void)
 #endif
 	// Initialize the AT command parser
 	AT_Init();
-
 #if AT_SENSOR
 
     //Initialize Sensor
@@ -157,17 +156,18 @@ void TD_USER_Setup(void)
 
 #if AT_GEOLOC
 
-    //Initialize GPS
+    // Initialize GPS
     TD_GEOLOC_Init();
 
-    //Initialize Accelero
+    // Initialize Accelero
    TD_ACCELERO_Init();
 #endif
 }
 
-/**
- * @brief  User loop function
- **/
+/***************************************************************************//**
+ * @brief
+ *   User loop function.
+ ******************************************************************************/
 void TD_USER_Loop(void)
 {
 	int c;
@@ -177,7 +177,7 @@ void TD_USER_Loop(void)
 	TD_LAN_Process();
 #endif
 
-#if defined(SIGFOX_V1) && defined(SIGFOX_DOWNLINK)
+#ifdef AT_SIGFOX
 	TD_SIGFOX_DOWNLINK_Process();
 #endif
 

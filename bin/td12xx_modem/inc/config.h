@@ -1,11 +1,11 @@
 /******************************************************************************
  * @file
- * @brief Configuration file for the TD12xx RF module firmware
+ * @brief Configuration file for the TD12xx/TD15xx RF module firmware
  * @author Telecom Design S.A.
- * @version 2.0.0
+ * @version 3.0.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -58,6 +58,26 @@
 /** Product */
 #define PRODUCT					"TD1205"
 
+#elif MODULE_REVISION == REVISION_TD1508
+
+/** Product */
+#define PRODUCT					"TD1508"
+
+#elif MODULE_REVISION == REVISION_TD1205P
+
+/** Product */
+#define PRODUCT					"TD1205P"
+
+#elif MODULE_REVISION == REVISION_REF_DESIGN_FCC
+
+/** Product */
+#define PRODUCT					"Ref Design FCC"
+
+#elif MODULE_REVISION == REVISION_REF_DESIGN_ETSI
+
+/** Product */
+#define PRODUCT					"Ref Design ETSI"
+
 #endif
 
 /** Hardware revision */
@@ -66,22 +86,42 @@
 #if MODULE_REVISION == REVISION_TD1202
 
 /** TD1202 Software release and version */
-#define SOFTWARE_RELEASE		1350
+#define SOFTWARE_RELEASE		0000
 
 #elif MODULE_REVISION == REVISION_TD1208
 
 /** TD1208 Software release and version */
-#define SOFTWARE_RELEASE		1451
+#define SOFTWARE_RELEASE		1975
 
 #elif MODULE_REVISION == REVISION_TD1204
 
 /** TD1204 Software release and version */
-#define SOFTWARE_RELEASE		1450
+#define SOFTWARE_RELEASE		1971
 
 #elif MODULE_REVISION == REVISION_TD1205
 
 /** TD1205 Software release and version */
-#define SOFTWARE_RELEASE		0000
+#define SOFTWARE_RELEASE		1972
+
+#elif MODULE_REVISION == REVISION_TD1508
+
+/** TD1508 Software release and version */
+#define SOFTWARE_RELEASE		1976
+
+#elif MODULE_REVISION == REVISION_TD1205P
+
+/** TD1205P Software release and version */
+#define SOFTWARE_RELEASE		1973
+
+#elif MODULE_REVISION == REVISION_REF_DESIGN_FCC
+
+/** REF_DESIGN_FCC Software release and version */
+#define SOFTWARE_RELEASE		1978
+
+#elif MODULE_REVISION == REVISION_REF_DESIGN_ETSI
+
+/** REF_DESIGN_ETSI Software release and version */
+#define SOFTWARE_RELEASE		1977
 
 #endif
 
@@ -92,7 +132,7 @@
 #define SOFTWARE_VERSION		STRING2(CONCAT2(SOFT,SOFTWARE_RELEASE))
 
 /** Release data */
-#define RELEASE_DATE			"M12+2014"
+#define RELEASE_DATE			"M10+2015"
 
 /** Telecom Design 12-digit serial number */
 #define SERIAL_NUMBER			"123456789012"
@@ -138,7 +178,7 @@
 #endif
 
 
-#if MODULE_REVISION == REVISION_TD1204
+#if MODULE_REVISION == REVISION_TD1204 || MODULE_REVISION == REVISION_TD1205 || MODULE_REVISION == REVISION_TD1205P
 
 /** Geoloc AT parser extension */
 #define AT_GEOLOC				1

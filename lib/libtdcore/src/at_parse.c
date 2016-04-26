@@ -2,10 +2,10 @@
  * @file
  * @brief AT parser API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.3
+ * @version 2.1.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -92,6 +92,7 @@
 //#define DEBUG_INFO
 //#define DEBUG_WARNING
 #ifdef DEBUG_INFO
+/** Macro to print information when debugging */
 #define PRINTF_INFO(...) tfp_printf(__VA_ARGS__);
 #else
 
@@ -99,9 +100,9 @@
 #define PRINTF_INFO(...)
 #endif
 #ifdef DEBUG_WARNING
+/** Macro to print warnings when debugging */
 #define PRINTF_WARNING(...) tfp_printf(__VA_ARGS__);
 #else
-
 /** Macro to print warnings when debugging */
 #define PRINTF_WARNING(...)
 #endif
@@ -148,12 +149,13 @@ static AT_command_t const AT_commands[] = {
 	{"ATV", AT_SET_VERBOSITY},
 	{"ATX", AT_SET_EXTENDED_RESULTS},
 	{"ATZ", AT_RESET},
+	{"AT$Z", AT_RESET},
 	{"AT", AT},
 	{0, 0}
 };
 
 /** Basic AT help string */
-static char const AT_help[] = {
+static char const AT_help[] = \
 	"----------------\r\n"
 	"E    => Echo\r\n"
 	"I    => Information\r\n"
@@ -165,8 +167,7 @@ static char const AT_help[] = {
 	"&F   => Factory\r\n"
 	"&V   => Status\r\n"
 	"&W   => Save\r\n"
-	"S200 => Reboot banner display\r\n"
-};
+	"S200 => Reboot banner display\r\n";
 
 /** @} */
 
@@ -219,17 +220,17 @@ bool AT_banner = AT_FORCE_BANNER ? true : false;
 /** @} */
 
 /*******************************************************************************
- **************************   PRIVATE FUNCTIONS   ******************************
+ **************************   PUBLIC FUNCTIONS   *******************************
  ******************************************************************************/
 
-/** @addtogroup AT_LOCAL_FUNCTIONS Local Functions
+/** @addtogroup AT_USER_FUNCTIONS User Functions
  * @{ */
 
 /***************************************************************************//**
  * @brief
  *   Save Persistent Buffer
  ******************************************************************************/
-static void AT_SavePersistBuffer(void)
+void AT_SavePersistBuffer(void)
 {
 	int extension;
 	uint8_t persist_size = 1, extension_write, *persist_pointer;
@@ -237,7 +238,7 @@ static void AT_SavePersistBuffer(void)
 	PRINTF_INFO("AT_echo:%d AT_verbose:%d AT_quietResult:%d AT_extended:%d AT_banner:%d\r\n",
 		AT_echo, AT_verbose, AT_quietResult, AT_extended, AT_banner);
 	persist_pointer = AT_persist_buffer;
-	PRINTF_INFO("AT_persist_buffer:0x%08X\r\n",persist_pointer);
+	PRINTF_INFO("AT_persist_buffer:0x%08X\r\n", persist_pointer);
 	*persist_pointer = (AT_echo == true) ? 0x01 : 0x00;
 	*persist_pointer |= (AT_verbose == true) ? 0x02 : 0x00;
 	*persist_pointer |= (AT_quietResult == true) ? 0x04 : 0x00;
@@ -251,7 +252,7 @@ static void AT_SavePersistBuffer(void)
 		}
 		if (AT_extension[extension]->persist != 0) {
 			PRINTF_INFO("persist %d(0x%08X) read\r\n",
-				extension,AT_extension[extension]);
+				extension, AT_extension[extension]);
 			persist_size += AT_extension[extension]->persist(false, 0, 0);
 		}
 	}
@@ -266,7 +267,7 @@ static void AT_SavePersistBuffer(void)
 		}
 		if (AT_extension[extension]->persist != 0) {
 			PRINTF_INFO("persist %d(0x%08X) save\r\n",
-				extension,AT_extension[extension]);
+				extension, AT_extension[extension]);
 			extension_write = AT_extension[extension]->persist(true,
 				persist_pointer, persist_size);
 			persist_pointer += extension_write;
@@ -274,15 +275,6 @@ static void AT_SavePersistBuffer(void)
 		}
 	}
 }
-
-/** @} */
-
-/*******************************************************************************
- **************************   PUBLIC FUNCTIONS   *******************************
- ******************************************************************************/
-
-/** @addtogroup AT_USER_FUNCTIONS User Functions
- * @{ */
 
 /***************************************************************************//**
  * @brief
@@ -310,7 +302,9 @@ uint8_t AT_Tokenize(char c, int *extension)
 	char *s, *d;
 	const AT_command_t *command;
 
-	if (c == '/' && AT_last == &AT_buffer[1] && AT_buffer[0] == 'A') {
+	if ((c == '/' && AT_last == &AT_buffer[1] && AT_buffer[0] == 'A') ||
+		(c == '/' && AT_last == &AT_buffer[2] && AT_buffer[0] == 'A' &&
+			AT_buffer[1] == 'T')) {
 
 		// Replay last command
 		for (s = AT_previousCommand, d = AT_buffer; *s;) {
@@ -321,10 +315,12 @@ uint8_t AT_Tokenize(char c, int *extension)
 		AT_last = AT_buffer;
 		AT_state = AT_A;
 	} else {
-		if (c >= 'a' && c <= 'z') {
+		if (!CONFIG_AT_ARG_CASE_SENSITIVE) {
+			if (c >= 'a' && c <= 'z') {
 
-			// Convert lower-case to upper-case
-			c -= 'a' - 'A';
+				// Convert lower-case to upper-case
+				c -= 'a' - 'A';
+			}
 		}
 		if (AT_last >= &AT_buffer[AT_BUFFER_SIZE]) {
 
@@ -333,6 +329,9 @@ uint8_t AT_Tokenize(char c, int *extension)
 		} else {
 			switch (AT_state) {
 			case AT_A:
+				if (c >= 'a' && c <= 'z') {
+					c -= 'a' - 'A';
+				}
 				if (c != 'A') {
 					return AT_PARSE;
 				}
@@ -342,6 +341,9 @@ uint8_t AT_Tokenize(char c, int *extension)
 				return AT_PARSE;
 
 			case AT_AT:
+				if (c >= 'a' && c <= 'z') {
+					c -= 'a' - 'A';
+				}
 				if (c != 'T') {
 					AT_state = AT_A;
 					AT_last = &AT_buffer[0];
@@ -409,7 +411,7 @@ uint8_t AT_Tokenize(char c, int *extension)
 		}
 		for (; command->token; command++) {
 			for (s = command->ascii, d = AT_buffer; *s; s++, d++) {
-				if (*s != *d) {
+				if ((*s ^ *d) & (~0x20)) {
 					break;
 				}
 			}
@@ -465,7 +467,7 @@ error:
  * @param[in] ...
  *   Number and types of arguments according to the format string.
  ******************************************************************************/
-void AT_printf(char *fmt, ...)
+void AT_printf(const char *fmt, ...)
 {
 	va_list va;
 
@@ -544,6 +546,29 @@ bool AT_AddExtension(AT_extension_t *extension)
 
 /***************************************************************************//**
  * @brief
+ *   Perform a factory reset.
+ ******************************************************************************/
+void AT_FactoryExec(void)
+{
+	int extension;
+	AT_verbose = true;
+	AT_extended = true;
+	AT_echo = true;
+	AT_quietResult = false;
+	AT_banner = AT_FORCE_BANNER ? true : false;
+
+	for (extension = 0; extension < AT_EXTENSION_NUMBER; extension++) {
+		if (AT_extension[extension] == 0) {
+			break;
+		}
+		if (AT_extension[extension]->init != 0) {
+			AT_extension[extension]->init();
+		}
+	}
+}
+
+/***************************************************************************//**
+ * @brief
  *   Initialize the AT command parser.
  ******************************************************************************/
 void AT_Init(void)
@@ -580,16 +605,16 @@ void AT_Init(void)
 			AT_extension[i]->init();
 		}
 		if (AT_extension[i]->persist != 0) {
-			PRINTF_INFO("Ext %d(0x%08X) persist read\r\n", i ,AT_extension[i]);
+			PRINTF_INFO("Ext %d(0x%08X) persist read\r\n", i , AT_extension[i]);
 			persist_size += AT_extension[i]->persist(false, 0, 0);
 		}
 	}
 	if (persist_size > CONFIG_AT_PERSIST_SIZE) {
-		PRINTF_WARNING("persist oversize:%d>%d\r\n", persist_size,
+		PRINTF_WARNING("persist oversize: %d > %d\r\n", persist_size,
 			CONFIG_AT_PERSIST_SIZE);
-		TD_Trap(TRAP_AT_PERSIST_OVERSIZE,persist_size);
+		TD_Trap(TRAP_AT_PERSIST_OVERSIZE, persist_size);
 	}
-	PRINTF_INFO("Persist size : %d\r\n",persist_size);
+	PRINTF_INFO("Persist size: %d\r\n", persist_size);
 
 	// Read persistent data. If not available, create them. After that,
 	// AT_persist_buffer should be correctly filled in
@@ -601,14 +626,14 @@ void AT_Init(void)
 
 	// Read persistent data
 	persist_pointer = AT_persist_buffer;
-	PRINTF_INFO("persist header:0x%02X\r\n", *persist_pointer);
+	PRINTF_INFO("persist header: 0x%02X\r\n", *persist_pointer);
 	AT_echo = (*persist_pointer & 0x01) ? true : false;
 	AT_verbose = (*persist_pointer & 0x02) ? true : false;
 	AT_quietResult = (*persist_pointer & 0x04) ? true : false;
 	AT_extended = (*persist_pointer & 0x08) ? true : false;
-	AT_banner  = (*persist_pointer & 0x10) ? true : false;
+	AT_banner = (*persist_pointer & 0x10) ? true : false;
 	PRINTF_INFO("AT_echo:%d AT_verbose:%d AT_quietResult:%d AT_extended:%d AT_banner:%d\r\n",
-		AT_echo, AT_verbose, AT_quietResult, AT_extended,AT_banner);
+		AT_echo, AT_verbose, AT_quietResult, AT_extended, AT_banner);
 	persist_pointer++;
 
 	// Pass persistent data to each extension
@@ -630,6 +655,21 @@ void AT_Init(void)
 		AT_printf("^SYSSTART\r\n");
 	}
 	PRINTF_INFO("AT_Init OK\r\n");
+}
+
+/***************************************************************************//**
+ * @brief
+ *   AT echo
+ *
+ * @details
+ *   This function controls AT parser's remote echo.
+ *
+ * @param[in] state
+ *   Enable echo if true, disable if false.
+ ******************************************************************************/
+void AT_Echo(bool state)
+{
+	AT_echo = state;
 }
 
 /***************************************************************************//**
@@ -748,10 +788,10 @@ void AT_Parse(char c)
 			}
 		}
 		AT_printf("%s\r\n", CONFIG_MANUFACTURER);
-		tfp_printf("Hardware Version: %s\r\nSoftware Version: %s\r\n",
+		tfp_printf(LGC("Hardware Version: %s\r\nSoftware Version: %s\r\n"),
 			CONFIG_HARDWARE_VERSION, CONFIG_SOFTWARE_VERSION);
 		TD_FLASH_DeviceRead(&device);
-		tfp_printf("S/N: %08X\r\n", device.Serial);
+		tfp_printf(LGC("S/N: %08X\r\n"), device.Serial);
 		if (TD_FLASH_DeviceReadExtended(&device, &device_ext) == true) {
 			for (i = 0; i < 12; i++) {
 				td_serial[i] = device_ext.TDSerial[i];
@@ -761,7 +801,7 @@ void AT_Parse(char c)
 				tfp_printf("TDID: %12s\r\n", td_serial);
 			}
 		}
-		tfp_printf("ACTIVE PROFILE\r\nE%d V%d Q%d X%d S200:%d",
+		tfp_printf(LGC("ACTIVE PROFILE\r\nE%d V%d Q%d X%d S200:%d"),
 				   AT_echo,
 				   AT_verbose,
 				   AT_quietResult,
@@ -995,7 +1035,7 @@ void AT_Parse(char c)
 		if (AT_argc == 0) {
 			x = DEVINFO->UNIQUEH;
 			y = DEVINFO->UNIQUEL;
-			AT_printf("%08X%08X\r\n", x, y);
+			AT_printf(LGC("%08X%08X\r\n"), x, y);
 		} else {
 			result = AT_ERROR;
 		}

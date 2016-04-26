@@ -2,10 +2,10 @@
  * @file
  * @brief CMU (Clock Management Unit) peripheral API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.0.3
+ * @version 2.0.4
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -54,9 +54,9 @@
 /** Macro to dump a clock status */
 #define DUMP_CLOCK_EN(lst)\
 	first = true;\
-	for (i = 0; i < sizeof (lst) / sizeof (char*); i++){\
-		if (status & (1 << i)){\
-			if (!first){\
+	for (i = 0; i < sizeof (lst) / sizeof (char *); i++){\
+		if (status & (1 << i)) {\
+			if (!first) {\
 				tfp_printf(",");\
 			}\
 			tfp_printf(lst[i]);\
@@ -105,13 +105,21 @@ void TD_CMU_Dump(CMU_TypeDef *cmu)
 {
 	uint32_t status, clk_sel;
 	uint8_t i, first;
-	static char *lst_hf_core[]={"AES","DMA","LEbus","EBI"};
-	static char *lst_hf_per[]={"USART0","USART1","USART2","UART0","TIM0","TIM1",
+#ifdef EZR32LG230F256
+	static char *lst_hf_core[] = {"DMA","AES","USBC","USB","LEbus","EBI"};
+	static char *lst_hf_per[] = {"USART0","USART1","USART2","UART0","TIM0","TIM1",
+		"TIM2","TIM3","ACMP0","ACMP1","I2C0","I2C1","GPIO","VCMP","PRS","ADC0","DAC0"};
+	static char *lst_lfa[] = {"LESENSES","RTC","LETIMER","LCD"};
+	static char *lst_lfb[] = {"LEUART0","LEUART1"};
+	static char *clk_lst[] = {"Dis/ULFRC","LFRCO","LFXO","HFCOREDIV2"};
+#else
+	static char *lst_hf_core[] = {"AES","DMA","LEbus","EBI"};
+	static char *lst_hf_per[] = {"USART0","USART1","USART2","UART0","TIM0","TIM1",
 		"TIM2","ACMP0","ACMP1","PRS","DAC0","GPIO","VCMP","ADC0","I2C0"};
-	static char *lst_lfa[]={"RTC","LETIMER","LCD"};
-	static char *lst_lfb[]={"LEUART0","LEUART1"};
-	static char *clk_lst[]={"Dis/ULFRC","LFRCO","LFXO","HFCOREDIV2"};
-
+	static char *lst_lfa[] = {"RTC","LETIMER","LCD"};
+	static char *lst_lfb[] = {"LEUART0","LEUART1"};
+	static char *clk_lst[] = {"Dis/ULFRC","LFRCO","LFXO","HFCOREDIV2"};
+#endif
 	if (!cmu) {
 		cmu = CMU;
 	}
@@ -119,25 +127,25 @@ void TD_CMU_Dump(CMU_TypeDef *cmu)
 	status = cmu->STATUS;
 	tfp_printf("        |EN|RDY|HFCLK\r\n");
 	tfp_printf("HFRCO   |%c | %c |%c\r\n",
-		status&CMU_STATUS_HFRCOENS ? 'X':' ',
-		status&CMU_STATUS_HFRCORDY ? 'X':' ',
-		status&CMU_STATUS_HFRCOSEL ? 'X':' ');
+		status & CMU_STATUS_HFRCOENS ? 'X' : ' ',
+		status & CMU_STATUS_HFRCORDY ? 'X' : ' ',
+		status & CMU_STATUS_HFRCOSEL ? 'X' : ' ');
 	tfp_printf("HFXO    |%c | %c |%c\r\n",
-		status&CMU_STATUS_HFXOENS ? 'X':' ',
-		status&CMU_STATUS_HFXORDY ? 'X':' ',
-		status&CMU_STATUS_HFXOSEL ? 'X':' ');
+		status & CMU_STATUS_HFXOENS ? 'X' : ' ',
+		status & CMU_STATUS_HFXORDY ? 'X' : ' ',
+		status & CMU_STATUS_HFXOSEL ? 'X' : ' ');
 	tfp_printf("AUXHFRCO|%c | %c |%c\r\n",
-		status&CMU_STATUS_AUXHFRCOENS ? 'X':' ',
-		status&CMU_STATUS_AUXHFRCORDY ? 'X':' ',
+		status & CMU_STATUS_AUXHFRCOENS ? 'X' : ' ',
+		status & CMU_STATUS_AUXHFRCORDY ? 'X' : ' ',
 		' ');
 	tfp_printf("LFRCO   |%c | %c |%c\r\n",
-		status&CMU_STATUS_LFRCOENS ? 'X':' ',
-		status&CMU_STATUS_LFRCORDY ? 'X':' ',
-		status&CMU_STATUS_LFRCOSEL ? 'X':' ');
+		status & CMU_STATUS_LFRCOENS ? 'X' : ' ',
+		status & CMU_STATUS_LFRCORDY ? 'X' : ' ',
+		status & CMU_STATUS_LFRCOSEL ? 'X' : ' ');
 	tfp_printf("LFXO    |%c | %c |%c\r\n",
-		status&CMU_STATUS_LFXOENS ? 'X':' ',
-		status&CMU_STATUS_LFXORDY ? 'X':' ',
-		status&CMU_STATUS_LFXOSEL ? 'X':' ');
+		status & CMU_STATUS_LFXOENS ? 'X' : ' ',
+		status & CMU_STATUS_LFXORDY ? 'X' : ' ',
+		status & CMU_STATUS_LFXOSEL ? 'X' : ' ');
 	tfp_printf("CMU_HFCORECLKDIV:%d\r\n", CMU->HFCORECLKDIV);
 	tfp_printf("CMU_HFPERCLKDIV:0x%02X\r\n", CMU->HFPERCLKDIV);
 	status = cmu->HFCORECLKEN0;

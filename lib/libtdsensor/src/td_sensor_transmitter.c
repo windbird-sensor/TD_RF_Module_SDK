@@ -2,10 +2,10 @@
  * @file
  * @brief Sensor Transmitter
  * @author Telecom Design S.A.
- * @version 1.2.0
+ * @version 1.3.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2015 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -91,11 +91,11 @@
 
 /** Possible SIGFOX transmission durations (v1 only) */
 typedef enum {
-    SIGFOX_LEN_0 = 0,					///< 1.12 s
-    SIGFOX_LEN_1 = 1,					///< 1.20 s
-    SIGFOX_LEN_2_4 = 2,					///< 1.44 s
-    SIGFOX_LEN_5_8 = 3,					///< 1.76 s
-    SIGFOX_LEN_9_12 = 4,				///< 2.08 s
+	SIGFOX_LEN_0 = 0,					///< 1.12 s
+	SIGFOX_LEN_1 = 1,					///< 1.20 s
+	SIGFOX_LEN_2_4 = 2,					///< 1.44 s
+	SIGFOX_LEN_5_8 = 3,					///< 1.76 s
+	SIGFOX_LEN_9_12 = 4,				///< 2.08 s
 } TD_TRANSMITTER_SigfoxTransmitDuration_t;
 
 /** @} */
@@ -110,25 +110,25 @@ typedef enum {
 
 /** Retransmission parameters, these are saved by the scheduler */
 typedef struct {
-    uint8_t index; 							///< Index in the retransmission list
-    uint8_t entry_id;						///< Device entry ID
-    uint8_t frame_type;		                ///< Fame type
-    uint8_t payload_count;					///< Payload size in bytes
-    uint8_t stamp;							///< Time stamp
+	uint8_t index; 							///< Index in the retransmission list
+	uint8_t entry_id;						///< Device entry ID
+	uint8_t frame_type;		                ///< Fame type
+	uint8_t payload_count;					///< Payload size in bytes
+	uint8_t stamp;							///< Time stamp
 } TD_TRANSMITTER_Retransmission_t;
 
 /** Past transmission history to compute duty cycle */
 typedef struct {
-    uint16_t delta;							///< Delta time in seconds since last transmission
-    uint8_t duration;	                    ///< Transmission duration in seconds
-    uint8_t retries;					    ///< Number of retries
+	uint16_t delta;							///< Delta time in seconds since last transmission
+	uint8_t duration;	                    ///< Transmission duration in seconds
+	uint8_t retries;					    ///< Number of retries
 } TD_TRANSMITTER_PastTransmissions_t;
 
 /** Last transmission parameters and time stamp */
 typedef struct {
-    uint64_t time;							///< Absolute time in seconds since last transmission
-    uint8_t duration;						///< Transmission duration in seconds
-    uint8_t retries;						///< Number of retries
+	uint64_t time;							///< Absolute time in seconds since last transmission
+	uint8_t duration;						///< Transmission duration in seconds
+	uint8_t retries;						///< Number of retries
 } TD_TRANSMITTER_LastTransmissions_t;
 
 /** @} */
@@ -208,30 +208,30 @@ static bool SigfoxAck = false;
  *   Retries count, it is used to compute the total transmission duration.
  ******************************************************************************/
 static void TD_SENSOR_TRANSMITTER_DutyCycleAppend(uint8_t length,
-    uint8_t retries)
+	uint8_t retries)
 {
-    uint64_t temp;
+	uint64_t temp;
 
-    // Convert to seconds
-    uint64_t now = TD_SCHEDULER_GetTime() >> 15;
+	// Convert to seconds
+	uint64_t now = TD_SCHEDULER_GetTime() >> 15;
 
-    // Compute delta if not first transmission
-    if (LastTransmission.time != 0xFFFFFFFFFFFFFF) {
-        if (++PastIndex >= TRANSMIT_HISTORY_SIZE) {
-            PastIndex = 0;
-        }
-        temp = now - LastTransmission.time;
-        if (temp < 0xFFFF) {
-            PastTransmission[PastIndex].delta = temp & 0xFFFF;
-        } else {
-            PastTransmission[PastIndex].delta = 0xFFFF;
-        }
-        PastTransmission[PastIndex].duration = LastTransmission.duration;
-        PastTransmission[PastIndex].retries = LastTransmission.retries;
-    }
-    LastTransmission.time = now;
-    LastTransmission.duration = TD_SENSOR_TRANSMITTER_LenToRealDuration(length);
-    LastTransmission.retries = retries;
+	// Compute delta if not first transmission
+	if (LastTransmission.time != 0xFFFFFFFFFFFFFF) {
+		if (++PastIndex >= TRANSMIT_HISTORY_SIZE) {
+			PastIndex = 0;
+		}
+		temp = now - LastTransmission.time;
+		if (temp < 0xFFFF) {
+			PastTransmission[PastIndex].delta = temp & 0xFFFF;
+		} else {
+			PastTransmission[PastIndex].delta = 0xFFFF;
+		}
+		PastTransmission[PastIndex].duration = LastTransmission.duration;
+		PastTransmission[PastIndex].retries = LastTransmission.retries;
+	}
+	LastTransmission.time = now;
+	LastTransmission.duration = TD_SENSOR_TRANSMITTER_LenToRealDuration(length);
+	LastTransmission.retries = retries;
 }
 
 /***************************************************************************//**
@@ -243,64 +243,67 @@ static void TD_SENSOR_TRANSMITTER_DutyCycleAppend(uint8_t length,
  ******************************************************************************/
 static bool TD_SENSOR_TRANSMITTER_EmitFirstInQueue(void)
 {
-    bool ret;
+	bool ret;
 	uint8_t index;
 	uint8_t type;
 
-    if (TD_SENSOR_TRANSMITTER_IsTxAllowed == 0 ||
-    	TD_SENSOR_TRANSMITTER_IsTxAllowed(
-        TD_SENSOR_TRANSMITTER_TransmissionQueue[QueueCurrentIndex].count,
-        SigfoxRetries)) {
-        if (UserCallback != 0) {
+	if (TD_SENSOR_TRANSMITTER_IsTxAllowed == 0 ||
+		TD_SENSOR_TRANSMITTER_IsTxAllowed(
+		TD_SENSOR_TRANSMITTER_TransmissionQueue[QueueCurrentIndex].count,
+		SigfoxRetries)) {
+		if (UserCallback != 0) {
 			(*UserCallback)();
-        }
+		}
 		ret = TD_SIGFOX_SendV1(MODE_FRAME, false,
-			 TD_SENSOR_TRANSMITTER_TransmissionQueue[QueueCurrentIndex].data,
-			  TD_SENSOR_TRANSMITTER_TransmissionQueue[QueueCurrentIndex].count,
-			  SigfoxRetries, SigfoxAck, false);
+			TD_SENSOR_TRANSMITTER_TransmissionQueue[QueueCurrentIndex].data,
+			TD_SENSOR_TRANSMITTER_TransmissionQueue[QueueCurrentIndex].count,
+			SigfoxRetries, SigfoxAck, false);
 
-        // Send over SIGFOX
+		// Send over SIGFOX
 		if (ret == true) {
-            if (DutyCycleEnabled) {
+			if (DutyCycleEnabled) {
 
-                // Append transmission to history
-                TD_SENSOR_TRANSMITTER_DutyCycleAppend(
-                    TD_SENSOR_TRANSMITTER_TransmissionQueue[QueueCurrentIndex].count,
-                    SigfoxRetries);
-            }
+				// Append transmission to history
+				TD_SENSOR_TRANSMITTER_DutyCycleAppend(
+					TD_SENSOR_TRANSMITTER_TransmissionQueue[QueueCurrentIndex].count,
+					SigfoxRetries);
+			}
 		} else {
 
 			// Sigfox fails, remove retransmission
 
 			// Retrieve retransmit index
 			index = TD_SENSOR_TRANSMITTER_TransmissionQueue[QueueCurrentIndex].index_retransmit;
+			if (index != 0xFF) {
 
-			// Remove scheduler if any
-			if (TD_SENSOR_TRANSMITTER_RetransmissionList[index].timer != 0xFF) {
-				TD_SCHEDULER_Remove(
-					TD_SENSOR_TRANSMITTER_RetransmissionList[index].timer);
-				TD_SENSOR_TRANSMITTER_RetransmissionList[index].timer = 0xFF;
+				// Remove scheduler if any
+				if (TD_SENSOR_TRANSMITTER_RetransmissionList[index].timer != 0xFF) {
+					TD_SCHEDULER_Remove(
+						TD_SENSOR_TRANSMITTER_RetransmissionList[index].timer);
+
+					TD_SENSOR_TRANSMITTER_RetransmissionList[index].timer = 0xFF;
+				}
 			}
 
-			//Sigfox fails, decrease GatewayStamp and GatewayCpt
+			// Sigfox fails, decrease GatewayStamp and GatewayCpt
 			type = TD_SENSOR_TRANSMITTER_TransmissionQueue[QueueCurrentIndex].data[1] & 0x0f;
 			GatewayStamp[type]--;
 			GatewayCpt--;
 		}
 		if (UserCallback != 0) {
 			(*UserCallback)();
-        }
-    } else {
-        ret = false;
-    }
+		}
+	} else {
+		ret = false;
+	}
 
-    // Remove the frame from queue
-    QueueCurrentIndex++;
-    if (QueueCurrentIndex >= CONFIG_TD_SENSOR_TRANSMITTER_MAX_TRANSMIT) {
-        QueueCurrentIndex = 0;
-    }
-    QueueCount--;
-    return ret;
+	// Remove the frame from queue
+	QueueCurrentIndex++;
+	if (QueueCurrentIndex >= CONFIG_TD_SENSOR_TRANSMITTER_MAX_TRANSMIT) {
+		QueueCurrentIndex = 0;
+	}
+	QueueCount--;
+	return ret;
 }
 
 /***************************************************************************//**
@@ -317,23 +320,25 @@ static bool TD_SENSOR_TRANSMITTER_EmitFirstInQueue(void)
  ******************************************************************************/
 static void TD_SENSOR_TRANSMITTER_AppendInQueue(uint8_t *data, uint8_t length)
 {
-    int i;
+	int i;
 
-    // If the circular buffer is full, send first one
-    if (QueueCount >= CONFIG_TD_SENSOR_TRANSMITTER_MAX_TRANSMIT) {
-        TD_SENSOR_TRANSMITTER_EmitFirstInQueue();
-    }
+	// If the circular buffer is full, send first one
+	if (QueueCount >= CONFIG_TD_SENSOR_TRANSMITTER_MAX_TRANSMIT) {
+		TD_SENSOR_TRANSMITTER_EmitFirstInQueue();
+	}
 
-    // Append to circular buffer
-    i = QueueCurrentIndex + QueueCount;
-    if (i >= CONFIG_TD_SENSOR_TRANSMITTER_MAX_TRANSMIT) {
-        i -= CONFIG_TD_SENSOR_TRANSMITTER_MAX_TRANSMIT;
-    }
-    memcpy(&TD_SENSOR_TRANSMITTER_TransmissionQueue[i].data[0], data, length);
-    TD_SENSOR_TRANSMITTER_TransmissionQueue[i].count = length;
+	// Append to circular buffer
+	i = QueueCurrentIndex + QueueCount;
+	if (i >= CONFIG_TD_SENSOR_TRANSMITTER_MAX_TRANSMIT) {
+		i -= CONFIG_TD_SENSOR_TRANSMITTER_MAX_TRANSMIT;
+	}
+	memcpy(&TD_SENSOR_TRANSMITTER_TransmissionQueue[i].data[0], data, length);
+	TD_SENSOR_TRANSMITTER_TransmissionQueue[i].count = length;
 	TD_SENSOR_TRANSMITTER_TransmissionQueue[i].index_retransmit =
-		CurrentRetransmissionIndex;
-    QueueCount++;
+		CurrentRetransmissionIndex != 0xFF ? CurrentRetransmissionIndex : 0xFF;
+
+	CurrentRetransmissionIndex = 0xFF;
+	QueueCount++;
 }
 
 /***************************************************************************//**
@@ -348,9 +353,9 @@ static void TD_SENSOR_TRANSMITTER_AppendInQueue(uint8_t *data, uint8_t length)
  *	Timer parameter. Not used.
  ******************************************************************************/
 static void inline TD_SENSOR_TRANSMITTER_QueueManagerCallback(uint32_t arg,
-    uint8_t repetitions)
+	uint8_t repetitions)
 {
-    CanEmit = true;
+	CanEmit = true;
 }
 
 /***************************************************************************//**
@@ -363,31 +368,31 @@ static void inline TD_SENSOR_TRANSMITTER_QueueManagerCallback(uint32_t arg,
  ******************************************************************************/
 static bool TD_SENSOR_TRANSMITTER_QueueManager(void)
 {
-    bool ret = false;
+	bool ret = false;
 
-    // If we can transmit and transmission list is not empty
-    if (QueueCount > 0 && CanEmit) {
-        CanEmit = false;
-        ret = TD_SENSOR_TRANSMITTER_EmitFirstInQueue();
+	// If we can transmit and transmission list is not empty
+	if (QueueCount > 0 && CanEmit) {
+		CanEmit = false;
+		ret = TD_SENSOR_TRANSMITTER_EmitFirstInQueue();
 
-        // Add timer to tell us when we can transmit
-        if (TRANSMISSION_INTERVAL > 0) {
-            QueueTimer = TD_SCHEDULER_Append(TRANSMISSION_INTERVAL,
-                0,
-                0,
-                1,
-                TD_SENSOR_TRANSMITTER_QueueManagerCallback,
-                0);
+		// Add timer to tell us when we can transmit
+		if (TRANSMISSION_INTERVAL > 0) {
+			QueueTimer = TD_SCHEDULER_Append(TRANSMISSION_INTERVAL,
+				0,
+				0,
+				1,
+				TD_SENSOR_TRANSMITTER_QueueManagerCallback,
+				0);
 
-            // If timer count overflow, then don't care about waiting
-            if (QueueTimer == 0xFF) {
-                CanEmit = true;
-            }
-        } else {
-            CanEmit = true;
-        }
-    }
-    return ret;
+			// If timer count overflow, then don't care about waiting
+			if (QueueTimer == 0xFF) {
+				CanEmit = true;
+			}
+		} else {
+			CanEmit = true;
+		}
+	}
+	return ret;
 }
 
 /***************************************************************************//**
@@ -407,12 +412,12 @@ static bool TD_SENSOR_TRANSMITTER_QueueManager(void)
  *   Returns true if a SIGFOX frame was sent successfully, false otherwise.
  ******************************************************************************/
 static bool TD_SENSOR_TRANSMITTER_SendSigfoxPrivate(uint8_t *frame,
-    uint8_t length, bool retry)
+	uint8_t length, bool retry)
 {
 	frame[0] &= 0x70;
 	frame[0] |= (retry ? 0x80 : 0x00) | (GatewayCpt++ & 0x0f);
-    TD_SENSOR_TRANSMITTER_AppendInQueue((uint8_t *) frame, length);
-    return TD_SENSOR_TRANSMITTER_QueueManager();
+	TD_SENSOR_TRANSMITTER_AppendInQueue((uint8_t *) frame, length);
+	return TD_SENSOR_TRANSMITTER_QueueManager();
 }
 
 /***************************************************************************//**
@@ -427,17 +432,17 @@ static bool TD_SENSOR_TRANSMITTER_SendSigfoxPrivate(uint8_t *frame,
  *	Count of timer repetitions left.
  ******************************************************************************/
 static void TD_SENSOR_TRANSMITTER_RetransmissionHandler(uint32_t arg,
-    uint8_t repetitions)
+	uint8_t repetitions)
 {
-    int i;
+	int i;
 
-    i = arg >> 4;
-    TD_SENSOR_TRANSMITTER_SendSigfoxPrivate(
-        &TD_SENSOR_TRANSMITTER_RetransmissionList[i].payload[0],
-        arg & 0xf, 1);
-    if (repetitions == 0) {
-        TD_SENSOR_TRANSMITTER_RetransmissionList[i].timer = 0xFF;
-    }
+	i = arg >> 4;
+	TD_SENSOR_TRANSMITTER_SendSigfoxPrivate(
+		&TD_SENSOR_TRANSMITTER_RetransmissionList[i].payload[0],
+		arg & 0xf, 1);
+	if (repetitions == 0) {
+		TD_SENSOR_TRANSMITTER_RetransmissionList[i].timer = 0xFF;
+	}
 }
 
 /***************************************************************************//**
@@ -461,31 +466,31 @@ static void TD_SENSOR_TRANSMITTER_RetransmissionHandler(uint32_t arg,
  * 	the retransmission list is full.
  ******************************************************************************/
 static bool TD_SENSOR_TRANSMITTER_AddRetransmission(uint8_t *frame,
-    uint8_t length, uint32_t interval, uint8_t repetitions)
+	uint8_t length, uint32_t interval, uint8_t repetitions)
 {
-    int i;
+	int i;
 
-    // Look for first available slot
-    for (i = 0; i < CONFIG_TD_SENSOR_TRANSMITTER_MAX_RETRANSMIT; i++) {
-        if (TD_SENSOR_TRANSMITTER_RetransmissionList[i].timer != 0xFF) {
-            continue;
-        } else {
-            memcpy(&TD_SENSOR_TRANSMITTER_RetransmissionList[i].payload[0],
-                &frame[0], length);
+	// Look for first available slot
+	for (i = 0; i < CONFIG_TD_SENSOR_TRANSMITTER_MAX_RETRANSMIT; i++) {
+		if (TD_SENSOR_TRANSMITTER_RetransmissionList[i].timer != 0xFF) {
+			continue;
+		} else {
+			memcpy(&TD_SENSOR_TRANSMITTER_RetransmissionList[i].payload[0],
+				&frame[0], length);
 
-            // Setup timer on interval with given repetitions
-            TD_SENSOR_TRANSMITTER_RetransmissionList[i].timer =
-                TD_SCHEDULER_Append(interval,
-                    0,
-                    0,
-                    repetitions,
-                    TD_SENSOR_TRANSMITTER_RetransmissionHandler,
-                    (i << 4) | (length & 0xf));
-            CurrentRetransmissionIndex = i;
-            return true;
-        }
-    }
-    return false;
+			// Setup timer on interval with given repetitions
+			TD_SENSOR_TRANSMITTER_RetransmissionList[i].timer =
+				TD_SCHEDULER_Append(interval,
+					0,
+					0,
+					repetitions,
+					TD_SENSOR_TRANSMITTER_RetransmissionHandler,
+					(i << 4) | (length & 0xf));
+			CurrentRetransmissionIndex = i;
+			return true;
+		}
+	}
+	return false;
 }
 
 /** @} */
@@ -509,26 +514,26 @@ static bool TD_SENSOR_TRANSMITTER_AddRetransmission(uint8_t *frame,
  ******************************************************************************/
 uint8_t TD_SENSOR_TRANSMITTER_LenToRealDuration(uint8_t length)
 {
-    static uint8_t duration[] = {
-        112,	// 0
-        120,	// 1
-        144,	// 2
-        144,	// 3
-        144,	// 4
-        176,	// 5
-        176,	// 6
-        176,	// 7
-        176,	// 8
-        208,	// 9
-        208,	// 10
-        208,	// 11
-        208		// 12
-    };
+	static uint8_t duration[] = {
+		112,	// 0
+		120,	// 1
+		144,	// 2
+		144,	// 3
+		144,	// 4
+		176,	// 5
+		176,	// 6
+		176,	// 7
+		176,	// 8
+		208,	// 9
+		208,	// 10
+		208,	// 11
+		208		// 12
+	};
 
-    if (length < sizeof (duration)) {
-        return duration[length];
-    }
-    return 0;
+	if (length < sizeof (duration)) {
+		return duration[length];
+	}
+	return 0;
 }
 
 /***************************************************************************//**
@@ -557,7 +562,7 @@ uint8_t TD_SENSOR_TRANSMITTER_LenToRealDuration(uint8_t length)
  *   Returns true if a SIGFOX frame was sent successfully, false otherwise.
  ******************************************************************************/
 bool DYNAMIC(TD_SENSOR_TRANSMITTER_SendSigfox)(uint8_t *frame, uint8_t length,
-    uint8_t id, TD_SENSOR_TransmitProfile_t *profile)
+	uint8_t id, TD_SENSOR_TransmitProfile_t *profile)
 {
 	uint8_t type;
 
@@ -566,16 +571,16 @@ bool DYNAMIC(TD_SENSOR_TRANSMITTER_SendSigfox)(uint8_t *frame, uint8_t length,
 	EFM_ASSERT(type < SRV_FRM_MAX);
 	frame[0] = (GatewayStamp[type]++ & 0x07) << 4;
 
-    // Change entry_id in case of forwarded frames
-    frame[1] = (frame[1] & 0x0f) | (id << 4);
+	// Change entry_id in case of forwarded frames
+	frame[1] = (frame[1] & 0x0f) | (id << 4);
 
-    //TODO: handle transmission list full case
-    if (profile->repetition > 0) {
-        TD_SENSOR_TRANSMITTER_AddRetransmission(frame, length,
-            profile->interval,
-            profile->repetition);
-    }
-    return TD_SENSOR_TRANSMITTER_SendSigfoxPrivate(frame, length, 0);
+	//TODO: handle transmission list full case
+	if (profile->repetition > 0) {
+		TD_SENSOR_TRANSMITTER_AddRetransmission(frame, length,
+			profile->interval,
+			profile->repetition);
+	}
+	return TD_SENSOR_TRANSMITTER_SendSigfoxPrivate(frame, length, 0);
 }
 
 /***************************************************************************//**
@@ -584,7 +589,7 @@ bool DYNAMIC(TD_SENSOR_TRANSMITTER_SendSigfox)(uint8_t *frame, uint8_t length,
  ******************************************************************************/
 void DYNAMIC(TD_SENSOR_TRANSMITTER_Process)(void)
 {
-    TD_SENSOR_TRANSMITTER_QueueManager();
+	TD_SENSOR_TRANSMITTER_QueueManager();
 }
 
 /***************************************************************************//**
@@ -597,7 +602,7 @@ void DYNAMIC(TD_SENSOR_TRANSMITTER_Process)(void)
  ******************************************************************************/
 void TD_SENSOR_TRANSMITTER_SetRetry(uint8_t retries)
 {
-    SigfoxRetries = retries;
+	SigfoxRetries = retries;
 }
 
 /***************************************************************************//**
@@ -609,7 +614,7 @@ void TD_SENSOR_TRANSMITTER_SetRetry(uint8_t retries)
  ******************************************************************************/
 void TD_SENSOR_TRANSMITTER_SetAck(bool ack)
 {
-    SigfoxAck = ack;
+	SigfoxAck = ack;
 }
 
 /***************************************************************************//**
@@ -618,32 +623,37 @@ void TD_SENSOR_TRANSMITTER_SetAck(bool ack)
  ******************************************************************************/
 void DYNAMIC(TD_SENSOR_TRANSMITTER_Init)(void)
 {
-    int i;
+	int i;
 
-    // Set all retransmission timers to unused
-    for (i = 0; i < CONFIG_TD_SENSOR_TRANSMITTER_MAX_RETRANSMIT; i++) {
-        TD_SENSOR_TRANSMITTER_RetransmissionList[i].timer = 0xFF;
-    }
+	// Set all retransmission timers to unused
+	for (i = 0; i < CONFIG_TD_SENSOR_TRANSMITTER_MAX_RETRANSMIT; i++) {
+		TD_SENSOR_TRANSMITTER_RetransmissionList[i].timer = 0xFF;
+	}
 
-    // Initialize all past transmissions
-    for (i = 0; i < TRANSMIT_HISTORY_SIZE; i++) {
-        PastTransmission[i].duration = SIGFOX_LEN_0;
-        PastTransmission[i].retries = 0;
-        PastTransmission[i].delta = 0xFFFF;
-    }
+	// Set all retransmit index timers to unused
+	for (i = 0; i < CONFIG_TD_SENSOR_TRANSMITTER_MAX_TRANSMIT; i++) {
+		TD_SENSOR_TRANSMITTER_TransmissionQueue[i].index_retransmit = 0xFF;
+	}
 
-    // Initialize last transmission time
-    LastTransmission.time = 0xFFFFFFFFFFFFFF;
+	// Initialize all past transmissions
+	for (i = 0; i < TRANSMIT_HISTORY_SIZE; i++) {
+		PastTransmission[i].duration = SIGFOX_LEN_0;
+		PastTransmission[i].retries = 0;
+		PastTransmission[i].delta = 0xFFFF;
+	}
 
-    // Reset all values and flags
-    GatewayCpt = 0;
-    for (i = 0; i < SRV_FRM_MAX; i++) {
-    	GatewayStamp[i] = 0;
-    }
-    QueueCount = 0;
-    QueueCurrentIndex = 0;
-    QueueTimer = 0xFF;
-    CanEmit = true;
+	// Initialize last transmission time
+	LastTransmission.time = 0xFFFFFFFFFFFFFF;
+
+	// Reset all values and flags
+	GatewayCpt = 0;
+	for (i = 0; i < SRV_FRM_MAX; i++) {
+		GatewayStamp[i] = 0;
+	}
+	QueueCount = 0;
+	QueueCurrentIndex = 0;
+	QueueTimer = 0xFF;
+	CanEmit = true;
 }
 /** @} */
 
@@ -660,7 +670,7 @@ void DYNAMIC(TD_SENSOR_TRANSMITTER_Init)(void)
  ******************************************************************************/
 void TD_SENSOR_TRANSMITTER_MonitorDutyCycle(bool enable)
 {
-    DutyCycleEnabled = enable;
+	DutyCycleEnabled = enable;
 }
 
 /***************************************************************************//**
@@ -678,51 +688,51 @@ void TD_SENSOR_TRANSMITTER_MonitorDutyCycle(bool enable)
  ******************************************************************************/
 bool DYNAMIC(TD_SENSOR_TRANSMITTER_IsTxAllowed)(uint8_t length, uint8_t retries)
 {
-    int i, j;
-    uint32_t total_duration;
-    uint32_t delta_time;
+	int i, j;
+	uint32_t total_duration;
+	uint32_t delta_time;
 
-    // If there is no previous transmission return true
-    if (LastTransmission.time == 0xFFFFFFFFFFFFFF || !DutyCycleEnabled) {
-        return true;
-    }
+	// If there is no previous transmission return true
+	if (LastTransmission.time == 0xFFFFFFFFFFFFFF || !DutyCycleEnabled) {
+		return true;
+	}
 
-    // Compute the duration of the transmission we are about to perform
-    total_duration = TD_SENSOR_TRANSMITTER_LenToRealDuration(length) * (1 +
-        retries);
+	// Compute the duration of the transmission we are about to perform
+	total_duration = TD_SENSOR_TRANSMITTER_LenToRealDuration(length) * (1 +
+		retries);
 
-    // Previous transmission gives last absolute time so compute delta
-    delta_time = (TD_SCHEDULER_GetTime() >> 15) - LastTransmission.time;
-    if (delta_time < DUTY_CYCLE_PERIOD) {
+	// Previous transmission gives last absolute time so compute delta
+	delta_time = (TD_SCHEDULER_GetTime() >> 15) - LastTransmission.time;
+	if (delta_time < DUTY_CYCLE_PERIOD) {
 
-        // Append duration for previous transmission
-        total_duration += LastTransmission.duration
-            * (1 + LastTransmission.retries);
-    }
+		// Append duration for previous transmission
+		total_duration += LastTransmission.duration
+			* (1 + LastTransmission.retries);
+	}
 
-    // As long as total_duration is < duty cycle allowed transmission
-    for (i = 0, j = PastIndex; i < TRANSMIT_HISTORY_SIZE && total_duration <
-        DUTY_CYCLE_ALLOWED_TX; i++) {
-        delta_time += PastTransmission[j].delta;
+	// As long as total_duration is < duty cycle allowed transmission
+	for (i = 0, j = PastIndex; i < TRANSMIT_HISTORY_SIZE && total_duration <
+		DUTY_CYCLE_ALLOWED_TX; i++) {
+		delta_time += PastTransmission[j].delta;
 
-        // Only add duration if within window
-        if (delta_time < DUTY_CYCLE_PERIOD) {
-            total_duration += PastTransmission[j].duration *
-                (1 + PastTransmission[j].retries);
-            if (--j < 0) {
-                j = TRANSMIT_HISTORY_SIZE - 1;
-            }
-        } else {
+		// Only add duration if within window
+		if (delta_time < DUTY_CYCLE_PERIOD) {
+			total_duration += PastTransmission[j].duration *
+				(1 + PastTransmission[j].retries);
+			if (--j < 0) {
+				j = TRANSMIT_HISTORY_SIZE - 1;
+			}
+		} else {
 
-            // We went back in time long enough, stop
-            break;
-        }
-    }
-    if (total_duration <= DUTY_CYCLE_ALLOWED_TX) {
-        return true;
-    } else {
-        return false;
-    }
+			// We went back in time long enough, stop
+			break;
+		}
+	}
+	if (total_duration <= DUTY_CYCLE_ALLOWED_TX) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 /***************************************************************************//**
@@ -731,7 +741,7 @@ bool DYNAMIC(TD_SENSOR_TRANSMITTER_IsTxAllowed)(uint8_t length, uint8_t retries)
  ******************************************************************************/
 void TD_SENSOR_TRANSMITTER_SetUserCallback(void (*user_callback)(void))
 {
-    UserCallback = user_callback;
+	UserCallback = user_callback;
 }
 
 /** @} */

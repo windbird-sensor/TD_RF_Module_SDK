@@ -2,10 +2,10 @@
  * @file
  * @brief API for sending Register frame type to Sensor
  * @author Telecom Design S.A.
- * @version 1.3.0
+ * @version 1.3.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -142,7 +142,7 @@ bool TD_SENSOR_SendRegisterExtended(uint8_t id, uint32_t sigfox_id,
 	frame.payload[6] = (sigfox_id >> 16) & 0xFF;
 	frame.payload[7] = (sigfox_id >> 8) & 0xFF;
 	frame.payload[8] = sigfox_id & 0xFF;
-	if(custom) {
+	if (custom) {
 		frame.payload[9] = custom_value;
 	}
 
@@ -179,7 +179,7 @@ bool TD_SENSOR_SendRegisterForBooster(void)
 
 	// Check if a Booster is paired and is available at start up
 	if ((pProxyStatus->paired == true)
-			&& (pProxyStatus->available == true)) {
+		&& (pProxyStatus->available == true)) {
 
 		// Look for booster entry_id
 		device_nb = TD_SENSOR_GATEWAY_GetDeviceIndex(pProxyConfig->class,
@@ -187,6 +187,7 @@ bool TD_SENSOR_SendRegisterForBooster(void)
 		entry_id = IndexList[device_nb - 1];
 
 		// Send Booster register frame
+		// TODO: get booster boot cause and send it
 		ret = TD_SENSOR_SendRegisterExtended(entry_id,
 			pProxyStatus->id,
 			((pProxyStatus->udm_release & 0x0f) << 4) |
@@ -194,7 +195,7 @@ bool TD_SENSOR_SendRegisterForBooster(void)
 			pProxyStatus->soft_version,
 			pProxyConfig->class,
 			true,
-			0xFF);	// TODO : get booster boot cause and send it
+			0xFF);
 	}
 	return ret;
 }

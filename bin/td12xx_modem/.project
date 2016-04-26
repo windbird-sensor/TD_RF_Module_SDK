@@ -3,6 +3,7 @@
 	<name>td12xx_modem</name>
 	<comment></comment>
 	<projects>
+		<project>CMSIS</project>
 		<project>Device</project>
 		<project>emlib</project>
 		<project>libtdcore</project>

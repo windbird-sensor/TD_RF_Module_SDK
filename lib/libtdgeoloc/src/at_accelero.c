@@ -2,10 +2,10 @@
 * @file
  * @brief Accelerometer AT command extension for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.1
+ * @version 1.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -106,10 +106,13 @@ static AT_command_t const accelero_commands[] = {
  * @{ */
 
 /** Active accelerometer events to filter low events */
-uint8_t AT_AcceleroEvents = 0;
+static uint8_t AT_AcceleroEvents = 0;
 
 /** Current Configuration */
-TD_ACCELERO_Config_t Config;
+static TD_ACCELERO_Config_t Config;
+
+/** Current Scale */
+static TD_ACCELERO_Scales_t CurrentScale;
 
 /** @} */
 
@@ -119,6 +122,52 @@ TD_ACCELERO_Config_t Config;
 
 /** @addtogroup AT_ACCELERO_LOCAL_FUNCTIONS Local Functions
  * @{ */
+
+
+/***************************************************************************//**
+ * @brief
+ *   Compute accelleration in G from raw accelration data.
+ *
+ * @param[in] acceleration
+ *   Raw acceleration data.
+ *
+ * @param[in] scale
+ *   Accelration scale as a TD_ACCELERO_Scales_t.
+ *
+ * @return
+ *   Returns the accelaration value converted to G.
+ ******************************************************************************/
+static int16_t DataToG(uint16_t acceleration, TD_ACCELERO_Scales_t scale)
+{
+	int16_t result;
+	int sc = 0;
+
+	switch (scale) {
+	case TD_ACCELERO_2G:
+		sc = 2000;
+		break;
+
+	case TD_ACCELERO_4G:
+		sc = 4000;
+		break;
+
+	case TD_ACCELERO_8G:
+		sc = 8000;
+		break;
+
+	case TD_ACCELERO_16G:
+		sc = 16000;
+		break;
+	}
+	if (acceleration & 0x8000) {
+
+		// Negative
+		result = -1 * (((65537 - acceleration) * sc) >> 15);
+	} else {
+		result =  (acceleration * sc) >> 15;
+	}
+	return result;
+}
 
 /***************************************************************************//**
  * @brief
@@ -138,7 +187,10 @@ static void data_callback(TD_ACCELERO_Data_t *data, uint8_t count, bool overrun)
 	int i;
 
 	for (i = 1; i < count; i++) {
-		tfp_printf("%d \t %d \t %d\r\n", data[i].x, data[i].y, data[i].z);
+		tfp_printf("%d \t %d \t %d\r\n",
+			DataToG(data[i].x, CurrentScale),
+			DataToG(data[i].y, CurrentScale),
+			DataToG(data[i].z, CurrentScale));
 	}
 }
 
@@ -233,7 +285,7 @@ static int8_t accelero_parse(uint8_t token)
 	int8_t result = AT_OK;
 	TD_ACCELERO_Config_t *accelero = 0;
 	int enable, low_power, rate, scale, filter, threshold, duration, reg;
-
+	
 	accelero = TD_ACCELERO_GetConfig();
 	switch (token) {
 	case AT_ACCELERO_DUMP:
@@ -327,20 +379,24 @@ static int8_t accelero_parse(uint8_t token)
 					rate >= 1 && rate <= 4 &&
 					(scale == 2 || scale == 4 || scale == 8 || scale == 16) &&
 					(filter == 0 || filter == 1)) {
-					TD_ACCELERO_MonitorEvent(false,
-						(TD_ACCELERO_Rates_t) 0,
-						0, (TD_ACCELERO_Scales_t) 0,
-						0,
-						0,
-						0,
-						0,
-						0);
+					if (scale == 2) {
+						CurrentScale = TD_ACCELERO_2G;
+					}
+					if (scale == 4) {
+						CurrentScale = TD_ACCELERO_4G;
+					}
+					if (scale == 8) {
+						CurrentScale = TD_ACCELERO_8G;
+					}
+					if (scale == 16) {
+						CurrentScale = TD_ACCELERO_16G;
+					}
 					TD_ACCELERO_MonitorData(true,
 						low_power,
 						(TD_ACCELERO_Rates_t) rate,
 						TD_ACCELERO_AXIS_X | TD_ACCELERO_AXIS_Y |
 						TD_ACCELERO_AXIS_Z,
-						(TD_ACCELERO_Scales_t) scale,
+						CurrentScale,
 						filter,
 						(TD_ACCELERO_FifoModes_t) 2,
 						1,
@@ -382,11 +438,23 @@ static int8_t accelero_parse(uint8_t token)
 					threshold >= 0 && threshold < 128 &&
 					duration >= 0 && duration < 128 &&
 					(filter == 0 || filter == 1)) {
+					if (scale == 2) {
+						CurrentScale = TD_ACCELERO_2G;
+					}
+					if (scale == 4) {
+						CurrentScale = TD_ACCELERO_4G;
+					}
+					if (scale == 8) {
+						CurrentScale = TD_ACCELERO_8G;
+					}
+					if (scale == 16) {
+						CurrentScale = TD_ACCELERO_16G;
+					}
 					TD_ACCELERO_MonitorEvent(true,
 						(TD_ACCELERO_Rates_t) rate,
 						TD_ACCELERO_AXIS_X | TD_ACCELERO_AXIS_Y |
 						TD_ACCELERO_AXIS_Z,
-						(TD_ACCELERO_Scales_t) scale,
+						CurrentScale,
 						AT_AcceleroEvents,
 						threshold,
 						duration,

@@ -2,10 +2,10 @@
  * @file
  * @brief Simple GPS fix upon movement detection application for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.1
+ * @version 1.2.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2014-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -42,12 +42,15 @@
 #include <td_rtc.h>
 #include <td_uart.h>
 #include <td_printf.h>
+#include <td_stream.h>
 #include <td_flash.h>
 #include <td_watchdog.h>
+
 #include <td_sensor.h>
+#include <sensor_data_geoloc.h>
+
 #include <td_accelero.h>
 #include <td_geoloc.h>
-#include <sensor_data_geoloc.h>
 
 #include <td_config.h>
 
@@ -96,7 +99,7 @@ static bool FixingEnabled = true;
  ******************************************************************************/
 static void GPSFix(TD_GEOLOC_Fix_t *fix, bool timeout)
 {
-	if (fix->type >= TD_GEOLOC_2D_FIX || timeout) {
+	if ((fix->type >= TD_GEOLOC_2D_FIX && fix->hard.rtc_calibrated) || timeout) {
 		tfp_printf("Stop fixing\r\n");
 
 		// Stop GPS in hardware backup mode
@@ -145,7 +148,7 @@ void MoveDetected(uint8_t source)
 
 		// Disable restarting the GPS until a position is found
 		FixingEnabled = false;
-		tfp_printf("Starting fixing\r\n");
+		tfp_printf("Start GPS\r\n");
 		TD_GEOLOC_TryToFix(TD_GEOLOC_NAVIGATION, FIX_TIMEOUT, GPSFix);
 		if (MOVE_IGNORE_TIMEOUT > 0 ) {
 
@@ -166,12 +169,11 @@ void MoveDetected(uint8_t source)
  ******************************************************************************/
 void TD_USER_Setup(void)
 {
+	TD_UART_Options_t options = {LEUART_DEVICE, LEUART_LOCATION, 9600, 8, 'N',
+		1, false};
 
-	// Initialize the LEUART
-	init_printf(TD_UART_Init(9600, true, false),
-				TD_UART_Putc,
-				TD_UART_Start,
-				TD_UART_Stop);
+	// Open an I/O stream using LEUART0
+	TD_UART_Open(&options, TD_STREAM_RDWR);
 
 	// Set flash variables version
 	TD_FLASH_SetVariablesVersion(VARIABLES_VERSION);
@@ -207,7 +209,7 @@ void TD_USER_Setup(void)
 		TD_ACCELERO_ALL_HIGH_IRQ,	// Only monitor high IRQs, as low IRQs are always set in
 									// accelerometer registers
 		10,							// Threshold in mg = 10 * 2 g / 127 = +- 160 mg (with scale 2 g)
-		3,							// Duration in ms = 3 * (1 / 10 Hz) = 300 ms (with rate 10 Hz)
+		6,							// Duration in ms = 6 * (1 / 10 Hz) = 600 ms (with rate 10 Hz)
 		1,							// High-pass filter enabled
 		MoveDetected);
 }

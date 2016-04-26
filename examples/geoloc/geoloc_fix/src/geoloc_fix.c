@@ -2,10 +2,10 @@
  * @file
  * @brief Simple GPS continuous fix application for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.0.1
+ * @version 1.2.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2014-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -41,8 +41,11 @@
 #include <td_core.h>
 #include <td_uart.h>
 #include <td_printf.h>
+#include <td_stream.h>
 #include <td_flash.h>
+
 #include <td_sensor.h>
+
 #include <td_accelero.h>
 #include <td_geoloc.h>
 #include <nmea_parser.h>
@@ -68,6 +71,9 @@ static void GPSFix(TD_GEOLOC_Fix_t *fix, bool timeout)
 	int latitude, longitude, latitude_int, latitude_fract, longitude_int,
 		longitude_fract;
 	char latitude_direction, longitude_direction;
+	int i;
+	int ephemeris_av = 0;
+	int ephemeris_downloading = 0;
 
 	if (fix->type >= TD_GEOLOC_TIME_FIX) {
 		tfp_printf("Time (HH:MM:SS): %02d:%02d:%02d\r\n",
@@ -113,8 +119,18 @@ static void GPSFix(TD_GEOLOC_Fix_t *fix, bool timeout)
 		tfp_printf("Altitude: %d m\r\n",
 			fix->position.altitude);
 	}
-	tfp_printf("Elapsed: %d s\r\n\r\n",
-		fix->duration);
+	for (i = 0; i < fix->sats.sv_info.channel_count; i++) {
+		TD_UBX7_NAV_SVInfo_Channel_t *p = &fix->sats.sv_info.channels[i];
+		if (p->flags & 8) {
+			ephemeris_av++;
+		}
+		if ((p->quality > 4) && (!(p->flags & 8))) {
+			ephemeris_downloading++;
+		}
+	}
+	tfp_printf("Elapsed: %d s\r\n", fix->duration,fix->sats.usabled);
+	tfp_printf("Usabled Sats = %d  -  Ephemeris av. = %d  - Ephemeris Downloading %d\r\n\r\n",
+		fix->sats.usabled, ephemeris_av, ephemeris_downloading);
 }
 
 /***************************************************************************//**
@@ -123,12 +139,11 @@ static void GPSFix(TD_GEOLOC_Fix_t *fix, bool timeout)
  ******************************************************************************/
 void TD_USER_Setup(void)
 {
+	TD_UART_Options_t options = {LEUART_DEVICE, LEUART_LOCATION, 9600, 8, 'N',
+		1, false};
 
-	// Initialize the LEUART
-	init_printf(TD_UART_Init(9600, true, false),
-				TD_UART_Putc,
-				TD_UART_Start,
-				TD_UART_Stop);
+	// Open an I/O stream using LEUART0
+	TD_UART_Open(&options, TD_STREAM_RDWR);
 
 	// Set flash variables version
 	TD_FLASH_DeleteVariables();

@@ -2,10 +2,10 @@
  * @file
  * @brief TD Sensor utils
  * @author Telecom Design S.A.
- * @version 1.0.1
+ * @version 1.1.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -101,7 +101,9 @@ void TD_SENSOR_UTILS_BitConcat(uint8_t *data,  uint8_t *len,
 	// While this is not the last byte of data to append
 	while (temp_len_append > 0) {
 		if (left != 0 && right != 0) {
-			//tfp_printf("%x %x %x\r\n", data[index_data + index], (data[index_data + index] & right_mask), data_append[index] >> right);
+			//tfp_printf("%x %x %x\r\n",
+			//data[index_data + index], (data[index_data + index] & right_mask),
+			//data_append[index] >> right);
 
 			// Clean up remaining bits and add left bits
 			data[index_data + index] = (data[index_data + index] & right_mask) |
@@ -114,7 +116,9 @@ void TD_SENSOR_UTILS_BitConcat(uint8_t *data,  uint8_t *len,
 
 			// Append right bits in brand new byte's MSB
 			if (temp_len_append > 0) {
-				//tfp_printf("r %x %x %x %x\r\n",temp_len_append, data_append[index], data_append[index] << left,(data_append[index] << left)&right_mask);
+				//tfp_printf("r %x %x %x %x\r\n",temp_len_append,
+				//data_append[index], data_append[index] << left,
+				//(data_append[index] << left)&right_mask);
 				data[index_data + index + 1] = (data_append[index] << left) &
 					right_mask;
 				if (temp_len_append >= right) {
@@ -136,6 +140,62 @@ void TD_SENSOR_UTILS_BitConcat(uint8_t *data,  uint8_t *len,
 		index++;
 	}
 	*len += len_append;
+}
+
+/***************************************************************************//**
+ * @brief
+ * 	 Read bits from array and return corresponding value. Limited to 32 bits.
+ *
+ * @param[in] data
+ *  Data to read
+ *
+ * @param[in] start_bit
+ *  Bit at which data starts (first byte). will be updated with bit at which
+ *  data stopped in last byte (useful for chaining reads). Bit are being read
+ *  from 7 to 0.
+ *  Big endian ie:
+ *
+ *  | bit 7 - bit 6 ... - bit 0| bit 7 - bit 6 ... - bit 0 |
+ *  		byte 0							byte 1
+ *
+ * @param[in] start_byte
+ *  Data index at which reading starts (useful for chaining reads)
+ *
+ * @param[in] bit_to_read
+ *  Bits to read count.
+ *
+ * @return
+ *  Read value
+ ******************************************************************************/
+uint32_t TD_SENSOR_UTILS_ReadBits(uint8_t *data,  uint8_t *start_bit,
+	uint8_t *start_byte, uint8_t bit_to_read)
+{
+	uint32_t value = 0;
+	int current_bit = *start_bit;
+	int byte_index = *start_byte;
+	int i;
+
+	//tfp_printf("Byte %02x\r\n", data[byte_index]);
+	for (i = 0; i < bit_to_read; i++) {
+		value += ((data[byte_index] >> current_bit) & 1) << (bit_to_read - i - 1);
+		//tfp_printf("Value %d %d, %d %d\r\n",
+		//	value,
+		//	(data[byte_index] >> current_bit) & 1,
+		//	i,
+		//	current_bit);
+		if (current_bit == 0) {
+			current_bit = 7;
+			byte_index++;
+			//tfp_printf("\r\n");
+			//tfp_printf("Byte %02x\r\n", data[byte_index]);
+			//tfp_printf("\r\n");
+		} else {
+			current_bit--;
+		}
+	}
+	*start_bit = current_bit;
+	*start_byte = byte_index;
+	return value;
 }
 
 /** @} */

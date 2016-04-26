@@ -2,10 +2,10 @@
  * @file
  * @brief Temperature/Supply Voltage measure API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.2.0
+ * @version 2.4.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2012-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -48,6 +48,17 @@
  * @{
  ******************************************************************************/
 
+/*******************************************************************************
+ *************************   PRIVATE VARIABLES   *******************************
+ ******************************************************************************/
+
+/** @addtogroup MEASURE_LOCAL_VARIABLES Local Variables
+ * @{ */
+
+/** Flag to lock ADC */
+static volatile bool AdcLock = false;
+static int32_t LastFastVoltage = 0;
+/** @} */
 /*******************************************************************************
  **************************  PRIVATE FUNCTIONS   *******************************
  ******************************************************************************/
@@ -113,6 +124,49 @@ static int32_t convertToCelsiusThenth(int32_t adc_result)
 		t_celsius_tenth >> 1;
 }
 
+/***************************************************************************//**
+ * @brief
+ *   Initialize the ADC for measuring either the power supply voltage or the
+ *   temperature.
+ *
+ * @param[in] mode
+ *   If true, measure the temperature, if false, measure the power supply
+ *   voltage.
+ *
+ * @param[in] continuous
+ *   If true, set the ADC sample period to 1 MSPS, if false, set it to 40 kSPS.
+ ******************************************************************************/
+static void TD_MEASURE_ADC_Init(bool mode, bool continuous)
+{
+
+	// Base the ADC configuration on the default setup
+	ADC_InitSingle_TypeDef single_init = ADC_INITSINGLE_DEFAULT;
+	//ADC_Init_TypeDef init = ADC_INIT_DEFAULT;
+	ADC_Init_TypeDef init = {
+		adcOvsRateSel2,                // 2x oversampling (if enabled).
+	    adcLPFilterBypass,             // No input filter selected.
+	    adcWarmupKeepADCWarm,
+	    _ADC_CTRL_TIMEBASE_DEFAULT,    // Use HW default value.
+	    _ADC_CTRL_PRESC_DEFAULT,       // Use HW default value.
+	    false                          // Do not use tailgate.
+	};
+
+	// Initialize timebase
+	init.timebase = ADC_TimebaseCalc(0);
+	if (!continuous) {
+		init.prescale = ADC_PrescaleCalc(40000, 0);
+	} else {
+		init.prescale = ADC_PrescaleCalc(1000000, 0);
+	}
+	CMU_ClockEnable(cmuClock_ADC0, true);
+	ADC_Init(ADC0, &init);
+
+	// Set input to temperature sensor. Reference must be 1.25V
+	single_init.reference = adcRef1V25;
+	single_init.input = mode ? adcSingleInpTemp : adcSingleInpVDDDiv3;
+	ADC_InitSingle(ADC0, &single_init);
+}
+
 /** @} */
 
 /*******************************************************************************
@@ -132,42 +186,115 @@ static int32_t convertToCelsiusThenth(int32_t adc_result)
  *
  * @return
  *   The measured temperature is given in 1/10 degrees Celsius, the power supply
- *    voltage is given in mV.
+ *    voltage is given in mV.  If ADC is not available, returns 0.
  ******************************************************************************/
 int32_t TD_MEASURE_VoltageTemperatureExtended(bool mode)
 {
 	int32_t setpoint;
+	bool AlreadyLocked;
+	volatile int timeout;
 
-	/* Base the ADC configuration on the default setup. */
-	ADC_InitSingle_TypeDef single_init = ADC_INITSINGLE_DEFAULT;
-	ADC_Init_TypeDef init = ADC_INIT_DEFAULT;
+	// Timeout of 50ms
+	timeout = 100000;
 
-	/* Initialize timebase */
-	init.timebase = ADC_TimebaseCalc(0);
-	init.prescale = ADC_PrescaleCalc(40000, 0);
-	CMU_ClockEnable(cmuClock_ADC0, true);
-	ADC_Init(ADC0, &init);
-
-	/* Set input to temperature sensor. Reference must be 1.25V */
-	single_init.reference = adcRef1V25;
-	single_init.input = mode ? adcSingleInpTemp : adcSingleInpVDDDiv3;
-	ADC_InitSingle(ADC0, &single_init);
-
-	// Start one ADC sample
-	ADC_Start(ADC0, adcStartSingle);
-
-	// Active wait for ADC to complete
-	while ((ADC0->STATUS & ADC_STATUS_SINGLEDV) == 0) {
-		;
-	}
-	setpoint = ADC_DataSingleGet(ADC0);
-	if (mode) {
-		setpoint = convertToCelsiusThenth(setpoint);
+	// Enter Critical Section
+	__set_PRIMASK(1);
+	if (AdcLock) {
+		AlreadyLocked = true;
 	} else {
-		setpoint = (setpoint * 3 * 1250) / 4096;
+		AlreadyLocked = false;
+		AdcLock = true;
 	}
-	CMU_ClockEnable(cmuClock_ADC0, false);
+	__set_PRIMASK(0);
+
+	// Exit Critical Section
+	if (!AlreadyLocked) {
+		TD_MEASURE_ADC_Init(mode, false);
+
+		// Start one ADC sample
+		ADC_Start(ADC0, adcStartSingle);
+
+		// Active wait for ADC to complete
+		while ((timeout--) && ((ADC0->STATUS & ADC_STATUS_SINGLEDV) == 0)) {
+				;
+		}
+		setpoint = ADC_DataSingleGet(ADC0);
+		CMU_ClockEnable(cmuClock_ADC0, false);
+
+		// Enter Critical Section
+		__set_PRIMASK(1);
+		AdcLock = false;
+		__set_PRIMASK(0);
+
+		// Exit Critical Section
+		if (mode) {
+			setpoint = convertToCelsiusThenth(setpoint);
+		} else {
+			setpoint = (setpoint * 3 * 1250) / 4096;
+		}
+	} else {
+
+		// ADC no is not available, return 0
+		setpoint = 0;
+	}
 	return(setpoint);
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Repeat a Power Supply voltage measure.
+ *
+ * @return
+ *   The measured temperature is given in 1/10 degrees Celsius, the power supply
+ *   voltage is given in mV. If ADC is not available, return the last voltage
+ *   measure.
+ ******************************************************************************/
+int32_t TD_MEASURE_VoltageRepeat(void)
+{
+	int32_t setpoint;
+	bool AlreadyLocked;
+	volatile int timeout;
+	// Timeout of 50ms
+	timeout = 100000;
+
+	// Enter Critical Section 
+	__set_PRIMASK(1);
+	if (AdcLock) {
+		AlreadyLocked = true;
+	} else {
+		AlreadyLocked = false;
+		AdcLock = true;
+	}
+	__set_PRIMASK(0);
+
+	// Exit Critical Section
+	if (!AlreadyLocked) {
+		if (!(CMU->HFPERCLKEN0>>_CMU_HFPERCLKEN0_ADC0_SHIFT)) {
+			TD_MEASURE_ADC_Init(false, true);
+		}
+
+		// Start one ADC sample
+		ADC_Start(ADC0, adcStartSingle);
+
+		// Active wait for ADC to complete
+		while ((timeout--) && ((ADC0->STATUS & ADC_STATUS_SINGLEDV) == 0)) {
+			;
+		}
+		setpoint = ADC_DataSingleGet(ADC0);
+
+		// Enter Critical Section
+		__set_PRIMASK(1);
+		AdcLock = false;
+		__set_PRIMASK(0);
+
+		// Exit Critical Section
+		setpoint = (setpoint * 3 * 1250)>>12;
+		LastFastVoltage = setpoint;
+	} else {
+
+		// ADC no is not available, return the last measure
+	}
+	return LastFastVoltage;
 }
 
 /***************************************************************************//**
@@ -185,47 +312,77 @@ int32_t TD_MEASURE_VoltageTemperatureExtended(bool mode)
  * @return
  *   The ADC output. Corresponding voltage can be found by computing:
  *
- *   voltage = reference_range*input/4096
+ *   voltage = reference_range * input / 4096
  *
  *   ex: 1.25V input, return = 1000
  *
  *   voltage = 1.25 * 1000 / 4096 = 305 mV
  *
- *
  *   ex: 5V diff input, return = 2048
  *
  *   voltage = -5000 + (10000 * 2048) / 4096 = 0V
  *
+ *  If ADC is not available, returns 0.
  ******************************************************************************/
 uint32_t TD_MEASURE_SingleVoltage(ADC_SingleInput_TypeDef input,
 	ADC_Ref_TypeDef ref)
 {
 	uint32_t setpoint;
+	bool AlreadyLocked;
+	volatile int timeout;
 
 	// Base the ADC configuration on the default setup
 	ADC_InitSingle_TypeDef single_init = ADC_INITSINGLE_DEFAULT;
 	ADC_Init_TypeDef init = ADC_INIT_DEFAULT;
 
-	// Initialize timebase
-	init.timebase = ADC_TimebaseCalc(0);
-	init.prescale = ADC_PrescaleCalc(40000, 0);
-	CMU_ClockEnable(cmuClock_ADC0, true);
-	ADC_Init(ADC0, &init);
+	// Timeout of 50 ms
+	timeout = 100000;
 
-	// Set reference and input
-	single_init.reference = ref;
-	single_init.input = input;
-	ADC_InitSingle(ADC0, &single_init);
-
-	// Start one ADC sample
-	ADC_Start(ADC0, adcStartSingle);
-
-	// Active wait for ADC to complete
-	while ((ADC0->STATUS & ADC_STATUS_SINGLEDV) == 0) {
-		;
+	// Enter Critical Section
+	__set_PRIMASK(1);
+	if (AdcLock) {
+		AlreadyLocked = true;
+	} else {
+		AlreadyLocked = false;
+		AdcLock = true;
 	}
-	setpoint = ADC_DataSingleGet(ADC0);
-	CMU_ClockEnable(cmuClock_ADC0, false);
+	__set_PRIMASK(0);
+
+	// Exit Critical Section
+	if (!AlreadyLocked) {
+
+		// Initialize timebase
+		init.timebase = ADC_TimebaseCalc(0);
+		init.prescale = ADC_PrescaleCalc(40000, 0);
+		CMU_ClockEnable(cmuClock_ADC0, true);
+		ADC_Init(ADC0, &init);
+
+		// Set reference and input
+		single_init.reference = ref;
+		single_init.input = input;
+		ADC_InitSingle(ADC0, &single_init);
+
+		// Start one ADC sample
+		ADC_Start(ADC0, adcStartSingle);
+
+		// Active wait for ADC to complete
+		while ((timeout--) && ((ADC0->STATUS & ADC_STATUS_SINGLEDV) == 0)) {
+			;
+		}
+		setpoint = ADC_DataSingleGet(ADC0);
+		CMU_ClockEnable(cmuClock_ADC0, false);
+
+		/* Enter Critical Section */
+		__set_PRIMASK(1);
+		AdcLock = false;
+		__set_PRIMASK(0);
+		/* Exit Critical Section */
+
+	} else {
+
+		// ADC no is not free, return 0
+		setpoint = 0;
+	}
 	return(setpoint);
 }
 
@@ -253,7 +410,6 @@ uint32_t TD_MEASURE_SingleVoltage(ADC_SingleInput_TypeDef input,
 uint8_t TD_MEASURE_VoltageTemperature(bool mode)
 {
 	int32_t measure = TD_MEASURE_VoltageTemperatureExtended(mode);
-	uint8_t msb;
 
 	if (mode) {
 		if (measure < 0) {
@@ -264,18 +420,37 @@ uint8_t TD_MEASURE_VoltageTemperature(bool mode)
 		measure /= 5;
 		return (measure & 1) ? (measure >> 1) + 1 : measure >> 1;
 	} else {
-		if (measure >= 3000) {
-			msb = 0x80;
-			measure -= 3000;
-		} else {
-			msb = 0x00;
-			measure -= 2000;
-		}
-
-		// Divide by 10 with proper rounding
-		measure /= 5;
-		return (measure & 1) ? (measure >> 1) + 1 + msb : (measure >> 1) + msb;
+		return TD_MEASURE_VoltageConvert(measure);
 	}
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Convert a Power Supply voltage in mV to a packed 8 bit format.
+ *
+ * @param[in] measure
+ *   The input measured power supply voltage in mV.
+ *
+ *
+ * @return
+ *   The measured power supply voltage in a compact 8 bit representation with
+ *   0.1 V resolution and offset by 3V if MSB is 1, only by 2V if MSB is 0.
+ ******************************************************************************/
+uint8_t TD_MEASURE_VoltageConvert(uint32_t measure)
+{
+	uint8_t msb;
+
+	if (measure >= 3000) {
+		msb = 0x80;
+		measure -= 3000;
+	} else {
+		msb = 0x00;
+		measure -= 2000;
+	}
+
+	// Divide by 10 with proper rounding
+	measure /= 5;
+	return (measure & 1) ? (measure >> 1) + 1 + msb : (measure >> 1) + msb;
 }
 
 /** @} */

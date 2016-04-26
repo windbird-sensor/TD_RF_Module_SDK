@@ -2,10 +2,10 @@
  * @file
  * @brief Scheduler API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.1.1
+ * @version 2.2.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -117,7 +117,11 @@ extern TD_SCHEDULER_callback_t *TD_SCHEDULER_CallbackQueue;
 
 #ifdef SCHEDULER_DEBUG
 int32_t	TD_SCHEDULER_LastIRQ = 0;
-uint32_t TD_SHEDULER_LastSet = 0;
+uint32_t TD_SCHEDULER_LastSet = 0;
+uint32_t TD_SCHEDULER_LastSetPrec = 0;
+uint32_t TD_SCHEDULER_LastSetDelta = 0;
+uint32_t TD_SCHEDULER_LastSetDeltaPrec = 0;
+uint32_t TD_SCHEDULER_DirectExec = 0;
 #endif
 
 /** @} */
@@ -255,7 +259,7 @@ static void TD_SCHEDULER_RemovePrivate(uint8_t id, bool purge)
 					__set_PRIMASK(msk);
 				}
 				index++;
-				if (index >= CONFIG_TD_SCHEDULER_MAX_QUEUE){
+				if (index >= CONFIG_TD_SCHEDULER_MAX_QUEUE) {
 					index = 0;
 				}
 			}
@@ -351,7 +355,7 @@ static void TD_SCHEDULER_ExecuteTimer(uint8_t id)
 			tim->repetition--;
 			if (tim->repetition == 0) {
 
-				//We must set RESERVED state to not have a false invalid timer
+				// We must set RESERVED state to not have a false invalid timer
 				// trap
 				tim->irq = SCHEDULER_RESERVED_STATE;
 				TD_SCHEDULER_RemovePrivate(id, false);
@@ -376,7 +380,7 @@ static void TD_SCHEDULER_Manager(TD_SCHEDULER_MANAGER_SOURCE)
 	volatile uint64_t time_now;
 	bool set_alarm;
 	bool bias;
-	uint32_t msk;
+	uint32_t msk, rtc;
 	static TD_SCHEDULER_state_t in_progress = SCHEDULER_IDLE;
 	TD_SCHEDULER_timer_t *tim;
 
@@ -395,8 +399,12 @@ static void TD_SCHEDULER_Manager(TD_SCHEDULER_MANAGER_SOURCE)
 	TD_SCHEDULER_WaitIrq = false;
 	__set_PRIMASK(msk);
 
+	rtc = RTC->CNT;
 	// Now we are in atomic condition
 	while (1) {
+		if (((RTC->CNT - rtc) & 0xFFFFFF) > T1S) {
+			TD_Trap(TRAP_SCHEDULER_OVERRUN, 0);
+		}
 
 		// Should stop processing timers right now...
 		time_now = TD_SCHEDULER_GetTime();
@@ -436,7 +444,9 @@ static void TD_SCHEDULER_Manager(TD_SCHEDULER_MANAGER_SOURCE)
 
 			// If we are late, go for it right now
 			if (diff >= tim->interval && !bias) {
-
+#ifdef SCHEDULER_DEBUG
+				TD_SCHEDULER_DirectExec++;
+#endif
 				// Does not keep order, latest should be started first!
 				TD_SCHEDULER_ExecuteTimer(i);
 
@@ -446,6 +456,8 @@ static void TD_SCHEDULER_Manager(TD_SCHEDULER_MANAGER_SOURCE)
 					break;
 				}
 
+				// Get new time as scheduler take time to execute
+				time_now = TD_SCHEDULER_GetTime();
 				// Recompute new delta
 				diff = time_now - tim->last_time;
 				bias = false;
@@ -483,7 +495,10 @@ static void TD_SCHEDULER_Manager(TD_SCHEDULER_MANAGER_SOURCE)
 				TD_SCHEDULER_WaitIrq = true;
 				TD_RTC_UserAlarmAfter(delta);
 #ifdef SCHEDULER_DEBUG
-				TD_SHEDULER_LastSet = RTC->CNT;
+				TD_SCHEDULER_LastSetPrec = TD_SCHEDULER_LastSet;
+				TD_SCHEDULER_LastSet = RTC->CNT;
+				TD_SCHEDULER_LastSetDeltaPrec = TD_SCHEDULER_LastSetDelta;
+				TD_SCHEDULER_LastSetDelta = delta;
 #endif
 				__set_PRIMASK(msk);
 			}
@@ -527,6 +542,30 @@ static void TD_SCHEDULER_TimerIRQHandler(void)
 /***************************************************************************//**
  * @brief
  *   Append a timer to schedule. See TD_SchedulerAppend
+ *
+ * @param[in] interval
+ *  Interval integer part in seconds at which the callback is called.
+ *
+ * @param[in] tick
+ * Interval fractional part in ticks (1/32768) at which the callback is called
+ *
+ * @param[in] delay
+ *  Time to wait before actually scheduling the timer.
+ *
+ * @param[in] repetition
+ * Timer repetition, 0xFF for infinite repetitions.
+ *
+ * @param[in] irq
+ * True if the callback has to be called in the IRQ domain, false otherwise.
+ *
+ * @param[in] callback
+ *  Function to be called.
+ *
+ * @param[in] arg
+ *  Argument to be passed to the callback when being called.
+ *
+ * @return
+ * 	Returns a timer id if successful or 0xFF if no more timer can be added in
  ******************************************************************************/
 uint8_t TD_SCHEDULER_AppendPrivate(uint32_t interval, uint16_t tick,
 	uint32_t delay, uint8_t repetition, bool irq,
@@ -620,9 +659,9 @@ void TD_SCHEDULER_Dump(void)
 			first = false;
 		}
 		t = TD_SCHEDULER_Timer[index].interval >> 15;
-		irq_s="   ";
-		if (TD_SCHEDULER_Timer[index].irq==SCHEDULER_RESERVED_STATE){
-			irq_s="RSV";
+		irq_s = "   ";
+		if (TD_SCHEDULER_Timer[index].irq == SCHEDULER_RESERVED_STATE) {
+			irq_s = "RSV";
 		}
 		tfp_printf("id:%d per:%02d:%02d:%02d.(%04d) rep:%3d irq:%d%s",
 			index,
@@ -672,8 +711,9 @@ void TD_SCHEDULER_Dump(void)
 		(uint32_t) (cur_time >> 32),
 		(uint32_t) (cur_time & 0xFFFFFFFF), comp1, _if, ien);
 #ifdef SCHEDULER_DEBUG
-	tfp_printf("==IT:%08X Set:%08X\r\n",
-		TD_SCHEDULER_LastIRQ, TD_SHEDULER_LastSet);
+	tfp_printf("==IT:%06X SetPrec:%06X,%d Set:%08X,%d DirExec:%d\r\n",
+		TD_SCHEDULER_LastIRQ, TD_SCHEDULER_LastSetPrec, TD_SCHEDULER_LastSetDeltaPrec,
+		TD_SCHEDULER_LastSet,  TD_SCHEDULER_LastSetDelta, TD_SCHEDULER_DirectExec);
 #endif
 	__set_PRIMASK(msk);
 }
@@ -771,9 +811,9 @@ void DYNAMIC(TD_SCHEDULER_Init)(void)
  * 	Returns a timer id if successful or 0xFF if no more timer can be added in
  * 	the list.
  *
- * @note Timer appended will be called for first time at delay + interval time.
- * Next time (if repetition > 1) will be called with interval delay.
-
+ * @note Timer appended will be called for first time at delay + (interval +
+ * tick) time.
+ * Next time (if repetition > 1) it will be called with (interval + tick) time.
  ******************************************************************************/
 uint8_t TD_SCHEDULER_Append(uint32_t interval, uint16_t tick, uint32_t delay,
 		uint8_t repetition, void (*callback)(uint32_t, uint8_t), uint32_t arg)

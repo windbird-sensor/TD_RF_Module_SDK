@@ -2,10 +2,10 @@
  * @file
  * @brief GPS NMEA parser.
  * @author Telecom Design S.A.
- * @version 1.0.1
+ * @version 1.0.2
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2014 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  ******************************************************************************
  *
@@ -508,6 +508,7 @@ static bool TD_NMEA_ProcessGPGSV(void)
 #endif
 	return false;
 }
+
 /***************************************************************************//**
  * @brief
  *   Display a valid NMEA trame.
@@ -734,7 +735,7 @@ bool TD_NMEA_PARSER_Parse(char data)
 			// All parameters are global, no real need to use them as parameters...
 			TD_NMEA_ProcessCommand(&LastCommand, Data, ReceivedChecksum);
 
-			//command done (save for /r/n which can be ignored)
+			// Command done (save for /r/n which can be ignored)
 			return true;
 		}
 		break;
