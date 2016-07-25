@@ -2,7 +2,7 @@
  * @file
  * @brief SIGFOX V1 API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 5.2.0
+ * @version 5.2.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -182,7 +182,8 @@ extern "C" {
 	bool TD_SIGFOX_SetMacroChannelBitmask(uint32_t *bitmask);
 	bool TD_SIGFOX_SetDefaultMacroChannel(uint16_t ChannelDefault);
 	bool TD_SIGFOX_ResetSequenceNumber(uint32_t key);
-
+	bool TD_SIGFOX_SetDownlinkOffset(int32_t frequency_offset);
+	int32_t TD_SIGFOX_GetDownlinkOffset(void);
 	/** @} */
 
 	/** @} (end addtogroup SIGFOX) */

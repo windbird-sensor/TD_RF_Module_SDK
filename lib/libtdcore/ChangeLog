@@ -331,7 +331,7 @@
 
   * Corrected drift in voltage measurement
 
-# Version 6.1.0 #
+# Version 4.0.0 #
 
 ## Additions ##
   * Added TD1205P, RefDesign ETSI and RefDesign FCC configurations
@@ -350,18 +350,3 @@
 ### UART: ###
   * Added `TD_UART_WaitForPendingTx` function
   * Added synchronisation for all pending uart when changing baud rate
-  
-# Version 6.2.0 #
-
-## Additions ##
-  * Added Td_HallEffect module
-
-## Changes ##
-    
-### PARSER: ###
-
-  * Up AT_PERSIST_SIZE to 220 bytes
-
-### TRAP: ###
-
-  * Added sigfox channel managment error

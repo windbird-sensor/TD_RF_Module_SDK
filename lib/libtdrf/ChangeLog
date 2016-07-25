@@ -175,15 +175,3 @@
   * Corrected a bug that may reduce the number of synchronization bit
   * Corrected of spectral quality in EZR ETSI configuration
   
-# Version 8.0.0 #
-
-## Major Updates ##
-  
-### SIGFOX: ###
-  * Corrected of spectral quality in EZR FCC configuration
-  * Add generic Sigfox test mode
-  * Add CW test mode
-  * Add macro channel bitmask
-  * Macro channels Harmonization according to Sigfox requirement.
-  * Library certified by SIGFOX
-

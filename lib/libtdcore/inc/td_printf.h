@@ -165,6 +165,8 @@ extern "C" {
 	/** Type definition for UART TX start/stop handling function */
 	typedef void (*tfp_start_stop_t)(void *);
 
+	/** Callback function for dump */
+	typedef uint32_t (*tfp_dump_cb_t)(uint32_t add);
 	/** @} */
 
  /***************************************************************************
@@ -179,6 +181,7 @@ extern "C" {
 	void init_printf_stream(void *stream);
 	void tfp_printf_stream(void *stream, const char *fmt, ...);
 	void tfp_printf(const char *fmt, ...);
+	void tfp_dump2(char *add_fmt, char *data_fmt, uint32_t start, uint32_t count, uint32_t step, uint8_t *mem,tfp_dump_cb_t callback);
 	void tfp_vprintf(const char *fmt, va_list va);
 	void tfp_sprintf(char *s, const char *fmt, ...);
 	void tfp_dump(char *text, unsigned char *s, unsigned char sz);

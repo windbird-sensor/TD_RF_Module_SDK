@@ -91,37 +91,37 @@
 #elif MODULE_REVISION == REVISION_TD1208
 
 /** TD1208 Software release and version */
-#define SOFTWARE_RELEASE		1975
+#define SOFTWARE_RELEASE		2069
 
 #elif MODULE_REVISION == REVISION_TD1204
 
 /** TD1204 Software release and version */
-#define SOFTWARE_RELEASE		1971
+#define SOFTWARE_RELEASE		2065
 
 #elif MODULE_REVISION == REVISION_TD1205
 
 /** TD1205 Software release and version */
-#define SOFTWARE_RELEASE		1972
+#define SOFTWARE_RELEASE		2066
 
 #elif MODULE_REVISION == REVISION_TD1508
 
 /** TD1508 Software release and version */
-#define SOFTWARE_RELEASE		1976
+#define SOFTWARE_RELEASE		2070
 
 #elif MODULE_REVISION == REVISION_TD1205P
 
 /** TD1205P Software release and version */
-#define SOFTWARE_RELEASE		1973
+#define SOFTWARE_RELEASE		2067
 
 #elif MODULE_REVISION == REVISION_REF_DESIGN_FCC
 
 /** REF_DESIGN_FCC Software release and version */
-#define SOFTWARE_RELEASE		1978
+#define SOFTWARE_RELEASE		2072
 
 #elif MODULE_REVISION == REVISION_REF_DESIGN_ETSI
 
 /** REF_DESIGN_ETSI Software release and version */
-#define SOFTWARE_RELEASE		1977
+#define SOFTWARE_RELEASE		2071
 
 #endif
 
@@ -150,11 +150,17 @@
 
 #else
 
+#if MODULE_REVISION == REVISION_TD1508 || MODULE_REVISION == REVISION_REF_DESIGN_FCC
+/** SigFox AT parser extension */
+#define AT_PROXY				0
+#define AT_LAN_RF				0
+
+#else
+
+#define AT_PROXY				1
 /** TD LAN RF AT parser extension */
 #define AT_LAN_RF				1
-
-/** SigFox AT parser extension */
-#define AT_PROXY				1
+#endif
 
 #endif
 
@@ -182,6 +188,7 @@
 
 /** Geoloc AT parser extension */
 #define AT_GEOLOC				1
+
 #else
 
 /** Geoloc AT parser extension */

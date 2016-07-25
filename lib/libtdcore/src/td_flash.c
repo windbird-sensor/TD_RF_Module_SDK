@@ -136,7 +136,7 @@ typedef struct {
 	uint32_t *last_page_adress;		/**< Address of last page */
 	uint32_t *current_write_adress;	/**< Current write address */
 	uint32_t *current_read_adress;	/**< Current read address */
-	uint8_t last_word_size;			/**< Last wrod size */
+	uint8_t last_word_size;			/**< Last word size */
 } TD_FLASH_logger_t;
 
 /** @} */
@@ -181,15 +181,25 @@ static uint32_t flash_eeprom_user_add = 0;
 
 /***************************************************************************//**
  * @brief
+ *   Returns the flash size of the microcontroler.
+ * @return
+ * 	Returns the flash size of the microcontroler.
+ ******************************************************************************/
+uint32_t TD_FLASH_GetFlashSize(void){
+	uint16_t *flash_size=(uint16_t*)0x0FE081F8;
+	return *flash_size<<10;
+}
+
+/***************************************************************************//**
+ * @brief
  *   This function will return base address of a layout section (and size)
  ******************************************************************************/
 uint32_t TD_FLASH_GetLayoutBase(uint8_t idx, uint32_t *size)
 {
 	uint32_t base_add;
-	uint16_t *flash_size = (uint16_t *) 0x0FE081F8;
 	uint8_t i;
 
-	base_add = *flash_size << 10;
+	base_add=TD_FLASH_GetFlashSize();
 	for (i = 0; i < idx; i++) {
 		if (!CONFIG_FLASH_LAYOUT[i]) {
 			TD_Trap(TRAP_FLASH_LAYOUT, i);
@@ -613,7 +623,7 @@ void TD_FLASH_DeleteVariables(void)
 	TD_FLASH_Init();
 
 	for (i = 0; i < CONFIG_TD_FLASH_USER_PAGE; i++) {
-		TD_FLASH_ErasePage((uint32_t *) E2P_USER - (i * FLASH_PAGE_SIZE));
+		TD_FLASH_ErasePage((uint32_t *) (E2P_USER - (i * FLASH_PAGE_SIZE)));
 	}
 
 	// Disable writing to the MSC
@@ -936,12 +946,8 @@ void TD_FLASH_SetVariablesVersion(uint32_t version)
 * Check real flash size is more or equal to one declared for compiling
 *
 ******************************************************************************/
-void TD_FLASH_CheckSize(void)
-{
-	uint16_t *flash_size = (uint16_t *) 0x0FE081F8;
-	uint32_t size = (uint32_t) (*flash_size) << 10;
-
-	if (size < CONFIG_LIMIT_FLASH_SIZE) {
+void TD_FLASH_CheckSize(void){
+	if (TD_FLASH_GetFlashSize()<CONFIG_LIMIT_FLASH_SIZE){
 		TD_Trap(TRAP_FLASH_LAYOUT, 100);
 	}
 }
@@ -1244,9 +1250,7 @@ void TD_FLASH_DumpLayout(void)
 {
 #if defined(__GNUC__)
 	uint8_t i = 0;
-	uint16_t *flash_size = (uint16_t *) 0x0FE081F8;
-	uint32_t add = (*flash_size) << 10;
-
+	uint32_t add=TD_FLASH_GetFlashSize();
 	tfp_printf("==FLASH LAYOUT==\r\n");
 	tfp_printf("0x%08X:-Top of flash-\r\n", add);
 	while (1) {

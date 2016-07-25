@@ -518,6 +518,39 @@ void tfp_dump(char *prompt, unsigned char *buffer, unsigned char length)
 	Stream->stop(Stream);
 }
 
+/***************************************************************************//**
+ * @brief
+ *   Dump data in hexadecimal with callback use.
+ *
+ * @param[in] add_fmt
+ *   Address format (ex 0x%08X)
+ *
+ * @param[in] data_fmt
+ *   Data format (ex 0x%02X)
+ *
+ * @param[in] start
+ *   Address start
+ *
+ * @param[in] count
+ *   Address increment count to show
+ *
+ * @param[in] step
+ *   Address step
+ *
+ * @param[in] mem
+ *   Pointer on memory to dump (have priority over CB)
+ *
+ * @param[in] callback
+ *   Callback uint32_t (*tfp_dump_cb_t)(uint32_t add);
+ *
+ * @note
+ * If start is 0, count is 8 and step is 2, will show data for 0, 2, 4, 6, 8, 10, 12, 14
+ ******************************************************************************/
+void tfp_dump2(char *add_fmt, char *data_fmt, uint32_t start, uint32_t count, uint32_t step, uint8_t *mem, tfp_dump_cb_t callback)
+{
+	Stream->stop(Stream);
+}
+
 /** @} */
 
 /** @} (end addtogroup PRINTF) */

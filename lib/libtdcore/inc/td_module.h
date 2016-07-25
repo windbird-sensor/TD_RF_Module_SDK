@@ -339,7 +339,6 @@ extern "C" {
 #define REVISION_TD1205P		36  ///< Module TD1205P, all revisions
 #define REVISION_REF_DESIGN_FCC	34  ///< Reference Design FCC, all revisions
 #define REVISION_REF_DESIGN_ETSI	35  ///< Reference Design ETSI, all revisions
-#define REVISION_TD1205P		36  ///< Module TD1205P, all revisions
 #define REVISION_CUSTOM         0xFF///< All other implementation that must define all their configuration before including td_config.h. See td_config.h doc
 
 	/* This define enables to build a very small subset of the TD_CORE library
@@ -461,10 +460,17 @@ extern "C" {
 #define ADC0_MASK               (1 << ADC0_BIT)		/**< Analog to Digital Converter 0 mask */
 #define ADC0_PIN                18					/**< Analog to Digital Converter 0 pin */
 
+#if MODULE_REVISION==REVISION_TD1205P
+#define TIM2_PORT               gpioPortD           /**< Timer 2 port */
+#define TIM2_BIT                5					/**< Timer 2 bit */
+#define TIM2_MASK               (1 << TIM2_BIT)		/**< Timer 2 mask */
+#define TIM2_PIN                19					/**< Timer 2 pin */
+#else
 #define TIM2_PORT               gpioPortD           /**< Timer 2 port */
 #define TIM2_BIT                7					/**< Timer 2 bit */
 #define TIM2_MASK               (1 << TIM2_BIT)		/**< Timer 2 mask */
 #define TIM2_PIN                19					/**< Timer 2 pin */
+#endif
 
 	/** @} (end addtogroup Port_D) */
 

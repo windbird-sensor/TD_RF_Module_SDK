@@ -22,7 +22,7 @@ once you register your Telecom Design Evaluation Board (EVB) by following the st
 <http://rfmodules.td-next.com/sdk/>.
 
 The stand-alone Eclipse Package which should be used to compile the source can be found here:
-<https://developers.insgroup.fr/releases/2014/02/25/sdk-400-version-available/index.html>
+<https://s3-eu-west-1.amazonaws.com/assetstdnext/download/TD_RF_Modules_SDK_Tools-v6.0.0.zip>
 
 The following steps detail how to download the source code and import all projects into the Eclipse
 environment.
@@ -159,6 +159,16 @@ Similarly, to debug a firmware on the TD12xx/TD15xx board:
 
 Release Notes
 =============
+v6.3.4 (July 2016)
+-------------------
+###Bug Fixes###
+#### SIGFOX: ####
+  - New library RF version 6.3.4
+  - Corrected a bug on Sigfox certification function in FCC mode
+  
+### Major Updates ###
+  - Added TD1205P module
+  
 v6.3.2 (April 2016)
 -------------------
 ### Release Notes ###
@@ -177,10 +187,10 @@ v6.3.2 (April 2016)
   * Add macro channel bitmask
   * Macro channels Harmonization according to Sigfox requirement.
   * Library certified by SIGFOX
-
+  
 v6.2.0 (February 2016)
 -------------------
-Bug Fixes
+###Bug Fixes ###
 #### SIGFOX: ####
   - Corrected a bug that may create an irregular ramp down duration
   - Corrected a bug that may not set LAN frequency after a Sigfox transmission

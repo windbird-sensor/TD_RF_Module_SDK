@@ -35,7 +35,7 @@
 <stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="TD1205 Debug/blink.elf"/>
 <stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="blink"/>
 <booleanAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_AUTO_ATTR" value="true"/>
-<stringAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR" value="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.1761944901.33914722"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR" value=""/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/blink"/>
 </listAttribute>

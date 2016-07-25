@@ -139,6 +139,7 @@ extern "C" {
 	uint16_t TD_FLASH_ReadVariable(uint8_t index, uint8_t *buffer);
 	bool TD_FLASH_DeclareVariable(uint8_t *variable, uint16_t size,
 		uint8_t *index);
+	uint32_t TD_FLASH_GetFlashSize(void);
 	uint32_t TD_FLASH_GetLayoutBase(uint8_t idx, uint32_t *size);
 	void TD_FLASH_WriteVariables(void);
 	void TD_FLASH_DeleteVariables(void);
