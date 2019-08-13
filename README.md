@@ -1,3 +1,4 @@
+
 Welcome to TD RF Module SDK (powered by TD next, a division of Telecom Design)
 =======================================================
 
@@ -159,12 +160,23 @@ Similarly, to debug a firmware on the TD12xx/TD15xx board:
 
 Release Notes
 =============
+v6.3.5 (August 2019)
+-------------------------
+### Bug Fixes ###
+#### SIGFOX: ####
+  * Corrected non-random Sigfox channel upon startup
+  * Corrected wrong Sigfox sequence number when there is an overrun and the module reboots
+##### **libtdgeoloc** #####
+ * Wrong GPS position for GPGGA NMEA frame and add retries when starting up the GPS
+ * Take the checksum into account when parsing GPS frames
+* Missing IRQ when there is simultaneous Sigfox transmission and a movement
+
 v6.3.4 (July 2016)
 -------------------
-###Bug Fixes###
+### Bug Fixes ###
 #### SIGFOX: ####
-  - New library RF version 6.3.4
-  - Corrected a bug on Sigfox certification function in FCC mode
+  * New library RF version 6.3.4
+  * Corrected a bug on Sigfox certification function in FCC mode
   
 ### Major Updates ###
   - Added TD1205P module
@@ -190,7 +202,7 @@ v6.3.2 (April 2016)
   
 v6.2.0 (February 2016)
 -------------------
-###Bug Fixes ###
+### Bug Fixes ###
 #### SIGFOX: ####
   - Corrected a bug that may create an irregular ramp down duration
   - Corrected a bug that may not set LAN frequency after a Sigfox transmission

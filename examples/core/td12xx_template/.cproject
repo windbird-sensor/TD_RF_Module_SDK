@@ -652,7 +652,7 @@
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def.1497533831" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="NDEBUG"/>
 									<listOptionValue builtIn="false" value="EZR32LG230F128"/>
-									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_TD1208"/>
+									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_TD1508"/>
 								</option>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths.979144289" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
@@ -1576,13 +1576,13 @@
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
-				<externalSettings containerId="Device;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.878147372.279295855.1048868787.109061794" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
-				<externalSettings containerId="emlib;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.1472287705.1884496659.1639202683.401447898" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
-				<externalSettings containerId="libtdcore;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.86103437.802703146.1248360277.279535262" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
-				<externalSettings containerId="libtdrf;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.86103437.253698458.1743820319" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
-				<externalSettings containerId="libtddrivers;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.1371762102.665148952" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
-				<externalSettings containerId="libtdgeoloc;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.1371762102.2015745606" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
-				<externalSettings containerId="libtdsensor;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.1033211399.828837204" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="Device;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.878147372.279295855.1048868787.109061794.935839874" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="emlib;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.1472287705.1884496659.1639202683.401447898.1943738969" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdcore;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.86103437.802703146.1248360277.279535262.1581354707" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdrf;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.86103437.253698458.1743820319.1921148862" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtddrivers;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.1371762102.665148952.1968061114" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdgeoloc;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.1371762102.2015745606.6408174" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdsensor;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.release.2075929637.1057491344.1838990031.1033211399.828837204.224370160" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
 			</storageModule>
 		</cconfiguration>
 		<cconfiguration id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.170095628.1059096247">
@@ -1699,13 +1699,13 @@
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
-				<externalSettings containerId="Device;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2140231312.184050707.213805513.857930142" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
-				<externalSettings containerId="emlib;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.1309782928.108768970.1644477002.1942064470" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
-				<externalSettings containerId="libtdcore;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.615468483.1265862379.1436657556.667045257" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
-				<externalSettings containerId="libtdrf;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.615468483.463640573.1686683803" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
-				<externalSettings containerId="libtddrivers;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.1666513988.307598557" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
-				<externalSettings containerId="libtdgeoloc;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.1666513988.583235120" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
-				<externalSettings containerId="libtdsensor;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.2017434799.637070350" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="Device;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2140231312.184050707.213805513.857930142.1144127242" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="emlib;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.1309782928.108768970.1644477002.1942064470.2041379577" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdcore;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.615468483.1265862379.1436657556.667045257.52699056" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdrf;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.615468483.463640573.1686683803.338032124" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtddrivers;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.1666513988.307598557.1228806112" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdgeoloc;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.1666513988.583235120.1993133992" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="libtdsensor;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.lib.debug.2056753846.912973448.183206926.2017434799.637070350.1881342572" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
 			</storageModule>
 		</cconfiguration>
 	</storageModule>
@@ -1714,11 +1714,8 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="TD1208 Release">
+		<configuration configurationName="TD1208 Debug">
 			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
-		</configuration>
-		<configuration configurationName="Multiple configurations">
-			<resource resourceType="PROJECT" workspacePath="/blink"/>
 		</configuration>
 		<configuration configurationName="IAR Debug">
 			<resource resourceType="PROJECT" workspacePath="/td1202_template"/>
@@ -1726,16 +1723,7 @@
 		<configuration configurationName="IAR Release Gecko">
 			<resource resourceType="PROJECT" workspacePath="/td1202_template"/>
 		</configuration>
-		<configuration configurationName="TD1208 Debug">
-			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
-		</configuration>
-		<configuration configurationName="IAR Debug Gecko">
-			<resource resourceType="PROJECT" workspacePath="/td1202_template"/>
-		</configuration>
 		<configuration configurationName="Ref Design FCC Release">
-			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
-		</configuration>
-		<configuration configurationName="TD1202 Release">
 			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
 		</configuration>
 		<configuration configurationName="GCC Debug Gecko">
@@ -1744,37 +1732,22 @@
 		<configuration configurationName="IAR Release">
 			<resource resourceType="PROJECT" workspacePath="/td1202_template"/>
 		</configuration>
-		<configuration configurationName="GCC Debug">
-			<resource resourceType="PROJECT" workspacePath="/td1202_template"/>
+		<configuration configurationName="TD1205P Release">
+			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
 		</configuration>
-		<configuration configurationName="Debug">
+		<configuration configurationName="GCC Debug">
 			<resource resourceType="PROJECT" workspacePath="/td1202_template"/>
 		</configuration>
 		<configuration configurationName="Ref Design FCC Debug">
 			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
 		</configuration>
-		<configuration configurationName="TD1205 Release">
-			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
-		</configuration>
-		<configuration configurationName="Release">
-			<resource resourceType="PROJECT" workspacePath="/td1202_template"/>
-		</configuration>
 		<configuration configurationName="GCC Release">
 			<resource resourceType="PROJECT" workspacePath="/td1202_template"/>
-		</configuration>
-		<configuration configurationName="TD1204 Release">
-			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
-		</configuration>
-		<configuration configurationName="TD1204 Debug">
-			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
 		</configuration>
 		<configuration configurationName="TD1508 Release">
 			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
 		</configuration>
 		<configuration configurationName="TD1205 Debug">
-			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
-		</configuration>
-		<configuration configurationName="Ref Design ETSI Release">
 			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
 		</configuration>
 		<configuration configurationName="Ref Design ETSI Debug">
@@ -1783,32 +1756,71 @@
 		<configuration configurationName="TD1202 Debug">
 			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
 		</configuration>
-		<configuration configurationName="TD1508 Debug">
-			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
-		</configuration>
 		<configuration configurationName="GCC Release Gecko">
 			<resource resourceType="PROJECT" workspacePath="/td1202_template"/>
+		</configuration>
+		<configuration configurationName="TD1208 Release">
+			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
+		</configuration>
+		<configuration configurationName="Multiple configurations">
+			<resource resourceType="PROJECT" workspacePath="/blink"/>
+		</configuration>
+		<configuration configurationName="IAR Debug Gecko">
+			<resource resourceType="PROJECT" workspacePath="/td1202_template"/>
+		</configuration>
+		<configuration configurationName="TD1202 Release">
+			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
+		</configuration>
+		<configuration configurationName="TD1205 Release">
+			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
+		</configuration>
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/td1202_template"/>
+		</configuration>
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/td1202_template"/>
+		</configuration>
+		<configuration configurationName="TD1204 Release">
+			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
+		</configuration>
+		<configuration configurationName="TD1205P Debug">
+			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
+		</configuration>
+		<configuration configurationName="TD1204 Debug">
+			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
+		</configuration>
+		<configuration configurationName="Ref Design ETSI Release">
+			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
+		</configuration>
+		<configuration configurationName="TD1508 Debug">
+			<resource resourceType="PROJECT" workspacePath="/td12xx_template"/>
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.exe.configuration.debug.v5.4.0.1914464558.1990563401.297814257.402206755.826138103;iar.arm.toolchain.project.exe.configuration.debug.v5.4.0.1914464558.1990563401.297814257.402206755.826138103.;iar.arm.toolchain.compiler.v5.4.1.747539362;iar.arm.toolchain.compiler.inputType.v5.4.1.1563167333">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.exe.configuration.release.v5.4.0.906220437.1061650086.239798615.1655237169.99709743;iar.arm.toolchain.project.exe.configuration.release.v5.4.0.906220437.1061650086.239798615.1655237169.99709743.;iar.arm.toolchain.compiler.v5.4.1.737601799;iar.arm.toolchain.compiler.inputType.v5.4.1.1663356547">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.release.1318853569;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.549175049">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.debug.639355606;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.192258010">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.release.1318853569;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.549175049">
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.1453082797.1224076505;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.1453082797.1224076505.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.release.370745858;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.281062608">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.exe.configuration.debug.v5.4.0.1914464558.1990563401.297814257.402206755.826138103;iar.arm.toolchain.project.exe.configuration.debug.v5.4.0.1914464558.1990563401.297814257.402206755.826138103.;iar.arm.toolchain.compiler.v5.4.1.747539362;iar.arm.toolchain.compiler.inputType.v5.4.1.1563167333">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.debug.1939259071;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.1302135206">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release.562944056;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.565044589">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.1453082797.1224076505;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.1453082797.1224076505.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release.1454945129;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.2072024530">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.exe.configuration.release.v5.4.0.906220437.1061650086.239798615.1655237169.99709743;iar.arm.toolchain.project.exe.configuration.release.v5.4.0.906220437.1061650086.239798615.1655237169.99709743.;iar.arm.toolchain.compiler.v5.4.1.737601799;iar.arm.toolchain.compiler.inputType.v5.4.1.1663356547">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.iar.cdt.arm.scanner.IAR_ARM_PerProjectProfile"/>
 		</scannerConfigBuildInfo>
 	</storageModule>
 </cproject>

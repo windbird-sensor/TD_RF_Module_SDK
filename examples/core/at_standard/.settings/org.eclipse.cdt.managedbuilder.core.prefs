@@ -77,6 +77,12 @@ environment/buildEnvironmentInclude/org.eclipse.cdt.cross.arm.gnu.sourcery.windo
 environment/buildEnvironmentInclude/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.578287768.728495171.1559786263/C_INCLUDE_PATH/operation=remove
 environment/buildEnvironmentInclude/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.578287768.728495171.1559786263/append=true
 environment/buildEnvironmentInclude/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.578287768.728495171.1559786263/appendContributed=true
+environment/buildEnvironmentInclude/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.75503817.1227192710.487493734/CPATH/delimiter=;
+environment/buildEnvironmentInclude/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.75503817.1227192710.487493734/CPATH/operation=remove
+environment/buildEnvironmentInclude/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.75503817.1227192710.487493734/C_INCLUDE_PATH/delimiter=;
+environment/buildEnvironmentInclude/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.75503817.1227192710.487493734/C_INCLUDE_PATH/operation=remove
+environment/buildEnvironmentInclude/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.75503817.1227192710.487493734/append=true
+environment/buildEnvironmentInclude/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.75503817.1227192710.487493734/appendContributed=true
 environment/buildEnvironmentInclude/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.441666929.1497353731.1496297760/CPATH/delimiter=;
 environment/buildEnvironmentInclude/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.441666929.1497353731.1496297760/CPATH/operation=remove
 environment/buildEnvironmentInclude/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.441666929.1497353731.1496297760/C_INCLUDE_PATH/delimiter=;
@@ -209,6 +215,10 @@ environment/buildEnvironmentLibrary/org.eclipse.cdt.cross.arm.gnu.sourcery.windo
 environment/buildEnvironmentLibrary/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.578287768.728495171.1559786263/LIBRARY_PATH/operation=remove
 environment/buildEnvironmentLibrary/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.578287768.728495171.1559786263/append=true
 environment/buildEnvironmentLibrary/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.578287768.728495171.1559786263/appendContributed=true
+environment/buildEnvironmentLibrary/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.75503817.1227192710.487493734/LIBRARY_PATH/delimiter=;
+environment/buildEnvironmentLibrary/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.75503817.1227192710.487493734/LIBRARY_PATH/operation=remove
+environment/buildEnvironmentLibrary/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.75503817.1227192710.487493734/append=true
+environment/buildEnvironmentLibrary/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.75503817.1227192710.487493734/appendContributed=true
 environment/buildEnvironmentLibrary/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.441666929.1497353731.1496297760/LIBRARY_PATH/delimiter=;
 environment/buildEnvironmentLibrary/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.441666929.1497353731.1496297760/LIBRARY_PATH/operation=remove
 environment/buildEnvironmentLibrary/org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.441666929.1497353731.1496297760/append=true

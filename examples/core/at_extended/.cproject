@@ -1714,7 +1714,7 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="TD1208 Release">
+		<configuration configurationName="TD1208 Debug">
 			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
 		</configuration>
 		<configuration configurationName="IAR Debug">
@@ -1723,19 +1723,7 @@
 		<configuration configurationName="IAR Release Gecko">
 			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
 		</configuration>
-		<configuration configurationName="Multiple configurations">
-			<resource resourceType="PROJECT" workspacePath="/blink"/>
-		</configuration>
-		<configuration configurationName="TD1208 Debug">
-			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
-		</configuration>
-		<configuration configurationName="IAR Debug Gecko">
-			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
-		</configuration>
 		<configuration configurationName="Ref Design FCC Release">
-			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
-		</configuration>
-		<configuration configurationName="TD1202 Release">
 			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
 		</configuration>
 		<configuration configurationName="GCC Debug Gecko">
@@ -1744,28 +1732,16 @@
 		<configuration configurationName="IAR Release">
 			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
 		</configuration>
-		<configuration configurationName="GCC Debug">
+		<configuration configurationName="TD1205P Release">
 			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
 		</configuration>
-		<configuration configurationName="Debug">
+		<configuration configurationName="GCC Debug">
 			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
 		</configuration>
 		<configuration configurationName="Ref Design FCC Debug">
 			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
 		</configuration>
-		<configuration configurationName="TD1205 Release">
-			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
-		</configuration>
-		<configuration configurationName="Release">
-			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
-		</configuration>
 		<configuration configurationName="GCC Release">
-			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
-		</configuration>
-		<configuration configurationName="TD1204 Release">
-			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
-		</configuration>
-		<configuration configurationName="TD1204 Debug">
 			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
 		</configuration>
 		<configuration configurationName="TD1508 Release">
@@ -1774,19 +1750,49 @@
 		<configuration configurationName="TD1205 Debug">
 			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
 		</configuration>
-		<configuration configurationName="Ref Design ETSI Release">
-			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
-		</configuration>
 		<configuration configurationName="Ref Design ETSI Debug">
 			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
 		</configuration>
 		<configuration configurationName="TD1202 Debug">
 			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
 		</configuration>
-		<configuration configurationName="TD1508 Debug">
+		<configuration configurationName="GCC Release Gecko">
 			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
 		</configuration>
-		<configuration configurationName="GCC Release Gecko">
+		<configuration configurationName="TD1208 Release">
+			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
+		</configuration>
+		<configuration configurationName="Multiple configurations">
+			<resource resourceType="PROJECT" workspacePath="/blink"/>
+		</configuration>
+		<configuration configurationName="IAR Debug Gecko">
+			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
+		</configuration>
+		<configuration configurationName="TD1202 Release">
+			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
+		</configuration>
+		<configuration configurationName="TD1205 Release">
+			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
+		</configuration>
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
+		</configuration>
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
+		</configuration>
+		<configuration configurationName="TD1204 Release">
+			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
+		</configuration>
+		<configuration configurationName="TD1205P Debug">
+			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
+		</configuration>
+		<configuration configurationName="TD1204 Debug">
+			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
+		</configuration>
+		<configuration configurationName="Ref Design ETSI Release">
+			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
+		</configuration>
+		<configuration configurationName="TD1508 Debug">
 			<resource resourceType="PROJECT" workspacePath="/at_extended"/>
 		</configuration>
 	</storageModule>
@@ -1805,6 +1811,9 @@
 	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.1127742919.993604571;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.1127742919.993604571.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release.1715401659;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.212000235">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.884607313.1030387481;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.884607313.1030387481.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release.260550640;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.45773093">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
@@ -1847,19 +1856,22 @@
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.debug.639355606;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.192258010">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release.562944056;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.565044589">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
-		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.1127742919;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.1127742919.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release.33977086;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.1835734622">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.376117288.52005950.1204278230.668965043.1379906283.497818286;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.376117288.52005950.1204278230.668965043.1379906283.497818286.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release.1788098083;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.605690390">
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release.562944056;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.565044589">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.1127742919;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.1127742919.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.release.907893223;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.861292924">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.376117288.52005950.1204278230.668965043.1379906283.497818286;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.473318727.107304340.929314195.1749781787.1822506601.2029136063.376117288.52005950.1204278230.668965043.1379906283.497818286.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release.1788098083;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.605690390">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.debug.1939259071;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.1302135206">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.1127742919.993604571;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.1127742919.993604571.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.release.2063372296;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.6431737">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.578287768.728495171.1966096605;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.1400086988.565480569.161940868.53913418.2041610307.578287768.728495171.1966096605.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.debug.578419165;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.842388968">

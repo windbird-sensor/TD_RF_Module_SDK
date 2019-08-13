@@ -912,7 +912,7 @@
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def.946006169" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="NDEBUG"/>
 									<listOptionValue builtIn="false" value="EZR32LG230F128"/>
-									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_TD1208"/>
+									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_TD1508"/>
 								</option>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths.473101979" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
@@ -1727,7 +1727,7 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="TD1208 Release">
+		<configuration configurationName="TD1208 Debug">
 			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
 		</configuration>
 		<configuration configurationName="IAR Debug">
@@ -1736,19 +1736,7 @@
 		<configuration configurationName="IAR Release Gecko">
 			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
 		</configuration>
-		<configuration configurationName="Multiple configurations">
-			<resource resourceType="PROJECT" workspacePath="/blink"/>
-		</configuration>
-		<configuration configurationName="TD1208 Debug">
-			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
-		</configuration>
-		<configuration configurationName="IAR Debug Gecko">
-			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
-		</configuration>
 		<configuration configurationName="Ref Design FCC Release">
-			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
-		</configuration>
-		<configuration configurationName="TD1202 Release">
 			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
 		</configuration>
 		<configuration configurationName="GCC Debug Gecko">
@@ -1757,28 +1745,16 @@
 		<configuration configurationName="IAR Release">
 			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
 		</configuration>
-		<configuration configurationName="GCC Debug">
+		<configuration configurationName="TD1205P Release">
 			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
 		</configuration>
-		<configuration configurationName="Debug">
+		<configuration configurationName="GCC Debug">
 			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
 		</configuration>
 		<configuration configurationName="Ref Design FCC Debug">
 			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
 		</configuration>
-		<configuration configurationName="TD1205 Release">
-			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
-		</configuration>
-		<configuration configurationName="Release">
-			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
-		</configuration>
 		<configuration configurationName="GCC Release">
-			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
-		</configuration>
-		<configuration configurationName="TD1204 Release">
-			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
-		</configuration>
-		<configuration configurationName="TD1204 Debug">
 			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
 		</configuration>
 		<configuration configurationName="TD1508 Release">
@@ -1787,19 +1763,49 @@
 		<configuration configurationName="TD1205 Debug">
 			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
 		</configuration>
-		<configuration configurationName="Ref Design ETSI Release">
-			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
-		</configuration>
 		<configuration configurationName="Ref Design ETSI Debug">
 			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
 		</configuration>
 		<configuration configurationName="TD1202 Debug">
 			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
 		</configuration>
-		<configuration configurationName="TD1508 Debug">
+		<configuration configurationName="GCC Release Gecko">
 			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
 		</configuration>
-		<configuration configurationName="GCC Release Gecko">
+		<configuration configurationName="TD1208 Release">
+			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
+		</configuration>
+		<configuration configurationName="Multiple configurations">
+			<resource resourceType="PROJECT" workspacePath="/blink"/>
+		</configuration>
+		<configuration configurationName="IAR Debug Gecko">
+			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
+		</configuration>
+		<configuration configurationName="TD1202 Release">
+			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
+		</configuration>
+		<configuration configurationName="TD1205 Release">
+			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
+		</configuration>
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
+		</configuration>
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
+		</configuration>
+		<configuration configurationName="TD1204 Release">
+			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
+		</configuration>
+		<configuration configurationName="TD1205P Debug">
+			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
+		</configuration>
+		<configuration configurationName="TD1204 Debug">
+			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
+		</configuration>
+		<configuration configurationName="Ref Design ETSI Release">
+			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
+		</configuration>
+		<configuration configurationName="TD1508 Debug">
 			<resource resourceType="PROJECT" workspacePath="/lan_rx"/>
 		</configuration>
 	</storageModule>

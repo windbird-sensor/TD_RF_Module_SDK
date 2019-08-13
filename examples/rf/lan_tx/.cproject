@@ -906,7 +906,7 @@
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def.920145860" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="NDEBUG"/>
 									<listOptionValue builtIn="false" value="EZR32LG230F128"/>
-									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_TD1208"/>
+									<listOptionValue builtIn="false" value="MODULE_REVISION=REVISION_TD1508"/>
 								</option>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths.161898894" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
@@ -1721,7 +1721,7 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="TD1208 Release">
+		<configuration configurationName="TD1208 Debug">
 			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
 		</configuration>
 		<configuration configurationName="IAR Debug">
@@ -1730,19 +1730,7 @@
 		<configuration configurationName="IAR Release Gecko">
 			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
 		</configuration>
-		<configuration configurationName="Multiple configurations">
-			<resource resourceType="PROJECT" workspacePath="/blink"/>
-		</configuration>
-		<configuration configurationName="TD1208 Debug">
-			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
-		</configuration>
-		<configuration configurationName="IAR Debug Gecko">
-			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
-		</configuration>
 		<configuration configurationName="Ref Design FCC Release">
-			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
-		</configuration>
-		<configuration configurationName="TD1202 Release">
 			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
 		</configuration>
 		<configuration configurationName="GCC Debug Gecko">
@@ -1751,28 +1739,16 @@
 		<configuration configurationName="IAR Release">
 			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
 		</configuration>
-		<configuration configurationName="GCC Debug">
+		<configuration configurationName="TD1205P Release">
 			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
 		</configuration>
-		<configuration configurationName="Debug">
+		<configuration configurationName="GCC Debug">
 			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
 		</configuration>
 		<configuration configurationName="Ref Design FCC Debug">
 			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
 		</configuration>
-		<configuration configurationName="TD1205 Release">
-			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
-		</configuration>
-		<configuration configurationName="Release">
-			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
-		</configuration>
 		<configuration configurationName="GCC Release">
-			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
-		</configuration>
-		<configuration configurationName="TD1204 Release">
-			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
-		</configuration>
-		<configuration configurationName="TD1204 Debug">
 			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
 		</configuration>
 		<configuration configurationName="TD1508 Release">
@@ -1781,19 +1757,49 @@
 		<configuration configurationName="TD1205 Debug">
 			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
 		</configuration>
-		<configuration configurationName="Ref Design ETSI Release">
-			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
-		</configuration>
 		<configuration configurationName="Ref Design ETSI Debug">
 			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
 		</configuration>
 		<configuration configurationName="TD1202 Debug">
 			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
 		</configuration>
-		<configuration configurationName="TD1508 Debug">
+		<configuration configurationName="GCC Release Gecko">
 			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
 		</configuration>
-		<configuration configurationName="GCC Release Gecko">
+		<configuration configurationName="TD1208 Release">
+			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
+		</configuration>
+		<configuration configurationName="Multiple configurations">
+			<resource resourceType="PROJECT" workspacePath="/blink"/>
+		</configuration>
+		<configuration configurationName="IAR Debug Gecko">
+			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
+		</configuration>
+		<configuration configurationName="TD1202 Release">
+			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
+		</configuration>
+		<configuration configurationName="TD1205 Release">
+			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
+		</configuration>
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
+		</configuration>
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
+		</configuration>
+		<configuration configurationName="TD1204 Release">
+			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
+		</configuration>
+		<configuration configurationName="TD1205P Debug">
+			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
+		</configuration>
+		<configuration configurationName="TD1204 Debug">
+			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
+		</configuration>
+		<configuration configurationName="Ref Design ETSI Release">
+			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
+		</configuration>
+		<configuration configurationName="TD1508 Debug">
 			<resource resourceType="PROJECT" workspacePath="/lan_tx"/>
 		</configuration>
 	</storageModule>
@@ -1802,7 +1808,13 @@
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.246941130.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.debug.639355606;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.192258010">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.1127742919.993604571.2095420394;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.1127742919.993604571.2095420394.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release.75769476;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.1458855596">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release.562944056;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.565044589">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.1127742919.993604571.2095420394;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.1508144370.852866544.1663196216.389900131.2056559027.1127742919.993604571.2095420394.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.release.1476632583;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.1926815473">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="iar.arm.toolchain.project.exe.configuration.release.v5.4.0.906220437.1061650086.239798615.1655237169.629806206;iar.arm.toolchain.project.exe.configuration.release.v5.4.0.906220437.1061650086.239798615.1655237169.629806206.;iar.arm.toolchain.compiler.v5.4.1.1593674879;iar.arm.toolchain.compiler.inputType.v5.4.1.315169155">

@@ -2,10 +2,10 @@
  * @file
  * @brief Accelerometer API for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 1.2.0
+ * @version 1.2.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2019 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -512,7 +512,7 @@ void TD_ACCELERO_Process(void)
 			}
 		}
 	} else {
-		if (AcceleroIrq) {
+		if (AcceleroIrq || GPIO_PinInGet(CONFIG_ACCELERO_IRQ_PORT, CONFIG_ACCELERO_IRQ_BIT)) {
 			AcceleroIrq = false;
 			if (TD_Accelero.monitoring == TD_ACCELERO_MONITOR_EVENT) {
 				if (EventCallback != 0) {

@@ -2,7 +2,7 @@
  * @file
  * @brief Public definitions for the TDxxxx RF modules.
  * @author Telecom Design S.A.
- * @version 2.2.0
+ * @version 2.2.1
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2012-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
@@ -339,6 +339,7 @@ extern "C" {
 #define REVISION_TD1205P		36  ///< Module TD1205P, all revisions
 #define REVISION_REF_DESIGN_FCC	34  ///< Reference Design FCC, all revisions
 #define REVISION_REF_DESIGN_ETSI	35  ///< Reference Design ETSI, all revisions
+#define REVISION_TD1205P		36  ///< Module TD1205P, all revisions
 #define REVISION_CUSTOM         0xFF///< All other implementation that must define all their configuration before including td_config.h. See td_config.h doc
 
 	/* This define enables to build a very small subset of the TD_CORE library

@@ -91,37 +91,37 @@
 #elif MODULE_REVISION == REVISION_TD1208
 
 /** TD1208 Software release and version */
-#define SOFTWARE_RELEASE		2069
+#define SOFTWARE_RELEASE		3951
 
 #elif MODULE_REVISION == REVISION_TD1204
 
 /** TD1204 Software release and version */
-#define SOFTWARE_RELEASE		2065
+#define SOFTWARE_RELEASE		3947
 
 #elif MODULE_REVISION == REVISION_TD1205
 
 /** TD1205 Software release and version */
-#define SOFTWARE_RELEASE		2066
+#define SOFTWARE_RELEASE		3948
 
 #elif MODULE_REVISION == REVISION_TD1508
 
 /** TD1508 Software release and version */
-#define SOFTWARE_RELEASE		2070
+#define SOFTWARE_RELEASE		3952
 
 #elif MODULE_REVISION == REVISION_TD1205P
 
 /** TD1205P Software release and version */
-#define SOFTWARE_RELEASE		2067
+#define SOFTWARE_RELEASE		3949
 
 #elif MODULE_REVISION == REVISION_REF_DESIGN_FCC
 
 /** REF_DESIGN_FCC Software release and version */
-#define SOFTWARE_RELEASE		2072
+#define SOFTWARE_RELEASE		3954
 
 #elif MODULE_REVISION == REVISION_REF_DESIGN_ETSI
 
 /** REF_DESIGN_ETSI Software release and version */
-#define SOFTWARE_RELEASE		2071
+#define SOFTWARE_RELEASE		3953
 
 #endif
 

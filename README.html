@@ -1,205 +1,169 @@
-<style type="text/css">html,body {font-family: Helvetica, Arial, Verdana, sans-serif;}</style>
-<h1>Welcome to TD RF Module SDK (powered by TD next, a division of Telecom Design)</h1>
-
-<p>The TD RF Module SDK provides a complete Rapid Embedded Development Environment for the TD RF modules and reference
+<style type="text/css">html,body {font-family: Helvetica, Arial,
+  Verdana, sans-serif;}</style>
+<h1 id="welcome-to-td-rf-module-sdk-powered-by-td-next-a-division-of-telecom-design">Welcome to TD RF Module SDK (powered by TD next, a division of Telecom Design)</h1>
+<p>The TD RF Module SDK provides a complete Rapid Embedded Development Environment for the TD RF modules and reference<br>
 designs.</p>
-
-<p>The TD RF Module SDK contains all the Eclipse projects, static libraries, examples with source codes
+<p>The TD RF Module SDK contains all the Eclipse projects, static libraries, examples with source codes<br>
 and auto-generated API documentation to develop for the TD RF modules and reference designs.</p>
-
 <p>Further details on the TD RF Module SDK can be found at <a href="http://rfmodules.td-next.com/">http://rfmodules.td-next.com/</a></p>
-
 <p>We hope you enjoy using the TD RF Module SDK!</p>
-
 <p><em>The TD next Team</em></p>
-
-<h1>Getting the Sources</h1>
-
-<p>The SDK source code and examples are no longer distributed with the TD RF Module SDK Tools zip file but
-are available through the <a href="https://github.com/Telecom-Design/TD_RF_Module_SDK">https://github.com/Telecom-Design/TD_RF_Module_SDK</a> Github repository
-once you register your Telecom Design Evaluation Board (EVB) by following the steps described on
+<h1 id="getting-the-sources">Getting the Sources</h1>
+<p>The SDK source code and examples are no longer distributed with the TD RF Module SDK Tools zip file but<br>
+are available through the <a href="https://github.com/Telecom-Design/TD_RF_Module_SDK">https://github.com/Telecom-Design/TD_RF_Module_SDK</a> Github repository<br>
+once you register your Telecom Design Evaluation Board (EVB) by following the steps described on<br>
 <a href="http://rfmodules.td-next.com/sdk/">http://rfmodules.td-next.com/sdk/</a>.</p>
-
-<p>The stand-alone Eclipse Package which should be used to compile the source can be found here:
+<p>The stand-alone Eclipse Package which should be used to compile the source can be found here:<br>
 <a href="https://s3-eu-west-1.amazonaws.com/assetstdnext/download/TD_RF_Modules_SDK_Tools-v6.0.0.zip">https://s3-eu-west-1.amazonaws.com/assetstdnext/download/TD_RF_Modules_SDK_Tools-v6.0.0.zip</a></p>
-
-<p>The following steps detail how to download the source code and import all projects into the Eclipse
+<p>The following steps detail how to download the source code and import all projects into the Eclipse<br>
 environment.</p>
-
 <ol>
-<li>Navigate to the <code>"C:\TD\TD_RF_Module_SDK-v6.0.0\eclipse"</code> folder and double-click on the
- <code>"eclipse.exe"</code> icon</li>
+<li>Navigate to the <code>"C:\TD\TD_RF_Module_SDK-v6.0.0\eclipse"</code> folder and double-click on the<br>
+<code>"eclipse.exe"</code> icon</li>
 <li>Open the <code>"File"</code> menu and select the <code>"Import..."</code> item.</li>
-<li>In the <code>"Import"</code> dialog, unfold the <code>"Git"</code> folder by clicking on the <code>"+"</code> sign left to it,
- select the <code>"Projects from Git"</code> item and click on the <code>"Next &gt;"</code> button</li>
+<li>In the <code>"Import"</code> dialog, unfold the <code>"Git"</code> folder by clicking on the <code>"+"</code> sign left to it,<br>
+select the <code>"Projects from Git"</code> item and click on the <code>"Next &gt;"</code> button</li>
 <li>In the <code>"Import Projects from Git"</code>, select the <code>"URI"</code> icon ad click on the <code>"Next &gt;"</code> button</li>
-<li>Enter The Github repository URL <code>"https://github.com/Telecom-Design/TD_RF_Module_SDK.git"</code>
- in the <code>"URI"</code> field</li>
-<li>Enter your Github username and password in the <code>"User:"</code> and <code>"Password:"</code> fields,
- respectively and click on the <code>"Next &gt;"</code> button</li>
+<li>Enter The Github repository URL <code>"https://github.com/Telecom-Design/TD_RF_Module_SDK.git"</code><br>
+in the <code>"URI"</code> field</li>
+<li>Enter your Github username and password in the <code>"User:"</code> and <code>"Password:"</code> fields,<br>
+respectively and click on the <code>"Next &gt;"</code> button</li>
 <li>Check the <code>"Master"</code> branch box and click on the <code>"Next &gt;"</code> button</li>
-<li>Enter <code>"C:\TD\TD_RF_Module_SDK-v6.0.0\Github\TD_RF_Module_SDK"</code> in the <code>"Directory:"</code> field and
- click on the <code>"Next &gt;"</code> button</li>
+<li>Enter <code>"C:\TD\TD_RF_Module_SDK-v6.0.0\Github\TD_RF_Module_SDK"</code> in the <code>"Directory:"</code> field and<br>
+click on the <code>"Next &gt;"</code> button</li>
 <li>Check the <code>"Import existing projects"</code> radio button and click on the <code>"Next &gt;"</code> button</li>
 <li>Click on the <code>"Finish"</code> button. The Git import will take place, this may take a while</li>
 </ol>
-
 <p>All the available libraries and examples should now be available in the Project Explorer panel.</p>
-
-<h1>Organizing the Sources</h1>
-
-<p>By default, all projects are presented in Eclipse at the same level without particular organization
+<h1 id="organizing-the-sources">Organizing the Sources</h1>
+<p>By default, all projects are presented in Eclipse at the same level without particular organization<br>
 except that they are sorted alphabetically.</p>
-
-<p>In order to have a more logical organization, we must import an Eclipse "Working Set" that will
+<p>In order to have a more logical organization, we must import an Eclipse  Working Set  that will<br>
 provide a grouping of projects by categories.</p>
-
-<p>To do so, launch Eclipse by navigating to the <code>"C:\TD\TD_RF_Module_SDK-v6.0.0\eclipse"</code> folder and
+<p>To do so, launch Eclipse by navigating to the <code>"C:\TD\TD_RF_Module_SDK-v6.0.0\eclipse"</code> folder and<br>
 double-click on the <code>"eclipse.exe"</code> icon (if not already done) and:</p>
-
 <ol>
 <li>Open the <code>"File"</code> menu and select the <code>"Import..."</code> item.</li>
-<li>In the <code>"Import"</code> dialog, unfold the <code>"General"</code> folder by clicking on the <code>"+"</code> sign left to
- it, select the <code>"Working Sets"</code> item and click on the <code>"Next &gt;"</code> button</li>
-<li>Enter <code>"C:\TD\TD_RF_Module_SDK-v6.0.0\Github\TD_RF_Module_SDK\TD_RF_Module_SDK.wst"</code> in the
- <code>"Browse..."</code> field, check all working sets and click on the <code>"Finish"</code> button</li>
-<li>Click on the small downwards arrow in the top-right corner of the <code>"Project Explorer"</code> panel
- and select the <code>"Select Working Sets..."</code> item</li>
+<li>In the <code>"Import"</code> dialog, unfold the <code>"General"</code> folder by clicking on the <code>"+"</code> sign left to<br>
+it, select the <code>"Working Sets"</code> item and click on the <code>"Next &gt;"</code> button</li>
+<li>Enter <code>"C:\TD\TD_RF_Module_SDK-v6.0.0\Github\TD_RF_Module_SDK\TD_RF_Module_SDK.wst"</code> in the<br>
+<code>"Browse..."</code> field, check all working sets and click on the <code>"Finish"</code> button</li>
+<li>Click on the small downwards arrow in the top-right corner of the <code>"Project Explorer"</code> panel<br>
+and select the <code>"Select Working Sets..."</code> item</li>
 <li>In the <code>"Select Working Sets"</code> dialog, click on the <code>"Select All"</code>, then on the <code>"OK"</code> button</li>
-<li>Click on the small downwards arrow in the top-right corner of the <code>"Project Explorer"</code> panel
- again and select the <code>"Top Level Elements &gt; Working Sets"</code> item</li>
+<li>Click on the small downwards arrow in the top-right corner of the <code>"Project Explorer"</code> panel<br>
+again and select the <code>"Top Level Elements &gt; Working Sets"</code> item</li>
 </ol>
-
 <p>All the available libraries and examples should now be better organized in the Project Explorer panel.</p>
-
-<h1>Compiling the Sources</h1>
-
-<p>With the exception of the binary-only static libraries in the <code>"libtddrivers"</code> and <code>"libtdrf"</code>
-projects, all deliverables are presented in source form only, and must be compiled to obtain an
-executable firmware. To compile properly you must add the gcc path into your Eclipse environment variables
-by opening: Window -> Preferences -> C/C++ -> Environment -> Add...</p>
-
+<h1 id="compiling-the-sources">Compiling the Sources</h1>
+<p>With the exception of the binary-only static libraries in the <code>"libtddrivers"</code> and <code>"libtdrf"</code><br>
+projects, all deliverables are presented in source form only, and must be compiled to obtain an<br>
+executable firmware. To compile properly you must add the gcc path into your Eclipse environment variables<br>
+by opening: Window -&gt; Preferences -&gt; C/C++ -&gt; Environment -&gt; Add </p>
 <p>Please add the PATH variable with the following value:</p>
-
-<p>C:\TD\TD<em>RF</em>Module_SDK-v6.0.0\gnu\bin</p>
-
+<p>C:\TD\TD_RF_Module_SDK-v6.0.0\gnu\bin</p>
 <p>Then if we take the <code>"blink"</code> project as an example, here are the steps required to compile it:</p>
-
 <ol>
-<li>In order to avoid unnecessary rebuilds of the common libraries, it is best to set the right
- build configuration for all these libraries: unfold the <code>"Common_Libraries"</code> working set in the
- Project Explorer panel on the left side, then select all the projects by clicking on the first one
- in the list, pressing the <code>"SHIFT"</code>key, then clicking on the last one in the list</li>
-<li>Click on the small downwards arrow right next to the <code>"Hammer"</code> icon in the top menu bar and
- select the right build configuration corresponding to your board: <code>"TD1204"</code> , <code>"TD1205"</code>
- <code>"TD1208"</code> or <code>"TD1508"</code>, and <code>"Debug"</code> for building an executable firmware with integrated symbols
- suitable for source code debugging, or <code>"Release"</code> for a stripped down firmware</li>
-<li>Unfold the <code>"Core_Examples"</code> working set in the Project Explorer panel on the left side, then
- select the <code>"blink"</code> project</li>
-<li>Click again on the small downwards arrow right next to the <code>"Hammer"</code> icon in the top menu bar and
- select the same build configuration as for the libraries above</li>
-<li>Compilation of the <code>"blink"</code>project and all the required dependencies will take place, which can
- be monitored in the <code>"Console"</code> tab of the bottom panel</li>
+<li>In order to avoid unnecessary rebuilds of the common libraries, it is best to set the right<br>
+build configuration for all these libraries: unfold the <code>"Common_Libraries"</code> working set in the<br>
+Project Explorer panel on the left side, then select all the projects by clicking on the first one<br>
+in the list, pressing the <code>"SHIFT"</code>key, then clicking on the last one in the list</li>
+<li>Click on the small downwards arrow right next to the <code>"Hammer"</code> icon in the top menu bar and<br>
+select the right build configuration corresponding to your board: <code>"TD1204"</code> , <code>"TD1205"</code><br>
+<code>"TD1208"</code> or <code>"TD1508"</code>, and <code>"Debug"</code> for building an executable firmware with integrated symbols<br>
+suitable for source code debugging, or <code>"Release"</code> for a stripped down firmware</li>
+<li>Unfold the <code>"Core_Examples"</code> working set in the Project Explorer panel on the left side, then<br>
+select the <code>"blink"</code> project</li>
+<li>Click again on the small downwards arrow right next to the <code>"Hammer"</code> icon in the top menu bar and<br>
+select the same build configuration as for the libraries above</li>
+<li>Compilation of the <code>"blink"</code>project and all the required dependencies will take place, which can<br>
+be monitored in the <code>"Console"</code> tab of the bottom panel</li>
 </ol>
-
 <p>The same procedure can be used for all the example projects when required.</p>
-
-<h1>Flashing / Debugging</h1>
-
-<p>Unlike some dedicated embedded Interactive Development Environments (IDEs), Eclipse does not come with
+<h1 id="flashing--debugging">Flashing / Debugging</h1>
+<p>Unlike some dedicated embedded Interactive Development Environments (IDEs), Eclipse does not come with<br>
 fixed Flash/Debug commands or menu buttons: they need to be added explicitly on a project by project basis.</p>
-
 <p>Fortunately, these Flash/Debug <code>"Launchers"</code> can be imported or duplicated to other projects easily:</p>
-
 <ol>
 <li>Open the <code>"File"</code> menu and select the <code>"Import..."</code> item.</li>
-<li>In the <code>"Import"</code> dialog, unfold the <code>"Run/Debug"</code> folder by clicking on the <code>"+"</code> sign left to it,
- select the <code>"Launch Configurations"</code> item and click on the <code>"Next &gt;"</code> button</li>
-<li>Enter <code>"C:/TD/TD_RF_Module_SDK-v6.0.0/Github/TD_RF_Module_SDK/Eclipse Launchers"</code> in the <code>"Browse..."</code>
- field, check the box in front of the <code>"Eclipse Launchers"</code> item and click on the <code>"Finish"</code> button</li>
-<li>All the default Flash/Debug <code>"Launchers"</code> will be added to the top menu <code>"Bug"</code> and <code>"Green Circle
- with With Right Arrow and Briefcase"</code> icons</li>
-<li>If required, you can edit these <code>"Launchers"</code> by choosing the "Debug Configurations..."<code>or
-</code>"External Tools Configurations..." entries in the menu obtained by the small downwards arrow right
- next to the corresponding <code>"Bug"</code> or <code>"Green Circle with With Right Arrow and Briefcase"</code> icon</li>
-<li>In the dialog windows that opens, you can edit a given configuration directly and click on the
- <code>"Apply"</code> and <code>"Close"</code> buttons, or you an duplicate it by right-clicking on it and selecting the
- <code>"Duplicate"</code> entry in the contextual menu that pops up</li>
+<li>In the <code>"Import"</code> dialog, unfold the <code>"Run/Debug"</code> folder by clicking on the <code>"+"</code> sign left to it,<br>
+select the <code>"Launch Configurations"</code> item and click on the <code>"Next &gt;"</code> button</li>
+<li>Enter <code>"C:/TD/TD_RF_Module_SDK-v6.0.0/Github/TD_RF_Module_SDK/Eclipse Launchers"</code> in the <code>"Browse..."</code><br>
+field, check the box in front of the <code>"Eclipse Launchers"</code> item and click on the <code>"Finish"</code> button</li>
+<li>All the default Flash/Debug <code>"Launchers"</code> will be added to the top menu <code>"Bug"</code> and <code>"Green Circle with With Right Arrow and Briefcase"</code> icons</li>
+<li>If required, you can edit these <code>"Launchers"</code> by choosing the  Debug Configurations  <code>or</code> External Tools Configurations   entries in the menu obtained by the small downwards arrow right<br>
+next to the corresponding <code>"Bug"</code> or <code>"Green Circle with With Right Arrow and Briefcase"</code> icon</li>
+<li>In the dialog windows that opens, you can edit a given configuration directly and click on the<br>
+<code>"Apply"</code> and <code>"Close"</code> buttons, or you an duplicate it by right-clicking on it and selecting the<br>
+<code>"Duplicate"</code> entry in the contextual menu that pops up</li>
 </ol>
-
 <p>Then, to flash a firmware to the TD12xx/TD15xx board:</p>
-
 <ol>
 <li>Select the desired project in the Project Explorer panel on the left side</li>
-<li>Right-click on the project and select the <code>"Build Configurations &gt; Set Active &gt;"</code> and the desired
- build configuration as explained above</li>
+<li>Right-click on the project and select the <code>"Build Configurations &gt; Set Active &gt;"</code> and the desired<br>
+build configuration as explained above</li>
 <li>Optionally click on the <code>"Hammer"</code> icon in the top menu bar to build the project</li>
-<li>Click on the  the small downwards arrow right next to the <code>"Green Circle with With Right Arrow and
- Briefcase"</code> icon and select <code>"Flash Selected Project"</code> in the contextual menu</li>
+<li>Click on the  the small downwards arrow right next to the <code>"Green Circle with With Right Arrow and Briefcase"</code> icon and select <code>"Flash Selected Project"</code> in the contextual menu</li>
 </ol>
-
 <p>Similarly, to debug a firmware on the TD12xx/TD15xx board:</p>
-
 <ol>
 <li>Select the desired project in the Project Explorer panel on the left side</li>
-<li>Right-click on the project and select the <code>"Build Configurations &gt; Set Active &gt;"</code> and the desired
- build configuration as explained above, this must be a <code>"Debug"</code>one</li>
-<li>If this is the first time you debug this project, you must edit/add a <code>"Launcher"</code> by choosing the
- "Debug Configurations..."<code>entry in the menu obtained by the small downwards arrow right next to the
-</code>"Bug"` icon</li>
-<li>In the dialog windows that opens, you can edit a given configuration directly (you only need to
- change the <code>"Project:"</code> and <code>"C/C++ Application:"</code> values) and click on the <code>"Apply"</code> and <code>"Close"</code>
- buttons, or you an duplicate an existing one by right-clicking on it and selecting the <code>"Duplicate"</code>
- entry in the contextual menu that pops up, then changing these same values</li>
-<li>Click on the  the small downwards arrow right next to the <code>"Bug"</code> icon and select the
- <code>"Debug TD12xx"</code> or <code>"Debug TD15xx"</code> entry in the contextual menu that corresponds to your board</li>
-<li>The first time you launch a debug session, Eclipse will prompt you if you want to switch to a new
- <code>"Debug Perspective"</code> (a window panel organization purposed for debugging): click on <code>"Yes"</code></li>
-<li>The firmware will optionally be built and flashed to the module, the execution will stop early in
- the program execution, giving you an opportunity to single-step, continue, explore variables as
-  expected from a source-level debugger</li>
-<li>When finished, you can cleanly disconnect from the running application by right-clicking on the
- <code>"Debug TD12xx"</code> or <code>"Debug TD15xx"</code> entry in the tree under the "Debug" panel, select the
- <code>"Terminate/Disconnect All"</code> entry in the contextual menu, clicking on the <code>"XX"</code> icon at the top
- of this panel, then clinking on the <code>"C/C++"</code> button located at the top right of the main window
- to return to the normal C/C++ edit panel organization</li>
+<li>Right-click on the project and select the <code>"Build Configurations &gt; Set Active &gt;"</code> and the desired<br>
+build configuration as explained above, this must be a <code>"Debug"</code>one</li>
+<li>If this is the first time you debug this project, you must edit/add a <code>"Launcher"</code> by choosing the<br>
+ Debug Configurations  <code>entry in the menu obtained by the small downwards arrow right next to the</code> Bug ` icon</li>
+<li>In the dialog windows that opens, you can edit a given configuration directly (you only need to<br>
+change the <code>"Project:"</code> and <code>"C/C++ Application:"</code> values) and click on the <code>"Apply"</code> and <code>"Close"</code><br>
+buttons, or you an duplicate an existing one by right-clicking on it and selecting the <code>"Duplicate"</code><br>
+entry in the contextual menu that pops up, then changing these same values</li>
+<li>Click on the  the small downwards arrow right next to the <code>"Bug"</code> icon and select the<br>
+<code>"Debug TD12xx"</code> or <code>"Debug TD15xx"</code> entry in the contextual menu that corresponds to your board</li>
+<li>The first time you launch a debug session, Eclipse will prompt you if you want to switch to a new<br>
+<code>"Debug Perspective"</code> (a window panel organization purposed for debugging): click on <code>"Yes"</code></li>
+<li>The firmware will optionally be built and flashed to the module, the execution will stop early in<br>
+the program execution, giving you an opportunity to single-step, continue, explore variables as<br>
+expected from a source-level debugger</li>
+<li>When finished, you can cleanly disconnect from the running application by right-clicking on the<br>
+<code>"Debug TD12xx"</code> or <code>"Debug TD15xx"</code> entry in the tree under the  Debug  panel, select the<br>
+<code>"Terminate/Disconnect All"</code> entry in the contextual menu, clicking on the <code>"XX"</code> icon at the top<br>
+of this panel, then clinking on the <code>"C/C++"</code> button located at the top right of the main window<br>
+to return to the normal C/C++ edit panel organization</li>
 </ol>
-
-<h1>Release Notes</h1>
-
-<h2>v6.3.4 (July 2016)</h2>
-
-<h3>Bug Fixes</h3>
-
-<h4>SIGFOX:</h4>
-
+<h1 id="release-notes">Release Notes</h1>
+<h2 id="v6.3.5-august-2019">v6.3.5 (August 2019)</h2>
+<h3 id="bug-fixes">Bug Fixes</h3>
+<h4 id="sigfox">SIGFOX:</h4>
+<ul>
+<li>Corrected non-random Sigfox channel upon startup</li>
+<li>Corrected wrong Sigfox sequence number when there is an overrun and the module reboots</li>
+</ul>
+<h5 id="libtdgeoloc"><strong>libtdgeoloc</strong></h5>
+<ul>
+<li>Wrong GPS position for GPGGA NMEA frame and add retries when starting up the GPS</li>
+<li>Take the checksum into account when parsing GPS frames</li>
+<li>Missing IRQ when there is simultaneous Sigfox transmission and a movement</li>
+</ul>
+<h2 id="v6.3.4-july-2016">v6.3.4 (July 2016)</h2>
+<h3 id="bug-fixes-1">Bug Fixes</h3>
+<h4 id="sigfox-1">SIGFOX:</h4>
 <ul>
 <li>New library RF version 6.3.4</li>
 <li>Corrected a bug on Sigfox certification function in FCC mode</li>
 </ul>
-
-<h3>Major Updates</h3>
-
+<h3 id="major-updates">Major Updates</h3>
 <ul>
 <li>Added TD1205P module</li>
 </ul>
-
-<h2>v6.3.2 (April 2016)</h2>
-
-<h3>Release Notes</h3>
-
-<h4>Major Updates</h4>
-
-<h4><strong>libtdcore</strong></h4>
-
+<h2 id="v6.3.2-april-2016">v6.3.2 (April 2016)</h2>
+<h3 id="release-notes-1">Release Notes</h3>
+<h4 id="major-updates-1">Major Updates</h4>
+<h4 id="libtdcore"><strong>libtdcore</strong></h4>
 <ul>
 <li>Added Td_HallEffect module</li>
-<li>Up AT<em>_</em>PERSIST_SIZE to 220 bytes</li>
+<li>Up AT___PERSIST_SIZE to 220 bytes</li>
 <li>Added sigfox channel managment error</li>
 </ul>
-
-<h4>SIGFOX:</h4>
-
+<h4 id="sigfox-2">SIGFOX:</h4>
 <ul>
 <li>Corrected of spectral quality in EZR FCC configuration</li>
 <li>Add generic Sigfox test mode</li>
@@ -208,264 +172,179 @@ fixed Flash/Debug commands or menu buttons: they need to be added explicitly on 
 <li>Macro channels Harmonization according to Sigfox requirement.</li>
 <li>Library certified by SIGFOX</li>
 </ul>
-
-<h2>v6.2.0 (February 2016)</h2>
-
-<h3>Bug Fixes</h3>
-
-<h4>SIGFOX:</h4>
-
+<h2 id="v6.2.0-february-2016">v6.2.0 (February 2016)</h2>
+<h3 id="bug-fixes-2">Bug Fixes</h3>
+<h4 id="sigfox-3">SIGFOX:</h4>
 <ul>
 <li>Corrected a bug that may create an irregular ramp down duration</li>
 <li>Corrected a bug that may not set LAN frequency after a Sigfox transmission</li>
 <li>Corrected a bug that may disable GPIO interrupts after a Sigfox transmission</li>
 </ul>
-
-<h2>v6.1.0 (January 2016)</h2>
-
+<h2 id="v6.1.0-january-2016">v6.1.0 (January 2016)</h2>
 <ul>
 <li>This version is a major update of TD RF Module SDK.</li>
 </ul>
-
-<h3>Release Notes</h3>
-
-<h4>Bug Fixes</h4>
-
-<h4>SIGFOX:</h4>
-
-<h2>v6.0.0 (December 2015)</h2>
-
+<h3 id="release-notes-2">Release Notes</h3>
+<h4 id="bug-fixes-3">Bug Fixes</h4>
+<h4 id="sigfox-4">SIGFOX:</h4>
+<h2 id="v6.0.0-december-2015">v6.0.0 (December 2015)</h2>
 <ul>
 <li>This version is a major update of TD RF Module SDK.</li>
 </ul>
-
-<h3>Release Notes</h3>
-
-<h4>Bug Fixes</h4>
-
-<h4>SIGFOX:</h4>
-
+<h3 id="release-notes-3">Release Notes</h3>
+<h4 id="bug-fixes-4">Bug Fixes</h4>
+<h4 id="sigfox-5">SIGFOX:</h4>
 <ul>
 <li>Corrected a bug that may crash the device after 21285 Sigfox transmissions</li>
 </ul>
-
-<h4><strong>libtdcore</strong></h4>
-
+<h4 id="libtdcore-1"><strong>libtdcore</strong></h4>
 <ul>
 <li>Corrected drift in voltage measurement</li>
 </ul>
-
-<h4>Major Updates</h4>
-
-<h4><strong>libtdcore</strong></h4>
-
+<h4 id="major-updates-2">Major Updates</h4>
+<h4 id="libtdcore-2"><strong>libtdcore</strong></h4>
 <ul>
 <li>Split link time configuration into multiple files</li>
 <li>Added a link-time Flash layout mechanism</li>
 <li>Added stream support</li>
 <li>Added long long support</li>
 </ul>
-
-<h4><strong>libtdrf</strong></h4>
-
+<h4 id="libtdrf"><strong>libtdrf</strong></h4>
 <ul>
 <li>Added support for TD1508 (FCC)</li>
 <li>Added support for reference design (both ETSI and FCC)</li>
 </ul>
-
-<h2>v5.0.1 (December 2014)</h2>
-
+<h2 id="v5.0.1-december-2014">v5.0.1 (December 2014)</h2>
 <ul>
 <li>This release is a minor update of TD RF Module SDK.</li>
 </ul>
-
-<h3>Release Notes</h3>
-
-<h4>Bug Fixes</h4>
-
-<h4>SIGFOX:</h4>
-
+<h3 id="release-notes-4">Release Notes</h3>
+<h4 id="bug-fixes-5">Bug Fixes</h4>
+<h4 id="sigfox-6">SIGFOX:</h4>
 <ul>
 <li>Corrected a problem causing loss of SIGFOX sequence number after un upgrade from previous SDKs</li>
 </ul>
-
-<h2>v5.0.0 (December 2014)</h2>
-
+<h2 id="v5.0.0-december-2014">v5.0.0 (December 2014)</h2>
 <ul>
 <li>This release is a major update of TD RF Module SDK.</li>
 </ul>
-
-<h3>Release Notes</h3>
-
-<h4>Major Updates</h4>
-
-<h4><strong>libtdcore</strong></h4>
-
+<h3 id="release-notes-5">Release Notes</h3>
+<h4 id="major-updates-3">Major Updates</h4>
+<h4 id="libtdcore-3"><strong>libtdcore</strong></h4>
 <ul>
 <li>Added the CAPSENSE module for capacitive touch buttons</li>
 <li>UART module now handles both LEUART and standard UART</li>
 </ul>
-
-<h5><strong>libtdrf</strong></h5>
-
+<h5 id="libtdrf-1"><strong>libtdrf</strong></h5>
 <ul>
 <li>Bidirectional (down-link) communication</li>
-<li>Transparent (use sender's SIGFOX ID) or non-transparent (use proxy's SIGFOX ID) SIGFOX proxy</li>
+<li>Transparent (use sender s SIGFOX ID) or non-transparent (use proxy s SIGFOX ID) SIGFOX proxy</li>
 <li>Fast LAN mode: once synchronized, transmitter and receiver can exchange data at maximum speed</li>
 </ul>
-
-<h5><strong>libtdtools</strong></h5>
-
+<h5 id="libtdtools"><strong>libtdtools</strong></h5>
 <ul>
 <li>New library for managing switches and LEDs</li>
 </ul>
-
-<h4>Minor Updates</h4>
-
-<h4><strong>libtdcore</strong></h4>
-
+<h4 id="minor-updates">Minor Updates</h4>
+<h4 id="libtdcore-4"><strong>libtdcore</strong></h4>
 <ul>
 <li>Increased maximum number of AT extensions to 16</li>
 <li>Now handling the different EFM32 power modes</li>
 <li>Unified the RF and standard GPIO management</li>
 </ul>
-
-<h5><strong>libtdrf</strong></h5>
-
+<h5 id="libtdrf-2"><strong>libtdrf</strong></h5>
 <ul>
 <li>Custom transmit (user callback function to write into FIFO) and receive (user callback function to read from FIFO and stop RX)</li>
 <li>Changed the TD LAN windowed listen period to variable up to 6.7 s instead of fixed 1 s, using the <code>LAN_PERIOD</code> and <code>LAN_ADDRESS_SIZE</code> configuration parameters</li>
 </ul>
-
-<h5><strong>libtdsensor</strong></h5>
-
+<h5 id="libtdsensor"><strong>libtdsensor</strong></h5>
 <ul>
 <li>Corresponds to UDM v2.3</li>
 </ul>
-
-<h5><strong>libtdgeoloc</strong></h5>
-
+<h5 id="libtdgeoloc-1"><strong>libtdgeoloc</strong></h5>
 <ul>
 <li>Now uses the UBlox 7 raw format instead of NMEA by default</li>
-<li>No longer use Sensor switch monitoring for accelerometer interrupts, have the driver handle it directly for efficiency's sake</li>
+<li>No longer use Sensor switch monitoring for accelerometer interrupts, have the driver handle it directly for efficiency s sake</li>
 <li>Added click monitoring</li>
 <li>Added power mode usage</li>
 <li>Added GPS autonomous computation handling</li>
 <li>Added ephemeris management</li>
 </ul>
-
-<h4>Bug Fixes</h4>
-
-<h4><strong>libtdcore</strong></h4>
-
+<h4 id="bug-fixes-6">Bug Fixes</h4>
+<h4 id="libtdcore-5"><strong>libtdcore</strong></h4>
 <ul>
 <li>Handles UART overflow gracefully</li>
 </ul>
-
-<h5><strong>libtdrf</strong></h5>
-
+<h5 id="libtdrf-3"><strong>libtdrf</strong></h5>
 <ul>
 <li>Corrected a timing problem on first frame detected with new base station software upgrade (already corrected in v4.1.0)</li>
 </ul>
-
-<h5><strong>libtdsensor</strong></h5>
-
+<h5 id="libtdsensor-1"><strong>libtdsensor</strong></h5>
 <ul>
 <li>Do not set encoded voltage length if no length pointer provided to <code>TD_SENSOR_EncodeLocalVoltage()</code> or <code>TD_SENSOR_EncodeLocalTemperature()</code></li>
 </ul>
-
-<h5><strong>libtdgeoloc</strong></h5>
-
+<h5 id="libtdgeoloc-2"><strong>libtdgeoloc</strong></h5>
 <ul>
 <li>Skipped first meaningless accelerometer data values in callback</li>
 <li>Fixed a bug in AT$AR= (read accelerometer register)</li>
 <li>Initialized the first byte in Sensor position data frame</li>
 <li>Fixed non-volatile accelerometer IRQ flag</li>
 </ul>
-
-<h2>v4.1.0 (December 2014)</h2>
-
+<h2 id="v4.1.0-december-2014">v4.1.0 (December 2014)</h2>
 <ul>
 <li>This release is a hotfix of the TD RF Module SDK. <strong>Please upgrade all firmwares generated with the SDK 4.0.0 to SDK 4.1.0 as it contains an important fix for compatibility with the SIGFOX network</strong></li>
 </ul>
-
-<h3>Release Notes</h3>
-
-<h4>Minor Updates</h4>
-
-<h5><strong>libtdcore</strong></h5>
-
+<h3 id="release-notes-6">Release Notes</h3>
+<h4 id="minor-updates-1">Minor Updates</h4>
+<h5 id="libtdcore-6"><strong>libtdcore</strong></h5>
 <ul>
 <li>Changed the definition of <code>T1S</code></li>
 </ul>
-
-<h4>Additions</h4>
-
-<h5><strong>libtdcore</strong></h5>
-
+<h4 id="additions">Additions</h4>
+<h5 id="libtdcore-7"><strong>libtdcore</strong></h5>
 <ul>
 <li>Added the function <code>TD_RTC_SignedTimeDiff()</code></li>
 </ul>
-
-<h5><strong>libtdrf</strong></h5>
-
-<h6>LAN:</h6>
-
+<h5 id="libtdrf-4"><strong>libtdrf</strong></h5>
+<h6 id="lan">LAN:</h6>
 <ul>
 <li>Changed the TD LAN windowed listen period to variable up to 6.7 s instead of fixed 1 s, using the <code>LAN_PERIOD</code> and <code>LAN_ADDRESS_SIZE</code> configuration parameters</li>
 </ul>
-
-<h4>Bug Fixes</h4>
-
-<h5><strong>libtdrf</strong></h5>
-
-<h6>SIGFOX:</h6>
-
+<h4 id="bug-fixes-7">Bug Fixes</h4>
+<h5 id="libtdrf-5"><strong>libtdrf</strong></h5>
+<h6 id="sigfox-7">SIGFOX:</h6>
 <ul>
 <li>Corrected a timing problem on first frame detected with new base station software upgrade</li>
 </ul>
-
-<h2>v4.0.0 (February 2014)</h2>
-
+<h2 id="v4.0.0-february-2014">v4.0.0 (February 2014)</h2>
 <ul>
 <li>This release is a major update of TD RF Module SDK.</li>
 </ul>
-
-<h3>Release Notes</h3>
-
-<h4>Major Updates</h4>
-
+<h3 id="release-notes-7">Release Notes</h3>
+<h4 id="major-updates-4">Major Updates</h4>
 <ul>
 <li>Supports the TD1204 products with GPS and 3D accelerometer functions</li>
-<li>Supports modules with SIGFOX ID >= 0x10000 (still retaining compatibility with smaller 16 bit IDs)</li>
+<li>Supports modules with SIGFOX ID &gt;= 0x10000 (still retaining compatibility with smaller 16 bit IDs)</li>
 <li>Now supports SIGFOX protocol V1 by default</li>
 </ul>
-
-<h4>Minor Updates</h4>
-
-<h5><strong>libtdcore</strong></h5>
-
+<h4 id="minor-updates-2">Minor Updates</h4>
+<h5 id="libtdcore-8"><strong>libtdcore</strong></h5>
 <ul>
 <li>Battery level monitoring (with IRQs) available</li>
 <li>Optional printf int64 support</li>
 <li>Stdlib atoll support</li>
 </ul>
-
-<h4>Additions</h4>
-
-<h5><strong>libtdcore</strong></h5>
-
+<h4 id="additions-1">Additions</h4>
+<h5 id="libtdcore-9"><strong>libtdcore</strong></h5>
 <ul>
 <li>Added watchdog module</li>
-<li>Added the <code>AT CORE</code> module which implements basic "system" AT command</li>
+<li>Added the <code>AT CORE</code> module which implements basic  system  AT command</li>
 <li>Added the <code>SPI</code> module to manage sharing of the SPI bus (multiple peripherals on the same SPI bus)</li>
 <li>Added a link-time <code>OPTION</code> mechanism to customize the behavior and/or limits of binary-only objects/libraries</li>
 <li>Added a fully configurable <code>TRAP</code> system to handle System/User code faults</li>
 <li>Added system dumps debugging tools</li>
 </ul>
-
-<h5><strong>libtdsensor</strong></h5>
-
+<h5 id="libtdsensor-2"><strong>libtdsensor</strong></h5>
 <ul>
 <li>Added a retransmission profile system</li>
 <li>Added a custom BootEvent</li>
@@ -474,99 +353,67 @@ fixed Flash/Debug commands or menu buttons: they need to be added explicitly on 
 <li>Extension of the <strong>Device</strong> and <strong>Gateway</strong> APIs</li>
 <li>Extension of the set of Sensor Events</li>
 </ul>
-
-<h5><strong>libtdgeoloc</strong></h5>
-
+<h5 id="libtdgeoloc-3"><strong>libtdgeoloc</strong></h5>
 <ul>
 <li>First release</li>
 </ul>
-
-<h5><strong>libtddrivers</strong></h5>
-
+<h5 id="libtddrivers"><strong>libtddrivers</strong></h5>
 <ul>
 <li>First release</li>
 </ul>
-
-<h4>Bug Fixes</h4>
-
-<h5><strong>libtdcore</strong></h5>
-
-<h6>AT Parser:</h6>
-
+<h4 id="bug-fixes-8">Bug Fixes</h4>
+<h5 id="libtdcore-10"><strong>libtdcore</strong></h5>
+<h6 id="at-parser">AT Parser:</h6>
 <ul>
 <li>Upon startup, if a parser extension module has no persistent data stored, its store function will be called immediately to fix it</li>
 <li>Correction on numeric parameter read in AT command (function AT_atoll) on value with leading spaces characters eg. " <code>123</code>": the first digit was incorrectly dropped and result set to 23</li>
 </ul>
-
-<h6>Flash:</h6>
-
+<h6 id="flash">Flash:</h6>
 <ul>
-<li>Corrections on "user variables" handling</li>
+<li>Corrections on  user variables  handling</li>
 </ul>
-
-<h6>GPIO:</h6>
-
+<h6 id="gpio">GPIO:</h6>
 <ul>
 <li>Modification of behavior in the IRQ handling. List of I/O that actually trigged interrupt (mask) must no longer be read by <code>GPIO_IntGet()</code> but is directly passed to the to Hook callback registered for I/O interrupt handling</li>
 </ul>
-
-<h6>System:</h6>
-
+<h6 id="system">System:</h6>
 <ul>
 <li>A fully deterministic, guaranted main loop processing (including the <code>TD_USER_Loop</code> function) can be trigged by calling the <code>TD_WakeMainLoop()</code> function, all others systems (while(flags) processing) must be removed. <code>TD_WakeMainLoop()</code> must be used in user interrupt handlers</li>
 </ul>
-
-<h6>RTC:</h6>
-
+<h6 id="rtc">RTC:</h6>
 <ul>
 <li>Major correction on low level function to allow calls in all possible context (background task, IRQs), with all special RTC cases handled</li>
 <li>Know limitation : a call to <code>TD_RTC_Delay()</code> while in IRQ handling will result in an active wait (not energy efficient). However, calling a wait function like <code>TD_RTC_Delay()</code> in IRQ context is a bad practice</li>
 </ul>
-
-<h6>Scheduler:</h6>
-
+<h6 id="scheduler">Scheduler:</h6>
 <ul>
 <li>Adding a Timer is now possible in IRQ context</li>
 <li>Major rewrite of the <strong>SCHEDULER</strong> processing to remove some race, full strengthening on <code>TD_SCHEDULER_AppendIrq()</code>, <code>TD_SCHEDULER_Append()</code>, <code>TD_SCHEDULER_Remove()</code> from anywhere in the user code, in any context</li>
 </ul>
-
-<h6>stdlib:</h6>
-
+<h6 id="stdlib">stdlib:</h6>
 <ul>
 <li>atoi now handles correctly signed value</li>
 </ul>
-
-<h5><strong>libtdrf</strong></h5>
-
-<h6>RF:</h6>
-
+<h5 id="libtdrf-6"><strong>libtdrf</strong></h5>
+<h6 id="rf">RF:</h6>
 <ul>
 <li>Bulletproof handling of RF chip mode (sleep/Idle/Receive/Transmit) transitions</li>
 </ul>
-
-<h6>LAN:</h6>
-
+<h6 id="lan-1">LAN:</h6>
 <ul>
 <li>Major rewrite of LAN functions, it is heavily recommended to not mix devices with a <code>libtdrf</code> library older than v4.0.0</li>
 <li>Better error handling and reporting</li>
 </ul>
-
-<h6>BOOTLOADER:</h6>
-
+<h6 id="bootloader">BOOTLOADER:</h6>
 <ul>
 <li>Extension of the bootloader to provide customization parameters: LED status pin location, optional update blink indication, RF channel selection, etc.</li>
 </ul>
-
-<h2>v3.0.0 (May 2013)</h2>
-
+<h2 id="v3.0.0-may-2013">v3.0.0 (May 2013)</h2>
 <ul>
 <li>First public release</li>
 </ul>
-
-<h3>Release Notes</h3>
-
+<h3 id="release-notes-8">Release Notes</h3>
 <p>New functionality contained in the TD RF Module SDK 3.0.0 include:</p>
-
 <ul>
 <li>The IDE is now based on the Eclipse ?Juno? SR2 release.</li>
 <li>The compilation tools are now based on GCC 4.5.1.</li>

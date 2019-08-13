@@ -2,10 +2,10 @@
  * @file
  * @brief GPS management for TD12xx RF modules.
  * @author Telecom Design S.A.
- * @version 1.2.0
+ * @version 1.2.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2013-2016 Telecom Design S.A., http://www.telecomdesign.fr</b>
+ * <b>(C) Copyright 2013-2019 Telecom Design S.A., http://www.telecomdesign.fr</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -88,6 +88,9 @@
 
 /** To enable nmea decoding */
 #define DECODE_NMEA				0
+
+/** Maximum number of GPS power-up retries */
+#define MAX_GPS_RETRY			5
 
 /** @} */
 
@@ -394,6 +397,9 @@ static void SetFixType(TD_GEOLOC_Fix_t *fix)
  *****************************************************************************/
 static void SetPowerMode(TD_GEOLOC_PowerMode_t mode)
 {
+	int i;
+	bool result = false;
+
 #ifdef GEOLOC_DEBUG_TIME
 	uint32_t cnt = RTC->CNT;
 	tfp_printf("SetPowerMode:%d\r\n", mode);
@@ -421,7 +427,15 @@ static void SetPowerMode(TD_GEOLOC_PowerMode_t mode)
 		case TD_GEOLOC_NAVIGATION_WARM_START:
 		case TD_GEOLOC_NAVIGATION_HOT_START:
 		case TD_GEOLOC_NAVIGATION_IDLE:
-			if (!TD_UBX7_PowerUp(mode == TD_GEOLOC_POWER_SAVE_MODE, false)) {
+			for (i = 0; i < MAX_GPS_RETRY; i++) {
+				result = TD_UBX7_PowerUp(mode == TD_GEOLOC_POWER_SAVE_MODE, false);
+				if (!result) {
+					TD_RTC_Delay(32768);
+				} else {
+					break;
+				}
+			}
+			if (!result) {
 				DEBUG_PRINTF("TD_UBX7_PowerUp 1 failed\r\n");
 				TD_Trap(TRAP_GPS_HARD_ERR, 0);
 			}
@@ -496,7 +510,7 @@ static void PrintfGPGGA(TD_GEOLOC_Fix_t *fix)
 	// tfp_printf("a%d\r\n",temp);
 	if (temp != 0x7FFFFFFF) {
 		calc = temp / 100000;
-		tfp_sprintf(position, "%04d.%03d", calc, temp - (calc * 100000));
+		tfp_sprintf(position, "%04d.%05d", calc, temp - (calc * 100000));
 		for (i = 0; position[i] != 0; i++) {
 			checksum ^= position[i];
 		}
@@ -516,7 +530,7 @@ static void PrintfGPGGA(TD_GEOLOC_Fix_t *fix)
 	// tfp_printf("a%d\r\n",temp);
 	if (temp != 0x7FFFFFFF) {
 		calc = temp / 100000;
-		tfp_sprintf(position, "%05d.%03d", calc, temp - (calc * 100000));
+		tfp_sprintf(position, "%05d.%05d", calc, temp - (calc * 100000));
 		for (i = 0; position[i] != 0; i++) {
 			checksum ^= position[i];
 		}
