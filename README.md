@@ -160,6 +160,12 @@ Similarly, to debug a firmware on the TD12xx/TD15xx board:
 
 Release Notes
 =============
+v6.3.6 (October 2021)
+-------------------------
+#### Major Updates ####
+##### **libtdrf** #####
+ * Add delay before enabling TCXO to manage part shortage
+
 v6.3.5 (August 2019)
 -------------------------
 ### Bug Fixes ###
